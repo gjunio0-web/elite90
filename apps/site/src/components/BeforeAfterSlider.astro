@@ -1,0 +1,181 @@
+---
+// ─── ELITE 90 · BeforeAfterSlider ────────────────────────────────────────────
+// Slider de comparação usando img-comparison-slider (web component, 3KB).
+// Substituição dos cards lado a lado da galeria de resultados.
+
+interface ResultItem {
+  n: number;
+  beforeSrc: string;
+  afterSrc: string;
+  name: string;
+  meta: string;
+  beforeLabel: string;
+  afterLabel: string;
+}
+
+interface Props {
+  items: ResultItem[];
+}
+const { items } = Astro.props;
+---
+
+<!-- Load img-comparison-slider from CDN (3KB, zero deps) -->
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"
+></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css"
+/>
+
+<div class="results-grid">
+  {items.map((item) => (
+    <div class="result-card">
+      <img-comparison-slider
+        class="result-card__slider"
+        tabindex="0"
+      >
+        <!-- Before slot -->
+        <figure slot="first" class="result-card__fig">
+          <img
+            src={item.beforeSrc}
+            alt={`${item.name} — antes`}
+            class="result-card__img"
+            width="300"
+            height="375"
+            loading="lazy"
+          />
+          <figcaption class="result-card__label result-card__label--before">
+            {item.beforeLabel}
+          </figcaption>
+        </figure>
+
+        <!-- After slot -->
+        <figure slot="second" class="result-card__fig">
+          <img
+            src={item.afterSrc}
+            alt={`${item.name} — depois`}
+            class="result-card__img"
+            width="300"
+            height="375"
+            loading="lazy"
+          />
+          <figcaption class="result-card__label result-card__label--after">
+            {item.afterLabel}
+          </figcaption>
+        </figure>
+
+        <!-- Custom drag handle -->
+        <svg
+          slot="handle"
+          class="result-card__handle"
+          xmlns="http://www.w3.org/2000/svg"
+          width="40"
+          height="40"
+          viewBox="0 0 40 40"
+          fill="none"
+          aria-hidden="true"
+        >
+          <circle cx="20" cy="20" r="19" fill="#0D0D0D" stroke="#A6C300" stroke-width="1.5"/>
+          <!-- Left arrow -->
+          <path d="M15 20L10 15M15 20L10 25" stroke="#A6C300" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Right arrow -->
+          <path d="M25 20L30 15M25 20L30 25" stroke="#A6C300" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Center line -->
+          <line x1="10" y1="20" x2="30" y2="20" stroke="#A6C300" stroke-width="1" stroke-dasharray="2 2"/>
+        </svg>
+      </img-comparison-slider>
+
+      <!-- Caption -->
+      <div class="result-card__caption">
+        <p class="result-card__name">{item.name}</p>
+        <p class="result-card__meta">{item.meta}</p>
+      </div>
+    </div>
+  ))}
+</div>
+
+<style>
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-5);
+    margin-top: var(--space-6);
+  }
+
+  .result-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .result-card__slider {
+    width: 100%;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    border: var(--border-lime);
+    --divider-width: 2px;
+    --divider-color: var(--c-lime);
+    --default-handle-opacity: 1;
+    aspect-ratio: 4/5;
+  }
+
+  .result-card__slider:focus {
+    outline: 2px solid var(--c-lime);
+    outline-offset: 3px;
+  }
+
+  .result-card__fig {
+    position: relative;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .result-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .result-card__label {
+    position: absolute;
+    bottom: var(--space-2);
+    font-family: var(--font-label);
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--c-white);
+    background-color: rgba(13, 13, 13, 0.85);
+    padding: 2px 8px;
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  .result-card__label--before { left: var(--space-2); }
+  .result-card__label--after  { right: var(--space-2); }
+
+  .result-card__handle {
+    filter: drop-shadow(0 0 6px rgba(166, 195, 0, 0.4));
+  }
+
+  .result-card__caption {
+    padding-inline: var(--space-1);
+  }
+
+  .result-card__name {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--c-lime);
+    text-transform: uppercase;
+  }
+
+  .result-card__meta {
+    font-size: var(--fs-body-sm);
+    color: var(--c-textsub);
+    margin-top: var(--space-1);
+  }
+</style>

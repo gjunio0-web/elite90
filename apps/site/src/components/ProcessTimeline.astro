@@ -1,0 +1,219 @@
+---
+// ─── ELITE 90 · ProcessTimeline ──────────────────────────────────────────────
+// Timeline visual substituindo a lista <ol> da seção "Como funciona".
+// Desktop: horizontal com conectores. Mobile: vertical com linha lateral.
+
+import type { Translations } from "../i18n/pt";
+
+interface Props {
+  t: Translations;
+}
+const { t } = Astro.props;
+
+const whoColors: Record<string, string> = {
+  "Você":         "who--you",
+  "You":          "who--you",
+  "Ruiz":         "who--ruiz",
+  "Você + Ruiz":  "who--together",
+  "You + Ruiz":   "who--together",
+  "Ruiz + Equipe":"who--team",
+  "Ruiz + Team":  "who--team",
+  "Contínuo":     "who--ongoing",
+  "Ongoing":      "who--ongoing",
+};
+---
+
+<div class="timeline">
+  {t.process.steps.map((step, i) => (
+    <div class="timeline__item">
+      <!-- Connector line (hidden for last item) -->
+      {i < t.process.steps.length - 1 && (
+        <div class="timeline__connector" aria-hidden="true"></div>
+      )}
+
+      <!-- Step node -->
+      <div class="timeline__node" aria-hidden="true">
+        <span class="timeline__number">{String(i + 1).padStart(2, "0")}</span>
+      </div>
+
+      <!-- Content -->
+      <div class="timeline__content">
+        <span class={`timeline__who ${whoColors[step.who] ?? ""}`}>
+          {step.who}
+        </span>
+        <h3 class="timeline__title">{step.title}</h3>
+        {step.body && <p class="timeline__body">{step.body}</p>}
+      </div>
+    </div>
+  ))}
+</div>
+
+<style>
+  /* ── LAYOUT ─────────────────────────────────────────────────────────────── */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: var(--space-7);
+    position: relative;
+  }
+
+  .timeline__item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-inline: var(--space-3);
+  }
+
+  /* Horizontal connector line between items */
+  .timeline__connector {
+    position: absolute;
+    top: 28px; /* center of node */
+    left: 50%;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, var(--c-lime), rgba(166, 195, 0, 0.2));
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── NODE ───────────────────────────────────────────────────────────────── */
+  .timeline__node {
+    position: relative;
+    z-index: 1;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--c-darkbg);
+    border: 2px solid var(--c-lime);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: var(--space-4);
+    box-shadow: 0 0 16px rgba(166, 195, 0, 0.15);
+  }
+
+  .timeline__number {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--c-lime);
+    line-height: 1;
+  }
+
+  /* ── CONTENT ────────────────────────────────────────────────────────────── */
+  .timeline__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: center;
+  }
+
+  .timeline__who {
+    font-family: var(--font-label);
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+
+  /* Who badge colors */
+  .who--you {
+    background: rgba(166, 195, 0, 0.12);
+    color: var(--c-lime);
+    border: 1px solid rgba(166, 195, 0, 0.3);
+  }
+
+  .who--ruiz {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--c-white);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .who--together {
+    background: rgba(166, 195, 0, 0.07);
+    color: var(--c-lime);
+    border: 1px solid rgba(166, 195, 0, 0.2);
+  }
+
+  .who--team {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--c-textsub);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .who--ongoing {
+    background: rgba(166, 195, 0, 0.06);
+    color: var(--c-lime);
+    border: 1px dashed rgba(166, 195, 0, 0.3);
+  }
+
+  .timeline__title {
+    font-family: var(--font-label);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--c-white);
+    line-height: 1.4;
+  }
+
+  .timeline__body {
+    font-size: var(--fs-body-sm);
+    color: var(--c-textsub);
+    line-height: 1.5;
+  }
+
+  /* ── MOBILE: vertical layout ────────────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .timeline {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding-left: var(--space-5);
+      border-left: 2px solid rgba(166, 195, 0, 0.2);
+    }
+
+    .timeline__item {
+      flex-direction: row;
+      align-items: flex-start;
+      text-align: left;
+      padding-inline: 0;
+      padding-bottom: var(--space-5);
+      gap: var(--space-4);
+    }
+
+    .timeline__connector {
+      /* vertical line is handled by border-left on .timeline */
+      display: none;
+    }
+
+    .timeline__node {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      margin-left: calc(-1 * var(--space-5) - 25px);
+      margin-bottom: 0;
+    }
+
+    .timeline__content {
+      align-items: flex-start;
+    }
+  }
+
+  /* ── TABLET: 4 cols → 2 cols ────────────────────────────────────────────── */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .timeline {
+      grid-template-columns: repeat(2, 1fr);
+      row-gap: var(--space-7);
+    }
+
+    .timeline__connector {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,337 @@
+---
+// ─── ELITE 90 · Header ───────────────────────────────────────────────────────
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import type { Locale } from "../i18n/utils";
+import type { Translations } from "../i18n/pt";
+
+interface Props {
+  t: Translations;
+  locale: Locale;
+}
+const { t, locale } = Astro.props;
+const n = t.nav;
+---
+
+<header class="site-header" id="site-header">
+  <div class="container site-header__inner">
+
+    <!-- Logo -->
+    <a href={locale === "en" ? "/en" : "/"} class="site-header__logo" aria-label="Coach Ruiz — Elite 90">
+      <img
+        src="/images/logo-elite90.svg"
+        alt="Coach Ruiz Elite 90"
+        width="140"
+        height="42"
+        loading="eager"
+      />
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="site-header__nav" aria-label="Navegação principal">
+      <a href="#pilares"      class="site-header__link">{n.method}</a>
+      <a href="#resultados"   class="site-header__link">{n.results}</a>
+      <a href="#depoimentos"  class="site-header__link">{n.testimonials}</a>
+      <a href="#faq"          class="site-header__link">{n.faq}</a>
+    </nav>
+
+    <!-- Right slot: lang switcher + CTA + hamburger -->
+    <div class="site-header__right">
+      <LanguageSwitcher currentLocale={locale} />
+
+      <button
+        class="btn-cta site-header__cta"
+        id="header-cta-btn"
+        type="button"
+        aria-haspopup="dialog"
+      >
+        {n.apply}
+      </button>
+
+      <!-- Hamburger (mobile only) -->
+      <button
+        class="site-header__hamburger"
+        id="hamburger-btn"
+        type="button"
+        aria-label={n.menu}
+        aria-expanded="false"
+        aria-controls="mobile-drawer"
+      >
+        <span class="site-header__bar"></span>
+        <span class="site-header__bar"></span>
+        <span class="site-header__bar"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile drawer -->
+<div
+  class="mobile-drawer"
+  id="mobile-drawer"
+  role="dialog"
+  aria-modal="true"
+  aria-label={n.menu}
+  hidden
+>
+  <div class="mobile-drawer__overlay" id="drawer-overlay"></div>
+  <nav class="mobile-drawer__panel" aria-label="Menu mobile">
+    <button
+      class="mobile-drawer__close"
+      id="drawer-close"
+      type="button"
+      aria-label={n.close}
+    >
+      ✕
+    </button>
+
+    <a href="#pilares"     class="mobile-drawer__link" data-drawer-link>{n.method}</a>
+    <a href="#resultados"  class="mobile-drawer__link" data-drawer-link>{n.results}</a>
+    <a href="#depoimentos" class="mobile-drawer__link" data-drawer-link>{n.testimonials}</a>
+    <a href="#faq"         class="mobile-drawer__link" data-drawer-link>{n.faq}</a>
+
+    <button
+      class="btn-cta mobile-drawer__cta"
+      id="drawer-cta-btn"
+      type="button"
+      aria-haspopup="dialog"
+      data-drawer-link
+    >
+      {n.apply}
+    </button>
+
+    <div class="mobile-drawer__lang">
+      <LanguageSwitcher currentLocale={locale} />
+    </div>
+  </nav>
+</div>
+
+<script>
+  const hamburger = document.getElementById("hamburger-btn") as HTMLButtonElement;
+  const drawer    = document.getElementById("mobile-drawer") as HTMLElement;
+  const overlay   = document.getElementById("drawer-overlay") as HTMLElement;
+  const closeBtn  = document.getElementById("drawer-close") as HTMLButtonElement;
+  const drawerLinks = document.querySelectorAll("[data-drawer-link]");
+
+  function openDrawer() {
+    drawer.hidden = false;
+    hamburger.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
+    closeBtn.focus();
+  }
+
+  function closeDrawer() {
+    drawer.hidden = true;
+    hamburger.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+    hamburger.focus();
+  }
+
+  hamburger.addEventListener("click", openDrawer);
+  closeBtn.addEventListener("click", closeDrawer);
+  overlay.addEventListener("click", closeDrawer);
+  drawerLinks.forEach(link => link.addEventListener("click", closeDrawer));
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !drawer.hidden) closeDrawer();
+  });
+
+  // Header hide/show on scroll
+  let lastY = 0;
+  const header = document.getElementById("site-header") as HTMLElement;
+  window.addEventListener("scroll", () => {
+    const currentY = window.scrollY;
+    if (currentY < 80) {
+      header.classList.remove("site-header--hidden");
+    } else if (currentY > lastY) {
+      header.classList.add("site-header--hidden");
+    } else {
+      header.classList.remove("site-header--hidden");
+    }
+    lastY = currentY;
+  }, { passive: true });
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    height: 64px;
+    background: rgba(13, 13, 13, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(166, 195, 0, 0.12);
+    transition: transform 300ms ease;
+  }
+
+  .site-header--hidden {
+    transform: translateY(-100%);
+  }
+
+  .site-header__inner {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .site-header__logo img {
+    height: 36px;
+    width: auto;
+    display: block;
+  }
+
+  .site-header__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+  }
+
+  .site-header__link {
+    font-family: var(--font-label);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--c-textsub);
+    text-decoration: none;
+    transition: color var(--transition-base);
+    white-space: nowrap;
+  }
+
+  .site-header__link:hover,
+  .site-header__link:focus-visible {
+    color: var(--c-lime);
+  }
+
+  .site-header__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .site-header__cta {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .site-header__hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .site-header__bar {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--c-lime);
+    border-radius: 2px;
+    transition: transform 200ms ease, opacity 200ms ease;
+  }
+
+  /* Mobile drawer */
+  .mobile-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+  }
+
+  .mobile-drawer[hidden] {
+    display: none;
+  }
+
+  .mobile-drawer__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+  }
+
+  .mobile-drawer__panel {
+    position: relative;
+    margin-left: auto;
+    width: min(320px, 85vw);
+    height: 100%;
+    background: var(--c-darkbg);
+    border-left: 1px solid rgba(166, 195, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-6) var(--space-5);
+    gap: var(--space-3);
+    overflow-y: auto;
+  }
+
+  .mobile-drawer__close {
+    align-self: flex-end;
+    font-size: 1.2rem;
+    color: var(--c-textsub);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-2);
+    margin-bottom: var(--space-4);
+    transition: color var(--transition-base);
+  }
+
+  .mobile-drawer__close:hover {
+    color: var(--c-lime);
+  }
+
+  .mobile-drawer__link {
+    font-family: var(--font-label);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--c-textbody);
+    text-decoration: none;
+    padding-block: var(--space-3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: color var(--transition-base);
+  }
+
+  .mobile-drawer__link:hover {
+    color: var(--c-lime);
+  }
+
+  .mobile-drawer__cta {
+    width: 100%;
+    margin-top: var(--space-4);
+    font-size: var(--fs-body-sm);
+  }
+
+  .mobile-drawer__lang {
+    margin-top: auto;
+    padding-top: var(--space-5);
+  }
+
+  @media (max-width: 767px) {
+    .site-header__nav,
+    .site-header__cta {
+      display: none;
+    }
+
+    .site-header__hamburger {
+      display: flex;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header {
+      transition: none;
+    }
+  }
+</style>

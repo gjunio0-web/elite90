@@ -231,8 +231,20 @@ export const en: Translations = {
     subtext: "Limited spots per cycle. Approval subject to screening.",
   },
 
+
+  nav: {
+    method: "Method",
+    results: "Results",
+    testimonials: "Testimonials",
+    faq: "FAQ",
+    apply: "Request a spot",
+    menu: "Menu",
+    close: "Close menu",
+  },
+
   footer: {
     copyright: "Coach Ruiz 2026 © All rights reserved",
+    credit: "Created by GM Digital Bunker ©, 2026",
   },
 
   form: {

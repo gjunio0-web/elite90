@@ -1,0 +1,722 @@
+---
+// ─── ELITE 90 · TriageModal ──────────────────────────────────────────────────
+// Modal com formulário completo de triagem (24 campos + upload).
+// Disparado por qualquer CTA da página via evento 'open-triage-modal'.
+// Envia para Netlify Function que salva no Firebase e dispara e-mail.
+
+import type { Translations } from "../i18n/pt";
+interface Props { t: Translations; }
+const { t } = Astro.props;
+const f = t.form;
+---
+
+<!-- Modal overlay -->
+<div
+  class="modal-overlay"
+  id="triage-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+  hidden
+>
+  <div class="modal-container">
+    <!-- Header -->
+    <div class="modal-header">
+      <div>
+        <p class="modal-eyebrow">{t.ctaFinal.eyebrow}</p>
+        <h2 class="modal-title" id="modal-title">{f.title}</h2>
+      </div>
+      <button class="modal-close" id="modal-close" type="button" aria-label="Fechar">✕</button>
+    </div>
+
+    <!-- Scrollable form body -->
+    <div class="modal-body">
+      <form
+        class="triage-form"
+        id="triage-form"
+        novalidate
+      >
+
+        <!-- ── DADOS PESSOAIS ─────────────────────────────────────── -->
+        <div class="form-section">
+          <h3 class="form-section__title">Dados Pessoais</h3>
+
+          <div class="form-grid form-grid--2">
+            <div class="field">
+              <label class="field__label" for="f-name">Nome completo <span aria-hidden="true">*</span></label>
+              <input class="field__input" type="text" id="f-name" name="nome" required autocomplete="name" />
+            </div>
+            <div class="field">
+              <label class="field__label" for="f-cpf">CPF <span aria-hidden="true">*</span></label>
+              <input class="field__input" type="text" id="f-cpf" name="cpf" required placeholder="000.000.000-00" maxlength="14" inputmode="numeric" />
+            </div>
+            <div class="field">
+              <label class="field__label" for="f-dob">Data de nascimento <span aria-hidden="true">*</span></label>
+              <input class="field__input" type="date" id="f-dob" name="data_nascimento" required />
+            </div>
+            <div class="field">
+              <label class="field__label" for="f-email">E-mail <span aria-hidden="true">*</span></label>
+              <input class="field__input" type="email" id="f-email" name="email" required autocomplete="email" />
+            </div>
+            <div class="field">
+              <label class="field__label" for="f-height">Altura <span aria-hidden="true">*</span></label>
+              <input class="field__input" type="text" id="f-height" name="altura" required placeholder="1,75 m" />
+            </div>
+            <div class="field">
+              <label class="field__label" for="f-weight">Peso <span aria-hidden="true">*</span></label>
+              <input class="field__input" type="text" id="f-weight" name="peso" required placeholder="85 kg" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ── IMERSÃO DO ATLETA ──────────────────────────────────── -->
+        <div class="form-section">
+          <h3 class="form-section__title">Imersão do Atleta</h3>
+          <p class="form-section__intro">Bora mergulhar de cabeça no processo? Aqui começa a sua jornada. Seja honesto(a) com cada resposta, é o seu corpo, sua evolução. Para mim é uma honra cuidar dele!</p>
+
+          <div class="form-stack">
+
+            <div class="field">
+              <label class="field__label" for="f-goal">1. Qual o seu objetivo principal com esse acompanhamento? <span aria-hidden="true">*</span></label>
+              <textarea class="field__input field__textarea" id="f-goal" name="objetivo" required rows="3"></textarea>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="f-activity">2. Atualmente pratica alguma atividade física? Se sim, qual e há quanto tempo? <span aria-hidden="true">*</span></label>
+              <textarea class="field__input field__textarea" id="f-activity" name="atividade_fisica" required rows="2"></textarea>
+            </div>
+
+            <div class="form-grid form-grid--2">
+              <div class="field">
+                <label class="field__label" for="f-freq">3. Pretende treinar quantas vezes por semana? <span aria-hidden="true">*</span></label>
+                <input class="field__input" type="text" id="f-freq" name="frequencia_semanal" required />
+              </div>
+              <div class="field">
+                <label class="field__label" for="f-avail">4. Qual sua disponibilidade diária de tempo para treinos? <span aria-hidden="true">*</span></label>
+                <input class="field__input" type="text" id="f-avail" name="disponibilidade_diaria" required />
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field__label">5. Treina com personal trainer? <span aria-hidden="true">*</span></span>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="personal_trainer" value="SIM" required /> SIM</label>
+                <label class="radio-label"><input type="radio" name="personal_trainer" value="NÃO" /> NÃO</label>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field__label">6. Já participou de alguma competição?</span>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="competicao" value="SIM" id="r-comp-sim" /> SIM</label>
+                <label class="radio-label"><input type="radio" name="competicao" value="NÃO" /> NÃO</label>
+              </div>
+            </div>
+            <div class="field field--conditional" id="cond-comp" hidden>
+              <label class="field__label" for="f-comp-detail">Se sim, qual modalidade e ano: <span aria-hidden="true">*</span></label>
+              <input class="field__input" type="text" id="f-comp-detail" name="competicao_detalhe" />
+            </div>
+
+            <div class="field">
+              <span class="field__label">7. Já conhece ou acompanha o trabalho de um coach bodybuilding? <span aria-hidden="true">*</span></span>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="conhece_coach" value="SIM" /> SIM</label>
+                <label class="radio-label"><input type="radio" name="conhece_coach" value="NÃO" /> NÃO</label>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field__label">8. Faz acompanhamento com médico do esporte? <span aria-hidden="true">*</span></span>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="medico_esporte" value="SIM" /> SIM</label>
+                <label class="radio-label"><input type="radio" name="medico_esporte" value="NÃO" /> NÃO</label>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field__label">9. Já fez ou está fazendo reposição hormonal (TRT)? <span aria-hidden="true">*</span></span>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="trt" value="SIM" id="r-trt-sim" /> SIM</label>
+                <label class="radio-label"><input type="radio" name="trt" value="NÃO" /> NÃO</label>
+              </div>
+            </div>
+            <div class="field field--conditional" id="cond-trt" hidden>
+              <label class="field__label" for="f-trt-detail">10. Caso sim, quais hormônios utiliza atualmente e em qual frequência?</label>
+              <textarea class="field__input field__textarea" id="f-trt-detail" name="trt_detalhe" rows="2"></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── HISTÓRICO DE SAÚDE ──────────────────────────────────── -->
+        <div class="form-section">
+          <h3 class="form-section__title">Histórico de Saúde</h3>
+
+          <div class="form-stack">
+
+            <div class="field">
+              <label class="field__label" for="f-cardiac">11. Possui alguma condição cardíaca? (hipertensão, arritmia, uso de marcapasso, angina, etc.) <span aria-hidden="true">*</span></label>
+              <textarea class="field__input field__textarea" id="f-cardiac" name="condicao_cardiaca" rows="2"></textarea>
+            </div>
+
+            <div class="field">
+              <span class="field__label">12. Possui diabetes? <span aria-hidden="true">*</span></span>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="diabetes" value="SIM" /> SIM</label>
+                <label class="radio-label"><input type="radio" name="diabetes" value="NÃO" /> NÃO</label>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="f-chronic">13. Tem alguma doença pré-existente ou crônica? <span aria-hidden="true">*</span></label>
+              <textarea class="field__input field__textarea" id="f-chronic" name="doenca_cronica" rows="2"></textarea>
+            </div>
+
+            <div class="field">
+              <span class="field__label">14. Já teve lesão muscular ou articular? <span aria-hidden="true">*</span></span>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="lesao" value="SIM" id="r-lesao-sim" /> SIM</label>
+                <label class="radio-label"><input type="radio" name="lesao" value="NÃO" /> NÃO</label>
+              </div>
+            </div>
+            <div class="field field--conditional" id="cond-lesao" hidden>
+              <label class="field__label" for="f-lesao-detail">Se sim, qual? Teve necessidade cirúrgica?</label>
+              <textarea class="field__input field__textarea" id="f-lesao-detail" name="lesao_detalhe" rows="2"></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── ROTINA ALIMENTAR E SUPLEMENTAÇÃO ───────────────────── -->
+        <div class="form-section">
+          <h3 class="form-section__title">Rotina Alimentar e Suplementação</h3>
+
+          <div class="form-stack">
+
+            <div class="field">
+              <span class="field__label">15. Atualmente segue alguma dieta? <span aria-hidden="true">*</span></span>
+              <div class="radio-group radio-group--vertical">
+                <label class="radio-label"><input type="radio" name="dieta" value="Sim, com acompanhamento profissional" required /> Sim, com acompanhamento profissional</label>
+                <label class="radio-label"><input type="radio" name="dieta" value="Sim, por conta própria" /> Sim, por conta própria</label>
+                <label class="radio-label"><input type="radio" name="dieta" value="Não sigo dieta" /> Não sigo dieta</label>
+              </div>
+            </div>
+
+            <div class="form-grid form-grid--2">
+              <div class="field">
+                <label class="field__label" for="f-meals">16. Em média, faz quantas refeições por dia? <span aria-hidden="true">*</span></label>
+                <input class="field__input" type="number" id="f-meals" name="refeicoes_dia" required min="1" max="12" />
+              </div>
+              <div class="field">
+                <label class="field__label" for="f-water">18. Em média, consome quantos litros de água por dia? <span aria-hidden="true">*</span></label>
+                <input class="field__input" type="number" id="f-water" name="agua_litros" required min="0" max="20" step="0.5" />
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field__label">17. Usa suplementos? <span aria-hidden="true">*</span></span>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="suplementos" value="SIM" id="r-supl-sim" /> SIM</label>
+                <label class="radio-label"><input type="radio" name="suplementos" value="NÃO" /> NÃO</label>
+              </div>
+            </div>
+            <div class="field field--conditional" id="cond-supl" hidden>
+              <label class="field__label" for="f-supl-detail">Se sim, quais:</label>
+              <textarea class="field__input field__textarea" id="f-supl-detail" name="suplementos_detalhe" rows="2"></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── AVALIAÇÃO FÍSICA VISUAL ─────────────────────────────── -->
+        <div class="form-section">
+          <h3 class="form-section__title">Avaliação Física Visual</h3>
+          <p class="form-section__intro">Envie aqui suas fotos</p>
+
+          <div class="field">
+            <label class="field__label field__label--file" for="f-photos">
+              Adicionar fotos (até 5 arquivos, máx 10 MB cada)
+            </label>
+            <input
+              class="field__file"
+              type="file"
+              id="f-photos"
+              name="fotos"
+              accept="image/*"
+              multiple
+              aria-describedby="f-photos-hint"
+            />
+            <p class="field__hint" id="f-photos-hint">Formatos aceitos: JPG, PNG, WEBP</p>
+            <div class="file-preview" id="file-preview" hidden></div>
+          </div>
+        </div>
+
+        <!-- ── PRIVACY + SUBMIT ────────────────────────────────────── -->
+        <div class="form-footer">
+          <p class="form-privacy">{f.privacy}</p>
+          <button class="btn-cta form-submit" type="submit" id="form-submit-btn">
+            {f.submit}
+          </button>
+          <p class="form-error" id="form-error" hidden role="alert"></p>
+        </div>
+
+      </form>
+
+      <!-- Success screen (replaces form) -->
+      <div class="form-success" id="form-success" hidden>
+        <div class="form-success__icon" aria-hidden="true">✓</div>
+        <h3 class="form-success__title" id="success-name-line">Ficha recebida.</h3>
+        <p class="form-success__message">
+          Sua solicitação está em análise. Em até 48 horas você receberá um contato para os próximos passos.
+        </p>
+        <p class="form-success__sub">
+          Vagas limitadas por ciclo. Sua ficha está na fila de análise.
+        </p>
+        <button class="modal-close-success btn-cta" type="button" id="success-close">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const modal   = $("triage-modal");
+  const form    = $("triage-form") as HTMLFormElement;
+  const success = $("form-success");
+  const errorEl = $("form-error");
+  const submitBtn = $("form-submit-btn") as HTMLButtonElement;
+
+  // ── Open / close ───────────────────────────────────────────────────────────
+  function openModal() {
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+    (modal.querySelector(".modal-close") as HTMLElement)?.focus();
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  // Listen for open event from any CTA
+  document.addEventListener("open-triage-modal", openModal);
+  $("modal-close").addEventListener("click", closeModal);
+  $("success-close")?.addEventListener("click", closeModal);
+
+  // Close on overlay click
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Close on Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.hidden) closeModal();
+  });
+
+  // ── CTAs → open modal ──────────────────────────────────────────────────────
+  document.querySelectorAll<HTMLElement>(
+    "#header-cta-btn, #drawer-cta-btn, .hero__cta, .motivational__cta, .cta-final__btn"
+  ).forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      document.dispatchEvent(new CustomEvent("open-triage-modal"));
+    });
+  });
+
+  // ── Conditional fields ────────────────────────────────────────────────────
+  function conditional(radioId: string, condId: string, inputSelector: string) {
+    const radios = document.querySelectorAll<HTMLInputElement>(`input[name="${radioId}"]`);
+    const cond   = $(condId);
+    const input  = cond?.querySelector<HTMLInputElement | HTMLTextAreaElement>(inputSelector);
+
+    radios.forEach(r => r.addEventListener("change", () => {
+      const show = r.value === "SIM" && r.checked;
+      if (cond) cond.hidden = !show;
+      if (input) input.required = show;
+    }));
+  }
+
+  conditional("competicao", "cond-comp", "input");
+  conditional("trt",        "cond-trt",  "textarea");
+  conditional("lesao",      "cond-lesao","textarea");
+  conditional("suplementos","cond-supl", "textarea");
+
+  // ── CPF mask ──────────────────────────────────────────────────────────────
+  const cpfInput = document.getElementById("f-cpf") as HTMLInputElement;
+  cpfInput?.addEventListener("input", () => {
+    let v = cpfInput.value.replace(/\D/g, "").slice(0, 11);
+    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+    else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+    cpfInput.value = v;
+  });
+
+  // ── File preview ──────────────────────────────────────────────────────────
+  const fileInput  = document.getElementById("f-photos") as HTMLInputElement;
+  const filePreview = $("file-preview");
+
+  fileInput?.addEventListener("change", () => {
+    const files = Array.from(fileInput.files ?? []);
+    if (!filePreview) return;
+    filePreview.innerHTML = "";
+    if (files.length === 0) { filePreview.hidden = true; return; }
+
+    filePreview.hidden = false;
+    files.forEach(file => {
+      const url = URL.createObjectURL(file);
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = file.name;
+      img.className = "file-preview__img";
+      img.onload = () => URL.revokeObjectURL(url);
+      filePreview.appendChild(img);
+    });
+  });
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Enviando...";
+    if (errorEl) errorEl.hidden = true;
+
+    try {
+      // Build FormData (includes files)
+      const data = new FormData(form);
+
+      const res = await fetch("/.netlify/functions/submit-lead", {
+        method: "POST",
+        body: data,
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      // Show success screen
+      form.hidden = true;
+      success.hidden = false;
+      success.focus();
+
+      // Fire Meta Pixel Lead event
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "Lead");
+      }
+    } catch (err) {
+      if (errorEl) {
+        errorEl.textContent = "Ocorreu um erro ao enviar. Tente novamente.";
+        errorEl.hidden = false;
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Solicitar avaliação";
+    }
+  });
+</script>
+
+<style>
+  /* ── OVERLAY ────────────────────────────────────────────────────────────── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    overflow-y: auto;
+  }
+
+  .modal-overlay[hidden] { display: none; }
+
+  /* ── CONTAINER ──────────────────────────────────────────────────────────── */
+  .modal-container {
+    background: var(--c-darkbg);
+    border: var(--border-card);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    animation: modal-in 200ms ease;
+  }
+
+  @keyframes modal-in {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── HEADER ─────────────────────────────────────────────────────────────── */
+  .modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+
+  .modal-eyebrow {
+    font-family: var(--font-label);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--c-lime);
+    margin-bottom: var(--space-1);
+  }
+
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-display-sm);
+    color: var(--c-white);
+    text-transform: uppercase;
+  }
+
+  .modal-close {
+    font-size: 1.2rem;
+    color: var(--c-textsub);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-1);
+    flex-shrink: 0;
+    transition: color var(--transition-base);
+    line-height: 1;
+  }
+
+  .modal-close:hover { color: var(--c-lime); }
+
+  /* ── BODY (scrollable) ──────────────────────────────────────────────────── */
+  .modal-body {
+    overflow-y: auto;
+    padding: var(--space-5) var(--space-6);
+    flex: 1;
+  }
+
+  /* ── FORM SECTIONS ──────────────────────────────────────────────────────── */
+  .triage-form { display: flex; flex-direction: column; gap: var(--space-6); }
+
+  .form-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .form-section__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-display-sm);
+    color: var(--c-lime);
+    text-transform: uppercase;
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid rgba(166,195,0,0.2);
+  }
+
+  .form-section__intro {
+    font-size: var(--fs-body-sm);
+    color: var(--c-textsub);
+    font-style: italic;
+    line-height: 1.6;
+    margin-top: calc(-1 * var(--space-2));
+  }
+
+  .form-grid { display: grid; gap: var(--space-4); }
+  .form-grid--2 { grid-template-columns: 1fr 1fr; }
+  .form-stack { display: flex; flex-direction: column; gap: var(--space-4); }
+
+  @media (max-width: 520px) {
+    .form-grid--2 { grid-template-columns: 1fr; }
+  }
+
+  /* ── FIELDS ─────────────────────────────────────────────────────────────── */
+  .field { display: flex; flex-direction: column; gap: var(--space-2); }
+
+  .field__label {
+    font-family: var(--font-label);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--c-textsub);
+    line-height: 1.5;
+  }
+
+  .field__input,
+  .field__textarea,
+  .field__select {
+    background: var(--c-black);
+    border: 1px solid #2a2a2a;
+    border-radius: 4px;
+    color: var(--c-white);
+    font-family: var(--font-body);
+    font-size: var(--fs-body-md);
+    padding: 0.75rem 1rem;
+    transition: border-color var(--transition-base);
+    width: 100%;
+  }
+
+  .field__input:focus,
+  .field__textarea:focus {
+    outline: none;
+    border-color: var(--c-lime);
+  }
+
+  .field__input::placeholder,
+  .field__textarea::placeholder { color: #444; }
+
+  .field__textarea { resize: vertical; min-height: 72px; }
+
+  .field__hint {
+    font-size: var(--fs-body-sm);
+    color: var(--c-textsub);
+  }
+
+  /* ── RADIO GROUPS ───────────────────────────────────────────────────────── */
+  .radio-group {
+    display: flex;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+  }
+
+  .radio-group--vertical {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-body-md);
+    color: var(--c-textbody);
+    cursor: pointer;
+  }
+
+  .radio-label input[type="radio"] {
+    accent-color: var(--c-lime);
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ── FILE INPUT ─────────────────────────────────────────────────────────── */
+  .field__label--file {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    border: 1px dashed rgba(166,195,0,0.4);
+    border-radius: 4px;
+    padding: var(--space-4);
+    color: var(--c-lime);
+    transition: border-color var(--transition-base), background var(--transition-base);
+  }
+
+  .field__label--file:hover {
+    border-color: var(--c-lime);
+    background: rgba(166,195,0,0.04);
+  }
+
+  .field__file {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .file-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+  }
+
+  .file-preview__img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: var(--border-lime);
+  }
+
+  /* ── FOOTER ─────────────────────────────────────────────────────────────── */
+  .form-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .form-privacy {
+    font-size: var(--fs-body-sm);
+    color: var(--c-textsub);
+    line-height: 1.5;
+  }
+
+  .form-submit { width: 100%; }
+
+  .form-error {
+    font-size: var(--fs-body-sm);
+    color: #E74C3C;
+    text-align: center;
+  }
+
+  /* ── SUCCESS SCREEN ─────────────────────────────────────────────────────── */
+  .form-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-4);
+    padding: var(--space-8) var(--space-5);
+  }
+
+  .form-success__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(166,195,0,0.1);
+    border: 2px solid var(--c-lime);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--c-lime);
+  }
+
+  .form-success__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-display-md);
+    color: var(--c-white);
+    text-transform: uppercase;
+  }
+
+  .form-success__message {
+    font-size: var(--fs-body-lg);
+    color: var(--c-textbody);
+    line-height: 1.7;
+    max-width: 400px;
+  }
+
+  .form-success__sub {
+    font-family: var(--font-label);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--c-textsub);
+  }
+
+  .modal-close-success { margin-top: var(--space-4); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .modal-container { animation: none; }
+  }
+</style>

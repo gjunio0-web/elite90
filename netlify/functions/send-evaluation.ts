@@ -1,0 +1,166 @@
+// ─── ELITE 90 · send-evaluation ─────────────────────────────────────────────
+// Netlify Function: salva o documento de avaliação no Firestore,
+// gera token único, cria a página /avaliacao/{token} e envia por e-mail.
+
+import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { randomBytes } from "crypto";
+
+function getDb() {
+  if (!getApps().length) {
+    const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}");
+    initializeApp({ credential: cert(sa) });
+  }
+  return getFirestore();
+}
+
+function buildEvaluationEmail(
+  nome: string,
+  token: string,
+  sections: Record<string, string>
+): string {
+  const firstName = nome.split(" ")[0];
+  const siteUrl = process.env.SITE_URL ?? "https://coachruiz.com.br";
+  const pageUrl = `${siteUrl}/avaliacao/${token}`;
+
+  return `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Elite 90 — Sua Avaliação</title>
+<style>
+  body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
+  .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
+  .logo{font-size:28px;font-weight:900;letter-spacing:.08em;color:#A6C300;text-transform:uppercase;margin-bottom:4px;}
+  .tagline{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#666;margin-bottom:40px;}
+  h1{font-size:22px;font-weight:700;color:#fff;text-transform:uppercase;margin:0 0 16px;}
+  p{font-size:15px;line-height:1.7;margin:0 0 16px;}
+  .highlight{color:#A6C300;font-weight:700;}
+  .cta-wrap{text-align:center;margin:32px 0;}
+  .cta{display:inline-block;background:#A6C300;color:#000;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:16px 40px;border-radius:50px;text-decoration:none;font-size:14px;}
+  .section-preview{background:#121212;border-left:3px solid #A6C300;padding:16px 20px;border-radius:0 6px 6px 0;margin:20px 0;font-size:13px;line-height:1.6;}
+  .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#A6C300;margin-bottom:8px;}
+  .sig{margin-top:40px;padding-top:24px;border-top:1px solid #1a1a1a;}
+  .sig-name{font-size:16px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;}
+  .sig-title{font-size:11px;color:#A6C300;letter-spacing:.15em;text-transform:uppercase;margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Coach Ruiz</div>
+  <div class="tagline">Estrategista em Alta Performance</div>
+
+  <h1>${firstName}, seu planejamento estratégico está pronto.</h1>
+
+  <p>
+    Analisei sua ficha com atenção. Com base no que você me enviou, 
+    preparei suas <span class="highlight">Diretrizes de Preparação e Planejamento Estratégico do Físico</span>.
+  </p>
+
+  <p>
+    Este é o ponto de partida. O documento abaixo contém minha análise completa 
+    e os próximos passos para construir o físico que você merece.
+  </p>
+
+  <div class="section-preview">
+    <div class="section-title">Prévia — Diagnóstico</div>
+    ${(sections.s1 ?? "").slice(0, 300)}${sections.s1?.length > 300 ? "..." : ""}
+  </div>
+
+  <div class="cta-wrap">
+    <a href="${pageUrl}" class="cta">Acessar meu planejamento completo</a>
+  </div>
+
+  <p style="font-size:13px;color:#666;text-align:center;">
+    Ou acesse diretamente: <a href="${pageUrl}" style="color:#A6C300;">${pageUrl}</a>
+  </p>
+
+  <div class="sig">
+    <div class="sig-name">Fernando Ruiz</div>
+    <div class="sig-title">Coach Ruiz · Elite 90</div>
+  </div>
+</div>
+</body>
+</html>
+`.trim();
+}
+
+// ── Handler ───────────────────────────────────────────────────────────────────
+export const handler = async (event: any) => {
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: "Method Not Allowed" };
+  }
+
+  const adminToken = event.headers["x-admin-token"];
+  if (adminToken !== process.env.ADMIN_SECRET) {
+    return { statusCode: 401, body: "Unauthorized" };
+  }
+
+  try {
+    const { leadId, sections, coachNotes } = JSON.parse(event.body);
+    if (!leadId || !sections) {
+      return { statusCode: 400, body: "leadId e sections obrigatórios" };
+    }
+
+    const db = getDb();
+
+    // Get lead
+    const leadDoc = await db.collection("leads").doc(leadId).get();
+    if (!leadDoc.exists) return { statusCode: 404, body: "Lead não encontrado" };
+    const lead = leadDoc.data() as Record<string, any>;
+
+    // Generate unique token
+    const token = randomBytes(16).toString("hex");
+
+    // Save evaluation to Firestore
+    await db.collection("avaliacoes").add({
+      leadId,
+      nome: lead.nome,
+      email: lead.email,
+      token,
+      sections,
+      coachNotes: coachNotes ?? "",
+      content_s1: sections.s1 ?? "", // indexed for future Gemini context
+      createdAt: FieldValue.serverTimestamp(),
+      sentAt: FieldValue.serverTimestamp(),
+    });
+
+    // Update lead status
+    await db.collection("leads").doc(leadId).update({
+      status: "avaliacao_enviada",
+      avaliacao_enviada: true,
+      avaliacao_token: token,
+    });
+
+    // Send email via Resend
+    const resendKey = process.env.RESEND_API_KEY;
+    if (resendKey) {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${resendKey}`,
+        },
+        body: JSON.stringify({
+          from: "Coach Ruiz <contato@coachruiz.com.br>",
+          to: [lead.email],
+          subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto — Elite 90`,
+          html: buildEvaluationEmail(lead.nome, token, sections),
+        }),
+      });
+    }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ success: true, token }),
+    };
+  } catch (err: any) {
+    console.error("send-evaluation error:", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message ?? "Erro interno" }),
+    };
+  }
+};

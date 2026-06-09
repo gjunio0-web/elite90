@@ -276,9 +276,22 @@ export const pt = {
     subtext: "Vagas limitadas por ciclo. Aprovação sujeita à triagem.",
   },
 
+
+  // NAVEGAÇÃO
+  nav: {
+    method: "Método",
+    results: "Resultados",
+    testimonials: "Depoimentos",
+    faq: "FAQ",
+    apply: "Solicitar vaga",
+    menu: "Menu",
+    close: "Fechar menu",
+  },
+
   // FOOTER
   footer: {
     copyright: "Coach Ruiz 2026 © Todos os direitos reservados",
+    credit: "Criado por GM Digital Bunker ©, 2026",
   },
 
   // FORMULÁRIO DE TRIAGEM
