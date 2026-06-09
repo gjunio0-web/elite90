@@ -1,4 +1,4 @@
-/* ─── ELITE 90 · Base Styles ────────────────────────────────────────────────── */
+/* --- ELITE 90 · Base Styles -------------------------------------------------- */
 
 *,
 *::before,
@@ -41,7 +41,7 @@ button {
   font-family: inherit;
 }
 
-/* ─── TIPOGRAFIA GLOBAL ─────────────────────────────────────────────────────── */
+/* --- TIPOGRAFIA GLOBAL ------------------------------------------------------- */
 
 h1, h2, h3, h4 {
   font-family: var(--font-display);
@@ -56,7 +56,7 @@ h2 { font-size: var(--fs-display-lg); }
 h3 { font-size: var(--fs-display-md); }
 h4 { font-size: var(--fs-display-sm); }
 
-/* ─── LAYOUT UTILITÁRIOS ────────────────────────────────────────────────────── */
+/* --- LAYOUT UTILITÁRIOS ------------------------------------------------------ */
 
 .container {
   width: 100%;
@@ -73,7 +73,7 @@ h4 { font-size: var(--fs-display-sm); }
   max-width: var(--max-w-text);
 }
 
-/* ─── SECTION BASE ──────────────────────────────────────────────────────────── */
+/* --- SECTION BASE ------------------------------------------------------------ */
 
 .section {
   padding-block: var(--space-8);
@@ -105,7 +105,7 @@ h4 { font-size: var(--fs-display-sm); }
   color: var(--c-lime);
 }
 
-/* ─── BOTÃO CTA ─────────────────────────────────────────────────────────────── */
+/* --- BOTÃO CTA --------------------------------------------------------------- */
 
 .btn-cta {
   display: inline-flex;
@@ -142,7 +142,7 @@ h4 { font-size: var(--fs-display-sm); }
   outline-offset: 3px;
 }
 
-/* ─── DIVIDER ORNAMENTAL ────────────────────────────────────────────────────── */
+/* --- DIVIDER ORNAMENTAL ------------------------------------------------------ */
 
 .divider {
   width: 100%;
@@ -157,7 +157,7 @@ h4 { font-size: var(--fs-display-sm); }
   opacity: 0.4;
 }
 
-/* ─── REDUCED MOTION ────────────────────────────────────────────────────────── */
+/* --- REDUCED MOTION ---------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   *,

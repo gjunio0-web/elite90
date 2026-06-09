@@ -1,6 +1,6 @@
 ---
-// ─── ELITE 90 · Página de Avaliação ─────────────────────────────────────────
-// Rota dinâmica /avaliacao/[token] — renderiza o documento de avaliação
+// --- ELITE 90 · Página de Avaliação -----------------------------------------
+// Rota dinâmica /avaliacao/[token] - renderiza o documento de avaliação
 // do atleta com a identidade visual do avaliacao_elite90.html.
 export const prerender = false;
 
@@ -50,7 +50,7 @@ const sections = [
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Elite 90 — {notFound ? "Avaliação não encontrada" : `Avaliação — ${avaliacao?.nome}`}</title>
+  <title>Elite 90 - {notFound ? "Avaliação não encontrada" : `Avaliação - ${avaliacao?.nome}`}</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" href="/favicon.ico" />
 
@@ -182,7 +182,7 @@ const sections = [
       </main>
 
       <footer>
-        <p>Elite 90 — Documento Oficial de Preparação</p>
+        <p>Elite 90 - Documento Oficial de Preparação</p>
       </footer>
     </>
   )}

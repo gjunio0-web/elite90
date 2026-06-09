@@ -1,2 +1,1 @@
-
-// Design system — Sprint 1
+// Design system components - Sprint 1

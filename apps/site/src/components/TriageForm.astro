@@ -1,7 +1,7 @@
 ---
-// ─── ELITE 90 · Formulário de Triagem ────────────────────────────────────────
+// --- ELITE 90 · Formulário de Triagem ----------------------------------------
 // Dispara evento Lead no Meta Pixel ao enviar.
-// O envio é tratado via Netlify Forms — sem backend necessário no Sprint 1.
+// O envio é tratado via Netlify Forms - sem backend necessário no Sprint 1.
 
 import type { Translations } from "../i18n/pt";
 
@@ -94,7 +94,7 @@ const f = t.form;
         name="objetivo"
         required
       >
-        <option value="" disabled selected>—</option>
+        <option value="" disabled selected>-</option>
         {f.fields.goalOptions.map((opt) => (
           <option value={opt}>{opt}</option>
         ))}
@@ -112,7 +112,7 @@ const f = t.form;
         name="experiencia"
         required
       >
-        <option value="" disabled selected>—</option>
+        <option value="" disabled selected>-</option>
         {f.fields.experienceOptions.map((opt) => (
           <option value={opt}>{opt}</option>
         ))}

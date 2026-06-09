@@ -1,11 +1,11 @@
-// ─── ELITE 90 · submit-lead ──────────────────────────────────────────────────
+// --- ELITE 90 · submit-lead --------------------------------------------------
 // Netlify Function: recebe o formulário de triagem, salva no Firestore,
 // dispara e-mail automático de confirmação via Resend.
 
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
-// ── Firebase Admin init ────────────────────────────────────────────────────
+// -- Firebase Admin init ----------------------------------------------------
 function getDb() {
   if (!getApps().length) {
     const serviceAccount = JSON.parse(
@@ -16,7 +16,7 @@ function getDb() {
   return getFirestore();
 }
 
-// ── E-mail template ────────────────────────────────────────────────────────
+// -- E-mail template --------------------------------------------------------
 function buildEmail(nome: string, objetivo: string): string {
   const firstName = nome.split(" ")[0];
   return `
@@ -25,7 +25,7 @@ function buildEmail(nome: string, objetivo: string): string {
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Elite 90 — Ficha recebida</title>
+<title>Elite 90 - Ficha recebida</title>
 <style>
   body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
   .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
@@ -53,7 +53,7 @@ function buildEmail(nome: string, objetivo: string): string {
 
   <p>
     Você preencheu a ficha de triagem do <span class="highlight">Programa Elite 90</span>.
-    Isso já diz algo sobre você — a maioria continua procrastinando. Você agiu.
+    Isso já diz algo sobre você - a maioria continua procrastinando. Você agiu.
   </p>
 
   <p>
@@ -82,7 +82,7 @@ function buildEmail(nome: string, objetivo: string): string {
 `.trim();
 }
 
-// ── Handler ────────────────────────────────────────────────────────────────
+// -- Handler ----------------------------------------------------------------
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -90,7 +90,7 @@ export const handler = async (event: any) => {
 
   try {
     // Parse multipart form data
-    // Netlify Functions receive multipart as base64 body — use busboy or parse manually
+    // Netlify Functions receive multipart as base64 body - use busboy or parse manually
     // For simplicity, we parse URL-encoded; file uploads handled separately via Firebase Storage
     let fields: Record<string, string> = {};
 
@@ -140,7 +140,7 @@ export const handler = async (event: any) => {
       return { statusCode: 400, body: "Campos obrigatórios ausentes" };
     }
 
-    // ── Save to Firestore ────────────────────────────────────────────────────
+    // -- Save to Firestore ----------------------------------------------------
     const db = getDb();
     const docRef = await db.collection("leads").add({
       // Dados pessoais
@@ -163,7 +163,7 @@ export const handler = async (event: any) => {
       avaliacao_enviada: false,
     });
 
-    // ── Send confirmation email via Resend ───────────────────────────────────
+    // -- Send confirmation email via Resend -----------------------------------
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey) {
       await fetch("https://api.resend.com/emails", {
@@ -175,7 +175,7 @@ export const handler = async (event: any) => {
         body: JSON.stringify({
           from: "Coach Ruiz <contato@coachruiz.com.br>",
           to: [email],
-          subject: `${nome.split(" ")[0]}, sua ficha foi recebida — Elite 90`,
+          subject: `${nome.split(" ")[0]}, sua ficha foi recebida - Elite 90`,
           html: buildEmail(nome, objetivo),
         }),
       });

@@ -1,5 +1,5 @@
 ---
-// ─── ELITE 90 · Painel Admin ─────────────────────────────────────────────────
+// --- ELITE 90 · Painel Admin -------------------------------------------------
 // Página protegida por senha. Lê leads do Firestore via Firebase SDK.
 // Funcionalidades: tabela de leads, mudança de status, export CSV,
 // geração de avaliação com Gemini, editor e envio.
@@ -35,13 +35,13 @@ export const prerender = false;
     const app = initializeApp(cfg);
     const db  = getFirestore(app);
 
-    // ── State ────────────────────────────────────────────────────────────────
+    // -- State ----------------------------------------------------------------
     let leads = [];
     let currentLeadId = null;
     let generatedSections = null;
     let adminToken = "";
 
-    // ── Auth ─────────────────────────────────────────────────────────────────
+    // -- Auth -----------------------------------------------------------------
     const authWall  = document.getElementById("auth-wall");
     const dashboard = document.getElementById("dashboard");
     const pwInput   = document.getElementById("pw-input");
@@ -69,7 +69,7 @@ export const prerender = false;
     pwBtn.addEventListener("click", tryAuth);
     pwInput.addEventListener("keydown", e => { if (e.key === "Enter") tryAuth(); });
 
-    // ── Load leads ───────────────────────────────────────────────────────────
+    // -- Load leads -----------------------------------------------------------
     async function loadLeads() {
       const snap = await getDocs(
         query(collection(db, "leads"), orderBy("createdAt", "desc"))
@@ -78,7 +78,7 @@ export const prerender = false;
       renderTable();
     }
 
-    // ── Render table ─────────────────────────────────────────────────────────
+    // -- Render table ---------------------------------------------------------
     function renderTable() {
       const tbody = document.getElementById("leads-tbody");
       const count = document.getElementById("leads-count");
@@ -88,7 +88,7 @@ export const prerender = false;
       const filtered  = filterVal ? leads.filter(l => l.status === filterVal) : leads;
 
       tbody.innerHTML = filtered.map(lead => {
-        const date = lead.createdAt?.toDate?.()?.toLocaleDateString("pt-BR") ?? "—";
+        const date = lead.createdAt?.toDate?.()?.toLocaleDateString("pt-BR") ?? "-";
         const statusLabel = {
           "novo": "🟡 Novo",
           "em_analise": "🔵 Em análise",
@@ -100,9 +100,9 @@ export const prerender = false;
         return `
           <tr class="lead-row" data-id="${lead.id}">
             <td class="td">${date}</td>
-            <td class="td td--name">${lead.nome ?? "—"}</td>
-            <td class="td">${lead.email ?? "—"}</td>
-            <td class="td td--goal">${(lead.objetivo ?? "—").slice(0, 60)}${lead.objetivo?.length > 60 ? "…" : ""}</td>
+            <td class="td td--name">${lead.nome ?? "-"}</td>
+            <td class="td">${lead.email ?? "-"}</td>
+            <td class="td td--goal">${(lead.objetivo ?? "-").slice(0, 60)}${lead.objetivo?.length > 60 ? "…" : ""}</td>
             <td class="td">
               <select class="status-select" data-id="${lead.id}" onchange="window.__updateStatus(this)">
                 <option value="novo"              ${lead.status === "novo"              ? "selected" : ""}>🟡 Novo</option>
@@ -120,7 +120,7 @@ export const prerender = false;
       }).join("");
     }
 
-    // ── Update status ─────────────────────────────────────────────────────────
+    // -- Update status ---------------------------------------------------------
     window.__updateStatus = async function(sel) {
       const id     = sel.dataset.id;
       const status = sel.value;
@@ -128,7 +128,7 @@ export const prerender = false;
       leads = leads.map(l => l.id === id ? { ...l, status } : l);
     };
 
-    // ── Detail drawer ─────────────────────────────────────────────────────────
+    // -- Detail drawer ---------------------------------------------------------
     window.__openDetail = function(id) {
       const lead = leads.find(l => l.id === id);
       if (!lead) return;
@@ -151,29 +151,29 @@ export const prerender = false;
         ["Frequência/semana", lead.frequencia_semanal],
         ["Disponibilidade",   lead.disponibilidade_diaria],
         ["Personal trainer",  lead.personal_trainer],
-        ["Competição",        lead.competicao + (lead.competicao_detalhe ? ` — ${lead.competicao_detalhe}` : "")],
+        ["Competição",        lead.competicao + (lead.competicao_detalhe ? ` - ${lead.competicao_detalhe}` : "")],
         ["Coach bodybuilding",lead.conhece_coach],
         ["Médico esporte",    lead.medico_esporte],
-        ["TRT",               lead.trt + (lead.trt_detalhe ? ` — ${lead.trt_detalhe}` : "")],
+        ["TRT",               lead.trt + (lead.trt_detalhe ? ` - ${lead.trt_detalhe}` : "")],
         ["Condição cardíaca", lead.condicao_cardiaca],
         ["Diabetes",          lead.diabetes],
         ["Doença crônica",    lead.doenca_cronica],
-        ["Lesão",             lead.lesao + (lead.lesao_detalhe ? ` — ${lead.lesao_detalhe}` : "")],
+        ["Lesão",             lead.lesao + (lead.lesao_detalhe ? ` - ${lead.lesao_detalhe}` : "")],
         ["Dieta",             lead.dieta],
         ["Refeições/dia",     lead.refeicoes_dia],
-        ["Suplementos",       lead.suplementos + (lead.suplementos_detalhe ? ` — ${lead.suplementos_detalhe}` : "")],
-        ["Água/dia",          lead.agua_litros ? `${lead.agua_litros}L` : "—"],
+        ["Suplementos",       lead.suplementos + (lead.suplementos_detalhe ? ` - ${lead.suplementos_detalhe}` : "")],
+        ["Água/dia",          lead.agua_litros ? `${lead.agua_litros}L` : "-"],
       ];
       return `<table class="detail-table">
         ${rows.map(([k,v]) => `
           <tr>
             <th class="detail-th">${k}</th>
-            <td class="detail-td">${v || "—"}</td>
+            <td class="detail-td">${v || "-"}</td>
           </tr>`).join("")}
       </table>`;
     }
 
-    // ── Evaluation editor ─────────────────────────────────────────────────────
+    // -- Evaluation editor -----------------------------------------------------
     window.__openEvalEditor = function(id) {
       currentLeadId = id;
       generatedSections = null;
@@ -242,7 +242,7 @@ export const prerender = false;
       }
     };
 
-    // ── Export CSV ────────────────────────────────────────────────────────────
+    // -- Export CSV ------------------------------------------------------------
     window.__exportCSV = function() {
       const headers = [
         "Data","Nome","Email","CPF","Nascimento","Altura","Peso","Objetivo",
@@ -280,7 +280,7 @@ export const prerender = false;
       URL.revokeObjectURL(url);
     };
 
-    // ── Filter ────────────────────────────────────────────────────────────────
+    // -- Filter ----------------------------------------------------------------
     document.getElementById("status-filter").addEventListener("change", renderTable);
     document.getElementById("refresh-btn").addEventListener("click", loadLeads);
     document.getElementById("detail-close").addEventListener("click", () => {
@@ -409,7 +409,7 @@ export const prerender = false;
         <option value="recusado">🔴 Recusados</option>
         <option value="avaliacao_enviada">✅ Avaliação enviada</option>
       </select>
-      <span class="toolbar-count" id="leads-count">—</span>
+      <span class="toolbar-count" id="leads-count">-</span>
     </div>
 
     <div class="table-wrap">
@@ -446,7 +446,7 @@ export const prerender = false;
   <div id="eval-editor" hidden>
     <div class="eval-panel">
       <div class="drawer-header">
-        <span class="drawer-title">Avaliação — <span id="eval-lead-name"></span></span>
+        <span class="drawer-title">Avaliação - <span id="eval-lead-name"></span></span>
         <button class="drawer-close" id="eval-close">✕</button>
       </div>
 

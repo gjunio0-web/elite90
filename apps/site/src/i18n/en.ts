@@ -1,10 +1,10 @@
-// ─── ELITE 90 · Translations EN ─────────────────────────────────────────────
+// --- ELITE 90 · Translations EN ---------------------------------------------
 
 import type { Translations } from "./pt";
 
 export const en: Translations = {
   meta: {
-    title: "Coach Ruiz | Elite 90 — High Performance Physical Consulting",
+    title: "Coach Ruiz | Elite 90 - High Performance Physical Consulting",
     description:
       "90-day body transformation program. Individualized protocol with training, nutrition and multidisciplinary support. Limited spots.",
     ogTitle: "Coach Ruiz | Elite 90",
@@ -24,12 +24,12 @@ export const en: Translations = {
     },
     cta: "Check if I qualify for the program",
     differentiation:
-      "This is not a standard program or just another online course — it is a personalized, individual online consulting service delivered through video call.",
+      "This is not a standard program or just another online course - it is a personalized, individual online consulting service delivered through video call.",
   },
 
   qualifier: {
     headline: "This program is not for everyone.",
-    body: "It is for the man between 35 and 55 who already trains, already knows what discipline is, but has not yet harvested the physique that his effort deserves. For those with an executive agenda, who refuse generic protocols and understand that real results require science — not motivation.",
+    body: "It is for the man between 35 and 55 who already trains, already knows what discipline is, but has not yet harvested the physique that his effort deserves. For those with an executive agenda, who refuse generic protocols and understand that real results require science - not motivation.",
     cta: "If this describes you, keep reading.",
   },
 
@@ -59,9 +59,9 @@ export const en: Translations = {
     eyebrow: "About your coach",
     title: "Fernando Ruiz",
     paragraphs: [
-      "Fernando Ruiz, better known as Coach Ruiz, is a professional Classic Physique bodybuilding athlete and Brazilian Masters Brasil Champion — a title won on stage, not in theory. Over a decade inside high-level bodybuilding, living every protocol in his own biology.",
+      "Fernando Ruiz, better known as Coach Ruiz, is a professional Classic Physique bodybuilding athlete and Brazilian Masters Brasil Champion - a title won on stage, not in theory. Over a decade inside high-level bodybuilding, living every protocol in his own biology.",
       "His method is not functional training disguised as bodybuilding. It is applied biological engineering: training science, hormonal balance monitored by an endocrinologist, nutrition prescribed by a sports nutritionist and emotional intelligence to sustain discipline in the agenda of those who have no time to waste. Ruiz is not your personal trainer. He is the strategist of your biology.",
-      "[NUMBER] athletes transformed. Entrepreneurs, executives, judges, athletes. Men aged 35 to 55 who came not seeking motivation — they came seeking a system.",
+      "[NUMBER] athletes transformed. Entrepreneurs, executives, judges, athletes. Men aged 35 to 55 who came not seeking motivation - they came seeking a system.",
     ],
   },
 
@@ -69,25 +69,25 @@ export const en: Translations = {
     eyebrow: "The method",
     title: "Elite 90 Program Pillars",
     intro:
-      "Performance. Discipline. Longevity. These are not buzzwords — they are the three vectors of a system. Together, they produce the only result that matters: the physique as the inevitable consequence of a correct method.",
+      "Performance. Discipline. Longevity. These are not buzzwords - they are the three vectors of a system. Together, they produce the only result that matters: the physique as the inevitable consequence of a correct method.",
     items: [
       {
         number: "01",
         title: "Systemic Performance",
         body: "Workouts designed for maximum hypertrophy without draining executive energy. Load, volume and intensity calibrated for those who lead, decide and produce.",
-        result: "Volume and Density — real, mature muscle mass.",
+        result: "Volume and Density - real, mature muscle mass.",
       },
       {
         number: "02",
         title: "Structured Discipline",
-        body: "The protocol fits your routine — not the other way around. We replace motivation with a system. For those who think in management terms, the body becomes a project like any other.",
-        result: "Permanent Definition — low body fat percentage year-round.",
+        body: "The protocol fits your routine - not the other way around. We replace motivation with a system. For those who think in management terms, the body becomes a project like any other.",
+        result: "Permanent Definition - low body fat percentage year-round.",
       },
       {
         number: "03",
         title: "Active Longevity",
         body: "Joint integrity and hormonal balance as the foundation of construction. The physique you build today must be better in ten years.",
-        result: "Proportion and Vigor — the V-taper aesthetic and protected joints.",
+        result: "Proportion and Vigor - the V-taper aesthetic and protected joints.",
       },
     ],
     confluence:
@@ -130,7 +130,7 @@ export const en: Translations = {
       "Change your life, conquer your dreams.",
       "Regular people can get there too, as long as they have passed the screening and are committed.",
       "You can change your lifestyle. I can direct your environment.",
-      "Don't wait until you're ready or motivated to start. Start — the motivation comes along the way.",
+      "Don't wait until you're ready or motivated to start. Start - the motivation comes along the way.",
     ],
     cta: "I want my individualized protocol",
   },
@@ -154,7 +154,7 @@ export const en: Translations = {
         role: "Entrepreneur",
         metric: "−10 kg of body fat",
         image: "/images/testimonials/depoente-renan.webp",
-        text: "My name is Renan Serrano, I am an entrepreneur and one of the fortunate ones who has Coach Fernando Ruiz by my side. I really needed someone like Fernando and a great friend introduced us — it was the best choice for my health! I was weighing 112kg with a lot of localized fat, and with Ruiz's help I lost 10kg of fat and I am now in the muscle gain process.",
+        text: "My name is Renan Serrano, I am an entrepreneur and one of the fortunate ones who has Coach Fernando Ruiz by my side. I really needed someone like Fernando and a great friend introduced us - it was the best choice for my health! I was weighing 112kg with a lot of localized fat, and with Ruiz's help I lost 10kg of fat and I am now in the muscle gain process.",
       },
       {
         name: "Michel de Barcelos Santos",
@@ -220,7 +220,7 @@ export const en: Translations = {
       {
         question: "What is the investment?",
         answer:
-          "The value is presented at the approval interview, after analyzing your profile. Elite 90 is a high-ticket consulting service — not an off-the-shelf product.",
+          "The value is presented at the approval interview, after analyzing your profile. Elite 90 is a high-ticket consulting service - not an off-the-shelf product.",
       },
     ],
   },

@@ -1,5 +1,5 @@
 ---
-// ─── ELITE 90 · ProcessTimeline ──────────────────────────────────────────────
+// --- ELITE 90 · ProcessTimeline ----------------------------------------------
 // Timeline visual substituindo a lista <ol> da seção "Como funciona".
 // Desktop: horizontal com conectores. Mobile: vertical com linha lateral.
 
@@ -49,7 +49,7 @@ const whoColors: Record<string, string> = {
 </div>
 
 <style>
-  /* ── LAYOUT ─────────────────────────────────────────────────────────────── */
+  /* -- LAYOUT --------------------------------------------------------------- */
   .timeline {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -79,7 +79,7 @@ const whoColors: Record<string, string> = {
     pointer-events: none;
   }
 
-  /* ── NODE ───────────────────────────────────────────────────────────────── */
+  /* -- NODE ----------------------------------------------------------------- */
   .timeline__node {
     position: relative;
     z-index: 1;
@@ -103,7 +103,7 @@ const whoColors: Record<string, string> = {
     line-height: 1;
   }
 
-  /* ── CONTENT ────────────────────────────────────────────────────────────── */
+  /* -- CONTENT -------------------------------------------------------------- */
   .timeline__content {
     display: flex;
     flex-direction: column;
@@ -169,7 +169,7 @@ const whoColors: Record<string, string> = {
     line-height: 1.5;
   }
 
-  /* ── MOBILE: vertical layout ────────────────────────────────────────────── */
+  /* -- MOBILE: vertical layout ---------------------------------------------- */
   @media (max-width: 767px) {
     .timeline {
       grid-template-columns: 1fr;
@@ -205,7 +205,7 @@ const whoColors: Record<string, string> = {
     }
   }
 
-  /* ── TABLET: 4 cols → 2 cols ────────────────────────────────────────────── */
+  /* -- TABLET: 4 cols → 2 cols ---------------------------------------------- */
   @media (min-width: 768px) and (max-width: 1023px) {
     .timeline {
       grid-template-columns: repeat(2, 1fr);

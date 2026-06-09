@@ -1,4 +1,4 @@
-// ─── ELITE 90 · generate-evaluation ─────────────────────────────────────────
+// --- ELITE 90 · generate-evaluation -----------------------------------------
 // Netlify Function: gera rascunho do documento de avaliação via Gemini 2.0 Flash.
 // Chamada pelo painel admin ao clicar em "Gerar avaliação".
 
@@ -13,7 +13,7 @@ function getDb() {
   return getFirestore();
 }
 
-// ── Referência do documento avaliacao_elite90.html (estrutura e tom) ─────────
+// -- Referência do documento avaliacao_elite90.html (estrutura e tom) ---------
 const REFERENCE_STRUCTURE = `
 O documento de avaliação do Coach Ruiz tem 5 seções:
 
@@ -46,7 +46,7 @@ O coach fala como estrategista biológico, não como personal trainer.
 Cada seção deve ter 2-4 parágrafos densos e específicos.
 `;
 
-// ── Build prompt from lead data ───────────────────────────────────────────────
+// -- Build prompt from lead data -----------------------------------------------
 function buildPrompt(lead: Record<string, any>, previousDocs: string[]): string {
   const prevContext = previousDocs.length > 0
     ? `\n\nDOCUMENTOS ANTERIORES DO COACH (para calibrar o estilo):\n${previousDocs.slice(0, 3).join("\n---\n")}`
@@ -65,17 +65,17 @@ DADOS DO ATLETA:
 - Frequência semanal pretendida: ${lead.frequencia_semanal || "não informada"}
 - Disponibilidade diária: ${lead.disponibilidade_diaria || "não informada"}
 - Treina com personal: ${lead.personal_trainer || "não informado"}
-- Já competiu: ${lead.competicao || "não informado"}${lead.competicao_detalhe ? ` — ${lead.competicao_detalhe}` : ""}
+- Já competiu: ${lead.competicao || "não informado"}${lead.competicao_detalhe ? ` - ${lead.competicao_detalhe}` : ""}
 - Conhece coach bodybuilding: ${lead.conhece_coach || "não informado"}
 - Acompanhamento médico esporte: ${lead.medico_esporte || "não informado"}
-- TRT: ${lead.trt || "não informado"}${lead.trt_detalhe ? ` — ${lead.trt_detalhe}` : ""}
+- TRT: ${lead.trt || "não informado"}${lead.trt_detalhe ? ` - ${lead.trt_detalhe}` : ""}
 - Condição cardíaca: ${lead.condicao_cardiaca || "nenhuma informada"}
 - Diabetes: ${lead.diabetes || "não informado"}
 - Doença crônica: ${lead.doenca_cronica || "nenhuma informada"}
-- Lesão: ${lead.lesao || "não informado"}${lead.lesao_detalhe ? ` — ${lead.lesao_detalhe}` : ""}
+- Lesão: ${lead.lesao || "não informado"}${lead.lesao_detalhe ? ` - ${lead.lesao_detalhe}` : ""}
 - Dieta: ${lead.dieta || "não informada"}
 - Refeições/dia: ${lead.refeicoes_dia || "não informado"}
-- Suplementos: ${lead.suplementos || "não informado"}${lead.suplementos_detalhe ? ` — ${lead.suplementos_detalhe}` : ""}
+- Suplementos: ${lead.suplementos || "não informado"}${lead.suplementos_detalhe ? ` - ${lead.suplementos_detalhe}` : ""}
 - Água/dia: ${lead.agua_litros || "não informado"} litros
 
 ESTRUTURA E TOM ESPERADOS:
@@ -84,7 +84,7 @@ ${prevContext}
 
 INSTRUÇÕES:
 - Gere o documento completo com as 5 seções numeradas
-- Seja específico aos dados do atleta — não genérico
+- Seja específico aos dados do atleta - não genérico
 - Use linguagem técnica do fisiculturismo
 - Onde os dados forem insuficientes para uma seção, sinalize com [COMPLETAR] para o coach revisar
 - Responda APENAS com o conteúdo das 5 seções, em formato JSON com esta estrutura:
@@ -97,7 +97,7 @@ INSTRUÇÕES:
 }`;
 }
 
-// ── Handler ───────────────────────────────────────────────────────────────────
+// -- Handler -------------------------------------------------------------------
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };

@@ -1,4 +1,4 @@
-// ─── ELITE 90 · send-evaluation ─────────────────────────────────────────────
+// --- ELITE 90 · send-evaluation ---------------------------------------------
 // Netlify Function: salva o documento de avaliação no Firestore,
 // gera token único, cria a página /avaliacao/{token} e envia por e-mail.
 
@@ -29,7 +29,7 @@ function buildEvaluationEmail(
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Elite 90 — Sua Avaliação</title>
+<title>Elite 90 - Sua Avaliação</title>
 <style>
   body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
   .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
@@ -65,7 +65,7 @@ function buildEvaluationEmail(
   </p>
 
   <div class="section-preview">
-    <div class="section-title">Prévia — Diagnóstico</div>
+    <div class="section-title">Prévia - Diagnóstico</div>
     ${(sections.s1 ?? "").slice(0, 300)}${sections.s1?.length > 300 ? "..." : ""}
   </div>
 
@@ -87,7 +87,7 @@ function buildEvaluationEmail(
 `.trim();
 }
 
-// ── Handler ───────────────────────────────────────────────────────────────────
+// -- Handler -------------------------------------------------------------------
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -146,7 +146,7 @@ export const handler = async (event: any) => {
         body: JSON.stringify({
           from: "Coach Ruiz <contato@coachruiz.com.br>",
           to: [lead.email],
-          subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto — Elite 90`,
+          subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - Elite 90`,
           html: buildEvaluationEmail(lead.nome, token, sections),
         }),
       });

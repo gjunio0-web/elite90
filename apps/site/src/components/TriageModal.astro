@@ -1,5 +1,5 @@
 ---
-// ─── ELITE 90 · TriageModal ──────────────────────────────────────────────────
+// --- ELITE 90 · TriageModal --------------------------------------------------
 // Modal com formulário completo de triagem (24 campos + upload).
 // Disparado por qualquer CTA da página via evento 'open-triage-modal'.
 // Envia para Netlify Function que salva no Firebase e dispara e-mail.
@@ -37,7 +37,7 @@ const f = t.form;
         novalidate
       >
 
-        <!-- ── DADOS PESSOAIS ─────────────────────────────────────── -->
+        <!-- -- DADOS PESSOAIS --------------------------------------- -->
         <div class="form-section">
           <h3 class="form-section__title">Dados Pessoais</h3>
 
@@ -69,7 +69,7 @@ const f = t.form;
           </div>
         </div>
 
-        <!-- ── IMERSÃO DO ATLETA ──────────────────────────────────── -->
+        <!-- -- IMERSÃO DO ATLETA ------------------------------------ -->
         <div class="form-section">
           <h3 class="form-section__title">Imersão do Atleta</h3>
           <p class="form-section__intro">Bora mergulhar de cabeça no processo? Aqui começa a sua jornada. Seja honesto(a) com cada resposta, é o seu corpo, sua evolução. Para mim é uma honra cuidar dele!</p>
@@ -148,7 +148,7 @@ const f = t.form;
           </div>
         </div>
 
-        <!-- ── HISTÓRICO DE SAÚDE ──────────────────────────────────── -->
+        <!-- -- HISTÓRICO DE SAÚDE ------------------------------------ -->
         <div class="form-section">
           <h3 class="form-section__title">Histórico de Saúde</h3>
 
@@ -187,7 +187,7 @@ const f = t.form;
           </div>
         </div>
 
-        <!-- ── ROTINA ALIMENTAR E SUPLEMENTAÇÃO ───────────────────── -->
+        <!-- -- ROTINA ALIMENTAR E SUPLEMENTAÇÃO --------------------- -->
         <div class="form-section">
           <h3 class="form-section__title">Rotina Alimentar e Suplementação</h3>
 
@@ -228,7 +228,7 @@ const f = t.form;
           </div>
         </div>
 
-        <!-- ── AVALIAÇÃO FÍSICA VISUAL ─────────────────────────────── -->
+        <!-- -- AVALIAÇÃO FÍSICA VISUAL ------------------------------- -->
         <div class="form-section">
           <h3 class="form-section__title">Avaliação Física Visual</h3>
           <p class="form-section__intro">Envie aqui suas fotos</p>
@@ -251,7 +251,7 @@ const f = t.form;
           </div>
         </div>
 
-        <!-- ── PRIVACY + SUBMIT ────────────────────────────────────── -->
+        <!-- -- PRIVACY + SUBMIT -------------------------------------- -->
         <div class="form-footer">
           <p class="form-privacy">{f.privacy}</p>
           <button class="btn-cta form-submit" type="submit" id="form-submit-btn">
@@ -279,7 +279,7 @@ const f = t.form;
 </div>
 
 <script>
-  // ── Helpers ────────────────────────────────────────────────────────────────
+  // -- Helpers ----------------------------------------------------------------
   const $ = (id: string) => document.getElementById(id) as HTMLElement;
   const modal   = $("triage-modal");
   const form    = $("triage-form") as HTMLFormElement;
@@ -287,7 +287,7 @@ const f = t.form;
   const errorEl = $("form-error");
   const submitBtn = $("form-submit-btn") as HTMLButtonElement;
 
-  // ── Open / close ───────────────────────────────────────────────────────────
+  // -- Open / close -----------------------------------------------------------
   function openModal() {
     modal.hidden = false;
     document.body.style.overflow = "hidden";
@@ -314,7 +314,7 @@ const f = t.form;
     if (e.key === "Escape" && !modal.hidden) closeModal();
   });
 
-  // ── CTAs → open modal ──────────────────────────────────────────────────────
+  // -- CTAs → open modal ------------------------------------------------------
   document.querySelectorAll<HTMLElement>(
     "#header-cta-btn, #drawer-cta-btn, .hero__cta, .motivational__cta, .cta-final__btn"
   ).forEach(btn => {
@@ -324,7 +324,7 @@ const f = t.form;
     });
   });
 
-  // ── Conditional fields ────────────────────────────────────────────────────
+  // -- Conditional fields ----------------------------------------------------
   function conditional(radioId: string, condId: string, inputSelector: string) {
     const radios = document.querySelectorAll<HTMLInputElement>(`input[name="${radioId}"]`);
     const cond   = $(condId);
@@ -342,7 +342,7 @@ const f = t.form;
   conditional("lesao",      "cond-lesao","textarea");
   conditional("suplementos","cond-supl", "textarea");
 
-  // ── CPF mask ──────────────────────────────────────────────────────────────
+  // -- CPF mask --------------------------------------------------------------
   const cpfInput = document.getElementById("f-cpf") as HTMLInputElement;
   cpfInput?.addEventListener("input", () => {
     let v = cpfInput.value.replace(/\D/g, "").slice(0, 11);
@@ -352,7 +352,7 @@ const f = t.form;
     cpfInput.value = v;
   });
 
-  // ── File preview ──────────────────────────────────────────────────────────
+  // -- File preview ----------------------------------------------------------
   const fileInput  = document.getElementById("f-photos") as HTMLInputElement;
   const filePreview = $("file-preview");
 
@@ -374,7 +374,7 @@ const f = t.form;
     });
   });
 
-  // ── Submit ────────────────────────────────────────────────────────────────
+  // -- Submit ----------------------------------------------------------------
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!form.checkValidity()) { form.reportValidity(); return; }
@@ -415,7 +415,7 @@ const f = t.form;
 </script>
 
 <style>
-  /* ── OVERLAY ────────────────────────────────────────────────────────────── */
+  /* -- OVERLAY -------------------------------------------------------------- */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -431,7 +431,7 @@ const f = t.form;
 
   .modal-overlay[hidden] { display: none; }
 
-  /* ── CONTAINER ──────────────────────────────────────────────────────────── */
+  /* -- CONTAINER ------------------------------------------------------------ */
   .modal-container {
     background: var(--c-darkbg);
     border: var(--border-card);
@@ -450,7 +450,7 @@ const f = t.form;
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ── HEADER ─────────────────────────────────────────────────────────────── */
+  /* -- HEADER --------------------------------------------------------------- */
   .modal-header {
     display: flex;
     align-items: flex-start;
@@ -492,14 +492,14 @@ const f = t.form;
 
   .modal-close:hover { color: var(--c-lime); }
 
-  /* ── BODY (scrollable) ──────────────────────────────────────────────────── */
+  /* -- BODY (scrollable) ---------------------------------------------------- */
   .modal-body {
     overflow-y: auto;
     padding: var(--space-5) var(--space-6);
     flex: 1;
   }
 
-  /* ── FORM SECTIONS ──────────────────────────────────────────────────────── */
+  /* -- FORM SECTIONS -------------------------------------------------------- */
   .triage-form { display: flex; flex-direction: column; gap: var(--space-6); }
 
   .form-section {
@@ -533,7 +533,7 @@ const f = t.form;
     .form-grid--2 { grid-template-columns: 1fr; }
   }
 
-  /* ── FIELDS ─────────────────────────────────────────────────────────────── */
+  /* -- FIELDS --------------------------------------------------------------- */
   .field { display: flex; flex-direction: column; gap: var(--space-2); }
 
   .field__label {
@@ -576,7 +576,7 @@ const f = t.form;
     color: var(--c-textsub);
   }
 
-  /* ── RADIO GROUPS ───────────────────────────────────────────────────────── */
+  /* -- RADIO GROUPS --------------------------------------------------------- */
   .radio-group {
     display: flex;
     gap: var(--space-5);
@@ -604,7 +604,7 @@ const f = t.form;
     flex-shrink: 0;
   }
 
-  /* ── FILE INPUT ─────────────────────────────────────────────────────────── */
+  /* -- FILE INPUT ----------------------------------------------------------- */
   .field__label--file {
     cursor: pointer;
     display: inline-flex;
@@ -645,7 +645,7 @@ const f = t.form;
     border: var(--border-lime);
   }
 
-  /* ── FOOTER ─────────────────────────────────────────────────────────────── */
+  /* -- FOOTER --------------------------------------------------------------- */
   .form-footer {
     display: flex;
     flex-direction: column;
@@ -668,7 +668,7 @@ const f = t.form;
     text-align: center;
   }
 
-  /* ── SUCCESS SCREEN ─────────────────────────────────────────────────────── */
+  /* -- SUCCESS SCREEN ------------------------------------------------------- */
   .form-success {
     display: flex;
     flex-direction: column;

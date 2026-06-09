@@ -1,5 +1,5 @@
 ---
-// ─── ELITE 90 · BeforeAfterSlider ────────────────────────────────────────────
+// --- ELITE 90 · BeforeAfterSlider --------------------------------------------
 // Slider de comparação usando img-comparison-slider (web component, 3KB).
 // Substituição dos cards lado a lado da galeria de resultados.
 
@@ -40,7 +40,7 @@ const { items } = Astro.props;
         <figure slot="first" class="result-card__fig">
           <img
             src={item.beforeSrc}
-            alt={`${item.name} — antes`}
+            alt={`${item.name} - antes`}
             class="result-card__img"
             width="300"
             height="375"
@@ -55,7 +55,7 @@ const { items } = Astro.props;
         <figure slot="second" class="result-card__fig">
           <img
             src={item.afterSrc}
-            alt={`${item.name} — depois`}
+            alt={`${item.name} - depois`}
             class="result-card__img"
             width="300"
             height="375"

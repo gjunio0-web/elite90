@@ -1,9 +1,9 @@
-// ─── ELITE 90 · Traduções PT-BR ─────────────────────────────────────────────
+// --- ELITE 90 · Traduções PT-BR ---------------------------------------------
 
 export const pt = {
   // META
   meta: {
-    title: "Coach Ruiz | Elite 90 — Consultoria de Alta Performance Física",
+    title: "Coach Ruiz | Elite 90 - Consultoria de Alta Performance Física",
     description:
       "Programa de transformação corporal em 90 dias. Protocolo individualizado com treino, nutrição e suporte multidisciplinar. Vagas limitadas.",
     ogTitle: "Coach Ruiz | Elite 90",
@@ -30,7 +30,7 @@ export const pt = {
   // QUALIFICADOR
   qualifier: {
     headline: "Este programa não é para todo mundo.",
-    body: "É para o homem de 35 a 55 anos que já treina, já sabe o que é disciplina, mas ainda não colheu o físico que seu esforço merece. Para quem tem agenda executiva, recusa protocolo genérico e entende que resultado real exige ciência — não motivação.",
+    body: "É para o homem de 35 a 55 anos que já treina, já sabe o que é disciplina, mas ainda não colheu o físico que seu esforço merece. Para quem tem agenda executiva, recusa protocolo genérico e entende que resultado real exige ciência - não motivação.",
     cta: "Se isso descreve você, continue.",
   },
 
@@ -62,9 +62,9 @@ export const pt = {
     eyebrow: "Sobre seu coach",
     title: "Fernando Ruiz",
     paragraphs: [
-      "Fernando Ruiz, mais conhecido como Coach Ruiz, é atleta profissional de fisiculturismo Classic Physique e Campeão Brasileiro Masters Brasil — título conquistado no palco, não em teoria. Mais de uma década dentro do bodybuilding de alto nível, vivendo cada protocolo na própria biologia.",
+      "Fernando Ruiz, mais conhecido como Coach Ruiz, é atleta profissional de fisiculturismo Classic Physique e Campeão Brasileiro Masters Brasil - título conquistado no palco, não em teoria. Mais de uma década dentro do bodybuilding de alto nível, vivendo cada protocolo na própria biologia.",
       "Seu método não é treinamento funcional disfarçado de fisiculturismo. É engenharia biológica aplicada: ciência do treinamento, equilíbrio hormonal monitorado por médico endocrinologista, nutrição prescrita por nutricionista esportivo e inteligência emocional para sustentar a disciplina na agenda de quem não tem tempo a perder. Ruiz não é seu personal trainer. É o estrategista da sua biologia.",
-      "[NÚMERO] alunos transformados. Empresários, executivos, juízes, atletas. Homens de 35 a 55 anos que não vieram buscar motivação — vieram buscar um sistema.",
+      "[NÚMERO] alunos transformados. Empresários, executivos, juízes, atletas. Homens de 35 a 55 anos que não vieram buscar motivação - vieram buscar um sistema.",
     ],
   },
 
@@ -73,25 +73,25 @@ export const pt = {
     eyebrow: "O método",
     title: "Pilares do Programa Elite 90",
     intro:
-      "Performance. Disciplina. Longevidade. Não são palavras de ordem — são os três vetores de um sistema. Em confluência, produzem o único resultado que importa: o corpo como consequência inevitável de um método correto.",
+      "Performance. Disciplina. Longevidade. Não são palavras de ordem - são os três vetores de um sistema. Em confluência, produzem o único resultado que importa: o corpo como consequência inevitável de um método correto.",
     items: [
       {
         number: "01",
         title: "Performance Sistêmica",
         body: "Treinos projetados para máxima hipertrofia sem drenar a energia executiva. Carga, volume e intensidade calibrados para quem lidera, decide e produz.",
-        result: "Volume e Densidade — massa muscular real e madura.",
+        result: "Volume e Densidade - massa muscular real e madura.",
       },
       {
         number: "02",
         title: "Disciplina Estruturada",
-        body: "O protocolo se encaixa na sua rotina — não o contrário. Substituímos motivação por sistema. Para quem pensa em gestão, o corpo vira um projeto como qualquer outro.",
-        result: "Definição Permanente — percentual de gordura baixo o ano todo.",
+        body: "O protocolo se encaixa na sua rotina - não o contrário. Substituímos motivação por sistema. Para quem pensa em gestão, o corpo vira um projeto como qualquer outro.",
+        result: "Definição Permanente - percentual de gordura baixo o ano todo.",
       },
       {
         number: "03",
         title: "Longevidade Ativa",
         body: "Integridade articular e equilíbrio hormonal como base de construção. O físico que você constrói hoje deve ser melhor em dez anos.",
-        result: "Proporção e Vigor — a estética em V e articulações protegidas.",
+        result: "Proporção e Vigor - a estética em V e articulações protegidas.",
       },
     ],
     confluence:
@@ -170,7 +170,7 @@ export const pt = {
       "Mude sua vida, conquiste seus sonhos.",
       "Pessoas normais também podem chegar lá, desde que tenham passado pela triagem e estejam comprometidas.",
       "Você pode mudar seu estilo de vida. Eu consigo direcionar o seu ambiente.",
-      "Não espere estar pronto ou motivado para começar. Comece — a motivação vem no caminho.",
+      "Não espere estar pronto ou motivado para começar. Comece - a motivação vem no caminho.",
     ],
     cta: "Quero meu protocolo individualizado",
   },
@@ -264,7 +264,7 @@ export const pt = {
       {
         question: "Qual o investimento?",
         answer:
-          "O valor é apresentado na entrevista de aprovação, após análise do seu perfil. O Elite 90 é uma consultoria de alto ticket — não um produto de prateleira.",
+          "O valor é apresentado na entrevista de aprovação, após análise do seu perfil. O Elite 90 é uma consultoria de alto ticket - não um produto de prateleira.",
       },
     ],
   },
