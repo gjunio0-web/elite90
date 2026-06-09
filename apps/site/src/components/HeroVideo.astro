@@ -1,0 +1,91 @@
+---
+// ─── ELITE 90 · HeroVideo ────────────────────────────────────────────────────
+// Vídeo de fundo da seção hero com overlay e fallback de imagem estática.
+// O conteúdo do hero é injetado via <slot />.
+---
+
+<div class="hero-video-wrap">
+  <video
+    class="hero-video"
+    autoplay
+    muted
+    loop
+    playsinline
+    poster="/video/hero-poster.jpg"
+    preload="auto"
+    aria-hidden="true"
+  >
+    <!-- Mobile 9:16 -->
+    <source
+      media="(max-width: 768px)"
+      src="/video/hero-mobile.webm"
+      type="video/webm"
+    />
+    <source
+      media="(max-width: 768px)"
+      src="/video/hero-mobile.mp4"
+      type="video/mp4"
+    />
+    <!-- Desktop 16:9 -->
+    <source src="/video/hero-desktop.webm" type="video/webm" />
+    <source src="/video/hero-desktop.mp4" type="video/mp4" />
+  </video>
+
+  <div class="hero-overlay" aria-hidden="true"></div>
+
+  <div class="hero-content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .hero-video-wrap {
+    position: relative;
+    width: 100%;
+    min-height: 100svh;
+    overflow: hidden;
+    background-color: var(--c-black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      to bottom,
+      rgba(13, 13, 13, 0.45) 0%,
+      rgba(13, 13, 13, 0.65) 50%,
+      rgba(13, 13, 13, 0.92) 100%
+    );
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+  }
+
+  /* Desativar vídeo quando preferência de movimento reduzido estiver ativa */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-video {
+      display: none;
+    }
+
+    .hero-overlay {
+      background: rgba(13, 13, 13, 0.85);
+    }
+  }
+</style>

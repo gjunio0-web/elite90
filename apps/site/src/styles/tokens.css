@@ -1,0 +1,57 @@
+/* ─── ELITE 90 · Design System Tokens ─────────────────────────────────────── */
+/* Fonte: brand board oficial (CoachRuizDesignSystem_simple.jpeg)               */
+
+:root {
+  /* PALETA */
+  --c-lime:     #A6C300;
+  --c-olive:    #556600;
+  --c-charcoal: #A0A820;
+  --c-light:    #EDEDE0;
+  --c-black:    #0D0D0D;
+  --c-darkbg:   #1A1A1A;
+  --c-white:    #FFFFFF;
+  --c-textbody: #CCCCCC;
+  --c-textsub:  #999999;
+
+  /* TIPOGRAFIA */
+  --font-display: "Bebas Neue", sans-serif;
+  --font-label:   "Raleway", sans-serif;
+  --font-body:    "Montserrat", sans-serif;
+
+  --fs-display-xl: clamp(2.5rem, 6vw, 4rem);
+  --fs-display-lg: clamp(2rem, 4.5vw, 3rem);
+  --fs-display-md: clamp(1.5rem, 3vw, 2rem);
+  --fs-display-sm: clamp(1.2rem, 2.5vw, 1.5rem);
+  --fs-label:      0.75rem;
+  --fs-body-lg:    1rem;
+  --fs-body-md:    0.875rem;
+  --fs-body-sm:    0.75rem;
+
+  /* ESPAÇAMENTO (8pt grid) */
+  --space-1: 0.25rem;   /*  4px */
+  --space-2: 0.5rem;    /*  8px */
+  --space-3: 1rem;      /* 16px */
+  --space-4: 1.5rem;    /* 24px */
+  --space-5: 2rem;      /* 32px */
+  --space-6: 3rem;      /* 48px */
+  --space-7: 4rem;      /* 64px */
+  --space-8: 6rem;      /* 96px */
+  --space-9: 8rem;      /* 128px */
+
+  /* LAYOUT */
+  --max-w-text:    680px;
+  --max-w-content: 1080px;
+  --max-w-full:    1440px;
+
+  /* COMPONENTES */
+  --radius-pill: 50px;
+  --radius-card: 4px;
+  --border-lime: 1px solid var(--c-lime);
+  --border-card: 4px solid var(--c-lime);
+  --ring-photo:  3px solid var(--c-lime);
+  --shadow-cta:  0 0 20px rgba(166, 195, 0, 0.5);
+
+  /* TRANSIÇÕES */
+  --transition-base: 200ms ease;
+  --transition-slow: 400ms ease;
+}

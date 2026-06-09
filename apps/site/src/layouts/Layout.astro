@@ -1,0 +1,108 @@
+---
+// ─── ELITE 90 · Layout Principal ─────────────────────────────────────────────
+import "@fontsource/bebas-neue";
+import "@fontsource/raleway/400.css";
+import "@fontsource/raleway/700.css";
+import "@fontsource/montserrat/400.css";
+import "@fontsource/montserrat/700.css";
+import "../styles/tokens.css";
+import "../styles/global.css";
+
+import type { Locale } from "../i18n/utils";
+
+interface Props {
+  title: string;
+  description: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  locale: Locale;
+  canonicalUrl?: string;
+}
+
+const {
+  title,
+  description,
+  ogTitle,
+  ogDescription,
+  locale,
+  canonicalUrl,
+} = Astro.props;
+
+const siteUrl = "https://coachruiz.com.br";
+const ogImageUrl = `${siteUrl}/images/og-image.jpg`;
+const canon = canonicalUrl ?? Astro.url.href;
+---
+
+<!doctype html>
+<html lang={locale === "pt-br" ? "pt-BR" : "en"}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canon} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canon} />
+    <meta property="og:title" content={ogTitle ?? title} />
+    <meta property="og:description" content={ogDescription ?? description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content={locale === "pt-br" ? "pt_BR" : "en_US"} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={ogTitle ?? title} />
+    <meta name="twitter:description" content={ogDescription ?? description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <!-- Hreflang -->
+    <link rel="alternate" hreflang="pt-BR" href={siteUrl} />
+    <link rel="alternate" hreflang="en" href={`${siteUrl}/en`} />
+    <link rel="alternate" hreflang="x-default" href={siteUrl} />
+
+    <!-- Meta Pixel — ID a inserir antes do go-live -->
+    <script>
+      // @ts-nocheck
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      // TODO: substituir PIXEL_ID pelo ID real antes do go-live
+      fbq('init', 'PIXEL_ID');
+      fbq('track', 'PageView');
+    </script>
+    <noscript>
+      <img
+        height="1"
+        width="1"
+        style="display:none"
+        src="https://www.facebook.com/tr?id=PIXEL_ID&ev=PageView&noscript=1"
+        alt=""
+      />
+    </noscript>
+    
+    <meta property="og:image" content="https://elite90.netlify.app/images/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://elite90.netlify.app/images/og-image.jpg" />
+
+  </head>
+
+  <body>
+    <slot />
+  </body>
+</html>

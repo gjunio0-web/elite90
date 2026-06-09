@@ -7,11 +7,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "astro": "6.4.5",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",
-    "vite": "^5.0.0"
+    "vite": "^8.0.16"
   }
 }

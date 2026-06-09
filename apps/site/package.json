@@ -7,6 +7,9 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "^4.0.0"
+    "@fontsource/bebas-neue": "*",
+    "@fontsource/montserrat": "*",
+    "@fontsource/raleway": "*",
+    "astro": "^6.4.5"
   }
 }

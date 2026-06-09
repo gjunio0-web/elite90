@@ -1,0 +1,171 @@
+/* ─── ELITE 90 · Base Styles ────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--c-black);
+  color: var(--c-textbody);
+  font-family: var(--font-body);
+  font-size: var(--fs-body-lg);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+/* ─── TIPOGRAFIA GLOBAL ─────────────────────────────────────────────────────── */
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: var(--c-white);
+}
+
+h1 { font-size: var(--fs-display-xl); }
+h2 { font-size: var(--fs-display-lg); }
+h3 { font-size: var(--fs-display-md); }
+h4 { font-size: var(--fs-display-sm); }
+
+/* ─── LAYOUT UTILITÁRIOS ────────────────────────────────────────────────────── */
+
+.container {
+  width: 100%;
+  max-width: var(--max-w-content);
+  margin-inline: auto;
+  padding-inline: var(--space-5);
+}
+
+.container--wide {
+  max-width: var(--max-w-full);
+}
+
+.container--text {
+  max-width: var(--max-w-text);
+}
+
+/* ─── SECTION BASE ──────────────────────────────────────────────────────────── */
+
+.section {
+  padding-block: var(--space-8);
+}
+
+.section--compact {
+  padding-block: var(--space-6);
+}
+
+.section__eyebrow {
+  font-family: var(--font-label);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--c-lime);
+  margin-bottom: var(--space-3);
+}
+
+.section__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-display-lg);
+  color: var(--c-white);
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+
+.section__title span {
+  color: var(--c-lime);
+}
+
+/* ─── BOTÃO CTA ─────────────────────────────────────────────────────────────── */
+
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--c-lime);
+  color: #000000;
+  font-family: var(--font-body);
+  font-size: var(--fs-body-md);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1.125rem 2rem;
+  border-radius: var(--radius-pill);
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-cta:hover,
+.btn-cta:focus-visible {
+  box-shadow: var(--shadow-cta);
+  transform: translateY(-1px);
+}
+
+.btn-cta:active {
+  transform: translateY(0);
+}
+
+.btn-cta:focus-visible {
+  outline: 2px solid var(--c-lime);
+  outline-offset: 3px;
+}
+
+/* ─── DIVIDER ORNAMENTAL ────────────────────────────────────────────────────── */
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--c-lime) 20%,
+    var(--c-lime) 80%,
+    transparent
+  );
+  opacity: 0.4;
+}
+
+/* ─── REDUCED MOTION ────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

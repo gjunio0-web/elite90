@@ -1,11 +1,11 @@
 [build]
-command = "npm run build --workspace=apps/site"
-publish = "apps/site/dist"
+  command = "npm run build --workspace=apps/site"
+  publish = "apps/site/dist"
 
 [build.environment]
-NODE_VERSION = "20"
+  NODE_VERSION = "20"
 
 [[redirects]]
-from = "/app/*"
-to = "/app/index.html"
-status = 200
+  from = "/app/*"
+  to = "/app/index.html"
+  status = 200

@@ -1,0 +1,64 @@
+---
+// ─── ELITE 90 · Language Switcher ────────────────────────────────────────────
+import type { Locale } from "../i18n/utils";
+import { localeLabels, localePath } from "../i18n/utils";
+
+interface Props {
+  currentLocale: Locale;
+}
+
+const { currentLocale } = Astro.props;
+const otherLocale: Locale = currentLocale === "pt-br" ? "en" : "pt-br";
+---
+
+<div role="navigation" class="lang-switcher" aria-label="Seleção de idioma">
+  <span class="lang-switcher__current" aria-current="true">
+    {localeLabels[currentLocale]}
+  </span>
+  <span class="lang-switcher__sep" aria-hidden="true">/</span>
+  <a
+    href={localePath(otherLocale)}
+    class="lang-switcher__link"
+    hreflang={otherLocale === "en" ? "en" : "pt-BR"}
+  >
+    {localeLabels[otherLocale]}
+  </a>
+</div>
+
+<style>
+  .lang-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: var(--font-label);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .lang-switcher__current {
+    color: var(--c-lime);
+  }
+
+  .lang-switcher__sep {
+    color: var(--c-textsub);
+  }
+
+  .lang-switcher__link {
+    color: var(--c-textsub);
+    transition: color var(--transition-base);
+    text-decoration: none;
+  }
+
+  .lang-switcher__link:hover,
+  .lang-switcher__link:focus-visible {
+    color: var(--c-white);
+  }
+
+  .lang-switcher__link:focus-visible {
+    outline: 2px solid var(--c-lime);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+</style>
