@@ -1,11 +1,11 @@
-// --- ELITE 90 · submit-lead --------------------------------------------------
+// --- ELITE 90 · submit-lead
 // Netlify Function: recebe o formulário de triagem, salva no Firestore,
 // dispara e-mail automático de confirmação via Resend.
 
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
-// -- Firebase Admin init ----------------------------------------------------
+// -- Firebase Admin init
 function getDb() {
   if (!getApps().length) {
     const serviceAccount = JSON.parse(
@@ -16,7 +16,7 @@ function getDb() {
   return getFirestore();
 }
 
-// -- E-mail template --------------------------------------------------------
+// -- E-mail template
 function buildEmail(nome: string, objetivo: string): string {
   const firstName = nome.split(" ")[0];
   return `
@@ -82,7 +82,7 @@ function buildEmail(nome: string, objetivo: string): string {
 `.trim();
 }
 
-// -- Handler ----------------------------------------------------------------
+// -- Handler
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -140,7 +140,7 @@ export const handler = async (event: any) => {
       return { statusCode: 400, body: "Campos obrigatórios ausentes" };
     }
 
-    // -- Save to Firestore ----------------------------------------------------
+    // -- Save to Firestore
     const db = getDb();
     const docRef = await db.collection("leads").add({
       // Dados pessoais
@@ -163,7 +163,7 @@ export const handler = async (event: any) => {
       avaliacao_enviada: false,
     });
 
-    // -- Send confirmation email via Resend -----------------------------------
+    // -- Send confirmation email via Resend
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey) {
       await fetch("https://api.resend.com/emails", {

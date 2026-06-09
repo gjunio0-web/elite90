@@ -1,5 +1,4 @@
-// --- ELITE 90 · Translations EN ---------------------------------------------
-
+// --- ELITE 90 · Translations EN
 import type { Translations } from "./pt";
 
 export const en: Translations = {

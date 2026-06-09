@@ -1,9 +1,10 @@
-﻿{
+{
   "name": "elite90",
   "private": true,
   "scripts": {
     "dev": "turbo dev",
-    "build": "turbo build"
+    "build": "turbo build",
+    "lint": "turbo lint"
   },
   "devDependencies": {
     "turbo": "^2.0.0"

@@ -1,4 +1,4 @@
-// --- ELITE 90 · generate-evaluation -----------------------------------------
+// --- ELITE 90 · generate-evaluation
 // Netlify Function: gera rascunho do documento de avaliação via Gemini 2.0 Flash.
 // Chamada pelo painel admin ao clicar em "Gerar avaliação".
 
@@ -13,7 +13,7 @@ function getDb() {
   return getFirestore();
 }
 
-// -- Referência do documento avaliacao_elite90.html (estrutura e tom) ---------
+// -- Referência do documento avaliacao_elite90.html (estrutura e tom)
 const REFERENCE_STRUCTURE = `
 O documento de avaliação do Coach Ruiz tem 5 seções:
 
@@ -46,7 +46,7 @@ O coach fala como estrategista biológico, não como personal trainer.
 Cada seção deve ter 2-4 parágrafos densos e específicos.
 `;
 
-// -- Build prompt from lead data -----------------------------------------------
+// -- Build prompt from lead data
 function buildPrompt(lead: Record<string, any>, previousDocs: string[]): string {
   const prevContext = previousDocs.length > 0
     ? `\n\nDOCUMENTOS ANTERIORES DO COACH (para calibrar o estilo):\n${previousDocs.slice(0, 3).join("\n---\n")}`
@@ -97,7 +97,7 @@ INSTRUÇÕES:
 }`;
 }
 
-// -- Handler -------------------------------------------------------------------
+// -- Handler
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };

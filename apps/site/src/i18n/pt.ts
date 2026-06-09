@@ -1,5 +1,4 @@
-// --- ELITE 90 · Traduções PT-BR ---------------------------------------------
-
+// --- ELITE 90 · Traduções PT-BR
 export const pt = {
   // META
   meta: {

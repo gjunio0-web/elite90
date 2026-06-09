@@ -1,10 +1,9 @@
 ---
-// --- ELITE 90 · Painel Admin -------------------------------------------------
+// --- ELITE 90 · Painel Admin
 // Página protegida por senha. Lê leads do Firestore via Firebase SDK.
 // Funcionalidades: tabela de leads, mudança de status, export CSV,
 // geração de avaliação com Gemini, editor e envio.
 export const prerender = false;
----
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -35,13 +34,13 @@ export const prerender = false;
     const app = initializeApp(cfg);
     const db  = getFirestore(app);
 
-    // -- State ----------------------------------------------------------------
+    // -- State
     let leads = [];
     let currentLeadId = null;
     let generatedSections = null;
     let adminToken = "";
 
-    // -- Auth -----------------------------------------------------------------
+    // -- Auth
     const authWall  = document.getElementById("auth-wall");
     const dashboard = document.getElementById("dashboard");
     const pwInput   = document.getElementById("pw-input");
@@ -69,7 +68,7 @@ export const prerender = false;
     pwBtn.addEventListener("click", tryAuth);
     pwInput.addEventListener("keydown", e => { if (e.key === "Enter") tryAuth(); });
 
-    // -- Load leads -----------------------------------------------------------
+    // -- Load leads
     async function loadLeads() {
       const snap = await getDocs(
         query(collection(db, "leads"), orderBy("createdAt", "desc"))
@@ -78,7 +77,7 @@ export const prerender = false;
       renderTable();
     }
 
-    // -- Render table ---------------------------------------------------------
+    // -- Render table
     function renderTable() {
       const tbody = document.getElementById("leads-tbody");
       const count = document.getElementById("leads-count");
@@ -120,7 +119,7 @@ export const prerender = false;
       }).join("");
     }
 
-    // -- Update status ---------------------------------------------------------
+    // -- Update status
     window.__updateStatus = async function(sel) {
       const id     = sel.dataset.id;
       const status = sel.value;
@@ -128,7 +127,7 @@ export const prerender = false;
       leads = leads.map(l => l.id === id ? { ...l, status } : l);
     };
 
-    // -- Detail drawer ---------------------------------------------------------
+    // -- Detail drawer
     window.__openDetail = function(id) {
       const lead = leads.find(l => l.id === id);
       if (!lead) return;
@@ -173,7 +172,7 @@ export const prerender = false;
       </table>`;
     }
 
-    // -- Evaluation editor -----------------------------------------------------
+    // -- Evaluation editor
     window.__openEvalEditor = function(id) {
       currentLeadId = id;
       generatedSections = null;
@@ -242,7 +241,7 @@ export const prerender = false;
       }
     };
 
-    // -- Export CSV ------------------------------------------------------------
+    // -- Export CSV
     window.__exportCSV = function() {
       const headers = [
         "Data","Nome","Email","CPF","Nascimento","Altura","Peso","Objetivo",
@@ -280,7 +279,7 @@ export const prerender = false;
       URL.revokeObjectURL(url);
     };
 
-    // -- Filter ----------------------------------------------------------------
+    // -- Filter
     document.getElementById("status-filter").addEventListener("change", renderTable);
     document.getElementById("refresh-btn").addEventListener("click", loadLeads);
     document.getElementById("detail-close").addEventListener("click", () => {

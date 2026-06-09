@@ -1,6 +1,5 @@
 ---
-// --- ELITE 90 · Landing Page PT-BR (revisada)
-export const prerender = true; --------------------------------
+export const prerender = true;
 import Layout from "../layouts/Layout.astro";
 import HeroVideo from "../components/HeroVideo.astro";
 import Header from "../components/Header.astro";
@@ -285,7 +284,7 @@ const partnerUrls: Record<string,string> = {
 </Layout>
 
 <script>
-  // -- Testimonial expand/collapse -------------------------------------------
+  // -- Testimonial expand/collapse
   document.querySelectorAll<HTMLButtonElement>(".testimonial-card__toggle").forEach(btn => {
     const wrap    = btn.closest(".testimonial-card__text-wrap");
     const textEl  = wrap?.querySelector<HTMLElement>(".testimonial-card__text");
@@ -309,7 +308,7 @@ const partnerUrls: Record<string,string> = {
     });
   });
 
-  // -- FAQ accordion --------------------------------------------------------
+  // -- FAQ accordion
   document.querySelectorAll<HTMLButtonElement>(".faq__btn").forEach(btn => {
     const item   = btn.closest(".faq__item");
     const answer = item?.querySelector<HTMLElement>(".faq__answer");
@@ -323,7 +322,7 @@ const partnerUrls: Record<string,string> = {
     });
   });
 
-  // -- Sticky CTA: hide when #triagem is visible ----------------------------
+  // -- Sticky CTA: hide when #triagem is visible
   const stickyCta = document.getElementById("sticky-cta");
   const triagemSection = document.getElementById("triagem");
   if (stickyCta && triagemSection) {
@@ -341,7 +340,7 @@ const partnerUrls: Record<string,string> = {
     observer.observe(triagemSection);
   }
 
-  // -- All CTA buttons → open modal -----------------------------------------
+  // -- All CTA buttons → open modal
   document.querySelectorAll<HTMLElement>(".hero__cta, .motivational__cta, .cta-final__btn, #header-cta-btn, #drawer-cta-btn").forEach(btn => {
     btn.addEventListener("click", e => {
       e.preventDefault();

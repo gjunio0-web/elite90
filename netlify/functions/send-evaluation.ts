@@ -1,4 +1,4 @@
-// --- ELITE 90 · send-evaluation ---------------------------------------------
+// --- ELITE 90 · send-evaluation
 // Netlify Function: salva o documento de avaliação no Firestore,
 // gera token único, cria a página /avaliacao/{token} e envia por e-mail.
 
@@ -87,7 +87,7 @@ function buildEvaluationEmail(
 `.trim();
 }
 
-// -- Handler -------------------------------------------------------------------
+// -- Handler
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };

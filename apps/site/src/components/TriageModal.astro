@@ -1,5 +1,5 @@
 ---
-// --- ELITE 90 · TriageModal --------------------------------------------------
+// --- ELITE 90 · TriageModal
 // Modal com formulário completo de triagem (24 campos + upload).
 // Disparado por qualquer CTA da página via evento 'open-triage-modal'.
 // Envia para Netlify Function que salva no Firebase e dispara e-mail.
@@ -279,7 +279,7 @@ const f = t.form;
 </div>
 
 <script>
-  // -- Helpers ----------------------------------------------------------------
+  // -- Helpers
   const $ = (id: string) => document.getElementById(id) as HTMLElement;
   const modal   = $("triage-modal");
   const form    = $("triage-form") as HTMLFormElement;
@@ -287,7 +287,7 @@ const f = t.form;
   const errorEl = $("form-error");
   const submitBtn = $("form-submit-btn") as HTMLButtonElement;
 
-  // -- Open / close -----------------------------------------------------------
+  // -- Open / close
   function openModal() {
     modal.hidden = false;
     document.body.style.overflow = "hidden";
@@ -314,7 +314,7 @@ const f = t.form;
     if (e.key === "Escape" && !modal.hidden) closeModal();
   });
 
-  // -- CTAs → open modal ------------------------------------------------------
+  // -- CTAs → open modal
   document.querySelectorAll<HTMLElement>(
     "#header-cta-btn, #drawer-cta-btn, .hero__cta, .motivational__cta, .cta-final__btn"
   ).forEach(btn => {
@@ -324,7 +324,7 @@ const f = t.form;
     });
   });
 
-  // -- Conditional fields ----------------------------------------------------
+  // -- Conditional fields
   function conditional(radioId: string, condId: string, inputSelector: string) {
     const radios = document.querySelectorAll<HTMLInputElement>(`input[name="${radioId}"]`);
     const cond   = $(condId);
@@ -342,7 +342,7 @@ const f = t.form;
   conditional("lesao",      "cond-lesao","textarea");
   conditional("suplementos","cond-supl", "textarea");
 
-  // -- CPF mask --------------------------------------------------------------
+  // -- CPF mask
   const cpfInput = document.getElementById("f-cpf") as HTMLInputElement;
   cpfInput?.addEventListener("input", () => {
     let v = cpfInput.value.replace(/\D/g, "").slice(0, 11);
@@ -352,7 +352,7 @@ const f = t.form;
     cpfInput.value = v;
   });
 
-  // -- File preview ----------------------------------------------------------
+  // -- File preview
   const fileInput  = document.getElementById("f-photos") as HTMLInputElement;
   const filePreview = $("file-preview");
 
@@ -374,7 +374,7 @@ const f = t.form;
     });
   });
 
-  // -- Submit ----------------------------------------------------------------
+  // -- Submit
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!form.checkValidity()) { form.reportValidity(); return; }

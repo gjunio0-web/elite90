@@ -1,11 +1,29 @@
+# Dependencies
 node_modules
 .pnp
+.pnp.js
+
+# Build outputs
 dist
 .astro
 .turbo
+
+# Environment variables — NUNCA commitar
 .env
 .env.local
 .env.*.local
+
+# Editor
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
 .DS_Store
 Thumbs.db
+
+# Netlify
 .netlify
