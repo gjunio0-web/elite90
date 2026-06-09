@@ -1,7 +1,9 @@
 import { defineConfig } from 'astro/config';
+import netlify from '@astrojs/netlify';
 
 export default defineConfig({
-  output: 'static',
+  output: 'server',
+  adapter: netlify(),
   site: 'https://coachruiz.com.br',
   i18n: {
     defaultLocale: 'pt-br',
