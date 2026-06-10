@@ -101,9 +101,10 @@ const isEn = locale === "en";
                 {isEn ? "Height (in metres, e.g. 1.75)" : "Altura (em metros, ex: 1,75)"}
                 <span class="field__req">*</span>
               </label>
-              <input class="field__input" type="text" id="f-height" name="altura" required
+              <input class="field__input numeric-br-field" type="text" id="f-height" name="altura_visual" required
                 inputmode="decimal"
-                placeholder={isEn ? "1.75" : "1,75"} />
+                placeholder={isEn ? "1.75" : "1,75"} data-field-target="altura" />
+              <input type="hidden" id="real-altura" name="altura" />
               <p class="field__error" id="f-height-error" hidden>
                 {isEn ? "Enter a value between 1.00 and 2.50 m." : "Informe um valor entre 1,00 e 2,50 m."}
               </p>
@@ -114,9 +115,10 @@ const isEn = locale === "en";
                 {isEn ? "Weight (in kg, e.g. 85.5)" : "Peso (em kg, ex: 85,5)"}
                 <span class="field__req">*</span>
               </label>
-              <input class="field__input" type="text" id="f-weight" name="peso" required
+              <input class="field__input numeric-br-field" type="text" id="f-weight" name="peso_visual" required
                 inputmode="decimal"
-                placeholder={isEn ? "85.5" : "85,5"} />
+                placeholder={isEn ? "85.5" : "85,5"} data-field-target="peso" />
+              <input type="hidden" id="real-peso" name="peso" />
               <p class="field__error" id="f-weight-error" hidden>
                 {isEn ? "Enter a value between 30 and 300 kg." : "Informe um valor entre 30 e 300 kg."}
               </p>
@@ -411,10 +413,11 @@ const isEn = locale === "en";
                   18. {isEn ? "Litres of water per day on average?" : "Em média, quantos litros de água por dia?"}
                   <span class="field__req">*</span>
                 </label>
-                <input class="field__input" type="text" id="f-water"
-                  name="agua_litros" required
+                <input class="field__input numeric-br-field" type="text" id="f-water"
+                  name="agua_litros_visual" required
                   inputmode="decimal"
-                  placeholder={isEn ? "2.5" : "2,5"} />
+                  placeholder={isEn ? "2.5" : "2,5"} data-field-target="agua_litros" />
+                <input type="hidden" id="real-agua_litros" name="agua_litros" />
               </div>
             </div>
 
@@ -637,12 +640,29 @@ const isEn = locale === "en";
     return !isNaN(d.getTime());
   });
 
-  // -- Decimal input: allow comma, prevent letters --
+  // -- Decimal input: allow comma, prevent letters (Algoritmo BR Corrigido) --
   ["f-height","f-weight","f-act-duration","f-avail","f-water"].forEach(id => {
     const inp = document.getElementById(id) as HTMLInputElement;
     if (!inp) return;
     inp.addEventListener("input", () => {
-      inp.value = inp.value.replace(/[^0-9.,]/g, "");
+      // Sanitização: permite apenas dígitos e uma única vírgula visual
+      let value = inp.value.replace(/[^0-9,]/g, "");
+      
+      const parts = value.split(",");
+      if (parts.length > 2) {
+        value = parts[0] + "," + parts.slice(1).join("");
+      }
+      inp.value = value;
+
+      // Captura o data-field-target associado e espelha no hidden input correspondente como Float (.)
+      const targetKey = inp.dataset.fieldTarget;
+      if (targetKey) {
+        const hiddenInput = document.getElementById(`real-${targetKey}`) as HTMLInputElement;
+        if (hiddenInput) {
+          const rawFloatString = value.replace(",", ".");
+          hiddenInput.value = rawFloatString ? parseFloat(rawFloatString).toString() : "";
+        }
+      }
     });
     // Prevent autocomplete from overwriting comma format
     inp.setAttribute("autocomplete", "off");

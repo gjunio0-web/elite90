@@ -7,12 +7,19 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
 function getDb() {
   if (!getApps().length) {
-    const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}";
-    let serviceAccount: object;
+    const saEnv = process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}";
+    let serviceAccount: any;
     try {
-      serviceAccount = JSON.parse(raw);
-    } catch {
-      throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON inválido - verifique a variável de ambiente no Netlify.");
+      // Força a sanitização e escape de quebras de linha literais corrompidas no parser da Netlify
+      const sanitizedSa = saEnv.replace(/\\n/g, '\n');
+      serviceAccount = JSON.parse(sanitizedSa);
+      
+      if (serviceAccount.private_key) {
+        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+      }
+    } catch (e: any) {
+      console.error("FALHA CRÍTICA: FIREBASE_SERVICE_ACCOUNT_JSON inválido - verifique a variável de ambiente no Netlify.");
+      throw new Error(`Erro no parse das credenciais do Firebase: ${ SaEnv ? e.message : "Variável vazia"}`);
     }
     initializeApp({ credential: cert(serviceAccount as any) });
   }

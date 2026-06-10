@@ -37,18 +37,19 @@ const navLinks = [
 
     <!-- Desktop nav -->
     <nav class="site-header__nav" id="site-nav" aria-label="Navegacao principal">
-      {navLinks.map(link => (
-        <a
-          href={link.href}
-          class="site-header__link"
-          data-nav-link
-          data-href={link.href}
-        >
-          {link.label}
-        </a>
-      ))}
+      <div class="nav-visible-wrapper" id="nav-visible-wrapper" style="display: flex; align-items: center; gap: var(--space-4); overflow: hidden; flex: 1; min-width: 0; height: 100%;">
+        {navLinks.map(link => (
+          <a
+            href={link.href}
+            class="site-header__link"
+            data-nav-link
+            data-href={link.href}
+          >
+            {link.label}
+          </a>
+        ))}
+      </div>
 
-      <!-- "Mais" overflow dropdown -->
       <div class="site-header__more" id="nav-more" hidden>
         <button
           class="site-header__link site-header__more-btn"
@@ -63,7 +64,7 @@ const navLinks = [
           </svg>
         </button>
         <div class="site-header__dropdown" id="nav-dropdown" hidden role="menu">
-        </div>
+          </div>
       </div>
     </nav>
 
@@ -142,95 +143,91 @@ const navLinks = [
     if (el) sectionObserver.observe(el);
   });
 
-  // -- Overflow "Mais" menu -----------------------------------------------------
-  const nav        = document.getElementById("site-nav") as HTMLElement;
-  const moreWrap   = document.getElementById("nav-more") as HTMLElement;
-  const moreBtn    = document.getElementById("nav-more-btn") as HTMLButtonElement;
-  const dropdown   = document.getElementById("nav-dropdown") as HTMLElement;
-  const moreIcon   = moreBtn?.querySelector(".site-header__more-icon") as SVGElement;
+  // -- Overflow "Mais" menu (Algoritmo Corrigido e Resiliente) ------------------
+  const navVisibleWrapper = document.getElementById("nav-visible-wrapper") as HTMLElement;
+  const mainNavList       = document.getElementById("main-nav-list") as HTMLElement;
+  const moreWrap          = document.getElementById("nav-more") as HTMLElement;
+  const moreBtn           = document.getElementById("nav-more-btn") as HTMLButtonElement;
+  const dropdown          = document.getElementById("nav-dropdown") as HTMLElement;
+  const moreIcon          = moreBtn?.querySelector(".site-header__more-icon") as SVGElement;
 
   function measureOverflow() {
-    if (!nav || !moreWrap) return;
+    if (!navVisibleWrapper || !mainNavList || !moreWrap || !dropdown) return;
 
-    // Step 1: show all links, hide Mais, measure available nav width
+    // Resetar o estado movendo todos os links ocultados de volta para a lista visível
     moreWrap.hidden = true;
     dropdown.hidden = true;
-    const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[data-nav-link]"));
-    links.forEach(l => { l.style.display = ""; l.style.visibility = ""; });
+    moreBtn.setAttribute("aria-expanded", "false");
+    if (moreIcon) moreIcon.style.transform = "";
 
-    // Force layout
-    nav.getBoundingClientRect();
+    const originalLinks = Array.from(mainNavList.querySelectorAll<HTMLAnchorElement>("a[data-nav-link]"));
+    originalLinks.forEach(link => {
+      link.style.display = "";
+      mainNavList.appendChild(link);
+    });
 
-    // Step 2: available width = right edge of .site-header__right minus nav left
+    // Calcular o espaço disponível dinamicamente usando as dimensões do cabeçalho real
     const headerInner = document.querySelector(".site-header__inner") as HTMLElement;
     const rightSlot   = document.querySelector(".site-header__right") as HTMLElement;
     const logoEl      = document.querySelector(".site-header__logo") as HTMLElement;
 
     if (!headerInner || !rightSlot || !logoEl) return;
 
-    const logoRight  = logoEl.getBoundingClientRect().right;
-    const rightLeft  = rightSlot.getBoundingClientRect().left;
-    // Reserve 80px for the Mais button itself
-    const available  = rightLeft - logoRight - 80;
+    const logoRight = logoEl.getBoundingClientRect().right;
+    const rightLeft = rightSlot.getBoundingClientRect().left;
+    
+    // 80px reservados para a largura física do próprio botão "Mais" quando visível
+    const availableSpace = rightLeft - logoRight - 80;
 
-    // Step 3: measure total links width
-    let totalWidth = 0;
-    const gap = 16; // var(--space-4) = 1rem = 16px
-    links.forEach(link => {
-      totalWidth += link.getBoundingClientRect().width + gap;
+    let currentWidthSum = 0;
+    const gap = 16; // var(--space-4) = 16px
+    const overflowingLinks: HTMLAnchorElement[] = [];
+
+    originalLinks.forEach(link => {
+      currentWidthSum += link.getBoundingClientRect().width + gap;
+      if (currentWidthSum > availableSpace) {
+        overflowingLinks.push(link);
+      }
     });
 
-    if (totalWidth > available) {
-      // Find which links overflow
-      const overflowing: HTMLAnchorElement[] = [];
-      let usedWidth = 0;
-      for (const link of links) {
-        const w = link.getBoundingClientRect().width + gap;
-        if (usedWidth + w > available) {
-          overflowing.push(link);
-        } else {
-          usedWidth += w;
-        }
-      }
+    // Se houver links estourando a área segura, reconstrói o dropdown dinamicamente
+    if (overflowingLinks.length > 0) {
+      dropdown.innerHTML = "";
+      
+      overflowingLinks.forEach(link => {
+        link.style.display = "none"; // Oculta da barra superior horizontal
 
-      if (overflowing.length > 0) {
-        overflowing.forEach(link => { link.style.display = "none"; });
-
-        dropdown.innerHTML = "";
-        overflowing.forEach(link => {
-          const a = document.createElement("a");
-          a.href = link.getAttribute("data-href") ?? link.href;
-          a.className = "site-header__dropdown-item";
-          a.textContent = link.textContent?.trim() ?? "";
-          a.setAttribute("role", "menuitem");
-          a.addEventListener("click", () => {
-            dropdown.hidden = true;
-            moreBtn.setAttribute("aria-expanded", "false");
-            if (moreIcon) moreIcon.style.transform = "";
-          });
-          dropdown.appendChild(a);
+        const a = document.createElement("a");
+        a.href = link.getAttribute("data-href") ?? link.href;
+        a.className = "site-header__dropdown-item";
+        a.textContent = link.textContent?.trim() ?? "";
+        a.setAttribute("role", "menuitem");
+        
+        a.addEventListener("click", () => {
+          dropdown.hidden = true;
+          moreBtn.setAttribute("aria-expanded", "false");
+          if (moreIcon) moreIcon.style.transform = "";
         });
+        
+        dropdown.appendChild(a);
+      });
 
-        moreWrap.hidden = false;
-        return;
-      }
+      moreWrap.hidden = false;
     }
-
-    moreWrap.hidden = true;
   }
 
-  // Toggle dropdown
-  moreBtn?.addEventListener("click", () => {
-    const expanded = moreBtn.getAttribute("aria-expanded") === "true";
-    moreBtn.setAttribute("aria-expanded", String(!expanded));
-    dropdown.hidden = expanded;
+  // Corrigida a mecânica de clique direto manipulando a propriedade 'hidden' nativa
+  moreBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isHidden = dropdown.hidden;
+    dropdown.hidden = !isHidden;
+    moreBtn.setAttribute("aria-expanded", String(isHidden));
     if (moreIcon) {
-      moreIcon.style.transform = expanded ? "" : "rotate(180deg)";
+      moreIcon.style.transform = isHidden ? "rotate(180deg)" : "";
     }
   });
 
-  // Close on outside click
-  document.addEventListener("click", e => {
+  document.addEventListener("click", (e) => {
     if (!moreWrap?.contains(e.target as Node)) {
       dropdown.hidden = true;
       moreBtn?.setAttribute("aria-expanded", "false");
@@ -238,11 +235,15 @@ const navLinks = [
     }
   });
 
-  // Run on load and resize
-  const ro = new ResizeObserver(measureOverflow);
-  ro.observe(nav);
-  // Run after layout is fully painted (fonts + images settled)
-  requestAnimationFrame(() => setTimeout(measureOverflow, 50));
+  // Ancoragem de execução baseada no estado de carregamento das fontes do DOM
+  if ('fonts' in document) {
+    document.fonts.ready.then(measureOverflow);
+  } else {
+    setTimeout(measureOverflow, 50);
+  }
+
+  const resizeObserver = new ResizeObserver(() => measureOverflow());
+  if (navVisibleWrapper) resizeObserver.observe(navVisibleWrapper);
   window.addEventListener("load", measureOverflow);
 
   // -- Drawer --------------------------------------------------------------------

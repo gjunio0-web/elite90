@@ -8,8 +8,21 @@ import { getFirestore } from "firebase-admin/firestore";
 
 function getDb() {
   if (!getApps().length) {
-    const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}");
-    initializeApp({ credential: cert(sa) });
+    const saEnv = process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}";
+    let serviceAccount: any;
+    try {
+      // Sanitização de strings e quebras de linha literais corrompidas no parser da Netlify
+      const sanitizedSa = saEnv.replace(/\\n/g, '\n');
+      serviceAccount = JSON.parse(sanitizedSa);
+      
+      if (serviceAccount.private_key) {
+        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+      }
+    } catch (e: any) {
+      console.error("FALHA CRÍTICA (generate-evaluation): FIREBASE_SERVICE_ACCOUNT_JSON inválido.");
+      throw new Error(`Erro no parse das credenciais do Firebase: ${e.message}`);
+    }
+    initializeApp({ credential: cert(serviceAccount as any) });
   }
   return getFirestore();
 }
