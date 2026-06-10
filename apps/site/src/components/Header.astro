@@ -24,7 +24,7 @@ const navLinks = [
   <div class="site-header__inner container">
 
     <!-- Logo -->
-    <a href={locale === "en" ? "/en" : "/"} class="site-header__logo" aria-label="Coach Ruiz">
+    <a href="#" class="site-header__logo" id="logo-home-link" aria-label="Coach Ruiz - Topo da página">
       <img
         src="/images/brand/logo-header.webp"
         srcset="/images/brand/logo-header.webp 1x, /images/brand/logo-header@2x.webp 2x"
@@ -112,6 +112,12 @@ const navLinks = [
   window.addEventListener("scroll", updateHeader, { passive: true });
   updateHeader();
 
+  // Logo click -> smooth scroll to top
+  document.getElementById("logo-home-link")?.addEventListener("click", e => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
   // -- Active link highlight ----------------------------------------------------
   const navLinkEls = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
   const sectionIds = ["cronograma","coach","pilares","resultados",
@@ -146,46 +152,71 @@ const navLinks = [
   function measureOverflow() {
     if (!nav || !moreWrap) return;
 
-    // Temporarily hide "Mais" to measure natural width
+    // Step 1: show all links, hide Mais, measure available nav width
     moreWrap.hidden = true;
+    dropdown.hidden = true;
     const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[data-nav-link]"));
-    links.forEach(l => { l.style.display = ""; });
+    links.forEach(l => { l.style.display = ""; l.style.visibility = ""; });
 
-    const navRight = nav.getBoundingClientRect().right;
-    const overflowing: HTMLAnchorElement[] = [];
+    // Force layout
+    nav.getBoundingClientRect();
 
+    // Step 2: available width = right edge of .site-header__right minus nav left
+    const headerInner = document.querySelector(".site-header__inner") as HTMLElement;
+    const rightSlot   = document.querySelector(".site-header__right") as HTMLElement;
+    const logoEl      = document.querySelector(".site-header__logo") as HTMLElement;
+
+    if (!headerInner || !rightSlot || !logoEl) return;
+
+    const logoRight  = logoEl.getBoundingClientRect().right;
+    const rightLeft  = rightSlot.getBoundingClientRect().left;
+    // Reserve 80px for the Mais button itself
+    const available  = rightLeft - logoRight - 80;
+
+    // Step 3: measure total links width
+    let totalWidth = 0;
+    const gap = 16; // var(--space-4) = 1rem = 16px
     links.forEach(link => {
-      const rect = link.getBoundingClientRect();
-      if (rect.right > navRight - 10) {
-        overflowing.push(link);
-      }
+      totalWidth += link.getBoundingClientRect().width + gap;
     });
 
-    if (overflowing.length > 0) {
-      // Hide overflowing links from main nav
-      overflowing.forEach(link => { link.style.display = "none"; });
+    if (totalWidth > available) {
+      // Find which links overflow
+      const overflowing: HTMLAnchorElement[] = [];
+      let usedWidth = 0;
+      for (const link of links) {
+        const w = link.getBoundingClientRect().width + gap;
+        if (usedWidth + w > available) {
+          overflowing.push(link);
+        } else {
+          usedWidth += w;
+        }
+      }
 
-      // Rebuild dropdown
-      dropdown.innerHTML = "";
-      overflowing.forEach(link => {
-        const btn = document.createElement("a");
-        btn.href = link.href;
-        btn.className = "site-header__dropdown-item";
-        btn.textContent = link.textContent ?? "";
-        btn.setAttribute("role", "menuitem");
-        btn.addEventListener("click", () => {
-          dropdown.hidden = true;
-          moreBtn.setAttribute("aria-expanded", "false");
-          moreIcon?.style.setProperty("transform", "");
+      if (overflowing.length > 0) {
+        overflowing.forEach(link => { link.style.display = "none"; });
+
+        dropdown.innerHTML = "";
+        overflowing.forEach(link => {
+          const a = document.createElement("a");
+          a.href = link.getAttribute("data-href") ?? link.href;
+          a.className = "site-header__dropdown-item";
+          a.textContent = link.textContent?.trim() ?? "";
+          a.setAttribute("role", "menuitem");
+          a.addEventListener("click", () => {
+            dropdown.hidden = true;
+            moreBtn.setAttribute("aria-expanded", "false");
+            if (moreIcon) moreIcon.style.transform = "";
+          });
+          dropdown.appendChild(a);
         });
-        dropdown.appendChild(btn);
-      });
 
-      moreWrap.hidden = false;
-    } else {
-      moreWrap.hidden = true;
-      dropdown.hidden = true;
+        moreWrap.hidden = false;
+        return;
+      }
     }
+
+    moreWrap.hidden = true;
   }
 
   // Toggle dropdown
@@ -210,7 +241,9 @@ const navLinks = [
   // Run on load and resize
   const ro = new ResizeObserver(measureOverflow);
   ro.observe(nav);
-  measureOverflow();
+  // Run after layout is fully painted (fonts + images settled)
+  requestAnimationFrame(() => setTimeout(measureOverflow, 50));
+  window.addEventListener("load", measureOverflow);
 
   // -- Drawer --------------------------------------------------------------------
   const hamburger  = document.getElementById("hamburger-btn") as HTMLButtonElement;

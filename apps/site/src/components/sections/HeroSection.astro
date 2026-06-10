@@ -9,20 +9,20 @@ const { t } = Astro.props;
 <HeroVideo>
   <section class="hero section" aria-label="Hero">
     <div class="container hero__inner">
+
+      <div class="hero__logo-wrap">
+        <img
+          src="/images/brand/logo-hero.webp"
+          alt="Coach Ruiz - Estrategista em Alta Performance"
+          class="hero__logo-img"
+          width="800"
+          height="800"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </div>
+
       <div class="hero__content">
-
-        <div class="hero__logo-wrap">
-          <img
-            src="/images/brand/logo-hero.webp"
-            alt="Coach Ruiz - Estrategista em Alta Performance"
-            class="hero__logo-img"
-            width="800"
-            height="800"
-            loading="eager"
-            fetchpriority="high"
-          />
-        </div>
-
         <p class="section__eyebrow">{t.hero.eyebrow}</p>
         <h1 class="hero__headline">{t.hero.headline}</h1>
         <p class="hero__sub">{t.hero.subheadline}</p>
@@ -47,7 +47,7 @@ const { t } = Astro.props;
         </button>
 
         <p class="hero__differentiation">{t.hero.differentiation}</p>
-      </div>
+        </div>
     </div>
   </section>
 </HeroVideo>
@@ -64,7 +64,8 @@ const { t } = Astro.props;
   .hero__inner {
     display: flex;
     flex-direction: column;
-    gap: var(--space-5);
+    gap: 0;
+    align-items: stretch;
   }
 
   .hero__content {
@@ -75,13 +76,11 @@ const { t } = Astro.props;
   }
 
   .hero__logo-wrap {
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-bottom: var(--space-4);
+    width: 100%;
     display: flex;
     justify-content: center;
+    align-items: center;
+    margin-bottom: var(--space-5);
   }
 
   .hero__logo-img {

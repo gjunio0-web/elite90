@@ -101,8 +101,8 @@ const isEn = locale === "en";
                 {isEn ? "Height (in metres, e.g. 1.75)" : "Altura (em metros, ex: 1,75)"}
                 <span class="field__req">*</span>
               </label>
-              <input class="field__input" type="number" id="f-height" name="altura" required
-                min="1.00" max="2.50" step="0.01"
+              <input class="field__input" type="text" id="f-height" name="altura" required
+                inputmode="decimal"
                 placeholder={isEn ? "1.75" : "1,75"} />
               <p class="field__error" id="f-height-error" hidden>
                 {isEn ? "Enter a value between 1.00 and 2.50 m." : "Informe um valor entre 1,00 e 2,50 m."}
@@ -114,8 +114,8 @@ const isEn = locale === "en";
                 {isEn ? "Weight (in kg, e.g. 85.5)" : "Peso (em kg, ex: 85,5)"}
                 <span class="field__req">*</span>
               </label>
-              <input class="field__input" type="number" id="f-weight" name="peso" required
-                min="30" max="300" step="0.1"
+              <input class="field__input" type="text" id="f-weight" name="peso" required
+                inputmode="decimal"
                 placeholder={isEn ? "85.5" : "85,5"} />
               <p class="field__error" id="f-weight-error" hidden>
                 {isEn ? "Enter a value between 30 and 300 kg." : "Informe um valor entre 30 e 300 kg."}
@@ -207,8 +207,8 @@ const isEn = locale === "en";
               <label class="field__label" for="f-act-duration">
                 {isEn ? "How long? (in years, e.g. 2.5)" : "Há quanto tempo? (em anos, ex: 2,5)"}
               </label>
-              <input class="field__input" type="number" id="f-act-duration"
-                name="tempo_atividade" min="0" max="50" step="0.5"
+              <input class="field__input" type="text" id="f-act-duration"
+                name="tempo_atividade" inputmode="decimal"
                 placeholder={isEn ? "2.5" : "2,5"} />
             </div>
 
@@ -220,8 +220,10 @@ const isEn = locale === "en";
                     : "Pretende treinar quantas vezes por semana?"}
                   <span class="field__req">*</span>
                 </label>
-                <input class="field__input" type="number" id="f-freq"
-                  name="frequencia_semanal" required min="1" max="7" />
+                <input class="field__input" type="text" id="f-freq"
+                  name="frequencia_semanal" required
+                  inputmode="numeric"
+                  placeholder="4" />
               </div>
               <div class="field">
                 <label class="field__label" for="f-avail">
@@ -230,9 +232,9 @@ const isEn = locale === "en";
                     : "Disponibilidade diária de horas para treinos?"}
                   <span class="field__req">*</span>
                 </label>
-                <input class="field__input" type="number" id="f-avail"
+                <input class="field__input" type="text" id="f-avail"
                   name="disponibilidade_diaria" required
-                  min="0.5" max="8" step="0.5"
+                  inputmode="decimal"
                   placeholder={isEn ? "e.g. 1.5" : "ex: 1,5"} />
               </div>
             </div>
@@ -399,16 +401,19 @@ const isEn = locale === "en";
                   16. {isEn ? "How many meals per day on average?" : "Em média, quantas refeições por dia?"}
                   <span class="field__req">*</span>
                 </label>
-                <input class="field__input" type="number" id="f-meals"
-                  name="refeicoes_dia" required min="1" max="12" />
+                <input class="field__input" type="text" id="f-meals"
+                  name="refeicoes_dia" required
+                  inputmode="numeric"
+                  placeholder="5" />
               </div>
               <div class="field">
                 <label class="field__label" for="f-water">
                   18. {isEn ? "Litres of water per day on average?" : "Em média, quantos litros de água por dia?"}
                   <span class="field__req">*</span>
                 </label>
-                <input class="field__input" type="number" id="f-water"
-                  name="agua_litros" required min="0" max="20" step="0.5"
+                <input class="field__input" type="text" id="f-water"
+                  name="agua_litros" required
+                  inputmode="decimal"
                   placeholder={isEn ? "2.5" : "2,5"} />
               </div>
             </div>
@@ -476,6 +481,17 @@ const isEn = locale === "en";
 
   function openModal() {
     if (!modal) return;
+    // Reset form state every time modal opens
+    if (formEl) {
+      formEl.style.display = "";
+      formEl.reset();
+    }
+    if (successEl) successEl.hidden = true;
+    if (errorEl) errorEl.hidden = true;
+    // Clear all field errors
+    modal.querySelectorAll(".field__error").forEach(el => {
+      (el as HTMLElement).hidden = true;
+    });
     modal.hidden = false;
     document.body.style.overflow = "hidden";
     (modal.querySelector(".modal-close") as HTMLElement)?.focus();
@@ -567,13 +583,39 @@ const isEn = locale === "en";
     });
   }
 
-  // -- Validation on blur (not on load) --
+  // -- Toast notification system --
+  function showValidationToast(msg: string) {
+    const area = document.getElementById("toast-area");
+    if (!area) return;
+    const t = document.createElement("div");
+    t.className = "compress-toast compress-toast--error";
+    t.textContent = msg;
+    area.prepend(t);
+    setTimeout(() => t.classList.add("compress-toast--out"), 3200);
+    setTimeout(() => t.remove(), 3800);
+  }
+
+  // -- Validation helpers --
+  function parseDecimal(v: string): number {
+    return parseFloat(v.replace(",", "."));
+  }
+
+  function validateField(id: string, errorId: string, fn: (v: string) => boolean): boolean {
+    const inp = document.getElementById(id) as HTMLInputElement | null;
+    const err = document.getElementById(errorId);
+    if (!inp) return true;
+    const valid = inp.value.trim() !== "" && fn(inp.value.trim());
+    if (err) err.hidden = valid;
+    return valid;
+  }
+
+  // -- Blur validation (show error only after user leaves field) --
   function attachBlurValidation(id: string, errorId: string, validateFn: (v: string) => boolean) {
     const inp = document.getElementById(id) as HTMLInputElement | null;
     const err = document.getElementById(errorId);
     if (!inp || !err) return;
     inp.addEventListener("blur", () => {
-      if (!inp.value) return; // don't show error on empty untouched field
+      if (!inp.value) return;
       err.hidden = validateFn(inp.value);
     });
     inp.addEventListener("input", () => {
@@ -584,15 +626,34 @@ const isEn = locale === "en";
   attachBlurValidation("f-email",  "f-email-error",
     v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
   attachBlurValidation("f-height", "f-height-error",
-    v => { const n = parseFloat(v.replace(",",".")); return n >= 1 && n <= 2.5; });
+    v => { const n = parseDecimal(v); return n >= 1 && n <= 2.5; });
   attachBlurValidation("f-weight", "f-weight-error",
-    v => { const n = parseFloat(v.replace(",",".")); return n >= 30 && n <= 300; });
+    v => { const n = parseDecimal(v); return n >= 30 && n <= 300; });
   attachBlurValidation("f-dob", "f-dob-error", v => {
-    if (v.includes("-")) return true; // type=date native
+    if (v.includes("-")) return true;
     const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
     if (!m) return false;
     const d = new Date(`${m[3]}-${m[2]}-${m[1]}`);
     return !isNaN(d.getTime());
+  });
+
+  // -- Decimal input: allow comma, prevent letters --
+  ["f-height","f-weight","f-act-duration","f-avail","f-water"].forEach(id => {
+    const inp = document.getElementById(id) as HTMLInputElement;
+    if (!inp) return;
+    inp.addEventListener("input", () => {
+      inp.value = inp.value.replace(/[^0-9.,]/g, "");
+    });
+    // Prevent autocomplete from overwriting comma format
+    inp.setAttribute("autocomplete", "off");
+  });
+  ["f-freq","f-meals"].forEach(id => {
+    const inp = document.getElementById(id) as HTMLInputElement;
+    if (!inp) return;
+    inp.addEventListener("input", () => {
+      inp.value = inp.value.replace(/[^0-9]/g, "");
+    });
+    inp.setAttribute("autocomplete", "off");
   });
 
   // -- Activity: at least one checkbox required --
@@ -685,6 +746,90 @@ const isEn = locale === "en";
         if (err) err.hidden = false;
         return;
       }
+    }
+
+    // Validate all required fields with toasts
+    const isEnPage = document.documentElement.lang === "en";
+    const toasts: string[] = [];
+
+    const nameVal = (document.getElementById("f-name") as HTMLInputElement)?.value.trim();
+    if (!nameVal) toasts.push(isEnPage ? "Full name is required." : "Nome completo é obrigatório.");
+
+    const dobVal2 = (document.getElementById("f-dob") as HTMLInputElement)?.value.trim();
+    if (!dobVal2) {
+      toasts.push(isEnPage ? "Date of birth is required." : "Data de nascimento é obrigatória.");
+    } else if (dobInput?.type === "text") {
+      const m2 = dobVal2.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (!m2) toasts.push(isEnPage ? "Date must be DD/MM/YYYY." : "Data deve estar no formato DD/MM/AAAA.");
+    }
+
+    const cpfVal = (document.getElementById("f-cpf") as HTMLInputElement)?.value.trim();
+    if (!cpfVal) toasts.push(isEnPage ? "CPF is required." : "CPF é obrigatório.");
+
+    const emailVal = (document.getElementById("f-email") as HTMLInputElement)?.value.trim();
+    if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      toasts.push(isEnPage ? "Enter a valid e-mail address." : "Informe um e-mail válido.");
+    }
+
+    const heightVal = (document.getElementById("f-height") as HTMLInputElement)?.value.trim();
+    const heightN = parseDecimal(heightVal);
+    if (!heightVal || heightN < 1 || heightN > 2.5) {
+      toasts.push(isEnPage ? "Height must be between 1.00 and 2.50 m." : "Altura deve estar entre 1,00 e 2,50 m.");
+    }
+
+    const weightVal = (document.getElementById("f-weight") as HTMLInputElement)?.value.trim();
+    const weightN = parseDecimal(weightVal);
+    if (!weightVal || weightN < 30 || weightN > 300) {
+      toasts.push(isEnPage ? "Weight must be between 30 and 300 kg." : "Peso deve estar entre 30 e 300 kg.");
+    }
+
+    const goalChecked = modal.querySelector<HTMLInputElement>('input[name="objetivo"]:checked');
+    if (!goalChecked) toasts.push(isEnPage ? "Select your main goal." : "Selecione seu objetivo principal.");
+
+    const actChecked = modal.querySelectorAll<HTMLInputElement>('input[name="atividade_fisica"]:checked');
+    if (!actChecked.length) toasts.push(isEnPage ? "Select at least one activity." : "Selecione ao menos uma atividade.");
+
+    const freqVal = (document.getElementById("f-freq") as HTMLInputElement)?.value.trim();
+    if (!freqVal) toasts.push(isEnPage ? "Training frequency is required." : "Frequência semanal é obrigatória.");
+
+    const availVal = (document.getElementById("f-avail") as HTMLInputElement)?.value.trim();
+    if (!availVal) toasts.push(isEnPage ? "Daily availability is required." : "Disponibilidade diária é obrigatória.");
+
+    const ptVal = modal.querySelector<HTMLInputElement>('input[name="personal_trainer"]:checked');
+    if (!ptVal) toasts.push(isEnPage ? "Answer question 5." : "Responda a questão 5.");
+
+    const coachVal = modal.querySelector<HTMLInputElement>('input[name="conhece_coach"]:checked');
+    if (!coachVal) toasts.push(isEnPage ? "Answer question 7." : "Responda a questão 7.");
+
+    const medVal = modal.querySelector<HTMLInputElement>('input[name="medico_esporte"]:checked');
+    if (!medVal) toasts.push(isEnPage ? "Answer question 8." : "Responda a questão 8.");
+
+    const trtVal = modal.querySelector<HTMLInputElement>('input[name="trt"]:checked');
+    if (!trtVal) toasts.push(isEnPage ? "Answer question 9." : "Responda a questão 9.");
+
+    const diabVal = modal.querySelector<HTMLInputElement>('input[name="diabetes"]:checked');
+    if (!diabVal) toasts.push(isEnPage ? "Answer question 12." : "Responda a questão 12.");
+
+    const dietaVal = modal.querySelector<HTMLInputElement>('input[name="dieta"]:checked');
+    if (!dietaVal) toasts.push(isEnPage ? "Select your diet type (question 15)." : "Selecione a dieta (questão 15).");
+
+    const suplVal = modal.querySelector<HTMLInputElement>('input[name="suplementos"]:checked');
+    if (!suplVal) toasts.push(isEnPage ? "Answer question 17." : "Responda a questão 17.");
+
+    const waterVal = (document.getElementById("f-water") as HTMLInputElement)?.value.trim();
+    if (!waterVal) toasts.push(isEnPage ? "Water intake is required." : "Consumo de água é obrigatório.");
+
+    if (toasts.length > 0) {
+      toasts.slice(0, 4).forEach((msg, i) => {
+        setTimeout(() => showValidationToast(msg), i * 200);
+      });
+      if (toasts.length > 4) {
+        setTimeout(() => showValidationToast(
+          isEnPage ? `...and ${toasts.length - 4} more fields to fill.`
+                   : `...e mais ${toasts.length - 4} campo(s) a preencher.`
+        ), 800);
+      }
+      return;
     }
 
     submitBtn.disabled = true;
@@ -808,9 +953,21 @@ const isEn = locale === "en";
   .file-preview__img{width:72px;height:72px;object-fit:cover;border-radius:4px;border:var(--border-lime);}
 
   /* Toast */
-  .toast-area{display:flex;flex-direction:column;gap:var(--space-2);margin-top:var(--space-2);}
+  .toast-area{
+    position:fixed;
+    bottom:80px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:300;
+    display:flex;
+    flex-direction:column;
+    gap:var(--space-2);
+    width:min(480px,90vw);
+    pointer-events:none;
+  }
   .compress-toast{background:var(--c-darkbg);border-left:3px solid var(--c-lime);border-radius:0 4px 4px 0;padding:var(--space-2) var(--space-3);font-size:var(--fs-body-sm);color:var(--c-textbody);font-family:var(--font-label);letter-spacing:0.05em;animation:toast-in 300ms ease;transition:opacity 400ms ease;}
   .compress-toast--out{opacity:0;}
+  .compress-toast--error{border-left-color:#E74C3C;}
   @keyframes toast-in{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
 
   /* Form footer */
@@ -821,6 +978,7 @@ const isEn = locale === "en";
 
   /* Success screen */
   .form-success{display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--space-4);padding:var(--space-8) var(--space-5);}
+  .form-success[hidden]{display:none !important;}
   .form-success__icon{width:72px;height:72px;border-radius:50%;background:rgba(166,195,0,0.1);border:2px solid var(--c-lime);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.8rem;color:var(--c-lime);}
   .form-success__title{font-family:var(--font-display);font-size:var(--fs-display-md);color:var(--c-white);text-transform:uppercase;}
   .form-success__message{font-size:var(--fs-body-lg);color:var(--c-textbody);line-height:1.7;max-width:400px;}

@@ -24,16 +24,42 @@ const { stage1, targetId = "triagem" } = Astro.props;
   const btn  = document.getElementById("sticky-cta-btn");
   if (!wrap || !btn) throw new Error("sticky-cta missing");
 
-  const heroEl = document.querySelector(".hero");
+  const heroEl        = document.querySelector(".hero");
+  const motivSection  = document.querySelector(".motivational");
+  const ctaSection    = document.getElementById("triagem");
   let visible = false;
+  let suppressed = false;
+
+  // Hide sticky when motivational CTA or final CTA section is on screen
+  const suppressObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) suppressed = true;
+    });
+    // Check if ANY observed section is still intersecting
+    const anyVisible = entries.some(e => e.isIntersecting);
+    if (!anyVisible) {
+      // Re-check all entries from observer
+    }
+    // Simple: hide if any target is visible
+    suppressed = entries.some(e => e.isIntersecting);
+    applyVisibility();
+  }, { threshold: 0.1 });
+
+  if (motivSection) suppressObserver.observe(motivSection);
+  if (ctaSection)   suppressObserver.observe(ctaSection);
+
+  function applyVisibility() {
+    const show = visible && !suppressed;
+    wrap.setAttribute("aria-hidden", String(!show));
+    wrap.classList.toggle("sticky-cta--visible", show);
+  }
 
   function update() {
     const heroBottom = (heroEl?.getBoundingClientRect().bottom ?? 0) + window.scrollY;
     const shouldShow = window.scrollY > heroBottom * 0.7;
     if (shouldShow !== visible) {
       visible = shouldShow;
-      wrap.setAttribute("aria-hidden", String(!visible));
-      wrap.classList.toggle("sticky-cta--visible", visible);
+      applyVisibility();
     }
   }
 
