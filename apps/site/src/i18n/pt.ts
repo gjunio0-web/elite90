@@ -21,7 +21,7 @@ export const pt = {
       experience: "[NÚMERO]+ anos de experiência em bodybuilding profissional",
       title: "#1 Campeão Brasileiro Masters Brasil · Classic Physique",
     },
-    cta: "Ver se tenho perfil para o programa",
+    cta: "Disputar uma vaga",
     differentiation:
       "Atenção, este não é um programa padrão, ou mais um curso na internet, mas uma consultoria personalizada, individual e online, feita através de uma videochamada.",
   },
@@ -249,7 +249,7 @@ export const pt = {
       {
         question: "Quanto tempo por semana preciso dedicar?",
         answer:
-          "4 sessões de treino de 60–75 minutos. Check-ins remotos conforme sua agenda executiva.",
+          "4 sessões de treino de 60-75 minutos. Check-ins remotos conforme sua agenda executiva.",
       },
       {
         question:
@@ -280,16 +280,17 @@ export const pt = {
 
   // NAVEGAÇÃO
   nav: {
-    method: "Método",
     schedule: "Programa",
     coach: "Coach",
+    method: "Método",
     results: "Resultados",
     process: "Como funciona",
     testimonials: "Depoimentos",
     partners: "Parceiros",
     faq: "FAQ",
     apply: "Solicitar vaga",
-    applyCta: "Vaga",
+    applyCta: "Disputar uma vaga",
+    more: "Mais",
     menu: "Menu",
     close: "Fechar menu",
   },

@@ -21,7 +21,7 @@ export const en: Translations = {
       experience: "[NUMBER]+ years of professional bodybuilding experience",
       title: "#1 Brazilian Champion Masters Brasil · Classic Physique",
     },
-    cta: "Check if I qualify for the program",
+    cta: "Compete for a spot",
     differentiation:
       "This is not a standard program or just another online course - it is a personalized, individual online consulting service delivered through video call.",
   },
@@ -206,7 +206,7 @@ export const en: Translations = {
       {
         question: "How much time per week do I need to dedicate?",
         answer:
-          "4 training sessions of 60–75 minutes. Remote check-ins according to your executive schedule.",
+          "4 training sessions of 60-75 minutes. Remote check-ins according to your executive schedule.",
       },
       {
         question: "What happens if my schedule doesn't allow me to follow the protocol exactly?",
@@ -234,16 +234,17 @@ export const en: Translations = {
 
 
   nav: {
-    method: "Method",
     schedule: "Program",
     coach: "Coach",
+    method: "Method",
     results: "Results",
     process: "How it works",
     testimonials: "Testimonials",
     partners: "Partners",
     faq: "FAQ",
     apply: "Request a spot",
-    applyCta: "Apply",
+    applyCta: "Compete for a spot",
+    more: "More",
     menu: "Menu",
     close: "Close menu",
   },

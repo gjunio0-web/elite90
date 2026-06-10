@@ -12,5 +12,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
 }

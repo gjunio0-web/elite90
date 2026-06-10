@@ -27,7 +27,14 @@ export const prerender = false;
     .btn-primary:hover{box-shadow:0 0 20px rgba(166,195,0,.4);}
     .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
     .error-msg{color:#E74C3C;font-size:12px;text-align:center;margin-top:12px;min-height:18px;}
-    .back-link{display:block;text-align:center;margin-top:24px;font-size:12px;color:#666;text-decoration:none;transition:color 200ms;}
+    .divider-or{display:flex;align-items:center;gap:12px;margin:20px 0;}
+  .divider-or::before,.divider-or::after{content:"";flex:1;height:1px;background:#222;}
+  .divider-or span{font-size:11px;color:#444;text-transform:uppercase;letter-spacing:.1em;}
+  .btn-google{width:100%;background:transparent;border:1px solid #333;border-radius:50px;color:#ccc;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:14px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;font-size:12px;transition:border-color 200ms,background 200ms;}
+  .btn-google:hover{border-color:#555;background:rgba(255,255,255,.04);}
+  .btn-google:disabled{opacity:.5;cursor:not-allowed;}
+  .google-error{color:#E74C3C;font-size:12px;text-align:center;margin-top:8px;min-height:16px;}
+  .back-link{display:block;text-align:center;margin-top:24px;font-size:12px;color:#666;text-decoration:none;transition:color 200ms;}
     .back-link:hover{color:#A6C300;}
   </style>
 </head>
@@ -60,7 +67,7 @@ export const prerender = false;
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const cfg = {
       apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
@@ -108,6 +115,23 @@ export const prerender = false;
     // If already logged in, redirect
     auth.onAuthStateChanged(user => {
       if (user) window.location.href = "/admin";
+    });
+
+    // Google sign-in
+    const googleBtn = document.getElementById("btn-google");
+    const googleError = document.getElementById("google-error");
+    const provider = new GoogleAuthProvider();
+
+    googleBtn?.addEventListener("click", async () => {
+      googleBtn.disabled = true;
+      if (googleError) googleError.textContent = "";
+      try {
+        await signInWithPopup(auth, provider);
+        window.location.href = "/admin";
+      } catch (err) {
+        if (googleError) googleError.textContent = "Erro ao entrar com Google. Tente novamente.";
+        googleBtn.disabled = false;
+      }
     });
   </script>
 

@@ -75,7 +75,13 @@ const { t } = Astro.props;
   }
 
   .hero__logo-wrap {
-    margin-bottom: var(--space-2);
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: var(--space-4);
+    display: flex;
+    justify-content: center;
   }
 
   .hero__logo-img {

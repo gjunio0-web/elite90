@@ -127,6 +127,16 @@ h4 { font-size: var(--fs-display-sm); }
   text-decoration: none;
 }
 
+@media (max-width: 767px) {
+  .btn-cta {
+    white-space: normal;
+    line-height: 1.3;
+    text-align: center;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
 .btn-cta:hover,
 .btn-cta:focus-visible {
   box-shadow: var(--shadow-cta);
