@@ -1,0 +1,27 @@
+---
+import BeforeAfterSlider from "../BeforeAfterSlider.astro";
+import type { Translations } from "../../i18n/pt";
+
+interface Props { t: Translations; }
+const { t } = Astro.props;
+
+const results = [1,2,3,4].map(n => ({
+  n,
+  beforeSrc: `/images/results/resultado-0${n}-antes.webp`,
+  afterSrc:  `/images/results/resultado-0${n}-depois.webp`,
+  name:      "Atleta [INICIAIS]",
+  meta:      "[CARGO] · [PERIODO] · [METRICA]",
+  beforeLabel: t.results.beforeLabel,
+  afterLabel:  t.results.afterLabel,
+}));
+---
+
+<section class="section results" id="resultados" style="scroll-margin-top:80px" aria-label="Resultados reais">
+  <div class="container">
+    <p class="section__eyebrow">{t.results.eyebrow}</p>
+    <h2 class="section__title">
+      {t.results.title}<span> {t.results.titleAccent}</span>
+    </h2>
+    <BeforeAfterSlider items={results} />
+  </div>
+</section>

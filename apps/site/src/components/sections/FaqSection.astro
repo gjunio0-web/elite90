@@ -1,0 +1,53 @@
+---
+import type { Translations } from "../../i18n/pt";
+interface Props { t: Translations; }
+const { t } = Astro.props;
+---
+
+<section class="section faq" id="faq" style="scroll-margin-top:80px" aria-label="FAQ">
+  <div class="container container--text">
+    <p class="section__eyebrow">{t.faq.eyebrow}</p>
+    <h2 class="section__title">{t.faq.title}</h2>
+    <dl class="faq__list">
+      {t.faq.items.map(item => (
+        <div class="faq__item">
+          <dt>
+            <button class="faq__btn" type="button" aria-expanded="false">
+              {item.question}
+              <span class="faq__icon" aria-hidden="true">+</span>
+            </button>
+          </dt>
+          <dd class="faq__answer" hidden><p>{item.answer}</p></dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll(".faq__btn").forEach(btn => {
+    const b = btn as HTMLButtonElement;
+    const item = b.closest(".faq__item");
+    const answer = item?.querySelector(".faq__answer") as HTMLElement | null;
+    const icon = b.querySelector(".faq__icon") as HTMLElement | null;
+    if (!answer || !icon) return;
+    b.addEventListener("click", () => {
+      const expanded = b.getAttribute("aria-expanded") === "true";
+      b.setAttribute("aria-expanded", String(!expanded));
+      answer.hidden = expanded;
+      icon.textContent = expanded ? "+" : "-";
+    });
+  });
+</script>
+
+<style>
+  .faq__list { display: flex; flex-direction: column; margin-top: var(--space-6); }
+  .faq__item { border-bottom: 1px solid rgba(255,255,255,.08); }
+  .faq__item:first-child { border-top: 1px solid rgba(255,255,255,.08); }
+  .faq__btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding-block: var(--space-4); font-family: var(--font-label); font-size: var(--fs-body-md); font-weight: 700; text-align: left; color: var(--c-white); background: none; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: .04em; transition: color var(--transition-base); }
+  .faq__btn:hover { color: var(--c-lime); }
+  .faq__icon { font-family: var(--font-display); font-size: 1.5rem; color: var(--c-lime); flex-shrink: 0; transition: transform var(--transition-base); line-height: 1; }
+  .faq__btn[aria-expanded="true"] .faq__icon { transform: rotate(45deg); }
+  .faq__answer { padding-bottom: var(--space-4); padding-right: 3rem; }
+  .faq__answer p { font-size: var(--fs-body-md); color: var(--c-textbody); line-height: 1.7; }
+</style>

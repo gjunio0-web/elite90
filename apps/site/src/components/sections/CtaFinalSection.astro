@@ -1,0 +1,22 @@
+---
+import type { Translations } from "../../i18n/pt";
+interface Props { t: Translations; }
+const { t } = Astro.props;
+---
+
+<section class="section cta-final" id="triagem" style="scroll-margin-top:80px" aria-label="CTA final">
+  <div class="container cta-final__inner">
+    <p class="section__eyebrow">{t.ctaFinal.eyebrow}</p>
+    <button class="btn-cta cta-final__btn" type="button" aria-haspopup="dialog">
+      {t.ctaFinal.cta}
+    </button>
+    <p class="cta-final__subtext">{t.ctaFinal.subtext}</p>
+  </div>
+</section>
+
+<style>
+  .cta-final { background: linear-gradient(to bottom, var(--c-black), var(--c-darkbg) 50%, var(--c-black)); text-align: center; }
+  .cta-final__inner { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); }
+  .cta-final__btn { font-size: var(--fs-body-sm); letter-spacing: .04em; line-height: 1.4; padding: 1.25rem 2rem; max-width: min(440px, 100%); width: 100%; }
+  .cta-final__subtext { font-family: var(--font-label); font-size: var(--fs-label); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--c-textsub); }
+</style>

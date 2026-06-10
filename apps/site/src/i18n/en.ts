@@ -107,6 +107,8 @@ export const en: Translations = {
     eyebrow: "Real proof",
     title: "Real Results",
     titleAccent: "achieved through the Elite 90 Program",
+    beforeLabel: "Before",
+    afterLabel: "After",
   },
 
   process: {
@@ -233,10 +235,15 @@ export const en: Translations = {
 
   nav: {
     method: "Method",
+    schedule: "Program",
+    coach: "Coach",
     results: "Results",
+    process: "How it works",
     testimonials: "Testimonials",
+    partners: "Partners",
     faq: "FAQ",
     apply: "Request a spot",
+    applyCta: "Apply",
     menu: "Menu",
     close: "Close menu",
   },

@@ -169,3 +169,17 @@ h4 { font-size: var(--fs-display-sm); }
     scroll-behavior: auto !important;
   }
 }
+
+/* SCROLLBAR IDENTITY */
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-lime) var(--c-darkbg);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--c-darkbg); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--c-lime); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--c-olive); }
+::-webkit-scrollbar-corner { background: var(--c-darkbg); }
+
+textarea { resize: vertical; }

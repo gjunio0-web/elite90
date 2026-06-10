@@ -1,0 +1,89 @@
+---
+import type { Translations } from "../../i18n/pt";
+interface Props { t: Translations; }
+const { t } = Astro.props;
+---
+
+<section class="section testimonials" id="depoimentos" style="scroll-margin-top:80px" aria-label="Depoimentos">
+  <div class="container">
+    <p class="testimonials__title">
+      {t.testimonials.eyebrow}{" "}
+      <span class="testimonials__accent">{t.testimonials.titleAccent}</span>{" "}
+      {t.testimonials.titleSuffix}
+    </p>
+    <div class="testimonials__grid">
+      {t.testimonials.items.map(item => (
+        <article class="testimonial-card">
+          <div class="testimonial-card__header">
+            <img
+              src={item.image}
+              alt={item.name}
+              class="testimonial-card__photo"
+              width="96" height="96"
+              loading="lazy"
+            />
+            <div>
+              <h3 class="testimonial-card__name">{item.name}</h3>
+              <p class="testimonial-card__role">{item.role}</p>
+            </div>
+          </div>
+          <p class="testimonial-card__metric">{item.metric}</p>
+          <div class="testimonial-card__text-wrap">
+            <p class="testimonial-card__text" data-full={item.text}>
+              {item.text.slice(0, 200)}<span class="testimonial-card__ellipsis">...</span>
+            </p>
+            <button
+              class="testimonial-card__toggle"
+              aria-expanded="false"
+              type="button"
+              data-read-more={t.testimonials.readMore}
+              data-read-less={t.testimonials.readLess}
+            >
+              {t.testimonials.readMore}
+            </button>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll(".testimonial-card__toggle").forEach(btn => {
+    const b = btn as HTMLButtonElement;
+    const wrap = b.closest(".testimonial-card__text-wrap");
+    const textEl = wrap?.querySelector(".testimonial-card__text") as HTMLElement | null;
+    const ellipsis = textEl?.querySelector(".testimonial-card__ellipsis") as HTMLElement | null;
+    if (!textEl || !ellipsis) return;
+    const fullText = textEl.dataset.full ?? "";
+    const shortText = textEl.childNodes[0]?.textContent ?? "";
+    b.addEventListener("click", () => {
+      const expanded = b.getAttribute("aria-expanded") === "true";
+      if (expanded) {
+        if (textEl.childNodes[0]) textEl.childNodes[0].textContent = shortText;
+        ellipsis.hidden = false;
+        b.setAttribute("aria-expanded", "false");
+        b.textContent = b.dataset.readMore ?? "";
+      } else {
+        if (textEl.childNodes[0]) textEl.childNodes[0].textContent = fullText;
+        ellipsis.hidden = true;
+        b.setAttribute("aria-expanded", "true");
+        b.textContent = b.dataset.readLess ?? "";
+      }
+    });
+  });
+</script>
+
+<style>
+  .testimonials__title { font-family: var(--font-display); font-size: var(--fs-display-md); color: var(--c-white); text-transform: uppercase; margin-bottom: var(--space-6); }
+  .testimonials__accent { color: var(--c-lime); }
+  .testimonials__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-5); }
+  .testimonial-card { background-color: var(--c-darkbg); border-left: var(--border-card); border-right: 1px solid rgba(166,195,0,.15); padding: var(--space-5); border-radius: var(--radius-card); display: flex; flex-direction: column; gap: var(--space-4); }
+  .testimonial-card__header { display: flex; gap: var(--space-4); align-items: center; }
+  .testimonial-card__photo { width: 72px; height: 72px; border-radius: 50%; border: var(--ring-photo); object-fit: cover; flex-shrink: 0; }
+  .testimonial-card__name { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-lime); text-transform: uppercase; }
+  .testimonial-card__role { font-size: var(--fs-body-sm); color: var(--c-textsub); font-family: var(--font-label); margin-top: var(--space-1); }
+  .testimonial-card__metric { font-family: var(--font-label); font-size: var(--fs-label); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--c-lime); border-bottom: 1px solid rgba(166,195,0,.2); padding-bottom: var(--space-3); }
+  .testimonial-card__text { font-size: var(--fs-body-md); color: var(--c-textbody); line-height: 1.7; }
+  .testimonial-card__toggle { font-family: var(--font-label); font-size: var(--fs-label); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--c-lime); cursor: pointer; background: none; border: none; padding: 0; margin-top: var(--space-2); }
+</style>

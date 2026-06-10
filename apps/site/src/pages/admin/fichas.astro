@@ -1,0 +1,318 @@
+---
+export const prerender = false;
+---
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elite 90 - Fichas de Triagem</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#ccc;min-height:100vh;scrollbar-width:thin;scrollbar-color:#A6C300 #1A1A1A;}
+    body::-webkit-scrollbar{width:6px;}body::-webkit-scrollbar-track{background:#1A1A1A;}body::-webkit-scrollbar-thumb{background:#A6C300;border-radius:3px;}
+    .adm-header{background:#111;border-bottom:1px solid rgba(166,195,0,.15);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+    .adm-header__left{display:flex;align-items:center;gap:12px;}
+    .adm-logo{font-size:15px;font-weight:900;letter-spacing:.12em;color:#A6C300;text-transform:uppercase;text-decoration:none;}
+    .adm-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;background:rgba(166,195,0,.1);color:#A6C300;border:1px solid rgba(166,195,0,.25);border-radius:3px;padding:3px 8px;}
+    .adm-header__right{display:flex;align-items:center;gap:8px;}
+    .adm-user{font-size:12px;color:#666;}
+    .btn-sm{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;border-radius:4px;cursor:pointer;border:none;}
+    .btn-outline{background:transparent;color:#A6C300;border:1px solid rgba(166,195,0,.3);}
+    .btn-primary{background:#A6C300;color:#000;}
+    .btn-danger{background:transparent;color:#E67E22;border:1px solid rgba(230,126,34,.3);}
+    main{max-width:1200px;margin:0 auto;padding:36px 32px;}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;gap:16px;flex-wrap:wrap;}
+    .page-title-block .page-eyebrow{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.18em;color:#666;margin-bottom:6px;}
+    .page-title{font-size:36px;font-weight:900;color:#fff;}
+    .page-title span{color:#A6C300;font-style:italic;font-weight:400;}
+    .page-actions{display:flex;gap:8px;flex-wrap:wrap;}
+    .stats-row{display:flex;gap:16px;margin-bottom:28px;flex-wrap:wrap;}
+    .stat-card{background:#121212;border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:16px 20px;min-width:140px;}
+    .stat-card__label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#666;margin-bottom:6px;}
+    .stat-card__value{font-size:28px;font-weight:900;color:#A6C300;}
+    .toolbar{display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap;}
+    .filter-select{background:#1A1A1A;border:1px solid #2a2a2a;color:#ccc;padding:7px 12px;border-radius:4px;font-size:12px;cursor:pointer;}
+    .leads-count{font-size:12px;color:#555;margin-left:auto;}
+    .table-wrap{overflow-x:auto;scrollbar-width:thin;scrollbar-color:#A6C300 #1A1A1A;}
+    .table-wrap::-webkit-scrollbar{height:5px;}
+    .table-wrap::-webkit-scrollbar-track{background:#1A1A1A;}
+    .table-wrap::-webkit-scrollbar-thumb{background:#A6C300;border-radius:3px;}
+    table{width:100%;border-collapse:collapse;min-width:900px;}
+    th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#555;text-align:left;padding:10px 12px;border-bottom:1px solid #1a1a1a;}
+    .td{padding:12px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;font-size:13px;color:#ccc;}
+    .td--name{font-weight:700;color:#fff;}
+    .td--goal{color:#888;font-size:12px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    tr:hover .td{background:rgba(255,255,255,.015);}
+    .status-sel{background:#121212;border:1px solid #2a2a2a;color:#ccc;padding:4px 8px;border-radius:3px;font-size:11px;cursor:pointer;scrollbar-width:thin;}
+    .btn-action{background:rgba(166,195,0,.08);color:#A6C300;border:1px solid rgba(166,195,0,.2);border-radius:3px;padding:4px 10px;font-size:10px;cursor:pointer;white-space:nowrap;}
+    .btn-action+.btn-action{margin-left:4px;background:rgba(255,255,255,.04);color:#888;border-color:rgba(255,255,255,.1);}
+    /* DRAWER */
+    .drawer{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-start;justify-content:flex-end;background:rgba(0,0,0,.75);}
+    .drawer[hidden]{display:none;}
+    .drawer-panel{background:#121212;width:min(560px,95vw);height:100%;overflow-y:auto;padding:28px;border-left:1px solid rgba(166,195,0,.15);scrollbar-width:thin;scrollbar-color:#A6C300 #121212;}
+    .drawer-panel::-webkit-scrollbar{width:4px;}
+    .drawer-panel::-webkit-scrollbar-thumb{background:#A6C300;border-radius:2px;}
+    .drawer-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+    .drawer-title{font-size:18px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;}
+    .drawer-close{background:none;border:none;color:#555;font-size:18px;cursor:pointer;line-height:1;}
+    .drawer-close:hover{color:#A6C300;}
+    .detail-table{width:100%;border-collapse:collapse;}
+    .detail-th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#555;padding:8px 0;vertical-align:top;width:140px;}
+    .detail-td{font-size:13px;color:#ccc;padding:8px 0 8px 12px;border-bottom:1px solid rgba(255,255,255,.03);}
+    /* EVAL PANEL */
+    .eval-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#A6C300;display:block;margin-bottom:6px;margin-top:16px;}
+    .eval-ta{width:100%;background:#0D0D0D;border:1px solid #2a2a2a;border-radius:4px;color:#ccc;padding:12px;font-size:13px;line-height:1.6;resize:vertical;min-height:100px;font-family:inherit;scrollbar-width:thin;scrollbar-color:#A6C300 #0D0D0D;}
+    .eval-ta:focus{outline:none;border-color:#A6C300;}
+    .eval-ta::-webkit-scrollbar{width:4px;}
+    .eval-ta::-webkit-scrollbar-thumb{background:#A6C300;border-radius:2px;}
+    .eval-status{font-size:11px;color:#A6C300;margin:8px 0;min-height:16px;}
+    .eval-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  </style>
+</head>
+<body>
+
+  <header class="adm-header">
+    <div class="adm-header__left">
+      <a href="/" class="adm-logo">Coach Ruiz</a>
+      <span class="adm-badge">Fichas</span>
+    </div>
+    <div class="adm-header__right">
+      <span class="adm-user" id="adm-email"></span>
+      <button class="btn-sm btn-outline" onclick="window.location.href='/admin'">Painel</button>
+      <button class="btn-sm btn-outline" id="btn-logout">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <div class="page-title-block">
+        <p class="page-eyebrow">Modulo 1 - Fichas</p>
+        <h1 class="page-title">Triagem <span>&amp; Leads</span></h1>
+      </div>
+      <div class="page-actions">
+        <button class="btn-sm btn-outline" id="btn-refresh">Atualizar</button>
+        <button class="btn-sm btn-primary" id="btn-csv">Exportar CSV</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-card__label">Total</div><div class="stat-card__value" id="stat-total">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Novos</div><div class="stat-card__value" id="stat-new" style="color:#E67E22">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Aprovados</div><div class="stat-card__value" id="stat-app" style="color:#27AE60">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Avaliados</div><div class="stat-card__value" id="stat-eval" style="color:#4A90D9">0</div></div>
+    </div>
+
+    <div class="toolbar">
+      <select class="filter-select" id="status-filter">
+        <option value="">Todos os status</option>
+        <option value="novo">Novo</option>
+        <option value="em_analise">Em analise</option>
+        <option value="aprovado">Aprovado</option>
+        <option value="recusado">Recusado</option>
+        <option value="avaliacao_enviada">Avaliacao enviada</option>
+      </select>
+      <span class="leads-count" id="leads-count"></span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th><th>Nome</th><th>E-mail</th><th>Objetivo</th>
+            <th>Status</th><th>Acoes</th>
+          </tr>
+        </thead>
+        <tbody id="leads-tbody">
+          <tr><td class="td" colspan="6" style="text-align:center;color:#333">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Detail drawer -->
+  <div class="drawer" id="detail-drawer" hidden>
+    <div class="drawer-panel">
+      <div class="drawer-hdr">
+        <span class="drawer-title">Ficha do atleta</span>
+        <button class="drawer-close" id="detail-close">x</button>
+      </div>
+      <div id="detail-content"></div>
+    </div>
+  </div>
+
+  <!-- Eval drawer -->
+  <div class="drawer" id="eval-drawer" hidden>
+    <div class="drawer-panel">
+      <div class="drawer-hdr">
+        <span class="drawer-title">Avaliacao - <span id="eval-name"></span></span>
+        <button class="drawer-close" id="eval-close">x</button>
+      </div>
+      <div class="eval-actions">
+        <button class="btn-sm btn-outline" id="btn-gen-ai">Gerar com IA (Gemini)</button>
+      </div>
+      <p class="eval-status" id="eval-status"></p>
+      <label class="eval-label" for="eval-s1">01 - Diagnostico Estetico</label>
+      <textarea class="eval-ta" id="eval-s1" rows="5"></textarea>
+      <label class="eval-label" for="eval-s2">02 - Planejamento de Treino</label>
+      <textarea class="eval-ta" id="eval-s2" rows="5"></textarea>
+      <label class="eval-label" for="eval-s3">03 - Protocolo de Saude</label>
+      <textarea class="eval-ta" id="eval-s3" rows="5"></textarea>
+      <label class="eval-label" for="eval-s4">04 - Estrategia de Competicao</label>
+      <textarea class="eval-ta" id="eval-s4" rows="5"></textarea>
+      <label class="eval-label" for="eval-s5">05 - Alinhamento Operacional</label>
+      <textarea class="eval-ta" id="eval-s5" rows="5"></textarea>
+      <label class="eval-label" for="eval-notes">Notas internas (nao enviadas)</label>
+      <textarea class="eval-ta" id="eval-notes" rows="3"></textarea>
+      <div class="eval-actions" style="margin-top:16px">
+        <button class="btn-sm btn-primary" id="btn-send-eval">Enviar avaliacao ao atleta</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, query, orderBy }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const cfg={apiKey:document.querySelector('meta[name="fb-api"]')?.content,authDomain:document.querySelector('meta[name="fb-auth"]')?.content,projectId:document.querySelector('meta[name="fb-proj"]')?.content,storageBucket:document.querySelector('meta[name="fb-bucket"]')?.content,messagingSenderId:document.querySelector('meta[name="fb-sender"]')?.content,appId:document.querySelector('meta[name="fb-appid"]')?.content};
+    const app=initializeApp(cfg);
+    const auth=getAuth(app);
+    const db=getFirestore(app);
+
+    let leads=[], currentLeadId=null, idToken="";
+
+    // Auth guard
+    onAuthStateChanged(auth, async user => {
+      if (!user) { window.location.href="/admin/login"; return; }
+      const el=document.getElementById("adm-email");
+      if(el)el.textContent=user.email??"";
+      idToken = await user.getIdToken();
+      loadLeads();
+    });
+
+    document.getElementById("btn-logout")?.addEventListener("click", async()=>{await signOut(auth);window.location.href="/admin/login";});
+
+    // Load leads
+    async function loadLeads(){
+      const snap=await getDocs(query(collection(db,"leads"),orderBy("createdAt","desc")));
+      leads=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderStats(); renderTable();
+    }
+
+    function renderStats(){
+      document.getElementById("stat-total").textContent=leads.length;
+      document.getElementById("stat-new").textContent=leads.filter(l=>l.status==="novo").length;
+      document.getElementById("stat-app").textContent=leads.filter(l=>l.status==="aprovado").length;
+      document.getElementById("stat-eval").textContent=leads.filter(l=>l.status==="avaliacao_enviada").length;
+    }
+
+    function renderTable(){
+      const filter=document.getElementById("status-filter").value;
+      const filtered=filter?leads.filter(l=>l.status===filter):leads;
+      document.getElementById("leads-count").textContent=`${filtered.length} ficha${filtered.length!==1?"s":""}`;
+      const statusLabel={"novo":"Novo","em_analise":"Em analise","aprovado":"Aprovado","recusado":"Recusado","avaliacao_enviada":"Avaliacao enviada"};
+      document.getElementById("leads-tbody").innerHTML=filtered.map(lead=>{
+        const date=lead.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"--";
+        return `<tr>
+          <td class="td">${date}</td>
+          <td class="td td--name">${lead.nome??""}</td>
+          <td class="td">${lead.email??""}</td>
+          <td class="td td--goal">${(lead.objetivo??"").slice(0,50)}</td>
+          <td class="td">
+            <select class="status-sel" data-id="${lead.id}" onchange="window.__updStatus(this)">
+              <option value="novo" ${lead.status==="novo"?"selected":""}>Novo</option>
+              <option value="em_analise" ${lead.status==="em_analise"?"selected":""}>Em analise</option>
+              <option value="aprovado" ${lead.status==="aprovado"?"selected":""}>Aprovado</option>
+              <option value="recusado" ${lead.status==="recusado"?"selected":""}>Recusado</option>
+              <option value="avaliacao_enviada" ${lead.status==="avaliacao_enviada"?"selected":""}>Avaliacao enviada</option>
+            </select>
+          </td>
+          <td class="td">
+            <button class="btn-action" onclick="window.__openDetail('${lead.id}')">Ver</button>
+            <button class="btn-action" onclick="window.__openEval('${lead.id}')">Avaliar</button>
+          </td>
+        </tr>`;
+      }).join("") || `<tr><td class="td" colspan="6" style="text-align:center;color:#333">Nenhuma ficha encontrada.</td></tr>`;
+    }
+
+    window.__updStatus=async function(sel){
+      await updateDoc(doc(db,"leads",sel.dataset.id),{status:sel.value});
+      leads=leads.map(l=>l.id===sel.dataset.id?{...l,status:sel.value}:l);
+      renderStats();
+    };
+
+    // Detail drawer
+    window.__openDetail=function(id){
+      const lead=leads.find(l=>l.id===id);if(!lead)return;
+      const rows=[["Nome",lead.nome],["E-mail",lead.email],["CPF",lead.cpf],["Nascimento",lead.data_nascimento],["Altura",lead.altura],["Peso",lead.peso],["Objetivo",lead.objetivo],["Atividade fisica",lead.atividade_fisica],["Tempo atividade",lead.tempo_atividade?`${lead.tempo_atividade} anos`:""],["Frequencia/sem",lead.frequencia_semanal],["Disponibilidade",lead.disponibilidade_diaria],["Personal",lead.personal_trainer],["Competicao",lead.competicao+(lead.competicao_detalhe?` - ${lead.competicao_detalhe}`:"")],["Coach BB",lead.conhece_coach],["Medico esporte",lead.medico_esporte],["TRT",lead.trt+(lead.trt_detalhe?` - ${lead.trt_detalhe}`:"")],["Cardiaca",lead.condicao_cardiaca],["Diabetes",lead.diabetes],["Cronica",lead.doenca_cronica],["Lesao",lead.lesao+(lead.lesao_detalhe?` - ${lead.lesao_detalhe}`:"")],["Dieta",lead.dieta],["Refeicoes/dia",lead.refeicoes_dia],["Suplementos",lead.suplementos+(lead.suplementos_detalhe?` - ${lead.suplementos_detalhe}`:"")],["Agua/dia",lead.agua_litros?`${lead.agua_litros}L`:""]];
+      document.getElementById("detail-content").innerHTML=`<table class="detail-table">${rows.map(([k,v])=>`<tr><th class="detail-th">${k}</th><td class="detail-td">${v||"--"}</td></tr>`).join("")}</table>`;
+      document.getElementById("detail-drawer").hidden=false;
+    };
+    document.getElementById("detail-close")?.addEventListener("click",()=>{document.getElementById("detail-drawer").hidden=true;});
+    document.getElementById("detail-drawer")?.addEventListener("click",e=>{if(e.target===document.getElementById("detail-drawer"))document.getElementById("detail-drawer").hidden=true;});
+
+    // Eval drawer
+    window.__openEval=function(id){
+      currentLeadId=id;
+      const lead=leads.find(l=>l.id===id);
+      document.getElementById("eval-name").textContent=lead?.nome??"";
+      ["s1","s2","s3","s4","s5","notes"].forEach(k=>{document.getElementById(`eval-${k}`).value="";});
+      document.getElementById("eval-status").textContent="";
+      document.getElementById("eval-drawer").hidden=false;
+    };
+    document.getElementById("eval-close")?.addEventListener("click",()=>{document.getElementById("eval-drawer").hidden=true;});
+
+    document.getElementById("btn-gen-ai")?.addEventListener("click",async()=>{
+      if(!currentLeadId)return;
+      const statusEl=document.getElementById("eval-status");
+      statusEl.textContent="Gerando com Gemini 2.0 Flash...";
+      try{
+        const res=await fetch("/.netlify/functions/generate-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${idToken}`},body:JSON.stringify({leadId:currentLeadId})});
+        if(!res.ok)throw new Error(await res.text());
+        const {sections}=await res.json();
+        ["s1","s2","s3","s4","s5"].forEach(k=>{document.getElementById(`eval-${k}`).value=sections[k]??"";});
+        statusEl.textContent="Rascunho gerado. Revise e envie.";
+      }catch(e){statusEl.textContent="Erro ao gerar: "+e.message;}
+    });
+
+    document.getElementById("btn-send-eval")?.addEventListener("click",async()=>{
+      if(!currentLeadId)return;
+      const statusEl=document.getElementById("eval-status");
+      const sections={};
+      ["s1","s2","s3","s4","s5"].forEach(k=>{sections[k]=document.getElementById(`eval-${k}`).value;});
+      const coachNotes=document.getElementById("eval-notes").value;
+      statusEl.textContent="Enviando...";
+      try{
+        const res=await fetch("/.netlify/functions/send-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${idToken}`},body:JSON.stringify({leadId:currentLeadId,sections,coachNotes})});
+        if(!res.ok)throw new Error(await res.text());
+        statusEl.textContent="Avaliacao enviada com sucesso.";
+        await loadLeads();
+      }catch(e){statusEl.textContent="Erro: "+e.message;}
+    });
+
+    // Export CSV
+    document.getElementById("btn-csv")?.addEventListener("click",()=>{
+      const headers=["Data","Nome","Email","CPF","Nascimento","Altura","Peso","Objetivo","Atividade","Tempo","Frequencia","Disponibilidade","Personal","Competicao","Coach BB","Medico","TRT","Cardiaca","Diabetes","Cronica","Lesao","Dieta","Refeicoes","Suplementos","Agua","Status"];
+      const rows=leads.map(l=>[l.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"",l.nome??"",l.email??"",l.cpf??"",l.data_nascimento??"",l.altura??"",l.peso??"",l.objetivo??"",l.atividade_fisica??"",l.tempo_atividade??"",l.frequencia_semanal??"",l.disponibilidade_diaria??"",l.personal_trainer??"",`${l.competicao??""}${l.competicao_detalhe?` - ${l.competicao_detalhe}`:""}`,l.conhece_coach??"",l.medico_esporte??"",`${l.trt??""}${l.trt_detalhe?` - ${l.trt_detalhe}`:""}`,l.condicao_cardiaca??"",l.diabetes??"",l.doenca_cronica??"",`${l.lesao??""}${l.lesao_detalhe?` - ${l.lesao_detalhe}`:""}`,l.dieta??"",l.refeicoes_dia??"",`${l.suplementos??""}${l.suplementos_detalhe?` - ${l.suplementos_detalhe}`:""}`,l.agua_litros??"",l.status??""]);
+      const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+      const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");a.href=url;a.download=`elite90-leads-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("status-filter")?.addEventListener("change",renderTable);
+    document.getElementById("btn-refresh")?.addEventListener("click",loadLeads);
+  </script>
+
+  <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+  <meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+  <meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+  <meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
+  <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
+  <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
+</body>
+</html>

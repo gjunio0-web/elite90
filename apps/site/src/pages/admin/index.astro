@@ -1,485 +1,122 @@
 ---
-// --- ELITE 90 · Painel Admin
-// Página protegida por senha. Lê leads do Firestore via Firebase SDK.
-// Funcionalidades: tabela de leads, mudança de status, export CSV,
-// geração de avaliação com Gemini, editor e envio.
 export const prerender = false;
 ---
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Elite 90 · Painel Admin</title>
+  <title>Elite 90 - Painel de Controle</title>
+  <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" href="/favicon.ico" />
-
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getFirestore, collection, getDocs, doc, updateDoc,
-      query, orderBy, getDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // Config injetada via meta tags (PUBLIC_ vars)
-    const cfg = {
-      apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
-      authDomain:        document.querySelector('meta[name="fb-auth"]')?.content,
-      projectId:         document.querySelector('meta[name="fb-proj"]')?.content,
-      storageBucket:     document.querySelector('meta[name="fb-bucket"]')?.content,
-      messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
-      appId:             document.querySelector('meta[name="fb-appid"]')?.content,
-    };
-
-    const app = initializeApp(cfg);
-    const db  = getFirestore(app);
-
-    // -- State
-    let leads = [];
-    let currentLeadId = null;
-    let generatedSections = null;
-    let adminToken = "";
-
-    // -- Auth
-    const authWall  = document.getElementById("auth-wall");
-    const dashboard = document.getElementById("dashboard");
-    const pwInput   = document.getElementById("pw-input");
-    const pwBtn     = document.getElementById("pw-btn");
-    const pwError   = document.getElementById("pw-error");
-
-    async function tryAuth() {
-      const pw = pwInput.value.trim();
-      if (!pw) return;
-
-      // Validate against Netlify Function (which checks ADMIN_SECRET)
-      const res = await fetch("/.netlify/functions/submit-lead", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-admin-auth": pw },
-        body: JSON.stringify({ __auth_check: true }),
-      });
-
-      // We use a simple convention: store token in memory
-      adminToken = pw; // The functions will validate
-      authWall.hidden = true;
-      dashboard.hidden = false;
-      loadLeads();
-    }
-
-    pwBtn.addEventListener("click", tryAuth);
-    pwInput.addEventListener("keydown", e => { if (e.key === "Enter") tryAuth(); });
-
-    // -- Load leads
-    async function loadLeads() {
-      const snap = await getDocs(
-        query(collection(db, "leads"), orderBy("createdAt", "desc"))
-      );
-      leads = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderTable();
-    }
-
-    // -- Render table
-    function renderTable() {
-      const tbody = document.getElementById("leads-tbody");
-      const count = document.getElementById("leads-count");
-      count.textContent = `${leads.length} lead${leads.length !== 1 ? "s" : ""}`;
-
-      const filterVal = document.getElementById("status-filter").value;
-      const filtered  = filterVal ? leads.filter(l => l.status === filterVal) : leads;
-
-      tbody.innerHTML = filtered.map(lead => {
-        const date = lead.createdAt?.toDate?.()?.toLocaleDateString("pt-BR") ?? "-";
-        const statusLabel = {
-          "novo": "🟡 Novo",
-          "em_analise": "🔵 Em análise",
-          "aprovado": "🟢 Aprovado",
-          "recusado": "🔴 Recusado",
-          "avaliacao_enviada": "✅ Avaliação enviada",
-        }[lead.status] ?? lead.status;
-
-        return `
-          <tr class="lead-row" data-id="${lead.id}">
-            <td class="td">${date}</td>
-            <td class="td td--name">${lead.nome ?? "-"}</td>
-            <td class="td">${lead.email ?? "-"}</td>
-            <td class="td td--goal">${(lead.objetivo ?? "-").slice(0, 60)}${lead.objetivo?.length > 60 ? "…" : ""}</td>
-            <td class="td">
-              <select class="status-select" data-id="${lead.id}" onchange="window.__updateStatus(this)">
-                <option value="novo"              ${lead.status === "novo"              ? "selected" : ""}>🟡 Novo</option>
-                <option value="em_analise"        ${lead.status === "em_analise"        ? "selected" : ""}>🔵 Em análise</option>
-                <option value="aprovado"          ${lead.status === "aprovado"          ? "selected" : ""}>🟢 Aprovado</option>
-                <option value="recusado"          ${lead.status === "recusado"          ? "selected" : ""}>🔴 Recusado</option>
-                <option value="avaliacao_enviada" ${lead.status === "avaliacao_enviada" ? "selected" : ""}>✅ Avaliação</option>
-              </select>
-            </td>
-            <td class="td">
-              <button class="btn-detail" onclick="window.__openDetail('${lead.id}')">Ver</button>
-              <button class="btn-eval" onclick="window.__openEvalEditor('${lead.id}')">Avaliar</button>
-            </td>
-          </tr>`;
-      }).join("");
-    }
-
-    // -- Update status
-    window.__updateStatus = async function(sel) {
-      const id     = sel.dataset.id;
-      const status = sel.value;
-      await updateDoc(doc(db, "leads", id), { status });
-      leads = leads.map(l => l.id === id ? { ...l, status } : l);
-    };
-
-    // -- Detail drawer
-    window.__openDetail = function(id) {
-      const lead = leads.find(l => l.id === id);
-      if (!lead) return;
-      const drawer = document.getElementById("detail-drawer");
-      const content = document.getElementById("detail-content");
-      content.innerHTML = buildDetailHTML(lead);
-      drawer.hidden = false;
-    };
-
-    function buildDetailHTML(lead) {
-      const rows = [
-        ["Nome",              lead.nome],
-        ["E-mail",            lead.email],
-        ["CPF",               lead.cpf],
-        ["Nascimento",        lead.data_nascimento],
-        ["Altura",            lead.altura],
-        ["Peso",              lead.peso],
-        ["Objetivo",          lead.objetivo],
-        ["Atividade física",  lead.atividade_fisica],
-        ["Frequência/semana", lead.frequencia_semanal],
-        ["Disponibilidade",   lead.disponibilidade_diaria],
-        ["Personal trainer",  lead.personal_trainer],
-        ["Competição",        lead.competicao + (lead.competicao_detalhe ? ` - ${lead.competicao_detalhe}` : "")],
-        ["Coach bodybuilding",lead.conhece_coach],
-        ["Médico esporte",    lead.medico_esporte],
-        ["TRT",               lead.trt + (lead.trt_detalhe ? ` - ${lead.trt_detalhe}` : "")],
-        ["Condição cardíaca", lead.condicao_cardiaca],
-        ["Diabetes",          lead.diabetes],
-        ["Doença crônica",    lead.doenca_cronica],
-        ["Lesão",             lead.lesao + (lead.lesao_detalhe ? ` - ${lead.lesao_detalhe}` : "")],
-        ["Dieta",             lead.dieta],
-        ["Refeições/dia",     lead.refeicoes_dia],
-        ["Suplementos",       lead.suplementos + (lead.suplementos_detalhe ? ` - ${lead.suplementos_detalhe}` : "")],
-        ["Água/dia",          lead.agua_litros ? `${lead.agua_litros}L` : "-"],
-      ];
-      return `<table class="detail-table">
-        ${rows.map(([k,v]) => `
-          <tr>
-            <th class="detail-th">${k}</th>
-            <td class="detail-td">${v || "-"}</td>
-          </tr>`).join("")}
-      </table>`;
-    }
-
-    // -- Evaluation editor
-    window.__openEvalEditor = function(id) {
-      currentLeadId = id;
-      generatedSections = null;
-      const lead = leads.find(l => l.id === id);
-      document.getElementById("eval-lead-name").textContent = lead?.nome ?? "";
-      document.getElementById("eval-editor").hidden = false;
-      // Clear sections
-      ["s1","s2","s3","s4","s5"].forEach(k => {
-        document.getElementById(`eval-${k}`).value = "";
-      });
-      document.getElementById("eval-status").textContent = "";
-    };
-
-    window.__generateEval = async function() {
-      if (!currentLeadId) return;
-      const statusEl = document.getElementById("eval-status");
-      statusEl.textContent = "Gerando com Gemini 2.0 Flash...";
-
-      const res = await fetch("/.netlify/functions/generate-evaluation", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-admin-token": adminToken,
-        },
-        body: JSON.stringify({ leadId: currentLeadId }),
-      });
-
-      if (!res.ok) {
-        statusEl.textContent = "Erro ao gerar. Tente novamente.";
-        return;
-      }
-
-      const data = await res.json();
-      generatedSections = data.sections;
-      ["s1","s2","s3","s4","s5"].forEach(k => {
-        document.getElementById(`eval-${k}`).value = data.sections[k] ?? "";
-      });
-      statusEl.textContent = "Rascunho gerado. Revise e envie.";
-    };
-
-    window.__sendEval = async function() {
-      if (!currentLeadId) return;
-      const statusEl = document.getElementById("eval-status");
-
-      const sections = {};
-      ["s1","s2","s3","s4","s5"].forEach(k => {
-        sections[k] = document.getElementById(`eval-${k}`).value;
-      });
-      const coachNotes = document.getElementById("eval-notes").value;
-
-      statusEl.textContent = "Enviando...";
-      const res = await fetch("/.netlify/functions/send-evaluation", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-admin-token": adminToken,
-        },
-        body: JSON.stringify({ leadId: currentLeadId, sections, coachNotes }),
-      });
-
-      if (res.ok) {
-        statusEl.textContent = "✅ Avaliação enviada com sucesso.";
-        await loadLeads();
-      } else {
-        statusEl.textContent = "Erro ao enviar. Tente novamente.";
-      }
-    };
-
-    // -- Export CSV
-    window.__exportCSV = function() {
-      const headers = [
-        "Data","Nome","Email","CPF","Nascimento","Altura","Peso","Objetivo",
-        "Atividade física","Frequência","Disponibilidade","Personal","Competição",
-        "Coach BB","Médico esporte","TRT","Cardíaca","Diabetes","Crônica",
-        "Lesão","Dieta","Refeições","Suplementos","Água","Status"
-      ];
-      const rows = leads.map(l => [
-        l.createdAt?.toDate?.()?.toLocaleDateString("pt-BR") ?? "",
-        l.nome ?? "", l.email ?? "", l.cpf ?? "",
-        l.data_nascimento ?? "", l.altura ?? "", l.peso ?? "",
-        l.objetivo ?? "", l.atividade_fisica ?? "", l.frequencia_semanal ?? "",
-        l.disponibilidade_diaria ?? "", l.personal_trainer ?? "",
-        `${l.competicao ?? ""}${l.competicao_detalhe ? ` - ${l.competicao_detalhe}` : ""}`,
-        l.conhece_coach ?? "", l.medico_esporte ?? "",
-        `${l.trt ?? ""}${l.trt_detalhe ? ` - ${l.trt_detalhe}` : ""}`,
-        l.condicao_cardiaca ?? "", l.diabetes ?? "",
-        l.doenca_cronica ?? "",
-        `${l.lesao ?? ""}${l.lesao_detalhe ? ` - ${l.lesao_detalhe}` : ""}`,
-        l.dieta ?? "", l.refeicoes_dia ?? "",
-        `${l.suplementos ?? ""}${l.suplementos_detalhe ? ` - ${l.suplementos_detalhe}` : ""}`,
-        l.agua_litros ?? "", l.status ?? "",
-      ]);
-
-      const csv = [headers, ...rows]
-        .map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(","))
-        .join("\n");
-
-      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement("a");
-      a.href = url;
-      a.download = `elite90-leads-${new Date().toISOString().slice(0,10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    };
-
-    // -- Filter
-    document.getElementById("status-filter").addEventListener("change", renderTable);
-    document.getElementById("refresh-btn").addEventListener("click", loadLeads);
-    document.getElementById("detail-close").addEventListener("click", () => {
-      document.getElementById("detail-drawer").hidden = true;
-    });
-    document.getElementById("eval-close").addEventListener("click", () => {
-      document.getElementById("eval-editor").hidden = true;
-    });
-  </script>
-
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#0D0D0D;color:#CCC;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;}
-    a{color:#A6C300;}
-
-    /* AUTH */
-    #auth-wall{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-    .auth-box{background:#1A1A1A;border:1px solid rgba(166,195,0,.2);border-radius:8px;padding:40px;width:100%;max-width:360px;text-align:center;}
-    .auth-logo{font-size:24px;font-weight:900;letter-spacing:.1em;color:#A6C300;text-transform:uppercase;margin-bottom:4px;}
-    .auth-sub{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#666;margin-bottom:32px;}
-    .auth-input{width:100%;background:#0D0D0D;border:1px solid #333;border-radius:4px;color:#fff;padding:12px 16px;font-size:14px;margin-bottom:12px;}
-    .auth-input:focus{outline:none;border-color:#A6C300;}
-    .auth-btn{width:100%;background:#A6C300;color:#000;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:12px;border:none;border-radius:50px;cursor:pointer;font-size:13px;}
-    .auth-error{color:#E74C3C;font-size:12px;margin-top:8px;}
-
-    /* DASHBOARD */
-    #dashboard{padding:0;}
-    .dash-header{background:#111;border-bottom:1px solid rgba(166,195,0,.15);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
-    .dash-logo{font-size:18px;font-weight:900;letter-spacing:.1em;color:#A6C300;text-transform:uppercase;}
-    .dash-actions{display:flex;gap:8px;}
-    .btn{padding:8px 16px;border-radius:4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border:none;}
-    .btn-primary{background:#A6C300;color:#000;}
-    .btn-ghost{background:transparent;color:#A6C300;border:1px solid rgba(166,195,0,.3);}
-    .btn-sm{padding:4px 10px;font-size:11px;}
-    .btn-detail{background:rgba(166,195,0,.1);color:#A6C300;border:1px solid rgba(166,195,0,.2);border-radius:3px;padding:4px 10px;font-size:11px;cursor:pointer;}
-    .btn-eval{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.1);border-radius:3px;padding:4px 10px;font-size:11px;cursor:pointer;margin-left:4px;}
-
-    /* TOOLBAR */
-    .toolbar{padding:16px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid #1a1a1a;}
-    .toolbar-count{font-size:12px;color:#666;margin-left:auto;}
-    .filter-select{background:#1A1A1A;border:1px solid #333;color:#ccc;padding:6px 10px;border-radius:4px;font-size:12px;}
-
-    /* TABLE */
-    .table-wrap{overflow-x:auto;padding:0 24px 24px;}
-    table{width:100%;border-collapse:collapse;min-width:800px;}
-    th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#666;text-align:left;padding:10px 12px;border-bottom:1px solid #1a1a1a;}
-    .td{padding:12px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;color:#ccc;}
-    .td--name{font-weight:600;color:#fff;}
-    .td--goal{color:#999;font-size:12px;}
-    .lead-row:hover td{background:rgba(255,255,255,.02);}
-    .status-select{background:#1A1A1A;border:1px solid #333;color:#ccc;padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer;}
-
-    /* DETAIL DRAWER */
-    #detail-drawer,#eval-editor{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-start;justify-content:flex-end;background:rgba(0,0,0,.7);}
-    #detail-drawer[hidden],#eval-editor[hidden]{display:none;}
-    .drawer-panel{background:#1A1A1A;width:min(500px,95vw);height:100%;overflow-y:auto;padding:24px;border-left:1px solid rgba(166,195,0,.15);}
-    .drawer-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
-    .drawer-title{font-size:16px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;}
-    .drawer-close{background:none;border:none;color:#666;font-size:18px;cursor:pointer;}
-    .drawer-close:hover{color:#A6C300;}
-    .detail-table{width:100%;border-collapse:collapse;}
-    .detail-th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#666;padding:8px 0;vertical-align:top;width:140px;}
-    .detail-td{font-size:13px;color:#ccc;padding:8px 0 8px 12px;border-bottom:1px solid rgba(255,255,255,.04);}
-
-    /* EVAL EDITOR */
-    .eval-panel{background:#1A1A1A;width:min(720px,95vw);height:100%;overflow-y:auto;padding:24px;border-left:1px solid rgba(166,195,0,.15);}
-    .eval-section{margin-bottom:20px;}
-    .eval-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A6C300;margin-bottom:6px;display:block;}
-    .eval-textarea{width:100%;background:#0D0D0D;border:1px solid #2a2a2a;border-radius:4px;color:#ccc;padding:12px;font-size:13px;line-height:1.6;resize:vertical;min-height:120px;font-family:inherit;}
-    .eval-textarea:focus{outline:none;border-color:#A6C300;}
-    .eval-status{font-size:12px;color:#A6C300;margin-top:8px;min-height:18px;}
-    .eval-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
-    .section-titles{
-      "--s1":"01 · Diagnóstico Estético e Análise de Proporções";
-      "--s2":"02 · Planejamento de Treinamento e Cardio";
-      "--s3":"03 · Protocolo de Saúde Cardiovascular";
-      "--s4":"04 · Estratégia de Competição";
-      "--s5":"05 · Alinhamento Operacional";
-    }
+    body{background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#ccc;min-height:100vh;}
+    .adm-header{background:#111;border-bottom:1px solid rgba(166,195,0,.15);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+    .adm-header__left{display:flex;align-items:center;gap:12px;}
+    .adm-logo{font-size:15px;font-weight:900;letter-spacing:.12em;color:#A6C300;text-transform:uppercase;text-decoration:none;}
+    .adm-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;background:rgba(166,195,0,.1);color:#A6C300;border:1px solid rgba(166,195,0,.25);border-radius:3px;padding:3px 8px;}
+    .adm-header__right{display:flex;align-items:center;gap:12px;}
+    .adm-user{font-size:12px;color:#666;}
+    .btn-ghost{background:transparent;color:#A6C300;border:1px solid rgba(166,195,0,.3);border-radius:4px;padding:6px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;}
+    main{max-width:1100px;margin:0 auto;padding:48px 32px;}
+    .dash-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.18em;color:#666;margin-bottom:8px;}
+    .dash-title{font-size:42px;font-weight:900;color:#fff;margin-bottom:48px;line-height:1.1;}
+    .dash-title span{color:#A6C300;font-style:italic;font-weight:400;}
+    .modules{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;}
+    .mod-card{background:#121212;border:1px solid rgba(255,255,255,.05);border-radius:8px;display:flex;flex-direction:column;overflow:hidden;transition:border-color 200ms;}
+    .mod-card:hover{border-color:rgba(166,195,0,.2);}
+    .mod-bar{height:3px;background:linear-gradient(to right,#A6C300,#556600);}
+    .mod-body{padding:28px 28px 20px;flex:1;display:flex;flex-direction:column;gap:12px;}
+    .mod-eyebrow{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#A6C300;}
+    .mod-title{font-size:26px;font-weight:900;color:#fff;line-height:1.15;}
+    .mod-sub{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#444;}
+    .mod-desc{font-size:13px;color:#888;line-height:1.7;flex:1;}
+    .mod-footer{border-top:1px solid rgba(255,255,255,.05);padding:16px 28px;}
+    .mod-link{display:flex;align-items:center;justify-content:space-between;text-decoration:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#A6C300;}
+    .mod-link--off{color:#333;pointer-events:none;}
+    .status-bar{margin-top:48px;background:#111;border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:16px 24px;display:flex;align-items:center;gap:12px;}
+    .status-dot{width:8px;height:8px;border-radius:50%;background:#A6C300;flex-shrink:0;}
+    .status-text{font-size:12px;color:#666;}
   </style>
 </head>
 <body>
+  <header class="adm-header">
+    <div class="adm-header__left">
+      <a href="/" class="adm-logo">Coach Ruiz</a>
+      <span class="adm-badge">Admin</span>
+    </div>
+    <div class="adm-header__right">
+      <span class="adm-user" id="adm-email"></span>
+      <button class="btn-ghost" id="btn-logout">Sair</button>
+    </div>
+  </header>
 
-  <!-- Firebase config via meta tags -->
+  <main>
+    <p class="dash-eyebrow">Painel de Controle</p>
+    <h1 class="dash-title">Escolha o que <span>gerenciar</span></h1>
+
+    <div class="modules">
+      <div class="mod-card">
+        <div class="mod-bar"></div>
+        <div class="mod-body">
+          <p class="mod-eyebrow">Captacao &amp; Triagem</p>
+          <h2 class="mod-title">Fichas de Triagem</h2>
+          <p class="mod-sub">Gestao de Leads</p>
+          <p class="mod-desc">Acesse todas as fichas preenchidas pelos atletas, filtre por status, visualize os dados completos, altere o andamento de cada lead e exporte para CSV com um clique.</p>
+        </div>
+        <div class="mod-footer">
+          <a class="mod-link" href="/admin/fichas">Acessar fichas -&gt;</a>
+        </div>
+      </div>
+
+      <div class="mod-card">
+        <div class="mod-bar" style="background:linear-gradient(to right,#4A90D9,#2C5F8A)"></div>
+        <div class="mod-body">
+          <p class="mod-eyebrow" style="color:#4A90D9">Avaliacao &amp; Protocolo</p>
+          <h2 class="mod-title">Avaliacoes</h2>
+          <p class="mod-sub">Documentos Enviados</p>
+          <p class="mod-desc">Gere e envie documentos de avaliacao personalizados com suporte de IA (Gemini 2.0 Flash). Acompanhe o historico por atleta.</p>
+        </div>
+        <div class="mod-footer">
+          <a class="mod-link" href="/admin/fichas">Acessar via fichas -&gt;</a>
+        </div>
+      </div>
+
+      <div class="mod-card" style="opacity:.45">
+        <div class="mod-bar" style="background:#2a2a2a"></div>
+        <div class="mod-body">
+          <p class="mod-eyebrow" style="color:#444">Portal do Atleta</p>
+          <h2 class="mod-title" style="color:#555">Atletas</h2>
+          <p class="mod-sub">Acesso e Dados</p>
+          <p class="mod-desc" style="color:#444">Gerencie o acesso dos atletas ao portal, acompanhe progresso de treinos, peso e evolucao fotografica.</p>
+        </div>
+        <div class="mod-footer">
+          <span class="mod-link mod-link--off">Em desenvolvimento (Sprint 2+)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <span class="status-dot"></span>
+      <span class="status-text">Voce esta autenticado e pode gerenciar o Elite 90 com seguranca.</span>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    const cfg={apiKey:document.querySelector('meta[name="fb-api"]')?.content,authDomain:document.querySelector('meta[name="fb-auth"]')?.content,projectId:document.querySelector('meta[name="fb-proj"]')?.content,storageBucket:document.querySelector('meta[name="fb-bucket"]')?.content,messagingSenderId:document.querySelector('meta[name="fb-sender"]')?.content,appId:document.querySelector('meta[name="fb-appid"]')?.content};
+    const app=initializeApp(cfg);const auth=getAuth(app);
+    onAuthStateChanged(auth,user=>{if(!user){window.location.href="/admin/login";return;}const el=document.getElementById("adm-email");if(el)el.textContent=user.email??""});
+    document.getElementById("btn-logout")?.addEventListener("click",async()=>{await signOut(auth);window.location.href="/admin/login";});
+  </script>
+
   <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
   <meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
   <meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
   <meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
   <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
   <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
-
-  <!-- AUTH WALL -->
-  <div id="auth-wall">
-    <div class="auth-box">
-      <div class="auth-logo">Coach Ruiz</div>
-      <div class="auth-sub">Painel Administrativo · Elite 90</div>
-      <input
-        class="auth-input"
-        type="password"
-        id="pw-input"
-        placeholder="Senha de acesso"
-        autocomplete="current-password"
-      />
-      <button class="auth-btn" id="pw-btn">Entrar</button>
-      <p class="auth-error" id="pw-error" hidden>Senha incorreta</p>
-    </div>
-  </div>
-
-  <!-- DASHBOARD -->
-  <div id="dashboard" hidden>
-
-    <div class="dash-header">
-      <div class="dash-logo">Elite 90 · Admin</div>
-      <div class="dash-actions">
-        <button class="btn btn-ghost btn-sm" id="refresh-btn">↻ Atualizar</button>
-        <button class="btn btn-primary btn-sm" onclick="window.__exportCSV()">⬇ Exportar CSV</button>
-      </div>
-    </div>
-
-    <div class="toolbar">
-      <select class="filter-select" id="status-filter">
-        <option value="">Todos os status</option>
-        <option value="novo">🟡 Novos</option>
-        <option value="em_analise">🔵 Em análise</option>
-        <option value="aprovado">🟢 Aprovados</option>
-        <option value="recusado">🔴 Recusados</option>
-        <option value="avaliacao_enviada">✅ Avaliação enviada</option>
-      </select>
-      <span class="toolbar-count" id="leads-count">-</span>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Nome</th>
-            <th>E-mail</th>
-            <th>Objetivo</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="leads-tbody">
-          <tr><td class="td" colspan="6" style="text-align:center;color:#444;">Carregando...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- DETAIL DRAWER -->
-  <div id="detail-drawer" hidden>
-    <div class="drawer-panel">
-      <div class="drawer-header">
-        <span class="drawer-title">Ficha do atleta</span>
-        <button class="drawer-close" id="detail-close">✕</button>
-      </div>
-      <div id="detail-content"></div>
-    </div>
-  </div>
-
-  <!-- EVALUATION EDITOR -->
-  <div id="eval-editor" hidden>
-    <div class="eval-panel">
-      <div class="drawer-header">
-        <span class="drawer-title">Avaliação - <span id="eval-lead-name"></span></span>
-        <button class="drawer-close" id="eval-close">✕</button>
-      </div>
-
-      <div class="eval-actions">
-        <button class="btn btn-ghost" onclick="window.__generateEval()">✦ Gerar com IA (Gemini)</button>
-      </div>
-      <p class="eval-status" id="eval-status"></p>
-
-      <div style="margin-top:20px;">
-        {[
-          ["s1","01 · Diagnóstico Estético e Análise de Proporções"],
-          ["s2","02 · Planejamento de Treinamento e Cardio"],
-          ["s3","03 · Protocolo de Saúde Cardiovascular"],
-          ["s4","04 · Estratégia de Competição"],
-          ["s5","05 · Alinhamento Operacional"],
-        ].map(([k, label]) => (
-          <div class="eval-section">
-            <label class="eval-label" for={`eval-${k}`}>{label}</label>
-            <textarea class="eval-textarea" id={`eval-${k}`} rows="6"></textarea>
-          </div>
-        ))}
-
-        <div class="eval-section">
-          <label class="eval-label" for="eval-notes">Observações internas do coach (não enviadas ao atleta)</label>
-          <textarea class="eval-textarea" id="eval-notes" rows="3"></textarea>
-        </div>
-
-        <div class="eval-actions">
-          <button class="btn btn-primary" onclick="window.__sendEval()">✉ Enviar avaliação ao atleta</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </body>
 </html>

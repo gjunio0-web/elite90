@@ -1,0 +1,31 @@
+---
+import type { Translations } from "../../i18n/pt";
+interface Props { t: Translations; }
+const { t } = Astro.props;
+---
+<section class="section schedule" id="cronograma" style="scroll-margin-top:80px" aria-label="Cronograma">
+  <div class="container">
+    <p class="section__eyebrow">{t.schedule.eyebrow}</p>
+    <h2 class="section__title">{t.schedule.title}</h2>
+    <div class="schedule__grid">
+      {t.schedule.phases.map(phase => (
+        <div class="schedule__phase">
+          <span class="schedule__number" aria-hidden="true">{phase.number}</span>
+          <h3 class="schedule__phase-title">{phase.title}</h3>
+          <ul class="schedule__items">
+            {phase.items.map(item => <li class="schedule__item">{item}</li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .schedule__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-5); margin-top: var(--space-6); }
+  .schedule__phase { background-color: var(--c-darkbg); border-left: var(--border-card); padding: var(--space-5); border-radius: var(--radius-card); }
+  .schedule__number { font-family: var(--font-display); font-size: 3rem; color: var(--c-lime); display: block; line-height: 1; margin-bottom: var(--space-3); }
+  .schedule__phase-title { font-size: var(--fs-display-sm); color: var(--c-white); margin-bottom: var(--space-3); }
+  .schedule__items { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
+  .schedule__item { font-family: var(--font-label); font-size: var(--fs-label); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--c-textbody); }
+</style>

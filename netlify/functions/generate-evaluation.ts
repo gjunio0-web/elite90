@@ -3,6 +3,7 @@
 // Chamada pelo painel admin ao clicar em "Gerar avaliação".
 
 import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 
 function getDb() {
@@ -104,9 +105,14 @@ export const handler = async (event: any) => {
   }
 
   // Admin auth check
-  const adminToken = event.headers["x-admin-token"];
-  if (adminToken !== process.env.ADMIN_SECRET) {
-    return { statusCode: 401, body: "Unauthorized" };
+  // Verify Firebase Auth ID token
+  const authHeader = event.headers["authorization"] ?? "";
+  const idToken = authHeader.replace("Bearer ", "").trim();
+  if (!idToken) return { statusCode: 401, body: "Unauthorized" };
+  try {
+    await getAuth(getApps()[0]).verifyIdToken(idToken);
+  } catch {
+    return { statusCode: 401, body: "Invalid token" };
   }
 
   try {

@@ -1,100 +1,64 @@
 ---
-// --- ELITE 90 · Sticky CTA Mobile
-// Botão fixo no rodapé em mobile. Aparece após o usuário rolar além do hero.
-// Copy muda conforme o estágio de scroll (Stage 1 → Stage 2 → Stage 3).
-
 interface Props {
   stage1: string;
   stage2: string;
   stage3: string;
   targetId?: string;
 }
-
-const {
-  stage1,
-  stage2,
-  stage3,
-  targetId = "triagem",
-} = Astro.props;
+const { stage1, targetId = "triagem" } = Astro.props;
 ---
 
 <div class="sticky-cta" id="sticky-cta" aria-hidden="true">
-  <a
-    href={`#${targetId}`}
+  <button
     class="btn-cta sticky-cta__btn"
     id="sticky-cta-btn"
-    data-stage1={stage1}
-    data-stage2={stage2}
-    data-stage3={stage3}
+    type="button"
+    aria-haspopup="dialog"
   >
     {stage1}
-  </a>
+  </button>
 </div>
 
 <script>
   const wrap = document.getElementById("sticky-cta");
-  const btn = document.getElementById("sticky-cta-btn") as HTMLAnchorElement | null;
+  const btn  = document.getElementById("sticky-cta-btn");
+  if (!wrap || !btn) throw new Error("sticky-cta missing");
 
-  if (!wrap || !btn) throw new Error("sticky-cta elements not found");
-
-  const stage1 = btn.dataset.stage1 ?? "";
-  const stage2 = btn.dataset.stage2 ?? "";
-  const stage3 = btn.dataset.stage3 ?? "";
-
-  // Pontos de referência para troca de copy
-  const heroEl = document.querySelector<HTMLElement>(".hero-video-wrap");
-  const pillarsEl = document.querySelector<HTMLElement>("#pilares");
-  const testimonialEl = document.querySelector<HTMLElement>("#depoimentos");
-
+  const heroEl = document.querySelector(".hero");
   let visible = false;
 
-  function getStageLabel(): string {
-    const scrollY = window.scrollY;
-    const h3 = testimonialEl?.offsetTop ?? Infinity;
-    const h2 = pillarsEl?.offsetTop ?? Infinity;
-    if (scrollY >= h3) return stage3;
-    if (scrollY >= h2) return stage2;
-    return stage1;
-  }
-
   function update() {
-    const heroBottom = (heroEl?.offsetTop ?? 0) + (heroEl?.offsetHeight ?? 0);
+    const heroBottom = (heroEl?.getBoundingClientRect().bottom ?? 0) + window.scrollY;
     const shouldShow = window.scrollY > heroBottom * 0.7;
-
     if (shouldShow !== visible) {
       visible = shouldShow;
       wrap.setAttribute("aria-hidden", String(!visible));
       wrap.classList.toggle("sticky-cta--visible", visible);
     }
-
-    btn.textContent = getStageLabel();
   }
 
   window.addEventListener("scroll", update, { passive: true });
   update();
+
+  btn.addEventListener("click", () => {
+    document.dispatchEvent(new CustomEvent("open-triage-modal"));
+  });
 </script>
 
 <style>
   .sticky-cta {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
+    bottom: 0; left: 0; right: 0;
+    z-index: 90;
     padding: var(--space-3) var(--space-4);
-    background: linear-gradient(
-      to top,
-      rgba(13, 13, 13, 0.98) 60%,
-      transparent
-    );
+    background: linear-gradient(to top, rgba(13,13,13,.98) 60%, transparent);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     transform: translateY(100%);
-    transition: transform var(--transition-slow);
+    transition: transform var(--transition-slow), opacity var(--transition-slow);
     pointer-events: none;
-
-    /* Visível apenas em mobile */
     display: none;
+    opacity: 1;
   }
 
   .sticky-cta--visible {
@@ -104,23 +68,19 @@ const {
 
   .sticky-cta__btn {
     width: 100%;
-    max-width: calc(100% - 0px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 56px;
+    min-height: 52px;
     font-size: var(--fs-body-sm);
+    white-space: normal;
+    text-align: center;
+    line-height: 1.3;
+    padding: 0.875rem 1.5rem;
   }
 
   @media (max-width: 767px) {
-    .sticky-cta {
-      display: block;
-    }
+    .sticky-cta { display: block; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .sticky-cta {
-      transition: none;
-    }
+    .sticky-cta { transition: none; }
   }
 </style>

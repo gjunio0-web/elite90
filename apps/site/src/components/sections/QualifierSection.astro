@@ -1,0 +1,20 @@
+---
+import type { Translations } from "../../i18n/pt";
+interface Props { t: Translations; }
+const { t } = Astro.props;
+---
+<section class="section qualifier" id="qualificador" style="scroll-margin-top:80px" aria-label="Qualificador de audiencia">
+  <div class="container container--text qualifier__inner">
+    <h2 class="qualifier__headline">{t.qualifier.headline}</h2>
+    <p class="qualifier__body">{t.qualifier.body}</p>
+    <p class="qualifier__cta-line">{t.qualifier.cta}</p>
+  </div>
+</section>
+
+<style>
+  .qualifier { background-color: var(--c-darkbg); }
+  .qualifier__inner { text-align: center; }
+  .qualifier__headline { font-size: var(--fs-display-md); color: var(--c-white); margin-bottom: var(--space-4); }
+  .qualifier__body { font-size: var(--fs-body-lg); color: var(--c-textbody); line-height: 1.8; margin-bottom: var(--space-4); }
+  .qualifier__cta-line { font-family: var(--font-label); font-size: var(--fs-label); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--c-lime); }
+</style>

@@ -1,0 +1,38 @@
+---
+import type { Translations } from "../../i18n/pt";
+interface Props { t: Translations; }
+const { t } = Astro.props;
+---
+<section class="section coach" id="coach" style="scroll-margin-top:80px" aria-label="Sobre o coach">
+  <div class="container coach__inner">
+    <div class="coach__image-col">
+      <div class="coach__photo-wrap">
+        <img
+          src="/images/coach-ruiz.webp"
+          alt="Coach Fernando Ruiz"
+          class="coach__photo"
+          width="480" height="600"
+          loading="lazy"
+        />
+      </div>
+    </div>
+    <div class="coach__content">
+      <p class="section__eyebrow">{t.coach.eyebrow}</p>
+      <h2 class="coach__name">{t.coach.title}</h2>
+      {t.coach.paragraphs.map(para => <p class="coach__para">{para}</p>)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .coach__inner { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: center; }
+  .coach__photo-wrap { position: relative; }
+  .coach__photo-wrap::before { content: ""; position: absolute; inset: -4px; border: var(--border-card); border-radius: var(--radius-card); pointer-events: none; }
+  .coach__photo { width: 100%; height: auto; aspect-ratio: 4/5; object-fit: cover; border-radius: var(--radius-card); display: block; }
+  .coach__name { font-size: var(--fs-display-lg); color: var(--c-lime); margin-bottom: var(--space-5); }
+  .coach__para { color: var(--c-textbody); line-height: 1.8; margin-bottom: var(--space-4); }
+  @media (max-width: 767px) {
+    .coach__inner { grid-template-columns: 1fr; }
+    .coach__image-col { max-width: 320px; margin-inline: auto; }
+  }
+</style>

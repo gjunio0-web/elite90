@@ -1,0 +1,151 @@
+---
+import HeroVideo from "../HeroVideo.astro";
+import type { Translations } from "../../i18n/pt";
+
+interface Props { t: Translations; }
+const { t } = Astro.props;
+---
+
+<HeroVideo>
+  <section class="hero section" aria-label="Hero">
+    <div class="container hero__inner">
+      <div class="hero__content">
+
+        <div class="hero__logo-wrap">
+          <img
+            src="/images/brand/logo-hero.webp"
+            alt="Coach Ruiz - Estrategista em Alta Performance"
+            class="hero__logo-img"
+            width="800"
+            height="800"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+
+        <p class="section__eyebrow">{t.hero.eyebrow}</p>
+        <h1 class="hero__headline">{t.hero.headline}</h1>
+        <p class="hero__sub">{t.hero.subheadline}</p>
+
+        <ul class="hero__proof" aria-label="Prova social">
+          <li class="hero__proof-item">
+            <span class="hero__proof-icon" aria-hidden="true">*</span>
+            {t.hero.socialProof.athletes}
+          </li>
+          <li class="hero__proof-item">
+            <span class="hero__proof-icon" aria-hidden="true">*</span>
+            {t.hero.socialProof.experience}
+          </li>
+          <li class="hero__proof-item hero__proof-item--title">
+            <span class="hero__proof-icon" aria-hidden="true">+</span>
+            {t.hero.socialProof.title}
+          </li>
+        </ul>
+
+        <button class="btn-cta hero__cta" type="button" aria-haspopup="dialog">
+          {t.hero.cta}
+        </button>
+
+        <p class="hero__differentiation">{t.hero.differentiation}</p>
+      </div>
+    </div>
+  </section>
+</HeroVideo>
+
+<style>
+  .hero {
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding-top: calc(var(--space-9) + 80px);
+    padding-bottom: var(--space-8);
+  }
+
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .hero__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 640px;
+  }
+
+  .hero__logo-wrap {
+    margin-bottom: var(--space-2);
+  }
+
+  .hero__logo-img {
+    width: auto;
+    height: auto;
+    max-width: 480px;
+    max-height: 480px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .hero__headline {
+    font-size: var(--fs-display-xl);
+    color: var(--c-lime);
+    text-transform: uppercase;
+    line-height: 1.05;
+  }
+
+  .hero__sub {
+    font-size: var(--fs-body-lg);
+    color: var(--c-textbody);
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1.5;
+  }
+
+  .hero__proof {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .hero__proof-item {
+    font-family: var(--font-label);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--c-textsub);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .hero__proof-item--title { color: var(--c-lime); }
+
+  .hero__proof-icon {
+    color: var(--c-lime);
+    font-size: .5rem;
+    flex-shrink: 0;
+  }
+
+  .hero__cta {
+    align-self: flex-start;
+    max-width: 100%;
+  }
+
+  .hero__differentiation {
+    font-size: var(--fs-body-sm);
+    color: var(--c-textsub);
+    font-style: italic;
+    border-left: 2px solid var(--c-lime);
+    padding-left: var(--space-4);
+    max-width: 480px;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 767px) {
+    .hero__logo-img { max-width: 280px; max-height: 280px; }
+    .hero__cta { align-self: stretch; text-align: center; }
+  }
+</style>

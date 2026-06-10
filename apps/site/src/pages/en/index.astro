@@ -1,10 +1,23 @@
 ---
 export const prerender = true;
 import Layout from "../../layouts/Layout.astro";
-import HeroVideo from "../../components/HeroVideo.astro";
-import LanguageSwitcher from "../../components/LanguageSwitcher.astro";
-import TriageForm from "../../components/TriageForm.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import TriageModal from "../../components/TriageModal.astro";
 import StickyCtaMobile from "../../components/StickyCtaMobile.astro";
+import HeroSection from "../../components/sections/HeroSection.astro";
+import QualifierSection from "../../components/sections/QualifierSection.astro";
+import ScheduleSection from "../../components/sections/ScheduleSection.astro";
+import CoachSection from "../../components/sections/CoachSection.astro";
+import PillarsSection from "../../components/sections/PillarsSection.astro";
+import ObjectionSection from "../../components/sections/ObjectionSection.astro";
+import ResultsSection from "../../components/sections/ResultsSection.astro";
+import ProcessSection from "../../components/sections/ProcessSection.astro";
+import MotivationalSection from "../../components/sections/MotivationalSection.astro";
+import TestimonialsSection from "../../components/sections/TestimonialsSection.astro";
+import PartnersSection from "../../components/sections/PartnersSection.astro";
+import FaqSection from "../../components/sections/FaqSection.astro";
+import CtaFinalSection from "../../components/sections/CtaFinalSection.astro";
 import { useTranslations } from "../../i18n/utils";
 
 const locale = "en";
@@ -18,389 +31,36 @@ const t = useTranslations(locale);
   ogDescription={t.meta.ogDescription}
   locale={locale}
 >
-  <HeroVideo>
-    <section class="hero section" aria-label="Hero">
-      <div class="container hero__inner">
-        <div class="hero__lang">
-          <LanguageSwitcher currentLocale={locale} />
-        </div>
-        <div class="hero__content">
-          <p class="section__eyebrow hero__eyebrow">{t.hero.eyebrow}</p>
-          <h1 class="hero__headline">{t.hero.headline}</h1>
-          <p class="hero__sub">{t.hero.subheadline}</p>
-          <ul class="hero__proof" aria-label="Social proof">
-            <li class="hero__proof-item"><span class="hero__proof-icon" aria-hidden="true">●</span>{t.hero.socialProof.athletes}</li>
-            <li class="hero__proof-item"><span class="hero__proof-icon" aria-hidden="true">●</span>{t.hero.socialProof.experience}</li>
-            <li class="hero__proof-item hero__proof-item--title"><span class="hero__proof-icon" aria-hidden="true">◆</span>{t.hero.socialProof.title}</li>
-          </ul>
-          <a href="#application" class="btn-cta hero__cta">{t.hero.cta}</a>
-          <p class="hero__differentiation">{t.hero.differentiation}</p>
-        </div>
-      </div>
-    </section>
-  </HeroVideo>
-
-  <section class="section qualifier" aria-label="Audience qualifier">
-    <div class="container container--text qualifier__inner">
-      <h2 class="qualifier__headline">{t.qualifier.headline}</h2>
-      <p class="qualifier__body">{t.qualifier.body}</p>
-      <p class="qualifier__cta-line">{t.qualifier.cta}</p>
-    </div>
-  </section>
-
-  <section class="section schedule" aria-label="Schedule">
-    <div class="container">
-      <p class="section__eyebrow">{t.schedule.eyebrow}</p>
-      <h2 class="section__title">{t.schedule.title}</h2>
-      <div class="schedule__grid">
-        {t.schedule.phases.map((phase) => (
-          <div class="schedule__phase">
-            <span class="schedule__number" aria-hidden="true">{phase.number}</span>
-            <h3 class="schedule__phase-title">{phase.title}</h3>
-            <ul class="schedule__items">
-              {phase.items.map((item) => <li class="schedule__item">{item}</li>)}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
+  <Header t={t} locale={locale} />
+  <HeroSection t={t} />
+  <QualifierSection t={t} />
+  <ScheduleSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <section class="section coach" aria-label="About the coach">
-    <div class="container coach__inner">
-      <div class="coach__image-col">
-        <div class="coach__photo-wrap">
-          <img src="/images/coach-ruiz.webp" alt="Coach Fernando Ruiz" class="coach__photo" width="480" height="600" loading="lazy" />
-        </div>
-      </div>
-      <div class="coach__content">
-        <p class="section__eyebrow">{t.coach.eyebrow}</p>
-        <h2 class="coach__name">{t.coach.title}</h2>
-        {t.coach.paragraphs.map((para) => <p class="coach__para">{para}</p>)}
-      </div>
-    </div>
-  </section>
-
+  <CoachSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <section class="section pillars" id="pillars" aria-label="Program pillars">
-    <div class="container">
-      <p class="section__eyebrow">{t.pillars.eyebrow}</p>
-      <h2 class="section__title">{t.pillars.title}</h2>
-      <p class="pillars__intro">{t.pillars.intro}</p>
-      <div class="pillars__grid">
-        {t.pillars.items.map((pillar) => (
-          <article class="pillar-card">
-            <span class="pillar-card__number" aria-hidden="true">{pillar.number}</span>
-            <h3 class="pillar-card__title">{pillar.title}</h3>
-            <p class="pillar-card__body">{pillar.body}</p>
-            <p class="pillar-card__result">
-              <span class="pillar-card__result-label" aria-label="Result:">→</span>
-              {pillar.result}
-            </p>
-          </article>
-        ))}
-      </div>
-      <p class="pillars__confluence">{t.pillars.confluence}</p>
-    </div>
-  </section>
-
-  <section class="section objection" aria-label="After 40">
-    <div class="container container--text objection__inner">
-      <p class="section__eyebrow">{t.objection.eyebrow}</p>
-      <h2 class="objection__question">{t.objection.question}</h2>
-      {t.objection.paragraphs.map((para) => <p class="objection__para">{para}</p>)}
-    </div>
-  </section>
-
+  <PillarsSection t={t} />
+  <ObjectionSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <section class="section results" aria-label="Real results">
-    <div class="container">
-      <p class="section__eyebrow">{t.results.eyebrow}</p>
-      <h2 class="section__title">{t.results.title}<span> {t.results.titleAccent}</span></h2>
-      <div class="results__grid">
-        {[1,2,3,4].map((n) => (
-          <div class="result-card">
-            <div class="result-card__images">
-              <figure class="result-card__fig">
-                <img src={`/images/results/resultado-${n}-antes.webp`} alt={`Athlete ${n} before`} class="result-card__img" width="280" height="350" loading="lazy" />
-                <figcaption class="result-card__label">Before</figcaption>
-              </figure>
-              <figure class="result-card__fig">
-                <img src={`/images/results/resultado-${n}-depois.webp`} alt={`Athlete ${n} after`} class="result-card__img" width="280" height="350" loading="lazy" />
-                <figcaption class="result-card__label">After</figcaption>
-              </figure>
-            </div>
-            <div class="result-card__caption">
-              <p class="result-card__name">Athlete [INITIALS]</p>
-              <p class="result-card__meta">[ROLE] · [PERIOD] · [METRIC]</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
+  <ResultsSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <section class="section process" aria-label="Step by step">
-    <div class="container">
-      <p class="section__eyebrow">{t.process.eyebrow}</p>
-      <h2 class="section__title">{t.process.title}</h2>
-      <ol class="process__list">
-        {t.process.steps.map((step, i) => (
-          <li class="process__step">
-            <span class="process__number" aria-hidden="true">{String(i+1).padStart(2,'0')}</span>
-            <div class="process__content">
-              <span class="process__who">{step.who}</span>
-              <h3 class="process__title">{step.title}</h3>
-              {step.body && <p class="process__body">{step.body}</p>}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
-
-  <section class="section motivational" aria-label="Motivational">
-    <div class="container container--text motivational__inner">
-      {t.motivational.lines.map((line) => <p class="motivational__line">{line}</p>)}
-      <a href="#application" class="btn-cta motivational__cta">{t.motivational.cta}</a>
-    </div>
-  </section>
-
+  <ProcessSection t={t} />
+  <MotivationalSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <section class="section testimonials" id="testimonials" aria-label="Testimonials">
-    <div class="container">
-      <p class="testimonials__title">
-        {t.testimonials.eyebrow} <span class="testimonials__accent">{t.testimonials.titleAccent}</span> {t.testimonials.titleSuffix}
-      </p>
-      <div class="testimonials__grid">
-        {t.testimonials.items.map((item) => (
-          <article class="testimonial-card">
-            <div class="testimonial-card__header">
-              <img src={item.image} alt={item.name} class="testimonial-card__photo" width="96" height="96" loading="lazy" />
-              <div>
-                <h3 class="testimonial-card__name">{item.name}</h3>
-                <p class="testimonial-card__role">{item.role}</p>
-              </div>
-            </div>
-            <p class="testimonial-card__metric">{item.metric}</p>
-            <div class="testimonial-card__text-wrap">
-              <p class="testimonial-card__text" data-full={item.text}>
-                {item.text.slice(0,200)}<span class="testimonial-card__ellipsis">…</span>
-              </p>
-              <button class="testimonial-card__toggle" aria-expanded="false" type="button" data-read-more={t.testimonials.readMore} data-read-less={t.testimonials.readLess}>
-                {t.testimonials.readMore}
-              </button>
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section class="section partners" aria-label="Partners">
-    <div class="container">
-      <p class="section__eyebrow">{t.partners.eyebrow}</p>
-      <h2 class="section__title">{t.partners.title}</h2>
-      <div class="partners__grid">
-        {t.partners.items.map((partner) => (
-          <div class="partner-item">
-            <img src={partner.logo} alt={partner.name} class="partner-item__logo" width="160" height="60" loading="lazy" />
-            <p class="partner-item__desc">{partner.description}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
+  <TestimonialsSection t={t} />
+  <PartnersSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <section class="section faq" aria-label="FAQ">
-    <div class="container container--text">
-      <p class="section__eyebrow">{t.faq.eyebrow}</p>
-      <h2 class="section__title">{t.faq.title}</h2>
-      <dl class="faq__list">
-        {t.faq.items.map((item) => (
-          <div class="faq__item">
-            <dt class="faq__question">
-              <button class="faq__btn" type="button" aria-expanded="false">
-                {item.question}
-                <span class="faq__icon" aria-hidden="true">+</span>
-              </button>
-            </dt>
-            <dd class="faq__answer" hidden><p>{item.answer}</p></dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  </section>
-
-  <section class="section cta-final" id="application" aria-label="Final CTA">
-    <div class="container cta-final__inner">
-      <div class="cta-final__left">
-        <p class="section__eyebrow">{t.ctaFinal.eyebrow}</p>
-        <a href="#application-form" class="btn-cta cta-final__btn">{t.ctaFinal.cta}</a>
-        <p class="cta-final__subtext">{t.ctaFinal.subtext}</p>
-      </div>
-      <div class="cta-final__right" id="application-form">
-        <TriageForm t={t} id="application-form" />
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <div class="container footer__inner">
-      <p class="footer__copy">{t.footer.copyright}</p>
-    </div>
-  </footer>
-
-  <StickyCtaMobile stage1={t.hero.cta} stage2={t.motivational.cta} stage3={t.ctaFinal.cta} targetId="application" />
+  <FaqSection t={t} />
+  <CtaFinalSection t={t} />
+  <Footer t={t} />
+  <TriageModal t={t} />
+  <StickyCtaMobile
+    stage1={t.nav.applyCta}
+    stage2={t.nav.applyCta}
+    stage3={t.nav.applyCta}
+    targetId="triagem"
+  />
 </Layout>
 
-<script>
-  document.querySelectorAll(".testimonial-card__toggle").forEach((btn) => {
-    const b = btn as HTMLButtonElement;
-    const wrap = b.closest(".testimonial-card__text-wrap");
-    const textEl = wrap?.querySelector(".testimonial-card__text") as HTMLElement | null;
-    const ellipsis = textEl?.querySelector(".testimonial-card__ellipsis") as HTMLElement | null;
-    if (!textEl || !ellipsis) return;
-    const fullText = textEl.dataset.full ?? "";
-    const shortText = textEl.childNodes[0]?.textContent ?? "";
-    b.addEventListener("click", () => {
-      const expanded = b.getAttribute("aria-expanded") === "true";
-      if (expanded) {
-        textEl.childNodes[0].textContent = shortText;
-        ellipsis.hidden = false;
-        b.setAttribute("aria-expanded","false");
-        b.textContent = b.dataset.readMore ?? "Read more";
-      } else {
-        textEl.childNodes[0].textContent = fullText;
-        ellipsis.hidden = true;
-        b.setAttribute("aria-expanded","true");
-        b.textContent = b.dataset.readLess ?? "Read less";
-      }
-    });
-  });
-
-  document.querySelectorAll(".faq__btn").forEach((btn) => {
-    const b = btn as HTMLButtonElement;
-    const item = b.closest(".faq__item");
-    const answer = item?.querySelector(".faq__answer") as HTMLElement | null;
-    const icon = b.querySelector(".faq__icon") as HTMLElement | null;
-    if (!answer || !icon) return;
-    b.addEventListener("click", () => {
-      const expanded = b.getAttribute("aria-expanded") === "true";
-      b.setAttribute("aria-expanded", String(!expanded));
-      answer.hidden = expanded;
-      icon.textContent = expanded ? "+" : "−";
-    });
-  });
-</script>
-
 <style>
-.hero{padding-block:var(--space-9) var(--space-8);min-height:100svh;display:flex;align-items:center;}
-.hero__inner{display:flex;flex-direction:column;gap:var(--space-6);position:relative;}
-.hero__lang{position:absolute;top:calc(-1 * var(--space-7));right:0;}
-.hero__content{display:flex;flex-direction:column;gap:var(--space-4);max-width:640px;}
-.hero__eyebrow{margin-bottom:0;}
-.hero__headline{font-size:var(--fs-display-xl);color:var(--c-lime);text-transform:uppercase;line-height:1.05;}
-.hero__sub{font-size:var(--fs-body-lg);color:var(--c-textbody);font-weight:700;text-transform:uppercase;line-height:1.5;}
-.hero__proof{list-style:none;display:flex;flex-direction:column;gap:var(--space-2);}
-.hero__proof-item{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c-textsub);display:flex;align-items:center;gap:var(--space-2);}
-.hero__proof-item--title{color:var(--c-lime);}
-.hero__proof-icon{color:var(--c-lime);font-size:.5rem;}
-.hero__cta{align-self:flex-start;}
-.hero__differentiation{font-size:var(--fs-body-sm);color:var(--c-textsub);font-style:italic;border-left:2px solid var(--c-lime);padding-left:var(--space-4);max-width:480px;line-height:1.6;}
-.qualifier{background-color:var(--c-darkbg);}
-.qualifier__inner{text-align:center;}
-.qualifier__headline{font-size:var(--fs-display-md);color:var(--c-white);margin-bottom:var(--space-4);}
-.qualifier__body{font-size:var(--fs-body-lg);color:var(--c-textbody);line-height:1.8;margin-bottom:var(--space-4);}
-.qualifier__cta-line{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-lime);}
-.schedule__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--space-5);margin-top:var(--space-6);}
-.schedule__phase{background-color:var(--c-darkbg);border-left:var(--border-card);padding:var(--space-5);border-radius:var(--radius-card);}
-.schedule__number{font-family:var(--font-display);font-size:3rem;color:var(--c-lime);display:block;line-height:1;margin-bottom:var(--space-3);}
-.schedule__phase-title{font-size:var(--fs-display-sm);color:var(--c-white);margin-bottom:var(--space-3);}
-.schedule__items{list-style:none;display:flex;flex-direction:column;gap:var(--space-2);}
-.schedule__item{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-textbody);}
-.coach__inner{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-8);align-items:center;}
-.coach__photo-wrap{position:relative;}
-.coach__photo-wrap::before{content:"";position:absolute;inset:-4px;border:var(--border-card);border-radius:var(--radius-card);pointer-events:none;}
-.coach__photo{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;border-radius:var(--radius-card);}
-.coach__name{font-size:var(--fs-display-lg);color:var(--c-lime);margin-bottom:var(--space-5);}
-.coach__para{color:var(--c-textbody);line-height:1.8;margin-bottom:var(--space-4);}
-@media(max-width:767px){.coach__inner{grid-template-columns:1fr;}.coach__image-col{max-width:320px;margin-inline:auto;}}
-.pillars__intro{font-size:var(--fs-body-lg);color:var(--c-textbody);line-height:1.8;max-width:680px;margin-bottom:var(--space-7);font-style:italic;}
-.pillars__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--space-5);margin-bottom:var(--space-7);}
-.pillar-card{background-color:var(--c-darkbg);border-top:var(--border-card);padding:var(--space-5);border-radius:var(--radius-card);display:flex;flex-direction:column;gap:var(--space-3);}
-.pillar-card__number{font-family:var(--font-display);font-size:2.5rem;color:var(--c-lime);line-height:1;}
-.pillar-card__title{font-size:var(--fs-display-sm);color:var(--c-white);}
-.pillar-card__body{font-size:var(--fs-body-md);color:var(--c-textbody);line-height:1.7;flex:1;}
-.pillar-card__result{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-lime);border-top:1px solid rgba(166,195,0,.2);padding-top:var(--space-3);display:flex;gap:var(--space-2);}
-.pillars__confluence{font-family:var(--font-display);font-size:var(--fs-display-md);color:var(--c-white);text-transform:uppercase;text-align:center;max-width:680px;margin-inline:auto;line-height:1.2;}
-.pillars__confluence::after{content:"";display:block;width:60px;height:3px;background-color:var(--c-lime);margin:var(--space-4) auto 0;}
-.objection{background-color:var(--c-darkbg);}
-.objection__inner{text-align:center;}
-.objection__question{font-size:var(--fs-display-md);color:var(--c-white);margin-bottom:var(--space-5);font-style:italic;}
-.objection__para{font-size:var(--fs-body-lg);color:var(--c-textbody);line-height:1.8;margin-bottom:var(--space-4);}
-.objection__para:last-child{color:var(--c-lime);font-weight:700;}
-.results__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--space-5);margin-top:var(--space-6);}
-.result-card{display:flex;flex-direction:column;gap:var(--space-3);}
-.result-card__images{display:grid;grid-template-columns:1fr 1fr;gap:2px;border-radius:var(--radius-card);overflow:hidden;border:var(--border-lime);}
-.result-card__fig{position:relative;margin:0;}
-.result-card__img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;}
-.result-card__label{position:absolute;bottom:var(--space-2);left:var(--space-2);font-family:var(--font-label);font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-white);background-color:rgba(13,13,13,.85);padding:2px 6px;border-radius:2px;}
-.result-card__name{font-family:var(--font-display);font-size:1rem;color:var(--c-lime);text-transform:uppercase;}
-.result-card__meta{font-size:var(--fs-body-sm);color:var(--c-textsub);margin-top:var(--space-1);}
-.process__list{list-style:none;display:flex;flex-direction:column;margin-top:var(--space-6);max-width:720px;}
-.process__step{display:grid;grid-template-columns:3rem 1fr;gap:var(--space-4);padding-block:var(--space-4);border-bottom:1px solid rgba(255,255,255,.06);align-items:flex-start;}
-.process__step:last-child{border-bottom:none;}
-.process__number{font-family:var(--font-display);font-size:1.5rem;color:var(--c-lime);line-height:1;padding-top:.15em;}
-.process__who{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-lime);display:block;margin-bottom:var(--space-1);}
-.process__title{font-size:var(--fs-display-sm);color:var(--c-white);margin-bottom:var(--space-1);}
-.process__body{font-size:var(--fs-body-sm);color:var(--c-textsub);}
-.motivational{background-color:var(--c-darkbg);}
-.motivational__inner{display:flex;flex-direction:column;gap:var(--space-4);align-items:flex-start;}
-.motivational__line{font-size:var(--fs-body-lg);color:var(--c-textbody);line-height:1.7;}
-.motivational__line:first-child{font-family:var(--font-display);font-size:var(--fs-display-sm);color:var(--c-white);text-transform:uppercase;}
-.motivational__cta{margin-top:var(--space-4);}
-.testimonials__title{font-family:var(--font-display);font-size:var(--fs-display-md);color:var(--c-white);text-transform:uppercase;margin-bottom:var(--space-6);}
-.testimonials__accent{color:var(--c-lime);}
-.testimonials__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--space-5);}
-.testimonial-card{background-color:var(--c-darkbg);border-left:var(--border-card);border-right:1px solid rgba(166,195,0,.15);padding:var(--space-5);border-radius:var(--radius-card);display:flex;flex-direction:column;gap:var(--space-4);}
-.testimonial-card__header{display:flex;gap:var(--space-4);align-items:center;}
-.testimonial-card__photo{width:72px;height:72px;border-radius:50%;border:var(--ring-photo);object-fit:cover;flex-shrink:0;}
-.testimonial-card__name{font-family:var(--font-display);font-size:var(--fs-display-sm);color:var(--c-lime);text-transform:uppercase;}
-.testimonial-card__role{font-size:var(--fs-body-sm);color:var(--c-textsub);font-family:var(--font-label);letter-spacing:.05em;margin-top:var(--space-1);}
-.testimonial-card__metric{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-lime);border-bottom:1px solid rgba(166,195,0,.2);padding-bottom:var(--space-3);}
-.testimonial-card__text{font-size:var(--fs-body-md);color:var(--c-textbody);line-height:1.7;}
-.testimonial-card__toggle{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-lime);cursor:pointer;background:none;border:none;padding:0;margin-top:var(--space-2);}
-.partners__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-6);margin-top:var(--space-6);align-items:start;}
-.partner-item{display:flex;flex-direction:column;align-items:center;gap:var(--space-3);text-align:center;}
-.partner-item__logo{height:48px;width:auto;max-width:160px;object-fit:contain;filter:brightness(0) invert(1);opacity:.7;transition:opacity var(--transition-base);}
-.partner-item:hover .partner-item__logo{opacity:1;}
-.partner-item__desc{font-size:var(--fs-body-sm);color:var(--c-textsub);line-height:1.5;}
-.faq__list{display:flex;flex-direction:column;margin-top:var(--space-6);}
-.faq__item{border-bottom:1px solid rgba(255,255,255,.08);}
-.faq__item:first-child{border-top:1px solid rgba(255,255,255,.08);}
-.faq__btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding-block:var(--space-4);font-family:var(--font-label);font-size:var(--fs-body-md);font-weight:700;text-align:left;color:var(--c-white);background:none;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:.04em;transition:color var(--transition-base);}
-.faq__btn:hover{color:var(--c-lime);}
-.faq__icon{font-family:var(--font-display);font-size:1.5rem;color:var(--c-lime);flex-shrink:0;transition:transform var(--transition-base);line-height:1;}
-.faq__btn[aria-expanded="true"] .faq__icon{transform:rotate(45deg);}
-.faq__answer{padding-bottom:var(--space-4);padding-right:3rem;}
-.faq__answer p{font-size:var(--fs-body-md);color:var(--c-textbody);line-height:1.7;}
-.cta-final{background:linear-gradient(to bottom,var(--c-black),var(--c-darkbg) 50%,var(--c-black));}
-.cta-final__inner{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-8);align-items:center;}
-.cta-final__left{display:flex;flex-direction:column;gap:var(--space-4);}
-.cta-final__btn{font-size:var(--fs-body-sm);letter-spacing:.04em;line-height:1.4;text-align:center;padding:1.25rem 1.5rem;max-width:400px;}
-.cta-final__subtext{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-textsub);}
-@media(max-width:767px){.cta-final__inner{grid-template-columns:1fr;}}
-.footer{padding-block:var(--space-6);border-top:1px solid rgba(255,255,255,.06);}
-.footer__inner{display:flex;justify-content:center;}
-.footer__copy{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--c-textsub);}
+  html, body { overflow-x: hidden; max-width: 100%; }
 </style>

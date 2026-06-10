@@ -1,0 +1,23 @@
+---
+import type { Translations } from "../../i18n/pt";
+interface Props { t: Translations; }
+const { t } = Astro.props;
+---
+
+<section class="section motivational" aria-label="Motivacional">
+  <div class="container container--text motivational__inner">
+    {t.motivational.lines.map(line => <p class="motivational__line">{line}</p>)}
+    <button class="btn-cta motivational__cta" type="button" aria-haspopup="dialog">
+      {t.motivational.cta}
+    </button>
+  </div>
+</section>
+
+<style>
+  .motivational { background-color: var(--c-darkbg); }
+  .motivational__inner { display: flex; flex-direction: column; gap: var(--space-4); align-items: flex-start; }
+  .motivational__line { font-size: var(--fs-body-lg); color: var(--c-textbody); line-height: 1.7; }
+  .motivational__line:first-child { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); text-transform: uppercase; }
+  .motivational__cta { margin-top: var(--space-4); max-width: 100%; }
+  @media (max-width: 767px) { .motivational__cta { align-self: stretch; text-align: center; } }
+</style>

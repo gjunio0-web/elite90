@@ -1,0 +1,121 @@
+---
+export const prerender = false;
+---
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elite 90 · Acesso ao Painel</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#ccc;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+    .login-wrap{width:100%;max-width:420px;}
+    .login-logo{text-align:center;margin-bottom:40px;}
+    .login-logo img{height:80px;width:auto;object-fit:contain;}
+    .login-card{background:#1A1A1A;border:1px solid rgba(166,195,0,.2);border-radius:12px;padding:40px 36px;}
+    .login-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:#A6C300;text-align:center;margin-bottom:8px;}
+    .login-title{font-family:'Arial Black',sans-serif;font-size:26px;font-weight:900;color:#fff;text-align:center;letter-spacing:.04em;margin-bottom:32px;}
+    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;}
+    .field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#999;}
+    .field input{background:#0D0D0D;border:1px solid #2a2a2a;border-radius:6px;color:#fff;font-size:15px;padding:14px 16px;transition:border-color 200ms;}
+    .field input:focus{outline:none;border-color:#A6C300;}
+    .field input::placeholder{color:#444;}
+    .btn-primary{width:100%;background:#A6C300;color:#000;font-weight:900;text-transform:uppercase;letter-spacing:.1em;padding:16px;border:none;border-radius:50px;cursor:pointer;font-size:13px;margin-top:8px;transition:box-shadow 200ms;}
+    .btn-primary:hover{box-shadow:0 0 20px rgba(166,195,0,.4);}
+    .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+    .error-msg{color:#E74C3C;font-size:12px;text-align:center;margin-top:12px;min-height:18px;}
+    .back-link{display:block;text-align:center;margin-top:24px;font-size:12px;color:#666;text-decoration:none;transition:color 200ms;}
+    .back-link:hover{color:#A6C300;}
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-logo">
+      <img src="/images/brand/logo-hero.webp" alt="Coach Ruiz Elite 90" />
+    </div>
+    <div class="login-card">
+      <p class="login-eyebrow">Area Restrita</p>
+      <h1 class="login-title">Acesso ao Painel</h1>
+
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="l-email">E-MAIL</label>
+          <input type="email" id="l-email" name="email" required
+            placeholder="admin@coachruiz.com.br" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="l-password">SENHA</label>
+          <input type="password" id="l-password" name="password" required
+            placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <button class="btn-primary" type="submit" id="login-btn">ENTRAR</button>
+        <p class="error-msg" id="login-error"></p>
+      </form>
+    </div>
+    <a class="back-link" href="/">← Voltar ao site</a>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const cfg = {
+      apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
+      authDomain:        document.querySelector('meta[name="fb-auth"]')?.content,
+      projectId:         document.querySelector('meta[name="fb-proj"]')?.content,
+      storageBucket:     document.querySelector('meta[name="fb-bucket"]')?.content,
+      messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
+      appId:             document.querySelector('meta[name="fb-appid"]')?.content,
+    };
+
+    const app  = initializeApp(cfg);
+    const auth = getAuth(app);
+
+    const form   = document.getElementById("login-form");
+    const btn    = document.getElementById("login-btn");
+    const errEl  = document.getElementById("login-error");
+
+    const errorMessages = {
+      "auth/user-not-found":    "Conta nao encontrada.",
+      "auth/wrong-password":    "Senha incorreta.",
+      "auth/invalid-email":     "E-mail invalido.",
+      "auth/too-many-requests": "Muitas tentativas. Aguarde alguns minutos.",
+      "auth/invalid-credential":"E-mail ou senha incorretos.",
+    };
+
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      btn.disabled = true;
+      btn.textContent = "ENTRANDO...";
+      errEl.textContent = "";
+
+      const email    = document.getElementById("l-email").value;
+      const password = document.getElementById("l-password").value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "/admin";
+      } catch (err) {
+        errEl.textContent = errorMessages[err.code] ?? "Erro ao autenticar.";
+        btn.disabled = false;
+        btn.textContent = "ENTRAR";
+      }
+    });
+
+    // If already logged in, redirect
+    auth.onAuthStateChanged(user => {
+      if (user) window.location.href = "/admin";
+    });
+  </script>
+
+  <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+  <meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+  <meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+  <meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
+  <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
+  <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
+</body>
+</html>

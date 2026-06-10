@@ -1,0 +1,37 @@
+---
+import type { Translations } from "../../i18n/pt";
+interface Props { t: Translations; }
+const { t } = Astro.props;
+---
+<section class="section pillars" id="pilares" style="scroll-margin-top:80px" aria-label="Pilares do programa">
+  <div class="container">
+    <p class="section__eyebrow">{t.pillars.eyebrow}</p>
+    <h2 class="section__title">{t.pillars.title}</h2>
+    <p class="pillars__intro">{t.pillars.intro}</p>
+    <div class="pillars__grid">
+      {t.pillars.items.map(pillar => (
+        <article class="pillar-card">
+          <span class="pillar-card__number" aria-hidden="true">{pillar.number}</span>
+          <h3 class="pillar-card__title">{pillar.title}</h3>
+          <p class="pillar-card__body">{pillar.body}</p>
+          <p class="pillar-card__result">
+            <span aria-label="Resultado:">-&gt;</span>{pillar.result}
+          </p>
+        </article>
+      ))}
+    </div>
+    <p class="pillars__confluence">{t.pillars.confluence}</p>
+  </div>
+</section>
+
+<style>
+  .pillars__intro { font-size: var(--fs-body-lg); color: var(--c-textbody); line-height: 1.8; max-width: 680px; margin-bottom: var(--space-7); font-style: italic; }
+  .pillars__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-7); }
+  .pillar-card { background-color: var(--c-darkbg); border-top: var(--border-card); padding: var(--space-5); border-radius: var(--radius-card); display: flex; flex-direction: column; gap: var(--space-3); }
+  .pillar-card__number { font-family: var(--font-display); font-size: 2.5rem; color: var(--c-lime); line-height: 1; }
+  .pillar-card__title { font-size: var(--fs-display-sm); color: var(--c-white); }
+  .pillar-card__body { font-size: var(--fs-body-md); color: var(--c-textbody); line-height: 1.7; flex: 1; }
+  .pillar-card__result { font-family: var(--font-label); font-size: var(--fs-label); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--c-lime); border-top: 1px solid rgba(166,195,0,.2); padding-top: var(--space-3); display: flex; gap: var(--space-2); }
+  .pillars__confluence { font-family: var(--font-display); font-size: var(--fs-display-md); color: var(--c-white); text-transform: uppercase; text-align: center; max-width: 680px; margin-inline: auto; line-height: 1.2; }
+  .pillars__confluence::after { content: ""; display: block; width: 60px; height: 3px; background-color: var(--c-lime); margin: var(--space-4) auto 0; }
+</style>

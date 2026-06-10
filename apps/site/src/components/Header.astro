@@ -1,61 +1,46 @@
 ---
-// --- ELITE 90 · Header
 import LanguageSwitcher from "./LanguageSwitcher.astro";
 import type { Locale } from "../i18n/utils";
 import type { Translations } from "../i18n/pt";
 
-interface Props {
-  t: Translations;
-  locale: Locale;
-}
+interface Props { t: Translations; locale: Locale; }
 const { t, locale } = Astro.props;
 const n = t.nav;
 ---
 
-<header class="site-header" id="site-header">
+<header class="site-header" id="site-header" data-scrolled="false">
   <div class="container site-header__inner">
 
-    <!-- Logo -->
-    <a href={locale === "en" ? "/en" : "/"} class="site-header__logo" aria-label="Coach Ruiz - Elite 90">
+    <a href={locale === "en" ? "/en" : "/"} class="site-header__logo" aria-label="Coach Ruiz">
       <img
-        src="/images/logo-elite90.webp"
-        alt="Coach Ruiz Elite 90"
-        width="140"
-        height="42"
+        src="/images/brand/logo-header.webp"
+        srcset="/images/brand/logo-header.webp 1x, /images/brand/logo-header@2x.webp 2x"
+        alt="Coach Ruiz"
+        class="site-header__logo-img"
+        width="280"
+        height="70"
         loading="eager"
       />
     </a>
 
-    <!-- Desktop nav -->
-    <nav class="site-header__nav" aria-label="Navegação principal">
-      <a href="#pilares"      class="site-header__link">{n.method}</a>
-      <a href="#resultados"   class="site-header__link">{n.results}</a>
-      <a href="#depoimentos"  class="site-header__link">{n.testimonials}</a>
-      <a href="#faq"          class="site-header__link">{n.faq}</a>
+    <nav class="site-header__nav" aria-label="Navegacao principal">
+      <a href="#pilares"     class="site-header__link" data-nav-link>{n.method}</a>
+      <a href="#cronograma"  class="site-header__link" data-nav-link>{n.schedule}</a>
+      <a href="#coach"       class="site-header__link" data-nav-link>{n.coach}</a>
+      <a href="#resultados"  class="site-header__link" data-nav-link>{n.results}</a>
+      <a href="#processo"    class="site-header__link" data-nav-link>{n.process}</a>
+      <a href="#depoimentos" class="site-header__link" data-nav-link>{n.testimonials}</a>
+      <a href="#parceiros"   class="site-header__link" data-nav-link>{n.partners}</a>
+      <a href="#faq"         class="site-header__link" data-nav-link>{n.faq}</a>
     </nav>
 
-    <!-- Right slot: lang switcher + CTA + hamburger -->
     <div class="site-header__right">
       <LanguageSwitcher currentLocale={locale} />
-
-      <button
-        class="btn-cta site-header__cta"
-        id="header-cta-btn"
-        type="button"
-        aria-haspopup="dialog"
-      >
-        {n.apply}
+      <button class="btn-cta site-header__cta" id="header-cta-btn" type="button" aria-haspopup="dialog">
+        {n.applyCta}
       </button>
-
-      <!-- Hamburger (mobile only) -->
-      <button
-        class="site-header__hamburger"
-        id="hamburger-btn"
-        type="button"
-        aria-label={n.menu}
-        aria-expanded="false"
-        aria-controls="mobile-drawer"
-      >
+      <button class="site-header__hamburger" id="hamburger-btn" type="button"
+        aria-label={n.menu} aria-expanded="false" aria-controls="mobile-drawer">
         <span class="site-header__bar"></span>
         <span class="site-header__bar"></span>
         <span class="site-header__bar"></span>
@@ -64,41 +49,21 @@ const n = t.nav;
   </div>
 </header>
 
-<!-- Mobile drawer -->
-<div
-  class="mobile-drawer"
-  id="mobile-drawer"
-  role="dialog"
-  aria-modal="true"
-  aria-label={n.menu}
-  hidden
->
+<div class="mobile-drawer" id="mobile-drawer" role="dialog" aria-modal="true" aria-label={n.menu} hidden>
   <div class="mobile-drawer__overlay" id="drawer-overlay"></div>
   <nav class="mobile-drawer__panel" aria-label="Menu mobile">
-    <button
-      class="mobile-drawer__close"
-      id="drawer-close"
-      type="button"
-      aria-label={n.close}
-    >
-      ✕
-    </button>
-
+    <button class="mobile-drawer__close" id="drawer-close" type="button" aria-label={n.close}>x</button>
     <a href="#pilares"     class="mobile-drawer__link" data-drawer-link>{n.method}</a>
+    <a href="#cronograma"  class="mobile-drawer__link" data-drawer-link>{n.schedule}</a>
+    <a href="#coach"       class="mobile-drawer__link" data-drawer-link>{n.coach}</a>
     <a href="#resultados"  class="mobile-drawer__link" data-drawer-link>{n.results}</a>
+    <a href="#processo"    class="mobile-drawer__link" data-drawer-link>{n.process}</a>
     <a href="#depoimentos" class="mobile-drawer__link" data-drawer-link>{n.testimonials}</a>
+    <a href="#parceiros"   class="mobile-drawer__link" data-drawer-link>{n.partners}</a>
     <a href="#faq"         class="mobile-drawer__link" data-drawer-link>{n.faq}</a>
-
-    <button
-      class="btn-cta mobile-drawer__cta"
-      id="drawer-cta-btn"
-      type="button"
-      aria-haspopup="dialog"
-      data-drawer-link
-    >
+    <button class="btn-cta mobile-drawer__cta" id="drawer-cta-btn" type="button" data-drawer-link>
       {n.apply}
     </button>
-
     <div class="mobile-drawer__lang">
       <LanguageSwitcher currentLocale={locale} />
     </div>
@@ -106,19 +71,51 @@ const n = t.nav;
 </div>
 
 <script>
+  const header   = document.getElementById("site-header") as HTMLElement;
   const hamburger = document.getElementById("hamburger-btn") as HTMLButtonElement;
-  const drawer    = document.getElementById("mobile-drawer") as HTMLElement;
-  const overlay   = document.getElementById("drawer-overlay") as HTMLElement;
-  const closeBtn  = document.getElementById("drawer-close") as HTMLButtonElement;
+  const drawer   = document.getElementById("mobile-drawer") as HTMLElement;
+  const overlay  = document.getElementById("drawer-overlay") as HTMLElement;
+  const closeBtn = document.getElementById("drawer-close") as HTMLButtonElement;
   const drawerLinks = document.querySelectorAll("[data-drawer-link]");
 
+  // Transparent -> solid on scroll
+  const SCROLL_THRESHOLD = 80;
+
+  function updateHeader() {
+    const scrolled = window.scrollY > SCROLL_THRESHOLD;
+    header.dataset.scrolled = String(scrolled);
+  }
+
+  window.addEventListener("scroll", updateHeader, { passive: true });
+  updateHeader();
+
+  // Active nav link highlight
+  const navLinks = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
+  const sectionIds = ["pilares","cronograma","coach","resultados","processo","depoimentos","parceiros","faq","triagem"];
+
+  const sectionObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(link => {
+          link.classList.toggle("site-header__link--active", link.getAttribute("href") === `#${id}`);
+        });
+      }
+    });
+  }, { rootMargin: "-50% 0px -50% 0px" });
+
+  sectionIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) sectionObserver.observe(el);
+  });
+
+  // Drawer
   function openDrawer() {
     drawer.hidden = false;
     hamburger.setAttribute("aria-expanded", "true");
     document.body.style.overflow = "hidden";
     closeBtn.focus();
   }
-
   function closeDrawer() {
     drawer.hidden = true;
     hamburger.setAttribute("aria-expanded", "false");
@@ -129,45 +126,27 @@ const n = t.nav;
   hamburger.addEventListener("click", openDrawer);
   closeBtn.addEventListener("click", closeDrawer);
   overlay.addEventListener("click", closeDrawer);
-  drawerLinks.forEach(link => link.addEventListener("click", closeDrawer));
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !drawer.hidden) closeDrawer();
-  });
-
-  // Header hide/show on scroll
-  let lastY = 0;
-  const header = document.getElementById("site-header") as HTMLElement;
-  window.addEventListener("scroll", () => {
-    const currentY = window.scrollY;
-    if (currentY < 80) {
-      header.classList.remove("site-header--hidden");
-    } else if (currentY > lastY) {
-      header.classList.add("site-header--hidden");
-    } else {
-      header.classList.remove("site-header--hidden");
-    }
-    lastY = currentY;
-  }, { passive: true });
+  drawerLinks.forEach(l => l.addEventListener("click", closeDrawer));
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !drawer.hidden) closeDrawer(); });
 </script>
 
 <style>
   .site-header {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     z-index: 50;
-    height: 64px;
-    background: rgba(13, 13, 13, 0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(166, 195, 0, 0.12);
-    transition: transform 300ms ease;
+    height: 80px;
+    background: transparent;
+    transition: background 300ms ease, height 300ms ease, border-color 300ms ease, backdrop-filter 300ms ease;
+    border-bottom: 1px solid transparent;
   }
 
-  .site-header--hidden {
-    transform: translateY(-100%);
+  .site-header[data-scrolled="true"] {
+    height: 64px;
+    background: rgba(13,13,13,0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom-color: rgba(166,195,0,0.12);
   }
 
   .site-header__inner {
@@ -178,45 +157,61 @@ const n = t.nav;
     gap: var(--space-4);
   }
 
-  .site-header__logo img {
-    height: 36px;
+  .site-header__logo { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
+
+  .site-header__logo-img {
+    height: 52px;
     width: auto;
-    display: block;
+    transition: height 300ms ease;
+    object-fit: contain;
   }
+
+  .site-header[data-scrolled="true"] .site-header__logo-img { height: 40px; }
 
   .site-header__nav {
     display: flex;
     align-items: center;
-    gap: var(--space-5);
+    gap: var(--space-4);
+    overflow-x: auto;
+    scrollbar-width: none;
   }
+  .site-header__nav::-webkit-scrollbar { display: none; }
 
   .site-header__link {
     font-family: var(--font-label);
-    font-size: var(--fs-label);
+    font-size: 0.68rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--c-textsub);
+    color: rgba(204,204,204,0.75);
     text-decoration: none;
-    transition: color var(--transition-base);
     white-space: nowrap;
+    transition: color var(--transition-base);
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+    transition: color var(--transition-base), border-color var(--transition-base);
   }
 
   .site-header__link:hover,
-  .site-header__link:focus-visible {
+  .site-header__link:focus-visible { color: var(--c-white); }
+
+  .site-header__link--active {
     color: var(--c-lime);
+    border-bottom-color: var(--c-lime);
   }
 
   .site-header__right {
     display: flex;
     align-items: center;
-    gap: var(--space-4);
+    gap: var(--space-3);
+    flex-shrink: 0;
   }
 
   .site-header__cta {
-    padding: 0.5rem 1.25rem;
-    font-size: 0.7rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.65rem;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .site-header__hamburger {
@@ -224,114 +219,75 @@ const n = t.nav;
     flex-direction: column;
     justify-content: center;
     gap: 5px;
-    width: 36px;
-    height: 36px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
+    width: 36px; height: 36px;
+    background: none; border: none;
+    cursor: pointer; padding: 4px;
   }
 
   .site-header__bar {
-    display: block;
-    width: 100%;
-    height: 2px;
-    background-color: var(--c-lime);
-    border-radius: 2px;
-    transition: transform 200ms ease, opacity 200ms ease;
+    display: block; width: 100%; height: 2px;
+    background-color: var(--c-lime); border-radius: 2px;
   }
 
   /* Mobile drawer */
   .mobile-drawer {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
+    position: fixed; inset: 0; z-index: 100;
     display: flex;
   }
-
-  .mobile-drawer[hidden] {
-    display: none;
-  }
+  .mobile-drawer[hidden] { display: none; }
 
   .mobile-drawer__overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.75);
     backdrop-filter: blur(4px);
   }
 
   .mobile-drawer__panel {
     position: relative;
     margin-left: auto;
-    width: min(320px, 85vw);
+    width: min(300px, 85vw);
     height: 100%;
     background: var(--c-darkbg);
-    border-left: 1px solid rgba(166, 195, 0, 0.15);
-    display: flex;
-    flex-direction: column;
+    border-left: 1px solid rgba(166,195,0,0.15);
+    display: flex; flex-direction: column;
     padding: var(--space-6) var(--space-5);
     gap: var(--space-3);
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-lime) var(--c-darkbg);
   }
 
   .mobile-drawer__close {
     align-self: flex-end;
-    font-size: 1.2rem;
-    color: var(--c-textsub);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: var(--space-2);
-    margin-bottom: var(--space-4);
+    font-size: 1.2rem; color: var(--c-textsub);
+    background: none; border: none; cursor: pointer;
+    padding: var(--space-2); margin-bottom: var(--space-4);
     transition: color var(--transition-base);
   }
-
-  .mobile-drawer__close:hover {
-    color: var(--c-lime);
-  }
+  .mobile-drawer__close:hover { color: var(--c-lime); }
 
   .mobile-drawer__link {
     font-family: var(--font-label);
-    font-size: 0.875rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--c-textbody);
-    text-decoration: none;
+    font-size: 0.875rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--c-textbody); text-decoration: none;
     padding-block: var(--space-3);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
     transition: color var(--transition-base);
   }
+  .mobile-drawer__link:hover { color: var(--c-lime); }
 
-  .mobile-drawer__link:hover {
-    color: var(--c-lime);
-  }
+  .mobile-drawer__cta { width: 100%; margin-top: var(--space-4); font-size: var(--fs-body-sm); }
+  .mobile-drawer__lang { margin-top: auto; padding-top: var(--space-5); }
 
-  .mobile-drawer__cta {
-    width: 100%;
-    margin-top: var(--space-4);
-    font-size: var(--fs-body-sm);
-  }
-
-  .mobile-drawer__lang {
-    margin-top: auto;
-    padding-top: var(--space-5);
-  }
-
-  @media (max-width: 767px) {
-    .site-header__nav,
-    .site-header__cta {
-      display: none;
-    }
-
-    .site-header__hamburger {
-      display: flex;
-    }
+  @media (max-width: 1023px) {
+    .site-header__nav { display: none; }
+    .site-header__cta { display: none; }
+    .site-header__hamburger { display: flex; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .site-header {
-      transition: none;
-    }
+    .site-header,
+    .site-header__logo-img { transition: none; }
   }
 </style>

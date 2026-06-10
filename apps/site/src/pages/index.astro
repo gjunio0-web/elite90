@@ -1,36 +1,27 @@
 ---
 export const prerender = true;
 import Layout from "../layouts/Layout.astro";
-import HeroVideo from "../components/HeroVideo.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import ProcessTimeline from "../components/ProcessTimeline.astro";
-import BeforeAfterSlider from "../components/BeforeAfterSlider.astro";
 import TriageModal from "../components/TriageModal.astro";
 import StickyCtaMobile from "../components/StickyCtaMobile.astro";
+import HeroSection from "../components/sections/HeroSection.astro";
+import QualifierSection from "../components/sections/QualifierSection.astro";
+import ScheduleSection from "../components/sections/ScheduleSection.astro";
+import CoachSection from "../components/sections/CoachSection.astro";
+import PillarsSection from "../components/sections/PillarsSection.astro";
+import ObjectionSection from "../components/sections/ObjectionSection.astro";
+import ResultsSection from "../components/sections/ResultsSection.astro";
+import ProcessSection from "../components/sections/ProcessSection.astro";
+import MotivationalSection from "../components/sections/MotivationalSection.astro";
+import TestimonialsSection from "../components/sections/TestimonialsSection.astro";
+import PartnersSection from "../components/sections/PartnersSection.astro";
+import FaqSection from "../components/sections/FaqSection.astro";
+import CtaFinalSection from "../components/sections/CtaFinalSection.astro";
 import { useTranslations } from "../i18n/utils";
 
 const locale = "pt-br";
 const t = useTranslations(locale);
-
-// Build result items for slider
-const results = [1,2,3,4].map(n => ({
-  n,
-  beforeSrc: `/images/results/resultado-0${n}-antes.webp`,
-  afterSrc:  `/images/results/resultado-0${n}-depois.webp`,
-  name:      "Atleta [INICIAIS]",
-  meta:      "[CARGO] · [PERÍODO] · [MÉTRICA]",
-  beforeLabel: "Antes",
-  afterLabel:  "Depois",
-}));
-
-// Partner URLs
-const partnerUrls: Record<string,string> = {
-  "Army":         "https://www.armybr.com.br/",
-  "Adaptogen":    "https://adaptogen.com.br/",
-  "Oficial Farma":"https://www.oficialfarma.com.br/",
-  "Quatro Folhas":"https://vivaquatrofolhas.com.br/",
-};
 ---
 
 <Layout
@@ -40,423 +31,36 @@ const partnerUrls: Record<string,string> = {
   ogDescription={t.meta.ogDescription}
   locale={locale}
 >
-  <!-- Header fixo -->
   <Header t={t} locale={locale} />
-
-  <!-- Hero -->
-  <HeroVideo>
-    <section class="hero section" aria-label="Hero" style="padding-top:calc(var(--space-9) + 64px)">
-      <div class="container hero__inner">
-        <div class="hero__content">
-          <p class="section__eyebrow">{t.hero.eyebrow}</p>
-          <h1 class="hero__headline">{t.hero.headline}</h1>
-          <p class="hero__sub">{t.hero.subheadline}</p>
-          <ul class="hero__proof">
-            <li class="hero__proof-item"><span class="hero__proof-icon" aria-hidden="true">●</span>{t.hero.socialProof.athletes}</li>
-            <li class="hero__proof-item"><span class="hero__proof-icon" aria-hidden="true">●</span>{t.hero.socialProof.experience}</li>
-            <li class="hero__proof-item hero__proof-item--title"><span class="hero__proof-icon" aria-hidden="true">◆</span>{t.hero.socialProof.title}</li>
-          </ul>
-          <button class="btn-cta hero__cta" type="button" aria-haspopup="dialog">
-            {t.hero.cta}
-          </button>
-          <p class="hero__differentiation">{t.hero.differentiation}</p>
-        </div>
-      </div>
-    </section>
-  </HeroVideo>
-
-  <!-- Qualificador -->
-  <section class="section qualifier" aria-label="Qualificador">
-    <div class="container container--text qualifier__inner">
-      <h2 class="qualifier__headline">{t.qualifier.headline}</h2>
-      <p class="qualifier__body">{t.qualifier.body}</p>
-      <p class="qualifier__cta-line">{t.qualifier.cta}</p>
-    </div>
-  </section>
-
-  <!-- Cronograma -->
-  <section class="section schedule" aria-label="Cronograma">
-    <div class="container">
-      <p class="section__eyebrow">{t.schedule.eyebrow}</p>
-      <h2 class="section__title">{t.schedule.title}</h2>
-      <div class="schedule__grid">
-        {t.schedule.phases.map(phase => (
-          <div class="schedule__phase">
-            <span class="schedule__number" aria-hidden="true">{phase.number}</span>
-            <h3 class="schedule__phase-title">{phase.title}</h3>
-            <ul class="schedule__items">
-              {phase.items.map(item => <li class="schedule__item">{item}</li>)}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
+  <HeroSection t={t} />
+  <QualifierSection t={t} />
+  <ScheduleSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <!-- Coach -->
-  <section class="section coach" aria-label="Sobre o coach" style="scroll-margin-top:64px">
-    <div class="container coach__inner">
-      <div class="coach__image-col">
-        <div class="coach__photo-wrap">
-          <img src="/images/coach-ruiz.webp" alt="Coach Fernando Ruiz" class="coach__photo" width="480" height="600" loading="lazy" />
-        </div>
-      </div>
-      <div class="coach__content">
-        <p class="section__eyebrow">{t.coach.eyebrow}</p>
-        <h2 class="coach__name">{t.coach.title}</h2>
-        {t.coach.paragraphs.map(para => <p class="coach__para">{para}</p>)}
-      </div>
-    </div>
-  </section>
-
+  <CoachSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <!-- Pilares -->
-  <section class="section pillars" id="pilares" style="scroll-margin-top:64px" aria-label="Pilares">
-    <div class="container">
-      <p class="section__eyebrow">{t.pillars.eyebrow}</p>
-      <h2 class="section__title">{t.pillars.title}</h2>
-      <p class="pillars__intro">{t.pillars.intro}</p>
-      <div class="pillars__grid">
-        {t.pillars.items.map(pillar => (
-          <article class="pillar-card">
-            <span class="pillar-card__number" aria-hidden="true">{pillar.number}</span>
-            <h3 class="pillar-card__title">{pillar.title}</h3>
-            <p class="pillar-card__body">{pillar.body}</p>
-            <p class="pillar-card__result">
-              <span aria-label="Resultado:">→</span>{pillar.result}
-            </p>
-          </article>
-        ))}
-      </div>
-      <p class="pillars__confluence">{t.pillars.confluence}</p>
-    </div>
-  </section>
-
-  <!-- Objeção -->
-  <section class="section objection" aria-label="Após os 40">
-    <div class="container container--text objection__inner">
-      <p class="section__eyebrow">{t.objection.eyebrow}</p>
-      <h2 class="objection__question">{t.objection.question}</h2>
-      {t.objection.paragraphs.map(para => <p class="objection__para">{para}</p>)}
-    </div>
-  </section>
-
+  <PillarsSection t={t} />
+  <ObjectionSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <!-- Resultados com slider -->
-  <section class="section results" id="resultados" style="scroll-margin-top:64px" aria-label="Resultados">
-    <div class="container">
-      <p class="section__eyebrow">{t.results.eyebrow}</p>
-      <h2 class="section__title">{t.results.title}<span> {t.results.titleAccent}</span></h2>
-      <BeforeAfterSlider items={results} />
-    </div>
-  </section>
-
+  <ResultsSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <!-- Processo - timeline -->
-  <section class="section process" aria-label="Como funciona">
-    <div class="container">
-      <p class="section__eyebrow">{t.process.eyebrow}</p>
-      <h2 class="section__title">{t.process.title}</h2>
-      <ProcessTimeline t={t} />
-    </div>
-  </section>
-
-  <!-- Motivacional -->
-  <section class="section motivational" aria-label="Motivacional">
-    <div class="container container--text motivational__inner">
-      {t.motivational.lines.map(line => <p class="motivational__line">{line}</p>)}
-      <button class="btn-cta motivational__cta" type="button" aria-haspopup="dialog">
-        {t.motivational.cta}
-      </button>
-    </div>
-  </section>
-
+  <ProcessSection t={t} />
+  <MotivationalSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <!-- Depoimentos -->
-  <section class="section testimonials" id="depoimentos" style="scroll-margin-top:64px" aria-label="Depoimentos">
-    <div class="container">
-      <p class="testimonials__title">
-        {t.testimonials.eyebrow} <span class="testimonials__accent">{t.testimonials.titleAccent}</span> {t.testimonials.titleSuffix}
-      </p>
-      <div class="testimonials__grid">
-        {t.testimonials.items.map(item => (
-          <article class="testimonial-card">
-            <div class="testimonial-card__header">
-              <img src={item.image} alt={item.name} class="testimonial-card__photo" width="96" height="96" loading="lazy" />
-              <div>
-                <h3 class="testimonial-card__name">{item.name}</h3>
-                <p class="testimonial-card__role">{item.role}</p>
-              </div>
-            </div>
-            <p class="testimonial-card__metric">{item.metric}</p>
-            <div class="testimonial-card__text-wrap">
-              <p class="testimonial-card__text" data-full={item.text}>
-                {item.text.slice(0,200)}<span class="testimonial-card__ellipsis">…</span>
-              </p>
-              <button class="testimonial-card__toggle" aria-expanded="false" type="button"
-                data-read-more={t.testimonials.readMore} data-read-less={t.testimonials.readLess}>
-                {t.testimonials.readMore}
-              </button>
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Parceiros -->
-  <section class="section partners" aria-label="Parceiros">
-    <div class="container">
-      <p class="section__eyebrow">{t.partners.eyebrow}</p>
-      <h2 class="section__title">{t.partners.title}</h2>
-      <div class="partners__grid">
-        {t.partners.items.map(partner => (
-          <a
-            class="partner-item"
-            href={partnerUrls[partner.name]}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={partner.name}
-          >
-            <div class="partner-item__logo-wrap">
-              <img src={partner.logo} alt={partner.name} class="partner-item__logo" width="160" height="56" loading="lazy" />
-            </div>
-            <p class="partner-item__desc">{partner.description}</p>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
-
+  <TestimonialsSection t={t} />
+  <PartnersSection t={t} />
   <div class="divider container" role="presentation"></div>
-
-  <!-- FAQ -->
-  <section class="section faq" id="faq" style="scroll-margin-top:64px" aria-label="FAQ">
-    <div class="container container--text">
-      <p class="section__eyebrow">{t.faq.eyebrow}</p>
-      <h2 class="section__title">{t.faq.title}</h2>
-      <dl class="faq__list">
-        {t.faq.items.map(item => (
-          <div class="faq__item">
-            <dt>
-              <button class="faq__btn" type="button" aria-expanded="false">
-                {item.question}
-                <span class="faq__icon" aria-hidden="true">+</span>
-              </button>
-            </dt>
-            <dd class="faq__answer" hidden><p>{item.answer}</p></dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  </section>
-
-  <!-- CTA Final -->
-  <section class="section cta-final" id="triagem" style="scroll-margin-top:64px" aria-label="CTA final">
-    <div class="container cta-final__inner">
-      <p class="section__eyebrow">{t.ctaFinal.eyebrow}</p>
-      <button class="btn-cta cta-final__btn" type="button" aria-haspopup="dialog">
-        {t.ctaFinal.cta}
-      </button>
-      <p class="cta-final__subtext">{t.ctaFinal.subtext}</p>
-    </div>
-  </section>
-
-  <!-- Footer -->
+  <FaqSection t={t} />
+  <CtaFinalSection t={t} />
   <Footer t={t} />
-
-  <!-- Modal de triagem -->
   <TriageModal t={t} />
-
-  <!-- Sticky CTA Mobile -->
   <StickyCtaMobile
-    stage1={t.hero.cta}
-    stage2={t.motivational.cta}
-    stage3={t.ctaFinal.cta}
+    stage1={t.nav.applyCta}
+    stage2={t.nav.applyCta}
+    stage3={t.nav.applyCta}
     targetId="triagem"
   />
 </Layout>
 
-<script>
-  // -- Testimonial expand/collapse
-  document.querySelectorAll<HTMLButtonElement>(".testimonial-card__toggle").forEach(btn => {
-    const wrap    = btn.closest(".testimonial-card__text-wrap");
-    const textEl  = wrap?.querySelector<HTMLElement>(".testimonial-card__text");
-    const ellipsis= textEl?.querySelector<HTMLElement>(".testimonial-card__ellipsis");
-    if (!textEl || !ellipsis) return;
-    const fullText  = textEl.dataset.full ?? "";
-    const shortText = textEl.childNodes[0]?.textContent ?? "";
-    btn.addEventListener("click", () => {
-      const expanded = btn.getAttribute("aria-expanded") === "true";
-      if (expanded) {
-        textEl.childNodes[0].textContent = shortText;
-        ellipsis.hidden = false;
-        btn.setAttribute("aria-expanded","false");
-        btn.textContent = btn.dataset.readMore ?? "Ver mais";
-      } else {
-        textEl.childNodes[0].textContent = fullText;
-        ellipsis.hidden = true;
-        btn.setAttribute("aria-expanded","true");
-        btn.textContent = btn.dataset.readLess ?? "Ver menos";
-      }
-    });
-  });
-
-  // -- FAQ accordion
-  document.querySelectorAll<HTMLButtonElement>(".faq__btn").forEach(btn => {
-    const item   = btn.closest(".faq__item");
-    const answer = item?.querySelector<HTMLElement>(".faq__answer");
-    const icon   = btn.querySelector<HTMLElement>(".faq__icon");
-    if (!answer || !icon) return;
-    btn.addEventListener("click", () => {
-      const expanded = btn.getAttribute("aria-expanded") === "true";
-      btn.setAttribute("aria-expanded", String(!expanded));
-      answer.hidden = expanded;
-      icon.textContent = expanded ? "+" : "−";
-    });
-  });
-
-  // -- Sticky CTA: hide when #triagem is visible
-  const stickyCta = document.getElementById("sticky-cta");
-  const triagemSection = document.getElementById("triagem");
-  if (stickyCta && triagemSection) {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          stickyCta.style.opacity = "0";
-          stickyCta.style.pointerEvents = "none";
-        } else {
-          stickyCta.style.opacity = "";
-          stickyCta.style.pointerEvents = "";
-        }
-      });
-    }, { threshold: 0.1 });
-    observer.observe(triagemSection);
-  }
-
-  // -- All CTA buttons → open modal
-  document.querySelectorAll<HTMLElement>(".hero__cta, .motivational__cta, .cta-final__btn, #header-cta-btn, #drawer-cta-btn").forEach(btn => {
-    btn.addEventListener("click", e => {
-      e.preventDefault();
-      document.dispatchEvent(new CustomEvent("open-triage-modal"));
-    });
-  });
-</script>
-
 <style>
-/* -- MOBILE OVERFLOW FIX --------------------------------------------------- */
-html, body { overflow-x: hidden; max-width: 100%; }
-
-/* -- HERO ------------------------------------------------------------------ */
-.hero { min-height:100svh; display:flex; align-items:center; padding-bottom:var(--space-8); }
-.hero__inner { display:flex; flex-direction:column; gap:var(--space-6); }
-.hero__content { display:flex; flex-direction:column; gap:var(--space-4); max-width:640px; }
-.hero__headline { font-size:var(--fs-display-xl); color:var(--c-lime); text-transform:uppercase; line-height:1.05; }
-.hero__sub { font-size:var(--fs-body-lg); color:var(--c-textbody); font-weight:700; text-transform:uppercase; line-height:1.5; }
-.hero__proof { list-style:none; display:flex; flex-direction:column; gap:var(--space-2); }
-.hero__proof-item { font-family:var(--font-label); font-size:var(--fs-label); font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--c-textsub); display:flex; align-items:center; gap:var(--space-2); }
-.hero__proof-item--title { color:var(--c-lime); }
-.hero__proof-icon { color:var(--c-lime); font-size:.5rem; }
-.hero__cta { align-self:flex-start; max-width:100%; }
-.hero__differentiation { font-size:var(--fs-body-sm); color:var(--c-textsub); font-style:italic; border-left:2px solid var(--c-lime); padding-left:var(--space-4); max-width:480px; line-height:1.6; }
-@media(max-width:767px) {
-  .hero__cta { align-self:stretch; text-align:center; }
-}
-
-/* -- QUALIFIER ------------------------------------------------------------- */
-.qualifier { background-color:var(--c-darkbg); }
-.qualifier__inner { text-align:center; }
-.qualifier__headline { font-size:var(--fs-display-md); color:var(--c-white); margin-bottom:var(--space-4); }
-.qualifier__body { font-size:var(--fs-body-lg); color:var(--c-textbody); line-height:1.8; margin-bottom:var(--space-4); }
-.qualifier__cta-line { font-family:var(--font-label); font-size:var(--fs-label); font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--c-lime); }
-
-/* -- SCHEDULE -------------------------------------------------------------- */
-.schedule__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:var(--space-5); margin-top:var(--space-6); }
-.schedule__phase { background-color:var(--c-darkbg); border-left:var(--border-card); padding:var(--space-5); border-radius:var(--radius-card); }
-.schedule__number { font-family:var(--font-display); font-size:3rem; color:var(--c-lime); display:block; line-height:1; margin-bottom:var(--space-3); }
-.schedule__phase-title { font-size:var(--fs-display-sm); color:var(--c-white); margin-bottom:var(--space-3); }
-.schedule__items { list-style:none; display:flex; flex-direction:column; gap:var(--space-2); }
-.schedule__item { font-family:var(--font-label); font-size:var(--fs-label); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--c-textbody); }
-
-/* -- COACH ----------------------------------------------------------------- */
-.coach__inner { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-8); align-items:center; }
-.coach__photo-wrap { position:relative; }
-.coach__photo-wrap::before { content:""; position:absolute; inset:-4px; border:var(--border-card); border-radius:var(--radius-card); pointer-events:none; }
-.coach__photo { width:100%; height:auto; aspect-ratio:4/5; object-fit:cover; border-radius:var(--radius-card); display:block; }
-.coach__name { font-size:var(--fs-display-lg); color:var(--c-lime); margin-bottom:var(--space-5); }
-.coach__para { color:var(--c-textbody); line-height:1.8; margin-bottom:var(--space-4); }
-@media(max-width:767px) {
-  .coach__inner { grid-template-columns:1fr; }
-  .coach__image-col { max-width:320px; margin-inline:auto; }
-}
-
-/* -- PILLARS --------------------------------------------------------------- */
-.pillars__intro { font-size:var(--fs-body-lg); color:var(--c-textbody); line-height:1.8; max-width:680px; margin-bottom:var(--space-7); font-style:italic; }
-.pillars__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:var(--space-5); margin-bottom:var(--space-7); }
-.pillar-card { background-color:var(--c-darkbg); border-top:var(--border-card); padding:var(--space-5); border-radius:var(--radius-card); display:flex; flex-direction:column; gap:var(--space-3); }
-.pillar-card__number { font-family:var(--font-display); font-size:2.5rem; color:var(--c-lime); line-height:1; }
-.pillar-card__title { font-size:var(--fs-display-sm); color:var(--c-white); }
-.pillar-card__body { font-size:var(--fs-body-md); color:var(--c-textbody); line-height:1.7; flex:1; }
-.pillar-card__result { font-family:var(--font-label); font-size:var(--fs-label); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--c-lime); border-top:1px solid rgba(166,195,0,.2); padding-top:var(--space-3); display:flex; gap:var(--space-2); }
-.pillars__confluence { font-family:var(--font-display); font-size:var(--fs-display-md); color:var(--c-white); text-transform:uppercase; text-align:center; max-width:680px; margin-inline:auto; line-height:1.2; }
-.pillars__confluence::after { content:""; display:block; width:60px; height:3px; background-color:var(--c-lime); margin:var(--space-4) auto 0; }
-
-/* -- OBJECTION ------------------------------------------------------------- */
-.objection { background-color:var(--c-darkbg); }
-.objection__inner { text-align:center; }
-.objection__question { font-size:var(--fs-display-md); color:var(--c-white); margin-bottom:var(--space-5); font-style:italic; }
-.objection__para { font-size:var(--fs-body-lg); color:var(--c-textbody); line-height:1.8; margin-bottom:var(--space-4); }
-.objection__para:last-child { color:var(--c-lime); font-weight:700; }
-
-/* -- MOTIVATIONAL ---------------------------------------------------------- */
-.motivational { background-color:var(--c-darkbg); }
-.motivational__inner { display:flex; flex-direction:column; gap:var(--space-4); align-items:flex-start; }
-.motivational__line { font-size:var(--fs-body-lg); color:var(--c-textbody); line-height:1.7; }
-.motivational__line:first-child { font-family:var(--font-display); font-size:var(--fs-display-sm); color:var(--c-white); text-transform:uppercase; }
-.motivational__cta { margin-top:var(--space-4); max-width:100%; }
-@media(max-width:767px) { .motivational__cta { align-self:stretch; text-align:center; } }
-
-/* -- TESTIMONIALS ---------------------------------------------------------- */
-.testimonials__title { font-family:var(--font-display); font-size:var(--fs-display-md); color:var(--c-white); text-transform:uppercase; margin-bottom:var(--space-6); }
-.testimonials__accent { color:var(--c-lime); }
-.testimonials__grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:var(--space-5); }
-.testimonial-card { background-color:var(--c-darkbg); border-left:var(--border-card); border-right:1px solid rgba(166,195,0,.15); padding:var(--space-5); border-radius:var(--radius-card); display:flex; flex-direction:column; gap:var(--space-4); }
-.testimonial-card__header { display:flex; gap:var(--space-4); align-items:center; }
-.testimonial-card__photo { width:72px; height:72px; border-radius:50%; border:var(--ring-photo); object-fit:cover; flex-shrink:0; }
-.testimonial-card__name { font-family:var(--font-display); font-size:var(--fs-display-sm); color:var(--c-lime); text-transform:uppercase; }
-.testimonial-card__role { font-size:var(--fs-body-sm); color:var(--c-textsub); font-family:var(--font-label); margin-top:var(--space-1); }
-.testimonial-card__metric { font-family:var(--font-label); font-size:var(--fs-label); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--c-lime); border-bottom:1px solid rgba(166,195,0,.2); padding-bottom:var(--space-3); }
-.testimonial-card__text { font-size:var(--fs-body-md); color:var(--c-textbody); line-height:1.7; }
-.testimonial-card__toggle { font-family:var(--font-label); font-size:var(--fs-label); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--c-lime); cursor:pointer; background:none; border:none; padding:0; margin-top:var(--space-2); }
-
-/* -- PARTNERS -------------------------------------------------------------- */
-.partners__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:var(--space-6); margin-top:var(--space-6); align-items:start; }
-.partner-item { display:flex; flex-direction:column; align-items:center; gap:var(--space-3); text-align:center; text-decoration:none; }
-.partner-item__logo-wrap { height:56px; display:flex; align-items:center; justify-content:center; }
-.partner-item__logo { max-height:56px; width:auto; max-width:180px; object-fit:contain; filter:brightness(0) invert(1); opacity:.7; transition:opacity var(--transition-base); }
-.partner-item:hover .partner-item__logo { opacity:1; }
-.partner-item__desc { font-size:var(--fs-body-sm); color:var(--c-textsub); line-height:1.5; }
-
-/* -- FAQ ------------------------------------------------------------------- */
-.faq__list { display:flex; flex-direction:column; margin-top:var(--space-6); }
-.faq__item { border-bottom:1px solid rgba(255,255,255,.08); }
-.faq__item:first-child { border-top:1px solid rgba(255,255,255,.08); }
-.faq__btn { width:100%; display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); padding-block:var(--space-4); font-family:var(--font-label); font-size:var(--fs-body-md); font-weight:700; text-align:left; color:var(--c-white); background:none; border:none; cursor:pointer; text-transform:uppercase; letter-spacing:.04em; transition:color var(--transition-base); }
-.faq__btn:hover { color:var(--c-lime); }
-.faq__icon { font-family:var(--font-display); font-size:1.5rem; color:var(--c-lime); flex-shrink:0; transition:transform var(--transition-base); line-height:1; }
-.faq__btn[aria-expanded="true"] .faq__icon { transform:rotate(45deg); }
-.faq__answer { padding-bottom:var(--space-4); padding-right:3rem; }
-.faq__answer p { font-size:var(--fs-body-md); color:var(--c-textbody); line-height:1.7; }
-
-/* -- CTA FINAL ------------------------------------------------------------- */
-.cta-final { background:linear-gradient(to bottom,var(--c-black),var(--c-darkbg) 50%,var(--c-black)); text-align:center; }
-.cta-final__inner { display:flex; flex-direction:column; align-items:center; gap:var(--space-4); }
-.cta-final__btn { font-size:var(--fs-body-sm); letter-spacing:.04em; line-height:1.4; padding:1.25rem 2rem; max-width:min(440px,100%); width:100%; }
-.cta-final__subtext { font-family:var(--font-label); font-size:var(--fs-label); font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--c-textsub); }
+  html, body { overflow-x: hidden; max-width: 100%; }
 </style>

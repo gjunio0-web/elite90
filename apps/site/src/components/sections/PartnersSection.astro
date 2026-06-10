@@ -1,0 +1,50 @@
+---
+import type { Translations } from "../../i18n/pt";
+interface Props { t: Translations; }
+const { t } = Astro.props;
+
+const partnerUrls: Record<string, string> = {
+  "Army":          "https://www.armybr.com.br/",
+  "Adaptogen":     "https://adaptogen.com.br/",
+  "Oficial Farma": "https://www.oficialfarma.com.br/",
+  "Quatro Folhas": "https://vivaquatrofolhas.com.br/",
+};
+---
+
+<section class="section partners" id="parceiros" style="scroll-margin-top:80px" aria-label="Parceiros">
+  <div class="container">
+    <p class="section__eyebrow">{t.partners.eyebrow}</p>
+    <h2 class="section__title">{t.partners.title}</h2>
+    <div class="partners__grid">
+      {t.partners.items.map(partner => (
+        <a
+          class="partner-item"
+          href={partnerUrls[partner.name] ?? "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={partner.name}
+        >
+          <div class="partner-item__logo-wrap">
+            <img
+              src={partner.logo}
+              alt={partner.name}
+              class="partner-item__logo"
+              width="160" height="56"
+              loading="lazy"
+            />
+          </div>
+          <p class="partner-item__desc">{partner.description}</p>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .partners__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-6); margin-top: var(--space-6); align-items: start; }
+  .partner-item { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; text-decoration: none; }
+  .partner-item__logo-wrap { height: 56px; display: flex; align-items: center; justify-content: center; }
+  .partner-item__logo { max-height: 56px; width: auto; max-width: 180px; object-fit: contain; filter: brightness(0) invert(1); opacity: .7; transition: opacity var(--transition-base); }
+  .partner-item:hover .partner-item__logo { opacity: 1; }
+  .partner-item__desc { font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: 1.5; }
+</style>

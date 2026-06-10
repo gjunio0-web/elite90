@@ -113,6 +113,8 @@ export const pt = {
     eyebrow: "Prova real",
     title: "Resultados Reais",
     titleAccent: "obtidos através do Programa Elite 90",
+    beforeLabel: "Antes",
+    afterLabel: "Depois",
   },
 
   // PROCESSO
@@ -279,10 +281,15 @@ export const pt = {
   // NAVEGAÇÃO
   nav: {
     method: "Método",
+    schedule: "Programa",
+    coach: "Coach",
     results: "Resultados",
+    process: "Como funciona",
     testimonials: "Depoimentos",
+    partners: "Parceiros",
     faq: "FAQ",
     apply: "Solicitar vaga",
+    applyCta: "Vaga",
     menu: "Menu",
     close: "Fechar menu",
   },
