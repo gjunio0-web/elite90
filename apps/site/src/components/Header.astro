@@ -36,8 +36,9 @@ const navLinks = [
     </a>
 
     <!-- Desktop nav -->
-    <nav class="site-header__nav" id="site-nav" aria-label="Navegacao principal">
-      <div class="nav-visible-wrapper" id="nav-visible-wrapper" style="display: flex; align-items: center; gap: var(--space-4); overflow: hidden; flex: 1; min-width: 0; height: 100%;">
+    <nav class="site-header__nav" id="site-nav" aria-label="Navegacao principal" style="position: relative; display: flex; align-items: center; overflow: hidden; max-height: 100%;">
+      
+      <div class="nav-flex-wrapper" id="nav-flex-wrapper" style="display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); width: 100%; max-height: 35px; overflow: hidden;">
         {navLinks.map(link => (
           <a
             href={link.href}
@@ -48,23 +49,23 @@ const navLinks = [
             {link.label}
           </a>
         ))}
-      </div>
 
-      <div class="site-header__more" id="nav-more" hidden>
-        <button
-          class="site-header__link site-header__more-btn"
-          id="nav-more-btn"
-          type="button"
-          aria-expanded="false"
-          aria-haspopup="true"
-        >
-          {n.more}
-          <svg class="site-header__more-icon" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
-            <path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <div class="site-header__dropdown" id="nav-dropdown" hidden role="menu">
+        <div class="site-header__more" id="nav-more" style="display: none; position: relative; z-index: 10;">
+          <button
+            class="site-header__link site-header__more-btn"
+            id="nav-more-btn"
+            type="button"
+            aria-expanded="false"
+            aria-haspopup="true"
+          >
+            {n.more}
+            <svg class="site-header__more-icon" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+              <path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="site-header__dropdown" id="nav-dropdown" hidden role="menu">
           </div>
+        </div>
       </div>
     </nav>
 
@@ -143,62 +144,42 @@ const navLinks = [
     if (el) sectionObserver.observe(el);
   });
 
-  // -- Overflow "Mais" menu (Algoritmo Corrigido e Resiliente) ------------------
-  const navVisibleWrapper = document.getElementById("nav-visible-wrapper") as HTMLElement;
-  const mainNavList       = document.getElementById("main-nav-list") as HTMLElement;
-  const moreWrap          = document.getElementById("nav-more") as HTMLElement;
-  const moreBtn           = document.getElementById("nav-more-btn") as HTMLButtonElement;
-  const dropdown          = document.getElementById("nav-dropdown") as HTMLElement;
-  const moreIcon          = moreBtn?.querySelector(".site-header__more-icon") as SVGElement;
+  // -- Overflow "Mais" menu (Abordagem Definitiva Baseada em Quebra Flex-Wrap) ----
+  const navFlexWrapper = document.getElementById("nav-flex-wrapper") as HTMLElement;
+  const moreWrap       = document.getElementById("nav-more") as HTMLElement;
+  const moreBtn        = document.getElementById("nav-more-btn") as HTMLButtonElement;
+  const dropdown       = document.getElementById("nav-dropdown") as HTMLElement;
+  const moreIcon       = moreBtn?.querySelector(".site-header__more-icon") as SVGElement;
 
-  function measureOverflow() {
-    if (!navVisibleWrapper || !mainNavList || !moreWrap || !dropdown) return;
+  function syncOverflowMenu() {
+    if (!navFlexWrapper || !moreWrap || !dropdown || !moreBtn) return;
 
-    // Resetar o estado movendo todos os links ocultados de volta para a lista visível
-    moreWrap.hidden = true;
+    // Limpa os estados anteriores e reinicia os links visíveis na barra superior
+    moreWrap.style.display = "none";
     dropdown.hidden = true;
     moreBtn.setAttribute("aria-expanded", "false");
     if (moreIcon) moreIcon.style.transform = "";
 
-    const originalLinks = Array.from(mainNavList.querySelectorAll<HTMLAnchorElement>("a[data-nav-link]"));
-    originalLinks.forEach(link => {
-      link.style.display = "";
-      mainNavList.appendChild(link);
-    });
-
-    // Calcular o espaço disponível dinamicamente usando as dimensões do cabeçalho real
-    const headerInner = document.querySelector(".site-header__inner") as HTMLElement;
-    const rightSlot   = document.querySelector(".site-header__right") as HTMLElement;
-    const logoEl      = document.querySelector(".site-header__logo") as HTMLElement;
-
-    if (!headerInner || !rightSlot || !logoEl) return;
-
-    const logoRight = logoEl.getBoundingClientRect().right;
-    const rightLeft = rightSlot.getBoundingClientRect().left;
+    // Seleciona estritamente apenas as tags 'a' com a propriedade data-nav-link
+    const links = Array.from(navFlexWrapper.querySelectorAll<HTMLAnchorElement>("a[data-nav-link]"));
     
-    // 80px reservados para a largura física do próprio botão "Mais" quando visível
-    const availableSpace = rightLeft - logoRight - 80;
+    // Força o reset de layout restaurando o display antes da amostragem física
+    links.forEach(link => { link.style.display = ""; });
 
-    let currentWidthSum = 0;
-    const gap = 16; // var(--space-4) = 16px
+    const baseTop = navFlexWrapper.getBoundingClientRect().top;
     const overflowingLinks: HTMLAnchorElement[] = [];
+    dropdown.innerHTML = "";
 
-    originalLinks.forEach(link => {
-      currentWidthSum += link.getBoundingClientRect().width + gap;
-      if (currentWidthSum > availableSpace) {
-        overflowingLinks.push(link);
-      }
-    });
-
-    // Se houver links estourando a área segura, reconstrói o dropdown dinamicamente
-    if (overflowingLinks.length > 0) {
-      dropdown.innerHTML = "";
+    links.forEach(link => {
+      const linkTop = link.getBoundingClientRect().top;
       
-      overflowingLinks.forEach(link => {
-        link.style.display = "none"; // Oculta da barra superior horizontal
+      // Se quebrou a linha, remove do fluxo do cabeçalho e injeta no dropdown
+      if (linkTop > baseTop + 5) {
+        overflowingLinks.push(link);
+        link.style.display = "none"; 
 
         const a = document.createElement("a");
-        a.href = link.getAttribute("data-href") ?? link.href;
+        a.href = link.getAttribute("href") ?? "#";
         a.className = "site-header__dropdown-item";
         a.textContent = link.textContent?.trim() ?? "";
         a.setAttribute("role", "menuitem");
@@ -210,13 +191,16 @@ const navLinks = [
         });
         
         dropdown.appendChild(a);
-      });
+      }
+    });
 
-      moreWrap.hidden = false;
+    // Exibe o botão "Mais" alinhado organicamente ao lado do último link se houver estouro
+    if (overflowingLinks.length > 0) {
+      moreWrap.style.display = "inline-block";
     }
   }
 
-  // Corrigida a mecânica de clique direto manipulando a propriedade 'hidden' nativa
+  // Mecânica do gatilho de clique corrigida alternando a propriedade hidden nativa do DOM
   moreBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
     const isHidden = dropdown.hidden;
@@ -227,6 +211,7 @@ const navLinks = [
     }
   });
 
+  // Fechamento nativo ao clicar fora da área do menu dropdown
   document.addEventListener("click", (e) => {
     if (!moreWrap?.contains(e.target as Node)) {
       dropdown.hidden = true;
@@ -235,16 +220,23 @@ const navLinks = [
     }
   });
 
-  // Ancoragem de execução baseada no estado de carregamento das fontes do DOM
-  if ('fonts' in document) {
-    document.fonts.ready.then(measureOverflow);
-  } else {
-    setTimeout(measureOverflow, 50);
-  }
+  // Execução atrelada de forma isolada ao ResizeObserver do contêiner flexível
+  const resizeObserver = new ResizeObserver(() => {
+    syncOverflowMenu();
+  });
 
-  const resizeObserver = new ResizeObserver(() => measureOverflow());
-  if (navVisibleWrapper) resizeObserver.observe(navVisibleWrapper);
-  window.addEventListener("load", measureOverflow);
+  if (navFlexWrapper) {
+    resizeObserver.observe(navFlexWrapper);
+  }
+  
+  if ('fonts' in document) {
+    document.fonts.ready.then(() => {
+      syncOverflowMenu();
+    });
+  } else {
+    setTimeout(syncOverflowMenu, 100);
+  }
+  window.addEventListener("load", syncOverflowMenu);
 
   // -- Drawer --------------------------------------------------------------------
   const hamburger  = document.getElementById("hamburger-btn") as HTMLButtonElement;
