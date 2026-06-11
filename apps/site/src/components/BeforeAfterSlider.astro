@@ -99,13 +99,17 @@ const { items } = Astro.props;
     margin: 0;
     width: 100%;
     display: block;
+    /* Injeta o fundo negro absoluto para absorver o letterboxing de fotos fora do padrão 9:16 */
+    background-color: var(--c-darkbg, #0A0A0A);
   }
 
   .result-card__img {
     width: 100%;
-    height: auto;
+    /* Substitui a altura fluida (auto) por uma trava tridimensional vertical inegociável */
+    aspect-ratio: 9 / 16;
     display: block;
-    object-fit: cover;
+    /* Altera o algoritmo de preenchimento para proteger a integridade anatômica (sem cortes) */
+    object-fit: contain;
   }
 
   .result-card__handle {
