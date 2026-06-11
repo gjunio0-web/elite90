@@ -280,6 +280,15 @@ const navLinks = [
         a.className = "site-header__dropdown-item";
         a.textContent = link.textContent?.trim() ?? "";
         a.setAttribute("role", "menuitem");
+
+        // --- CORREÇÃO DE ASSINATURA DE ESCOPO (Astro Scoping) ---
+        // Descobre dinamicamente se o link original possui o atributo com o hash do Astro
+        const astroAttr = Array.from(link.attributes).find(attr => attr.name.startsWith('data-astro-cid'));
+        if (astroAttr) {
+          // Aplica exatamente a mesma assinatura do Astro no novo link criado
+          a.setAttribute(astroAttr.name, astroAttr.value);
+        }
+        // --------------------------------------------------------
         
         fragmentoDropdown.appendChild(a);
       }
