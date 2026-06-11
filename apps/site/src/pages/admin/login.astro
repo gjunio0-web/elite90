@@ -4,6 +4,40 @@ export const prerender = false;
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
+  <style is:inline>
+    /* A classe 'locked' esconde todo o corpo da página e exibe apenas o vazio negro */
+    html.locked body {
+      display: none !important;
+    }
+    html.locked {
+      background-color: #0A0A0A; /* Fundo Brutalista Noir */
+    }
+  </style>
+
+  <script is:inline>
+    // Trava imediata do DOM antes do carregamento do conteúdo
+    document.documentElement.classList.add('locked');
+
+    // Função de interceptação (IIFE) executada em milissegundos
+    (function() {
+      const isUnlocked = sessionStorage.getItem('gateway_unlocked');
+      
+      if (!isUnlocked) {
+        // Acesso direto detectado ou token ausente. Expulsão silenciosa.
+        // Usa 'replace' para não deixar rastro no botão "Voltar" do navegador
+        window.location.replace('/'); 
+      } else {
+        // Salvo-conduto validado. Destranca a interface para o formulário.
+        document.documentElement.classList.remove('locked');
+        
+        // Opcional de Defesa Ativa: Apagar a chave após abrir a porta.
+        // Se você quiser que recarregar a página exija os 5 cliques de novo, descomente a linha abaixo:
+        // sessionStorage.removeItem('gateway_unlocked');
+      }
+    })();
+  </script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Elite 90 · Acesso ao Painel</title>

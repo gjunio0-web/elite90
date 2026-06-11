@@ -11,7 +11,7 @@ const { t } = Astro.props;
 <footer class="site-footer">
   <div class="site-footer__divider" role="presentation"></div>
   <div class="container site-footer__inner">
-    <p class="site-footer__copy">{t.footer.copyright}</p>
+    <p class="site-footer__copy" id="admin-ignite" style="user-select: none;">{t.footer.copyright}</p>
     <p class="site-footer__credit">{t.footer.credit}</p>
   </div>
 </footer>
@@ -62,3 +62,43 @@ const { t } = Astro.props;
     color: rgba(153, 153, 153, 0.5);
   }
 </style>
+
+<script>
+  // Ocultação Esteganográfica: Gatilho de 5 cliques iterativos
+  const triggerElement = document.getElementById('admin-ignite');
+
+  if (triggerElement) {
+    let clickCount = 0;
+    let clickTimer = null;
+
+    const handleIgnition = (e) => {
+      // Previne comportamentos padrão em dispositivos móveis (zoom ou seleção)
+      e.preventDefault(); 
+
+      clickCount++;
+
+      // Inicia a janela de tempo no primeiro clique
+      if (clickCount === 1) {
+        clickTimer = setTimeout(() => {
+          clickCount = 0; // Reseta a contagem se o administrador demorar mais de 2 segundos
+        }, 2000);
+      }
+
+      // Conclusão do ritual (5 cliques dentro do tempo limite)
+      if (clickCount >= 5) {
+        clearTimeout(clickTimer);
+        clickCount = 0;
+        
+        // Injeção do Salvo-Conduto no navegador (Token Efêmero)
+        sessionStorage.setItem('gateway_unlocked', 'true');
+        
+        // Redirecionamento Silencioso para a rota real
+        window.location.assign('/admin/login');
+      }
+    };
+
+    // Escuta dupla para garantir funcionamento tátil (mobile) e físico (desktop)
+    triggerElement.addEventListener('click', handleIgnition);
+    triggerElement.addEventListener('touchstart', handleIgnition, { passive: false });
+  }
+</script>
