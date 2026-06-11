@@ -177,30 +177,46 @@ const navLinks = [
     dropdown.style.position = "absolute";
     dropdown.style.zIndex = "9999";
     dropdown.style.margin = "0";
-    
-    // Neutraliza o 'right: 0' do CSS estático para permitir o alinhamento via JS
     dropdown.style.right = "auto";
 
-    // --- CORREÇÃO DE FORMATAÇÃO EM RUNTIME ---
-    // Força o contêiner do dropdown a empilhar os links verticalmente e com espaçamento isolado
+    // --- ENGENHARIA DE ADERÊNCIA DE CURSOR ---
     dropdown.style.display = "flex";
     dropdown.style.flexDirection = "column";
-    dropdown.style.padding = "8px 0"; // Equivalente a var(--space-2)
     
-    // Aplica o espaçamento e quebra de linha individual em cada link clonado lá dentro
+    // Injeta 12px de área invisível no topo para manter o mouse ativo na transição,
+    // mantendo os 6px originais nas laterais e base para proteger a massa visual.
+    dropdown.style.padding = "12px 0 6px 0"; 
+
     const dropdownItems = dropdown.querySelectorAll<HTMLAnchorElement>(".site-header__dropdown-item");
     dropdownItems.forEach(item => {
       item.style.display = "block";
-      item.style.padding = "12px 16px"; // Equivalente a var(--space-3) var(--space-4)
+      item.style.padding = "10px 20px";
       item.style.whiteSpace = "nowrap";
+      
+      // Preserva a tipografia e assinatura do Astro recuperadas anteriormente
+      item.style.fontFamily = "var(--font-label), sans-serif";
+      item.style.fontSize = "0.7rem";
+      item.style.fontWeight = "700";
+      item.style.textTransform = "uppercase";
+      item.style.letterSpacing = "0.08em";
+      item.style.color = "var(--c-textsub, rgba(204, 204, 204, 0.75))";
+      item.style.textDecoration = "none";
+      item.style.transition = "color 200ms ease, background 200ms ease";
+
+      item.onmouseenter = () => {
+        item.style.color = "var(--c-lime, #a6c300)";
+        item.style.background = "rgba(166, 195, 0, 0.05)";
+      };
+      item.onmouseleave = () => {
+        item.style.color = "var(--c-textsub, rgba(204, 204, 204, 0.75))";
+        item.style.background = "transparent";
+      };
     });
-    // -----------------------------------------
     
-    // Calcula a largura dinâmica real (absorve traduções i18n)
     const dropdownWidth = dropdown.offsetWidth || 180;
     
-    // Injeta as coordenadas absolutas ancoradas ao botão [Mais]
-    dropdown.style.top = `${rect.bottom + window.scrollY + 12}px`;
+    // CORREÇÃO: Cola a caixa colada na borda do botão (elimina o vácuo de pixels)
+    dropdown.style.top = `${rect.bottom + window.scrollY}px`;
     dropdown.style.left = `${rect.right + window.scrollX - dropdownWidth}px`;
   }
 
