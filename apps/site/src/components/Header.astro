@@ -162,8 +162,8 @@ const navLinks = [
   const moreIcon       = moreBtn?.querySelector(".site-header__more-icon") as SVGElement;
 
   // Constantes de Engenharia Geométrica (Tarefa C)
-  const LARGURA_FIXA_MAIS = 75; // Largura aproximada em pixels do botão [MAIS ⌄]
-  const MARGEM_SEGURANCA  = 4;  // Absorção de subpixels e arredondamentos de navegadores
+  const LARGURA_FIXA_MAIS = 88;  // Espelho exato da min-width definida no CSS
+  const MARGEM_SEGURANCA  = 6;   // Absorção de subpixels para navegação estável
   const GAP_PIXELS        = 16; // Equivalente numérico a var(--space-4)
 
   function syncOverflowMenu() {
@@ -417,6 +417,11 @@ const navLinks = [
     padding-bottom: 2px;
     white-space: nowrap;
     transition: color var(--transition-base);
+    /* INJEÇÃO DE IMUNIDADE i18n: */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 88px; /* Espaço físico idêntico que acomoda folgadamente tanto "MAIS ⌄" quanto "MORE ⌄" */    
   }
 
   .site-header__more-btn:hover { color: var(--c-white); }
