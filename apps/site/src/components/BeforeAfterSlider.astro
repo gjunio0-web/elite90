@@ -120,10 +120,10 @@ const { items } = Astro.props;
     filter: drop-shadow(0 0 6px rgba(166,195,0,0.4));
   }
 
-  /* Tags always visible, outside the slider */
+  /* Tags ajustadas para o novo contexto internalizado (clipping automático) */
   .result-card__tag {
     position: absolute;
-    bottom: var(--space-2);
+    bottom: var(--space-3); /* Espaçamento levemente aumentado para melhor respiro */
     font-family: var(--font-label);
     font-size: 0.6rem;
     font-weight: 700;
@@ -131,14 +131,15 @@ const { items } = Astro.props;
     letter-spacing: 0.1em;
     color: var(--c-white);
     background-color: rgba(13,13,13,0.85);
-    padding: 3px 8px;
+    padding: 4px 10px; /* Padding levemente otimizado */
     border-radius: 2px;
-    pointer-events: none;
     z-index: 10;
+    pointer-events: none; /* Garante que não interfira no slider */
   }
 
-  .result-card__tag--before { left: var(--space-2); }
-  .result-card__tag--after  { right: var(--space-2); }
+  /* Ajuste fino lateral para cada tag respeitando o slot */
+  .result-card__tag--before { left: var(--space-3); }
+  .result-card__tag--after  { right: var(--space-3); }
 
   .result-card__caption { padding-inline: var(--space-1); }
 
