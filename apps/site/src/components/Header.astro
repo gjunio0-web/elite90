@@ -151,32 +151,77 @@ const navLinks = [
   const dropdown       = document.getElementById("nav-dropdown") as HTMLElement;
   const moreIcon       = moreBtn?.querySelector(".site-header__more-icon") as SVGElement;
 
+  // -- Overflow "Mais" menu (Abordagem Absoluta por Geometria Pura em Memória) ----
+  const navFlexWrapper = document.getElementById("nav-flex-wrapper") as HTMLElement;
+  const moreWrap       = document.getElementById("nav-more") as HTMLElement;
+  const moreBtn        = document.getElementById("nav-more-btn") as HTMLButtonElement;
+  const dropdown       = document.getElementById("nav-dropdown") as HTMLElement;
+  const moreIcon       = moreBtn?.querySelector(".site-header__more-icon") as SVGElement;
+
+  // Constantes de Engenharia Geométrica (Tarefa C)
+  const LARGURA_FIXA_MAIS = 75; // Largura aproximada em pixels do botão [MAIS ⌄]
+  const MARGEM_SEGURANCA  = 4;  // Absorção de subpixels e arredondamentos de navegadores
+  const GAP_PIXELS        = 16; // Equivalente numérico a var(--space-4)
+
   function syncOverflowMenu() {
     if (!navFlexWrapper || !moreWrap || !dropdown || !moreBtn) return;
 
-    // Limpa os estados anteriores e reinicia os links visíveis na barra superior
+    // --- FASE 1: LEITURA PURA (Tarefa B - Read) ---
+    // Forçamos temporariamente o reset para medir a largura nativa real dos links
     moreWrap.style.display = "none";
-    dropdown.hidden = true;
-    moreBtn.setAttribute("aria-expanded", "false");
-    if (moreIcon) moreIcon.style.transform = "";
-
-    // Seleciona estritamente apenas as tags 'a' com a propriedade data-nav-link
     const links = Array.from(navFlexWrapper.querySelectorAll<HTMLAnchorElement>("a[data-nav-link]"));
+    links.forEach(link => { 
+      link.style.display = ""; 
+      link.setAttribute("tabindex", "0"); // Restaura o foco padrão
+    });
+
+    const larguraDisponivelTotal = navFlexWrapper.offsetWidth;
     
-    // Força o reset de layout restaurando o display antes da amostragem física
-    links.forEach(link => { link.style.display = ""; });
+    // Captura as larguras físicas que o HTML/CSS distribuiu previamente na tela
+    const largurasLinks = links.map(link => link.offsetWidth);
 
-    const baseTop = navFlexWrapper.getBoundingClientRect().top;
-    const overflowingLinks: HTMLAnchorElement[] = [];
+    // --- FASE 2: CÁLCULO PREDITIVO EM MEMÓRIA (Tarefa C - Compute) ---
+    let somaLarguras = 0;
+    let indiceCorte = links.length; // Por padrão, todos os links cabem
+    let precisaDeMais = false;
+
+    // Primeiro teste lógico: descobrir se a fila inteira estoura o contêiner
+    for (let i = 0; i < links.length; i++) {
+      const espacamento = i > 0 ? GAP_PIXELS : 0;
+      somaLarguras += largurasLinks[i] + espacamento;
+
+      if (somaLarguras > larguraDisponivelTotal) {
+        precisaDeMais = true;
+        break;
+      }
+    }
+
+    // Se estourou, recalculamos a área segura subtraindo a massa virtual do botão "MAIS"
+    if (precisaDeMais) {
+      const larguraSeguraMenu = larguraDisponivelTotal - LARGURA_FIXA_MAIS - MARGEM_SEGURANCA;
+      let somaLarguraSegura = 0;
+
+      for (let i = 0; i < links.length; i++) {
+        const espacamento = i > 0 ? GAP_PIXELS : 0;
+        
+        // Se incluir este link estourar até a área segura, o corte é aqui
+        if (somaLarguraSegura + largurasLinks[i] + espacamento > larguraSeguraMenu) {
+          indiceCorte = i;
+          break;
+        }
+        somaLarguraSegura += largurasLinks[i] + espacamento;
+      }
+    }
+
+    // --- FASE 3: ESCRITA ÚNICA EM LOTE (Tarefa B - Write) ---
     dropdown.innerHTML = "";
+    const fragmentoDropdown = document.createDocumentFragment();
 
-    links.forEach(link => {
-      const linkTop = link.getBoundingClientRect().top;
-      
-      // Se quebrou a linha, remove do fluxo do cabeçalho e injeta no dropdown
-      if (linkTop > baseTop + 5) {
-        overflowingLinks.push(link);
-        link.style.display = "none"; 
+    links.forEach((link, indice) => {
+      if (indice >= indiceCorte) {
+        // Elementos cortados matematicamente: somem da barra e vão para o Dropdown
+        link.style.display = "none";
+        link.setAttribute("tabindex", "-1"); // Bloqueia foco do teclado (WCAG 2.2)
 
         const a = document.createElement("a");
         a.href = link.getAttribute("href") ?? "#";
@@ -184,21 +229,33 @@ const navLinks = [
         a.textContent = link.textContent?.trim() ?? "";
         a.setAttribute("role", "menuitem");
         
-        a.addEventListener("click", () => {
-          dropdown.hidden = true;
-          moreBtn.setAttribute("aria-expanded", "false");
-          if (moreIcon) moreIcon.style.transform = "";
-        });
-        
-        dropdown.appendChild(a);
+        fragmentoDropdown.appendChild(a);
       }
     });
 
-    // Exibe o botão "Mais" alinhado organicamente ao lado do último link se houver estouro
-    if (overflowingLinks.length > 0) {
-      moreWrap.style.display = "inline-block";
+    // Aplica as mutações de interface de uma única vez, evitando repinturas em loop
+    if (indiceCorte < links.length) {
+      dropdown.appendChild(fragmentoDropdown);
+      moreWrap.style.display = "inline-block"; // Posiciona o botão colado ao último item visível
+    } else {
+      moreWrap.style.display = "none";
+      dropdown.hidden = true;
+      moreBtn.setAttribute("aria-expanded", "false");
+      if (moreIcon) moreIcon.style.transform = "";
     }
   }
+
+  // Mecânica do debounce para blindar o ResizeObserver contra o Layout Thrashing
+  let timeoutId: number;
+  const resizeObserver = new ResizeObserver(() => {
+    clearTimeout(timeoutId);
+    timeoutId = window.setTimeout(syncOverflowMenu, 40); // Aguarda a estabilização da janela
+  });
+
+  if (navFlexWrapper) {
+    resizeObserver.observe(navFlexWrapper);
+  }
+
 
   // Mecânica do gatilho de clique corrigida alternando a propriedade hidden nativa do DOM
   moreBtn?.addEventListener("click", (e) => {
@@ -220,15 +277,6 @@ const navLinks = [
     }
   });
 
-  // Execução atrelada de forma isolada ao ResizeObserver do contêiner flexível
-  const resizeObserver = new ResizeObserver(() => {
-    syncOverflowMenu();
-  });
-
-  if (navFlexWrapper) {
-    resizeObserver.observe(navFlexWrapper);
-  }
-  
   if ('fonts' in document) {
     document.fonts.ready.then(() => {
       syncOverflowMenu();
