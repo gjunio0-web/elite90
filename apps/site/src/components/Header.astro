@@ -109,7 +109,17 @@ const navLinks = [
   // -- Transparent → solid on scroll -------------------------------------------
   const header = document.getElementById("site-header") as HTMLElement;
   function updateHeader() {
-    header.dataset.scrolled = String(window.scrollY > 80);
+    if (!header) return;
+    const scrollY = window.scrollY;
+    const isScrolled = scrollY > 80;
+
+    if (header.getAttribute("data-scrolled") !== String(isScrolled)) {
+      header.setAttribute("data-scrolled", String(isScrolled));
+      
+      // EXECUTAR CORREÇÃO: Força o recálculo imediato da geometria dos links
+      // assim que o CSS alterar a escala e a altura do cabeçalho.
+      syncOverflowMenu();
+    }
   }
   window.addEventListener("scroll", updateHeader, { passive: true });
   updateHeader();
