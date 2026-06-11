@@ -28,7 +28,12 @@ const { items } = Astro.props;
               class="result-card__img"
               loading="lazy"
             />
+            {/* Tag movida para dentro do slot para sofrer clipping */}
+            <span class="result-card__tag result-card__tag--before" aria-hidden="true">
+              {item.beforeLabel}
+            </span>
           </figure>
+          
           <figure slot="second" class="result-card__fig">
             <img
               src={item.afterSrc}
@@ -36,7 +41,12 @@ const { items } = Astro.props;
               class="result-card__img"
               loading="lazy"
             />
+            {/* Tag movida para dentro do slot para sofrer clipping */}
+            <span class="result-card__tag result-card__tag--after" aria-hidden="true">
+              {item.afterLabel}
+            </span>
           </figure>
+
           <svg slot="handle" class="result-card__handle" xmlns="http://www.w3.org/2000/svg"
             width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
             <circle cx="20" cy="20" r="19" fill="#0D0D0D" stroke="#A6C300" stroke-width="1.5"/>
@@ -44,13 +54,6 @@ const { items } = Astro.props;
             <path d="M25 20L30 15M25 20L30 25" stroke="#A6C300" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </img-comparison-slider>
-
-        <span class="result-card__tag result-card__tag--before" aria-hidden="true">
-          {item.beforeLabel}
-        </span>
-        <span class="result-card__tag result-card__tag--after" aria-hidden="true">
-          {item.afterLabel}
-        </span>
       </div>
 
       <div class="result-card__caption">
@@ -99,6 +102,7 @@ const { items } = Astro.props;
     margin: 0;
     width: 100%;
     display: block;
+    position: relative; /* Essencial para o absolute da tag */
     /* Injeta o fundo negro absoluto para absorver o letterboxing de fotos fora do padrão 9:16 */
     background-color: var(--c-darkbg, #0A0A0A);
   }
