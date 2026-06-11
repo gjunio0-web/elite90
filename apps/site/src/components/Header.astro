@@ -340,27 +340,31 @@ const navLinks = [
   // Função centralizada para abrir o menu, girar a seta para cima e posicionar no body
   function openDropdownHover() {
     dropdown.hidden = false;
+    // Força a exibição e anula qualquer resquício de ocultação anterior
+    dropdown.style.display = "flex"; 
     moreBtn?.setAttribute("aria-expanded", "true");
-    positionDropdown(); // Executa o portal dinâmico
-    if (moreIcon) moreIcon.style.transform = "rotate(180deg)"; // Seta para cima
+    positionDropdown(); 
+    if (moreIcon) moreIcon.style.transform = "rotate(180deg)"; 
   }
 
-// Função centralizada para colapsar o menu e voltar a seta para baixo
+  // Função centralizada para colapsar o menu e voltar a seta para baixo
   function closeDropdownHover(e: MouseEvent) {
     const targetAondeOMouseFoi = e.relatedTarget as Node;
     
-    // CORREÇÃO CIRÚRGICA: Verifica as duas referências físicas agora que estão separadas no DOM
     if (
       moreBtn?.contains(targetAondeOMouseFoi) || 
       dropdown?.contains(targetAondeOMouseFoi) ||
       (moreWrap && moreWrap.contains(targetAondeOMouseFoi))
     ) {
-      return; // Retém o menu aberto se o cursor estiver transitando entre eles
+      return; 
     }
     
+    // CORREÇÃO: Remove o display inline para que o atributo hidden ou o CSS original consigam ocultar o elemento
     dropdown.hidden = true;
+    dropdown.style.display = "none"; 
+    
     moreBtn?.setAttribute("aria-expanded", "false");
-    if (moreIcon) moreIcon.style.transform = ""; // Seta para baixo
+    if (moreIcon) moreIcon.style.transform = ""; 
   }
 
   // Gatilhos de entrada e saída no botão [MAIS]
