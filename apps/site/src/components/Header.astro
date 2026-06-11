@@ -169,7 +169,7 @@ const navLinks = [
     document.body.appendChild(dropdown);
   }
 
-  // Motor de cálculo de coordenadas flutuantes em tempo de execução
+  // Função para calcular e alinhar dinamicamente a posição flutuante do dropdown na tela (Ação 2.2)
   function positionDropdown() {
     if (!moreBtn || !dropdown) return;
     const rect = moreBtn.getBoundingClientRect();
@@ -180,6 +180,21 @@ const navLinks = [
     
     // Neutraliza o 'right: 0' do CSS estático para permitir o alinhamento via JS
     dropdown.style.right = "auto";
+
+    // --- CORREÇÃO DE FORMATAÇÃO EM RUNTIME ---
+    // Força o contêiner do dropdown a empilhar os links verticalmente e com espaçamento isolado
+    dropdown.style.display = "flex";
+    dropdown.style.flexDirection = "column";
+    dropdown.style.padding = "8px 0"; // Equivalente a var(--space-2)
+    
+    // Aplica o espaçamento e quebra de linha individual em cada link clonado lá dentro
+    const dropdownItems = dropdown.querySelectorAll<HTMLAnchorElement>(".site-header__dropdown-item");
+    dropdownItems.forEach(item => {
+      item.style.display = "block";
+      item.style.padding = "12px 16px"; // Equivalente a var(--space-3) var(--space-4)
+      item.style.whiteSpace = "nowrap";
+    });
+    // -----------------------------------------
     
     // Calcula a largura dinâmica real (absorve traduções i18n)
     const dropdownWidth = dropdown.offsetWidth || 180;
