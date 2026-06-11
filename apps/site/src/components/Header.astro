@@ -151,27 +151,34 @@ const navLinks = [
   const dropdown       = document.getElementById("nav-dropdown") as HTMLElement;
   const moreIcon       = moreBtn?.querySelector(".site-header__more-icon") as SVGElement;
 
-  // Constantes de Engenharia Geométrica (Tarefa C)
-  const LARGURA_FIXA_MAIS = 75; // Largura aproximada em pixels do botão [MAIS ⌄]
-  const MARGEM_SEGURANCA  = 4;  // Absorção de subpixels e arredondamentos de navegadores
+  // Constantes de Engenharia Geométrica Dinâmica (Tarefa C)
+  const MARGEM_SEGURANCA  = 6;  // Margem ligeiramente expandida para cobrir subpixels no Safari/Chrome
   const GAP_PIXELS        = 16; // Equivalente numérico a var(--space-4)
 
   function syncOverflowMenu() {
     if (!navFlexWrapper || !moreWrap || !dropdown || !moreBtn) return;
 
-    // --- FASE 1: LEITURA PURA (Tarefa B - Read) ---
-    // Forçamos temporariamente o reset para medir a largura nativa real dos links
-    moreWrap.style.display = "none";
+    // --- FASE 1: LEITURA PURA DINÂMICA (Tarefa B - Read) ---
+    // 1. Revelamos temporariamente os elementos para que o navegador possa calcular suas massas físicas reais
+    moreWrap.style.opacity = "0";
+    moreWrap.style.display = "inline-block"; 
+    
     const links = Array.from(navFlexWrapper.querySelectorAll<HTMLAnchorElement>("a[data-nav-link]"));
     links.forEach(link => { 
       link.style.display = ""; 
-      link.setAttribute("tabindex", "0"); // Restaura o foco padrão
+      link.setAttribute("tabindex", "0"); // Restaura acessibilidade padrão (WCAG 2.2)
     });
 
+    // 2. Captura a largura geométrica exata do botão de acordo com o idioma ativo (MAIS ou MORE)
+    const larguraRealBotaoMais = moreWrap.offsetWidth;
+
+    // 3. Captura o espaço total da barra e as larguras individuais dos links
     const larguraDisponivelTotal = navFlexWrapper.offsetWidth;
-    
-    // Captura as larguras físicas que o HTML/CSS distribuiu previamente na tela
     const largurasLinks = links.map(link => link.offsetWidth);
+
+    // Restauramos a opacidade para evitar flashes visuais na tela
+    moreWrap.style.opacity = "";
+    moreWrap.style.display = "none";
 
     // --- FASE 2: CÁLCULO PREDITIVO EM MEMÓRIA (Tarefa C - Compute) ---
     let somaLarguras = 0;
@@ -191,7 +198,7 @@ const navLinks = [
 
     // Se estourou, recalculamos a área segura subtraindo a massa virtual do botão "MAIS"
     if (precisaDeMais) {
-      const larguraSeguraMenu = larguraDisponivelTotal - LARGURA_FIXA_MAIS - MARGEM_SEGURANCA;
+      const larguraSeguraMenu = larguraDisponivelTotal - larguraRealBotaoMais - MARGEM_SEGURANCA;
       let somaLarguraSegura = 0;
 
       for (let i = 0; i < links.length; i++) {
