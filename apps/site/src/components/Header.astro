@@ -329,13 +329,19 @@ const navLinks = [
     if (moreIcon) moreIcon.style.transform = "rotate(180deg)"; // Seta para cima
   }
 
-  // Função centralizada para colapsar o menu e voltar a seta para baixo
+// Função centralizada para colapsar o menu e voltar a seta para baixo
   function closeDropdownHover(e: MouseEvent) {
-    // Verifica se o mouse se moveu para dentro do dropdown ou do botão antes de fechar
     const targetAondeOMouseFoi = e.relatedTarget as Node;
-    if (moreWrap?.contains(targetAondeOMouseFoi) || dropdown?.contains(targetAondeOMouseFoi)) {
-      return; // Retém o menu aberto se o usuário estiver transitando entre o botão e a caixa
+    
+    // CORREÇÃO CIRÚRGICA: Verifica as duas referências físicas agora que estão separadas no DOM
+    if (
+      moreBtn?.contains(targetAondeOMouseFoi) || 
+      dropdown?.contains(targetAondeOMouseFoi) ||
+      (moreWrap && moreWrap.contains(targetAondeOMouseFoi))
+    ) {
+      return; // Retém o menu aberto se o cursor estiver transitando entre eles
     }
+    
     dropdown.hidden = true;
     moreBtn?.setAttribute("aria-expanded", "false");
     if (moreIcon) moreIcon.style.transform = ""; // Seta para baixo
