@@ -36,9 +36,9 @@ const navLinks = [
     </a>
 
     <!-- Desktop nav -->
-    <nav class="site-header__nav" id="site-nav" aria-label="Navegacao principal" style="position: relative; display: flex; align-items: center; gap: var(--space-4); width: 100%; max-height: 100%;">
+    <nav class="site-header__nav" id="site-nav" aria-label="Navegacao principal" style="position: relative; display: flex; align-items: center; overflow: hidden; max-height: 100%;">
       
-      <div class="site-header__links-wrapper" id="nav-links-wrapper" style="display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); flex: 1; max-height: 35px; overflow: hidden;">
+      <div class="nav-flex-wrapper" id="nav-flex-wrapper" style="display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); width: 100%; max-height: 35px; overflow: hidden;">
         {navLinks.map(link => (
           <a
             href={link.href}
@@ -49,22 +49,22 @@ const navLinks = [
             {link.label}
           </a>
         ))}
-      </div>
 
-      <div class="site-header__more" id="nav-more" style="display: none; position: relative; z-index: 10;">
-        <button
-          class="site-header__link site-header__more-btn"
-          id="nav-more-btn"
-          type="button"
-          aria-expanded="false"
-          aria-haspopup="true"
-        >
-          {n.more}
-          <svg class="site-header__more-icon" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
-            <path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <div class="site-header__dropdown" id="nav-dropdown" hidden role="menu">
+        <div class="site-header__more" id="nav-more" style="display: none; position: relative; z-index: 10;">
+          <button
+            class="site-header__link site-header__more-btn"
+            id="nav-more-btn"
+            type="button"
+            aria-expanded="false"
+            aria-haspopup="true"
+          >
+            {n.more}
+            <svg class="site-header__more-icon" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+              <path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="site-header__dropdown" id="nav-dropdown" hidden role="menu">
+          </div>
         </div>
       </div>
     </nav>
@@ -155,26 +155,26 @@ const navLinks = [
   });
 
   // -- Overflow "Mais" menu (Abordagem Absoluta por Geometria Pura em Memória) ----
-  const siteNavContainer = document.getElementById("site-nav") as HTMLElement; // Novo alvo de largura total
-  const navLinksWrapper  = document.getElementById("nav-links-wrapper") as HTMLElement; // Novo alvo de jaula de links
-  const moreWrap         = document.getElementById("nav-more") as HTMLElement;
-  const moreBtn          = document.getElementById("nav-more-btn") as HTMLButtonElement;
-  const dropdown         = document.getElementById("nav-dropdown") as HTMLElement;
-  const moreIcon         = moreBtn?.querySelector(".site-header__more-icon") as SVGElement;
+  const navFlexWrapper = document.getElementById("nav-flex-wrapper") as HTMLElement;
+  const moreWrap       = document.getElementById("nav-more") as HTMLElement;
+  const moreBtn        = document.getElementById("nav-more-btn") as HTMLButtonElement;
+  const dropdown       = document.getElementById("nav-dropdown") as HTMLElement;
+  const moreIcon       = moreBtn?.querySelector(".site-header__more-icon") as SVGElement;
 
   // Constantes de Engenharia Geométrica (Cálculo Preditivo Blindado)
   const LARGURA_FIXA_MAIS = 85; // Espaço físico estendido para absorver "MAIS ⌄" / "MORE ⌄" sem vazamento
 
   function syncOverflowMenu() {
-    if (!siteNavContainer || !navLinksWrapper || !moreWrap || !dropdown || !moreBtn) return;
+    if (!navFlexWrapper || !moreWrap || !dropdown || !moreBtn) return;
 
     // --- FASE 1: LEITURA PURA (Tarefa B - Read) ---
-    // Captura primeiro a largura física real e imutável do contêiner de navegação geral (Ação 1)
-    const larguraDisponivelTotal = siteNavContainer.offsetWidth;
+
+    // Captura primeiro a largura física real e imutável que a barra possui na tela
+    const larguraDisponivelTotal = navFlexWrapper.offsetWidth;
 
     // Forçamos temporariamente o reset para medir a largura nativa real dos links
     moreWrap.style.display = "none";
-    const links = Array.from(navLinksWrapper.querySelectorAll<HTMLAnchorElement>("a[data-nav-link]"));
+    const links = Array.from(navFlexWrapper.querySelectorAll<HTMLAnchorElement>("a[data-nav-link]"));
     links.forEach(link => { 
       link.style.display = ""; 
       link.setAttribute("tabindex", "0"); // Restaura o foco padrão
@@ -265,8 +265,8 @@ const navLinks = [
     timeoutId = window.setTimeout(syncOverflowMenu, 40); // Aguarda a estabilização da janela
   });
 
-  if (navLinksWrapper) {
-    resizeObserver.observe(navLinksWrapper);
+  if (navFlexWrapper) {
+    resizeObserver.observe(navFlexWrapper);
   }
 
 
@@ -378,19 +378,8 @@ const navLinks = [
     align-items: center;
     gap: var(--space-4);
     flex: 1;
-    min-width: 0;
-    /* Liberado o overflow para permitir que sub-elementos absolutos flutuem livremente para fora */
-  }
-
-  /* Nova classe de controle da Jaula de Links internos */
-  .site-header__links-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-4);
-    flex: 1;
-    max-height: 35px;
     overflow: hidden;
+    min-width: 0;
   }
 
   .site-header__link {
