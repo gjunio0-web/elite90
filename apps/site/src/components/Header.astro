@@ -227,7 +227,7 @@ const navLinks = [
     });
 
     // Aplica as mutações de interface de uma única vez, evitando repinturas em loop
-    if (indiceCorte < links.length) {
+    if (precisaDeMais) {
       dropdown.appendChild(fragmentoDropdown);
       moreWrap.style.display = "inline-block"; // Posiciona o botão colado ao último item visível
     } else {
