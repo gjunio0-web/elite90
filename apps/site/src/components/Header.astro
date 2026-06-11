@@ -681,6 +681,15 @@ const navLinks = [
     }
   }
 
+  /* --- CONTENÇÃO DE VAZAMENTO MOBILE (Handoff Sincronizado) --- */
+  /* Instanciação local do threshold para desligar o CTA superior no exato pixel 
+     em que o StickyCtaMobile.astro assume a responsabilidade de conversão */
+  @media (max-width: 767px) {
+    .site-header__cta {
+      display: none !important;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .site-header,
     .site-header__logo-img,
