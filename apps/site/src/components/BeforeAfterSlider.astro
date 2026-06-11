@@ -120,10 +120,10 @@ const { items } = Astro.props;
     filter: drop-shadow(0 0 6px rgba(166,195,0,0.4));
   }
 
-  /* Tags ajustadas para o novo contexto internalizado (clipping automático) */
+/* Unificação brutalista das tags: neutraliza fluxo e alinha z-index */
   .result-card__tag {
     position: absolute;
-    bottom: var(--space-3); /* Espaçamento levemente aumentado para melhor respiro */
+    bottom: var(--space-3);
     font-family: var(--font-label);
     font-size: 0.6rem;
     font-weight: 700;
@@ -131,15 +131,27 @@ const { items } = Astro.props;
     letter-spacing: 0.1em;
     color: var(--c-white);
     background-color: rgba(13,13,13,0.85);
-    padding: 4px 10px; /* Padding levemente otimizado */
+    padding: 4px 10px;
     border-radius: 2px;
-    z-index: 10;
-    pointer-events: none; /* Garante que não interfira no slider */
+    z-index: 5; /* Força z-index idêntico para ambos */
+    pointer-events: none;
+    line-height: 1; /* Garante que o height seja ditado apenas pelo padding */
   }
 
-  /* Ajuste fino lateral para cada tag respeitando o slot */
+  /* Aplicação em ambos os slots com offset idêntico */
   .result-card__tag--before { left: var(--space-3); }
   .result-card__tag--after  { right: var(--space-3); }
+
+  /* Blindagem: força a figure a ignorar o conteúdo das tags no cálculo de tamanho */
+  .result-card__fig {
+    margin: 0;
+    width: 100%;
+    display: flex; /* Alinhamento flex para controle rígido */
+    flex-direction: column;
+    position: relative;
+    background-color: var(--c-darkbg, #0A0A0A);
+    overflow: hidden; /* Corta qualquer transbordo acidental */
+  }
 
   .result-card__caption { padding-inline: var(--space-1); }
 
