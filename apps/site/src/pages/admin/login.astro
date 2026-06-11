@@ -2,7 +2,7 @@
 export const prerender = false;
 ---
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="locked">
 <head>
 
   <style is:inline>
@@ -16,9 +16,6 @@ export const prerender = false;
   </style>
 
   <script is:inline>
-    // Trava imediata do DOM antes do carregamento do conteúdo
-    document.documentElement.classList.add('locked');
-
     // Função de interceptação (IIFE) executada em milissegundos
     (function() {
       const isUnlocked = sessionStorage.getItem('gateway_unlocked');
