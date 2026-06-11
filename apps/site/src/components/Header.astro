@@ -144,13 +144,6 @@ const navLinks = [
     if (el) sectionObserver.observe(el);
   });
 
-  // -- Overflow "Mais" menu (Abordagem Definitiva Baseada em Quebra Flex-Wrap) ----
-  const navFlexWrapper = document.getElementById("nav-flex-wrapper") as HTMLElement;
-  const moreWrap       = document.getElementById("nav-more") as HTMLElement;
-  const moreBtn        = document.getElementById("nav-more-btn") as HTMLButtonElement;
-  const dropdown       = document.getElementById("nav-dropdown") as HTMLElement;
-  const moreIcon       = moreBtn?.querySelector(".site-header__more-icon") as SVGElement;
-
   // -- Overflow "Mais" menu (Abordagem Absoluta por Geometria Pura em Memória) ----
   const navFlexWrapper = document.getElementById("nav-flex-wrapper") as HTMLElement;
   const moreWrap       = document.getElementById("nav-more") as HTMLElement;
