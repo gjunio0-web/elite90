@@ -164,6 +164,31 @@ const navLinks = [
   // Constantes de Engenharia Geométrica (Cálculo Preditivo Blindado)
   const LARGURA_FIXA_MAIS = 85; // Espaço físico estendido para absorver "MAIS ⌄" / "MORE ⌄" sem vazamento
 
+  // Teletransporta o dropdown para fora da jaula de overflow:hidden assim que o script inicializa
+  if (dropdown && dropdown.parentElement !== document.body) {
+    document.body.appendChild(dropdown);
+  }
+
+  // Motor de cálculo de coordenadas flutuantes em tempo de execução
+  function positionDropdown() {
+    if (!moreBtn || !dropdown) return;
+    const rect = moreBtn.getBoundingClientRect();
+    
+    dropdown.style.position = "absolute";
+    dropdown.style.zIndex = "9999";
+    dropdown.style.margin = "0";
+    
+    // Neutraliza o 'right: 0' do CSS estático para permitir o alinhamento via JS
+    dropdown.style.right = "auto";
+    
+    // Calcula a largura dinâmica real (absorve traduções i18n)
+    const dropdownWidth = dropdown.offsetWidth || 180;
+    
+    // Injeta as coordenadas absolutas ancoradas ao botão [Mais]
+    dropdown.style.top = `${rect.bottom + window.scrollY + 12}px`;
+    dropdown.style.left = `${rect.right + window.scrollX - dropdownWidth}px`;
+  }
+
   function syncOverflowMenu() {
     if (!navFlexWrapper || !moreWrap || !dropdown || !moreBtn) return;
 
@@ -276,6 +301,12 @@ const navLinks = [
     const isHidden = dropdown.hidden;
     dropdown.hidden = !isHidden;
     moreBtn.setAttribute("aria-expanded", String(isHidden));
+    
+    // Ativa o cálculo de portal se o menu estiver abrindo
+    if (isHidden) {
+      positionDropdown();
+    }
+    
     if (moreIcon) {
       moreIcon.style.transform = isHidden ? "rotate(180deg)" : "";
     }
@@ -298,6 +329,15 @@ const navLinks = [
     setTimeout(syncOverflowMenu, 100);
   }
   window.addEventListener("load", syncOverflowMenu);
+
+  // Garante que o dropdown flutuante acompanhe a barra durante a rolagem ou redimensionamento
+  window.addEventListener("scroll", () => {
+    if (dropdown && !dropdown.hidden) positionDropdown();
+  }, { passive: true });
+
+  window.addEventListener("resize", () => {
+    if (dropdown && !dropdown.hidden) positionDropdown();
+  }, { passive: true });
 
   // -- Drawer --------------------------------------------------------------------
   const hamburger  = document.getElementById("hamburger-btn") as HTMLButtonElement;
