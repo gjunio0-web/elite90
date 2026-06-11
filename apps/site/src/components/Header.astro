@@ -540,11 +540,37 @@ const navLinks = [
 
   .mobile-drawer__lang { margin-top: auto; padding-top: var(--space-5); }
 
-  /* Breakpoint: show hamburger, hide desktop nav + CTA */
-  @media (max-width: 1023px) {
-    .site-header__nav, #nav-flex-wrapper, #nav-more { display: none; !important}
-    .site-header__cta { display: none; }
-    .site-header__hamburger { display: flex; }
+  /* Breakpoint Definitivo: Reorganização de Fluxo Mobile */
+  @media (max-width: 1240px) {
+    /* 1. Esconde a navegação inteira (links + botão mais) */
+    .site-header__nav { 
+      display: none !important; 
+    }
+    
+    /* 2. Esconde o botão de CTA de desktop */
+    .site-header__cta { 
+      display: none !important; 
+    }
+    
+    /* 3. Força o hambúrguer a aparecer */
+    .site-header__hamburger { 
+      display: flex !important; 
+    }
+
+    /* 4. CORREÇÃO SISTÊMICA: Força o contêiner pai a empurrar as duas extremidades */
+    .site-header__inner {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+    }
+
+    /* 5. Garante que o bloco da direita não retenha larguras ou margens do desktop */
+    .site-header__right {
+      flex: none !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: var(--space-4) !important;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
