@@ -163,12 +163,15 @@ const navLinks = [
 
   // Constantes de Engenharia Geométrica (Cálculo Preditivo Blindado)
   const LARGURA_FIXA_MAIS = 85; // Espaço físico estendido para absorver "MAIS ⌄" / "MORE ⌄" sem vazamento
-  const GAP_PIXELS        = 16; // Equivalente numérico a var(--space-4)
 
   function syncOverflowMenu() {
     if (!navFlexWrapper || !moreWrap || !dropdown || !moreBtn) return;
 
     // --- FASE 1: LEITURA PURA (Tarefa B - Read) ---
+
+    // Captura primeiro a largura física real e imutável que a barra possui na tela
+    const larguraDisponivelTotal = navFlexWrapper.offsetWidth;
+
     // Forçamos temporariamente o reset para medir a largura nativa real dos links
     moreWrap.style.display = "none";
     const links = Array.from(navFlexWrapper.querySelectorAll<HTMLAnchorElement>("a[data-nav-link]"));
@@ -176,11 +179,14 @@ const navLinks = [
       link.style.display = ""; 
       link.setAttribute("tabindex", "0"); // Restaura o foco padrão
     });
-
-    const larguraDisponivelTotal = navFlexWrapper.offsetWidth;
     
     // Captura as larguras físicas que o HTML/CSS distribuiu previamente na tela
     const largurasLinks = links.map(link => link.offsetWidth);
+
+    // Interroga o motor de renderização para obter o gap real computado pelo CSS (Ação 2)
+    const estiloComputado = window.getComputedStyle(navFlexWrapper);
+    const gapTexto = estiloComputado.gap || estiloComputado.columnGap;
+    const GAP_PIXELS = gapTexto && gapTexto !== "normal" ? parseFloat(gapTexto) : 16;
 
     // --- FASE 2: CÁLCULO PREDITIVO EM MEMÓRIA POR SIMULAÇÃO VIRTUAL (Tarefa C - Compute) ---
     let somaLargurasFila = 0;
