@@ -319,26 +319,39 @@ const navLinks = [
   }
 
 
-  // Mecânica do gatilho de clique corrigida alternando a propriedade hidden nativa do DOM
-  moreBtn?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const isHidden = dropdown.hidden;
-    dropdown.hidden = !isHidden;
-    moreBtn.setAttribute("aria-expanded", String(isHidden));
-    
-    // Ativa o cálculo de portal se o menu estiver abrindo
-    if (isHidden) {
-      positionDropdown();
-    }
-    
-    if (moreIcon) {
-      moreIcon.style.transform = isHidden ? "rotate(180deg)" : "";
-    }
-  });
+  // --- ENGENHARIA DE HOVER E ROTAÇÃO DA SETA ---
+  
+  // Função centralizada para abrir o menu, girar a seta para cima e posicionar no body
+  function openDropdownHover() {
+    dropdown.hidden = false;
+    moreBtn?.setAttribute("aria-expanded", "true");
+    positionDropdown(); // Executa o portal dinâmico
+    if (moreIcon) moreIcon.style.transform = "rotate(180deg)"; // Seta para cima
+  }
 
-  // Fechamento nativo ao clicar fora da área do menu dropdown
+  // Função centralizada para colapsar o menu e voltar a seta para baixo
+  function closeDropdownHover(e: MouseEvent) {
+    // Verifica se o mouse se moveu para dentro do dropdown ou do botão antes de fechar
+    const targetAondeOMouseFoi = e.relatedTarget as Node;
+    if (moreWrap?.contains(targetAondeOMouseFoi) || dropdown?.contains(targetAondeOMouseFoi)) {
+      return; // Retém o menu aberto se o usuário estiver transitando entre o botão e a caixa
+    }
+    dropdown.hidden = true;
+    moreBtn?.setAttribute("aria-expanded", "false");
+    if (moreIcon) moreIcon.style.transform = ""; // Seta para baixo
+  }
+
+  // Gatilhos de entrada e saída no botão [MAIS]
+  moreWrap?.addEventListener("mouseenter", openDropdownHover);
+  moreWrap?.addEventListener("mouseleave", closeDropdownHover);
+
+  // Gatilhos de entrada e saída no próprio contêiner flutuante (Portal)
+  dropdown?.addEventListener("mouseenter", openDropdownHover);
+  dropdown?.addEventListener("mouseleave", closeDropdownHover);
+
+  // Fechamento nativo ao clicar fora ou para garantir o colapso estrutural
   document.addEventListener("click", (e) => {
-    if (!moreWrap?.contains(e.target as Node)) {
+    if (!moreWrap?.contains(e.target as Node) && !dropdown?.contains(e.target as Node)) {
       dropdown.hidden = true;
       moreBtn?.setAttribute("aria-expanded", "false");
       if (moreIcon) moreIcon.style.transform = "";
