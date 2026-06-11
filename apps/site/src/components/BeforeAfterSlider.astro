@@ -102,9 +102,10 @@ const { items } = Astro.props;
     margin: 0;
     width: 100%;
     display: block;
-    position: relative; /* Essencial para o absolute da tag */
-    /* Injeta o fundo negro absoluto para absorver o letterboxing de fotos fora do padrão 9:16 */
+    position: relative; 
     background-color: var(--c-darkbg, #0A0A0A);
+    /* O selo de arquitetura Z: aprisiona a tag DEPOIS no seu próprio contexto */
+    isolation: isolate; 
   }
 
   .result-card__img {
