@@ -162,6 +162,9 @@ const isEn = locale === "en";
                   </label>
                 ))}
               </div>
+              <p class="field__error" id="f-objetivo-error" hidden>
+                {isEn ? "Select your main goal." : "Selecione seu objetivo principal."}
+              </p>
               <div class="field field--conditional" id="cond-goal-other" hidden>
                 <label class="field__label" for="f-goal-other">
                   {isEn ? "Describe your goal:" : "Descreva seu objetivo:"}
@@ -229,6 +232,9 @@ const isEn = locale === "en";
                   name="frequencia_semanal" required
                   inputmode="numeric"
                   placeholder="4" />
+                <p class="field__error" id="f-freq-error" hidden>
+                  {isEn ? "Training frequency is required." : "Frequência semanal é obrigatória."}
+                </p>
               </div>
               <div class="field">
                 <label class="field__label" for="f-avail">
@@ -241,6 +247,9 @@ const isEn = locale === "en";
                   name="disponibilidade_diaria" required
                   inputmode="decimal"
                   placeholder={isEn ? "e.g. 1.5" : "ex: 1,5"} />
+                <p class="field__error" id="f-avail-error" hidden>
+                  {isEn ? "Daily availability is required." : "Disponibilidade diária é obrigatória."}
+                </p>
               </div>
             </div>
 
@@ -253,6 +262,9 @@ const isEn = locale === "en";
                 <label class="radio-label"><input type="radio" name="personal_trainer" value="SIM" required /> {isEn ? "YES" : "SIM"}</label>
                 <label class="radio-label"><input type="radio" name="personal_trainer" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
+              <p class="field__error" id="f-personal-error" hidden>
+                {isEn ? "Answer question 5." : "Responda a questão 5."}
+              </p>
             </div>
 
             <div class="field">
@@ -297,6 +309,17 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
+                8. {isEn ? "Do you see a sports medicine doctor?" : "Faz acompanhamento com médico do esporte?"}
+                <span class="field__req">*</span>
+              </span>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="medico_esporte" value="SIM" required /> {isEn ? "YES" : "SIM"}</label>
+                <label class="radio-label"><input type="radio" name="medico_esporte" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field__label">
                 9. {isEn ? "Have you done or are you doing TRT?" : "Já fez ou está fazendo reposição hormonal (TRT)?"}
                 <span class="field__req">*</span>
               </span>
@@ -304,6 +327,9 @@ const isEn = locale === "en";
                 <label class="radio-label"><input type="radio" name="trt" value="SIM" id="r-trt-sim" required /> {isEn ? "YES" : "SIM"}</label>
                 <label class="radio-label"><input type="radio" name="trt" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
+              <p class="field__error" id="f-trt-error" hidden>
+                {isEn ? "Answer question 9." : "Responda a questão 9."}
+              </p>
             </div>
             <div class="field field--conditional" id="cond-trt" hidden>
               <label class="field__label" for="f-trt-detail">
@@ -342,6 +368,9 @@ const isEn = locale === "en";
                 <label class="radio-label"><input type="radio" name="diabetes" value="SIM" required /> {isEn ? "YES" : "SIM"}</label>
                 <label class="radio-label"><input type="radio" name="diabetes" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
+              <p class="field__error" id="f-diabetes-error" hidden>
+                {isEn ? "Answer question 12." : "Responda a questão 12."}
+              </p>
             </div>
 
             <div class="field">
@@ -398,6 +427,9 @@ const isEn = locale === "en";
                   </label>
                 ))}
               </div>
+              <p class="field__error" id="f-dieta-error" hidden>
+                {isEn ? "Select your diet status." : "Selecione seu status de rotina alimentar."}
+              </p>
             </div>
 
             <div class="form-grid form-grid--2">
@@ -426,13 +458,16 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
-                17. {isEn ? "Do you use supplements?" : "Usa suplementos?"}
+                17. {isEn ? "Do use supplements?" : "Usa suplementos?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
                 <label class="radio-label"><input type="radio" name="suplementos" value="SIM" id="r-supl-sim" required /> {isEn ? "YES" : "SIM"}</label>
                 <label class="radio-label"><input type="radio" name="suplementos" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
+              <p class="field__error" id="f-suplementos-error" hidden>
+                {isEn ? "Answer question 17." : "Responda se faz uso de suplementos."}
+              </p>
             </div>
             <div class="field field--conditional" id="cond-supl" hidden>
               <label class="field__label" for="f-supl-detail">
@@ -775,15 +810,10 @@ const isEn = locale === "en";
       if (targetInput) {
         const fieldContainer = targetInput.closest(".field");
         if (fieldContainer) {
-          const hasErrorTag = fieldContainer.querySelector(".field__error");
-          if (!hasErrorTag) {
-            // Injeta o parágrafo de erro ausente dinamicamente para as seções de Imersão e Rotina
-            const dErr = document.createElement("p");
-            dErr.className = "field__error dynamic-field-error";
-            dErr.textContent = message;
-            fieldContainer.appendChild(dErr);
-          } else {
-            (hasErrorTag as HTMLElement).hidden = false;
+          // Busca a tag de erro estática e força a exibição do texto vermelho abaixo do campo
+          const inlineErrorTag = fieldContainer.querySelector(".field__error");
+          if (inlineErrorTag) {
+            (inlineErrorTag as HTMLElement).hidden = false;
           }
           if (!firstInvalidEl) firstInvalidEl = fieldContainer as HTMLElement;
         }
