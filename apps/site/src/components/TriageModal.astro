@@ -20,8 +20,9 @@ const isEn = locale === "en";
       <button class="modal-close" id="modal-close" type="button" aria-label="Fechar">&#x2715;</button>
     </div>
 
-    <div class="modal-body">
-      <!-- SUCCESS shown ONLY after submit, starts hidden -->
+    <div class="modal-body" id="modal-body">
+
+      <!-- SUCESSO: oculto por padrao, exibido apenas apos envio bem-sucedido -->
       <div class="form-success" id="form-success" hidden tabindex="-1">
         <div class="form-success__icon" aria-hidden="true">&#x2713;</div>
         <h3 class="form-success__title">
@@ -30,19 +31,19 @@ const isEn = locale === "en";
         <p class="form-success__message">
           {isEn
             ? "Your application is under review. You will be contacted within 48 hours."
-            : "Sua solicitação está em análise. Em até 48 horas você receberá um contato."}
+            : "Sua solicitacao esta em analise. Em ate 48 horas voce recebera um contato."}
         </p>
         <p class="form-success__sub">
           {isEn
             ? "Limited spots per cycle. Your application is in the queue."
-            : "Vagas limitadas por ciclo. Sua ficha está na fila de análise."}
+            : "Vagas limitadas por ciclo. Sua ficha esta na fila de analise."}
         </p>
         <button class="btn-cta" type="button" id="success-close">
           {isEn ? "Close" : "Fechar"}
         </button>
       </div>
 
-      <!-- FORM shown by default -->
+      <!-- FORMULARIO -->
       <form class="triage-form" id="triage-form" novalidate>
 
         <!-- DADOS PESSOAIS -->
@@ -54,22 +55,19 @@ const isEn = locale === "en";
               <label class="field__label" for="f-name">
                 {isEn ? "Full name" : "Nome completo"} <span class="field__req">*</span>
               </label>
-              <input class="field__input" type="text" id="f-name" name="nome" required
+              <input class="field__input" type="text" id="f-name" name="nome"
                 autocomplete="name" />
-              <p class="field__error" id="f-name-error" hidden>
-                {isEn ? "Name is required." : "Nome é obrigatório."}
-              </p>
+              <p class="field__error" id="f-name-error" hidden></p>
             </div>
 
             <div class="field">
               <label class="field__label" for="f-cpf">
                 CPF <span class="field__req">*</span>
               </label>
-              <input class="field__input" type="text" id="f-cpf" name="cpf" required
-                placeholder="000.000.000-00" maxlength="14" inputmode="numeric" />
-              <p class="field__error" id="f-cpf-error" hidden>
-                {isEn ? "Enter a valid CPF." : "Informe um CPF válido."}
-              </p>
+              <input class="field__input" type="text" id="f-cpf" name="cpf"
+                placeholder="000.000.000-00" maxlength="14" inputmode="numeric"
+                autocomplete="off" />
+              <p class="field__error" id="f-cpf-error" hidden></p>
             </div>
 
             <div class="field">
@@ -78,65 +76,63 @@ const isEn = locale === "en";
                 <span class="field__req">*</span>
               </label>
               {isEn
-                ? <input class="field__input" type="date" id="f-dob" name="data_nascimento" required />
-                : <input class="field__input" type="text" id="f-dob" name="data_nascimento" required
-                    placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" />
+                ? <input class="field__input" type="date" id="f-dob"
+                    name="data_nascimento" autocomplete="bday" />
+                : <input class="field__input" type="text" id="f-dob"
+                    name="data_nascimento" placeholder="DD/MM/AAAA"
+                    maxlength="10" inputmode="numeric" autocomplete="off" />
               }
-              <p class="field__error" id="f-dob-error" hidden>
-                {isEn ? "Enter a valid date." : "Informe uma data válida (DD/MM/AAAA)."}
-              </p>
+              <p class="field__error" id="f-dob-error" hidden></p>
             </div>
 
             <div class="field">
               <label class="field__label" for="f-email">
                 E-mail <span class="field__req">*</span>
               </label>
-              <input class="field__input" type="email" id="f-email" name="email" required
+              <input class="field__input" type="email" id="f-email" name="email"
                 autocomplete="email"
                 placeholder={isEn ? "your@email.com" : "seu@email.com"} />
-              <p class="field__error" id="f-email-error" hidden>
-                {isEn ? "Enter a valid e-mail address." : "Informe um e-mail válido."}
-              </p>
+              <p class="field__error" id="f-email-error" hidden></p>
             </div>
 
             <div class="field">
               <label class="field__label" for="f-height">
-                {isEn ? "Height (in metres, e.g. 1.75)" : "Altura (em metros, ex: 1,75)"}
+                {isEn ? "Height (metres, e.g. 1.75)" : "Altura (metros, ex: 1,75)"}
                 <span class="field__req">*</span>
               </label>
-              <input class="field__input numeric-br-field" type="text" id="f-height" name="altura_visual" required
-                inputmode="decimal"
-                placeholder={isEn ? "1.75" : "1,75"} data-field-target="altura" />
+              <input class="field__input" type="text" id="f-height"
+                name="altura_visual" inputmode="decimal"
+                placeholder={isEn ? "1.75" : "1,75"}
+                autocomplete="off"
+                data-field-target="altura" />
               <input type="hidden" id="real-altura" name="altura" />
-              <p class="field__error" id="f-height-error" hidden>
-                {isEn ? "Enter a value between 1.00 and 2.50 m." : "Informe um valor entre 1,00 e 2,50 m."}
-              </p>
+              <p class="field__error" id="f-height-error" hidden></p>
             </div>
 
             <div class="field">
               <label class="field__label" for="f-weight">
-                {isEn ? "Weight (in kg, e.g. 85.5)" : "Peso (em kg, ex: 85,5)"}
+                {isEn ? "Weight (kg, e.g. 85.5)" : "Peso (kg, ex: 85,5)"}
                 <span class="field__req">*</span>
               </label>
-              <input class="field__input numeric-br-field" type="text" id="f-weight" name="peso_visual" required
-                inputmode="decimal"
-                placeholder={isEn ? "85.5" : "85,5"} data-field-target="peso" />
+              <input class="field__input" type="text" id="f-weight"
+                name="peso_visual" inputmode="decimal"
+                placeholder={isEn ? "85.5" : "85,5"}
+                autocomplete="off"
+                data-field-target="peso" />
               <input type="hidden" id="real-peso" name="peso" />
-              <p class="field__error" id="f-weight-error" hidden>
-                {isEn ? "Enter a value between 30 and 300 kg." : "Informe um valor entre 30 e 300 kg."}
-              </p>
+              <p class="field__error" id="f-weight-error" hidden></p>
             </div>
 
           </div>
         </div>
 
-        <!-- IMERSÃO DO ATLETA -->
+        <!-- IMERSAO DO ATLETA -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Athlete Immersion" : "Imersão do Atleta"}</h3>
+          <h3 class="form-section__title">{isEn ? "Athlete Immersion" : "Imersao do Atleta"}</h3>
           <p class="form-section__intro">
             {isEn
-              ? "Honest answers here shape your entire protocol."
-              : "Bora mergulhar de cabeça no processo? Seja honesto - é o seu corpo, sua evolução."}
+              ? "Honest answers shape your entire protocol."
+              : "Bora mergulhar de cabeca no processo? Seja honesto - e o seu corpo, sua evolucao."}
           </p>
 
           <div class="form-stack">
@@ -149,43 +145,45 @@ const isEn = locale === "en";
                   : "Qual o seu objetivo principal com esse acompanhamento?"}
                 <span class="field__req">*</span>
               </span>
-              <div class="radio-group radio-group--vertical">
+              <div class="radio-group radio-group--vertical" id="group-objetivo">
                 {(isEn
                   ? ["Muscle gain","Fat loss","Body recomposition","Competition preparation","Improve general fitness","Other"]
-                  : ["Ganho de massa muscular","Perda de gordura","Recomposição corporal","Preparação para competição","Melhorar condicionamento geral","Outro"]
+                  : ["Ganho de massa muscular","Perda de gordura","Recomposicao corporal","Preparacao para competicao","Melhorar condicionamento geral","Outro"]
                 ).map((opt, i, arr) => (
                   <label class="radio-label">
                     <input type="radio" name="objetivo" value={opt}
-                      id={i === arr.length - 1 ? "r-goal-other" : undefined}
-                      required />
+                      id={i === arr.length - 1 ? "r-goal-other" : undefined} />
                     {opt}
                   </label>
                 ))}
               </div>
-              <p class="field__error" id="f-objetivo-error" hidden>
-                {isEn ? "Select your main goal." : "Selecione seu objetivo principal."}
-              </p>
-              <div class="field field--conditional" id="cond-goal-other" hidden>
+              <p class="field__error" id="f-objetivo-error" hidden></p>
+              <!-- Condicional: aparece se "Outro/Other" selecionado -->
+              <fieldset class="field field--cond" id="cond-goal-other"
+                data-cond-name="objetivo"
+                data-cond-value={isEn ? "Other" : "Outro"}
+                hidden aria-hidden="true">
                 <label class="field__label" for="f-goal-other">
                   {isEn ? "Describe your goal:" : "Descreva seu objetivo:"}
                 </label>
                 <textarea class="field__input field__textarea" id="f-goal-other"
-                  name="objetivo_outro" rows="2"></textarea>
-              </div>
+                  name="objetivo_outro" rows="2" autocomplete="off"></textarea>
+                <p class="field__error" id="f-goal-other-error" hidden></p>
+              </fieldset>
             </div>
 
-            <!-- Q2a: qual atividade (multiple checkboxes) -->
+            <!-- Q2: atividade fisica -->
             <div class="field">
               <span class="field__label">
                 2. {isEn
                   ? "Do you currently practice any physical activity? If so, which?"
-                  : "Atualmente pratica alguma atividade física? Se sim, qual?"}
+                  : "Atualmente pratica alguma atividade fisica? Se sim, qual?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group radio-group--vertical" id="activity-group">
                 {(isEn
                   ? ["Weight training","CrossFit","Running","Swimming","Martial arts","Cycling","None"]
-                  : ["Musculação","CrossFit","Corrida","Natação","Artes marciais","Ciclismo","Nenhuma"]
+                  : ["Musculacao","CrossFit","Corrida","Natacao","Artes marciais","Ciclismo","Nenhuma"]
                 ).map((opt) => (
                   <label class="radio-label">
                     <input type="checkbox" name="atividade_fisica" value={opt}
@@ -194,169 +192,181 @@ const isEn = locale === "en";
                   </label>
                 ))}
                 <label class="radio-label">
-                  <input type="checkbox" name="atividade_fisica" value={isEn ? "Other" : "Outra"}
+                  <input type="checkbox" name="atividade_fisica"
+                    value={isEn ? "Other" : "Outra"}
                     id="r-act-other" class="activity-check" />
                   {isEn ? "Other" : "Outra"}
                 </label>
               </div>
-              <p class="field__error" id="f-activity-error" hidden>
-                {isEn ? "Select at least one option." : "Selecione ao menos uma opção."}
-              </p>
-              <div class="field field--conditional" id="cond-act-other" hidden>
+              <p class="field__error" id="f-activity-error" hidden></p>
+              <!-- Condicional "Outra": aparece se checkbox "Outra" marcado -->
+              <fieldset class="field field--cond" id="cond-act-other"
+                data-cond-name="__act-other-checkbox"
+                data-cond-value="checked"
+                hidden aria-hidden="true">
                 <label class="field__label" for="f-act-other">
                   {isEn ? "Which activity?" : "Qual atividade?"}
+                  <span class="field__req">*</span>
                 </label>
-                <input class="field__input" type="text" id="f-act-other" name="atividade_outra" />
-              </div>
+                <input class="field__input" type="text" id="f-act-other"
+                  name="atividade_outra" autocomplete="off" />
+                <p class="field__error" id="f-act-other-error" hidden></p>
+              </fieldset>
             </div>
 
-            <!-- Q2b: há quanto tempo -->
-            <div class="field">
+            <!-- Q3: ha quanto tempo (condicional: so se alguma atividade marcada, exceto Nenhuma) -->
+            <fieldset class="field field--cond" id="cond-act-duration"
+              data-cond-name="__activity-any"
+              data-cond-value="yes"
+              hidden aria-hidden="true">
               <label class="field__label" for="f-act-duration">
-                {isEn ? "How long? (in years, e.g. 2.5)" : "Há quanto tempo? (em anos, ex: 2,5)"}
+                3. {isEn ? "How long? (years, e.g. 2.5)" : "Ha quanto tempo? (anos, ex: 2,5)"}
+                <span class="field__req">*</span>
               </label>
               <input class="field__input" type="text" id="f-act-duration"
                 name="tempo_atividade" inputmode="decimal"
-                placeholder={isEn ? "2.5" : "2,5"} />
-            </div>
+                placeholder={isEn ? "2.5" : "2,5"}
+                autocomplete="off"
+                data-field-target="tempo_atividade" />
+              <input type="hidden" id="real-tempo_atividade" name="tempo_atividade_float" />
+              <p class="field__error" id="f-act-duration-error" hidden></p>
+            </fieldset>
 
             <div class="form-grid form-grid--2">
               <div class="field">
                 <label class="field__label" for="f-freq">
-                  3. {isEn
+                  4. {isEn
                     ? "How many times per week do you plan to train?"
                     : "Pretende treinar quantas vezes por semana?"}
                   <span class="field__req">*</span>
                 </label>
                 <input class="field__input" type="text" id="f-freq"
-                  name="frequencia_semanal" required
-                  inputmode="numeric"
-                  placeholder="4" />
-                <p class="field__error" id="f-freq-error" hidden>
-                  {isEn ? "Training frequency is required." : "Frequência semanal é obrigatória."}
-                </p>
+                  name="frequencia_semanal"
+                  inputmode="numeric" placeholder="4"
+                  autocomplete="off" />
+                <p class="field__error" id="f-freq-error" hidden></p>
               </div>
               <div class="field">
                 <label class="field__label" for="f-avail">
-                  4. {isEn
+                  5. {isEn
                     ? "Daily hours available for training?"
-                    : "Disponibilidade diária de horas para treinos?"}
+                    : "Disponibilidade diaria de horas para treinos?"}
                   <span class="field__req">*</span>
                 </label>
                 <input class="field__input" type="text" id="f-avail"
-                  name="disponibilidade_diaria" required
-                  inputmode="decimal"
-                  placeholder={isEn ? "e.g. 1.5" : "ex: 1,5"} />
-                <p class="field__error" id="f-avail-error" hidden>
-                  {isEn ? "Daily availability is required." : "Disponibilidade diária é obrigatória."}
-                </p>
+                  name="disponibilidade_diaria" inputmode="decimal"
+                  placeholder={isEn ? "1.5" : "1,5"}
+                  autocomplete="off"
+                  data-field-target="disponibilidade_diaria" />
+                <input type="hidden" id="real-disponibilidade_diaria" name="disponibilidade_diaria_float" />
+                <p class="field__error" id="f-avail-error" hidden></p>
               </div>
             </div>
 
             <div class="field">
               <span class="field__label">
-                5. {isEn ? "Do you train with a personal trainer?" : "Treina com personal trainer?"}
+                6. {isEn ? "Do you train with a personal trainer?" : "Treina com personal trainer?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
-                <label class="radio-label"><input type="radio" name="personal_trainer" value="SIM" required /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="personal_trainer" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
+                <label class="radio-label"><input type="radio" name="personal_trainer" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
+                <label class="radio-label"><input type="radio" name="personal_trainer" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
               </div>
-              <p class="field__error" id="f-personal-error" hidden>
-                {isEn ? "Answer question 5." : "Responda a questão 5."}
-              </p>
+              <p class="field__error" id="f-personal-error" hidden></p>
             </div>
 
             <div class="field">
               <span class="field__label">
-                6. {isEn ? "Have you competed before?" : "Já participou de alguma competição?"}
+                7. {isEn ? "Have you competed before?" : "Ja participou de alguma competicao?"}
               </span>
               <div class="radio-group">
-                <label class="radio-label"><input type="radio" name="competicao" value="SIM" id="r-comp-sim" /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="competicao" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
+                <label class="radio-label"><input type="radio" name="competicao" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
+                <label class="radio-label"><input type="radio" name="competicao" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
               </div>
-            </div>
-            <div class="field field--conditional" id="cond-comp" hidden>
-              <label class="field__label" for="f-comp-detail">
-                {isEn ? "If yes, which category and year?" : "Se sim, qual modalidade e ano?"}
-              </label>
-              <input class="field__input" type="text" id="f-comp-detail" name="competicao_detalhe" />
+              <!-- Condicional: aparece se SIM, mas NAO e obrigatorio -->
+              <fieldset class="field field--cond" id="cond-comp"
+                data-cond-name="competicao"
+                data-cond-value="SIM"
+                data-cond-optional="true"
+                hidden aria-hidden="true">
+                <label class="field__label" for="f-comp-detail">
+                  {isEn ? "Which category and year?" : "Qual modalidade e ano?"}
+                </label>
+                <input class="field__input" type="text" id="f-comp-detail"
+                  name="competicao_detalhe" autocomplete="off" />
+              </fieldset>
             </div>
 
             <div class="field">
               <span class="field__label">
-                7. {isEn
+                8. {isEn
                   ? "Do you know or follow a bodybuilding coach?"
-                  : "Já conhece ou acompanha o trabalho de um coach bodybuilding?"}
+                  : "Ja conhece ou acompanha o trabalho de um coach bodybuilding?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
-                <label class="radio-label"><input type="radio" name="conhece_coach" value="SIM" required /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="conhece_coach" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
+                <label class="radio-label"><input type="radio" name="conhece_coach" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
+                <label class="radio-label"><input type="radio" name="conhece_coach" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
               </div>
+              <p class="field__error" id="f-coach-error" hidden></p>
             </div>
 
             <div class="field">
               <span class="field__label">
-                8. {isEn ? "Do you see a sports medicine doctor?" : "Faz acompanhamento com médico do esporte?"}
+                9. {isEn ? "Do you see a sports medicine doctor?" : "Faz acompanhamento com medico do esporte?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
-                <label class="radio-label"><input type="radio" name="medico_esporte" value="SIM" required /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="medico_esporte" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
+                <label class="radio-label"><input type="radio" name="medico_esporte" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
+                <label class="radio-label"><input type="radio" name="medico_esporte" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
               </div>
+              <p class="field__error" id="f-medico-error" hidden></p>
             </div>
 
             <div class="field">
               <span class="field__label">
-                8. {isEn ? "Do you see a sports medicine doctor?" : "Faz acompanhamento com médico do esporte?"}
+                10. {isEn ? "Have you done or are you doing TRT?" : "Ja fez ou esta fazendo reposicao hormonal (TRT)?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
-                <label class="radio-label"><input type="radio" name="medico_esporte" value="SIM" required /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="medico_esporte" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
+                <label class="radio-label"><input type="radio" name="trt" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
+                <label class="radio-label"><input type="radio" name="trt" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
               </div>
-            </div>
-
-            <div class="field">
-              <span class="field__label">
-                9. {isEn ? "Have you done or are you doing TRT?" : "Já fez ou está fazendo reposição hormonal (TRT)?"}
-                <span class="field__req">*</span>
-              </span>
-              <div class="radio-group">
-                <label class="radio-label"><input type="radio" name="trt" value="SIM" id="r-trt-sim" required /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="trt" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
-              </div>
-              <p class="field__error" id="f-trt-error" hidden>
-                {isEn ? "Answer question 9." : "Responda a questão 9."}
-              </p>
-            </div>
-            <div class="field field--conditional" id="cond-trt" hidden>
-              <label class="field__label" for="f-trt-detail">
-                10. {isEn ? "Which hormones and at what frequency?" : "Quais hormônios e em qual frequência?"}
-              </label>
-              <textarea class="field__input field__textarea" id="f-trt-detail"
-                name="trt_detalhe" rows="2"></textarea>
+              <p class="field__error" id="f-trt-error" hidden></p>
+              <!-- Condicional: aparece se SIM, obrigatorio -->
+              <fieldset class="field field--cond" id="cond-trt"
+                data-cond-name="trt"
+                data-cond-value="SIM"
+                hidden aria-hidden="true">
+                <label class="field__label" for="f-trt-detail">
+                  {isEn ? "Which hormones and at what frequency?" : "Quais hormonios e em qual frequencia?"}
+                  <span class="field__req">*</span>
+                </label>
+                <textarea class="field__input field__textarea" id="f-trt-detail"
+                  name="trt_detalhe" rows="2" autocomplete="off"></textarea>
+                <p class="field__error" id="f-trt-detail-error" hidden></p>
+              </fieldset>
             </div>
 
           </div>
         </div>
 
-        <!-- HISTÓRICO DE SAÚDE -->
+        <!-- HISTORICO DE SAUDE -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Health History" : "Histórico de Saúde"}</h3>
+          <h3 class="form-section__title">{isEn ? "Health History" : "Historico de Saude"}</h3>
           <div class="form-stack">
 
             <div class="field">
               <label class="field__label" for="f-cardiac">
                 11. {isEn
                   ? "Do you have any cardiac condition? (hypertension, arrhythmia, pacemaker, angina, etc.)"
-                  : "Possui alguma condição cardíaca? (hipertensão, arritmia, uso de marcapasso, angina, etc.)"}
+                  : "Possui alguma condicao cardiaca? (hipertensao, arritmia, uso de marcapasso, angina, etc.)"}
                 <span class="field__req">*</span>
               </label>
               <textarea class="field__input field__textarea" id="f-cardiac"
-                name="condicao_cardiaca" required rows="2"
+                name="condicao_cardiaca" rows="2" autocomplete="off"
                 placeholder={isEn ? "None / describe if applicable" : "Nenhuma / descreva se houver"}></textarea>
+              <p class="field__error" id="f-cardiac-error" hidden></p>
             </div>
 
             <div class="field">
@@ -365,50 +375,55 @@ const isEn = locale === "en";
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
-                <label class="radio-label"><input type="radio" name="diabetes" value="SIM" required /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="diabetes" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
+                <label class="radio-label"><input type="radio" name="diabetes" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
+                <label class="radio-label"><input type="radio" name="diabetes" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
               </div>
-              <p class="field__error" id="f-diabetes-error" hidden>
-                {isEn ? "Answer question 12." : "Responda a questão 12."}
-              </p>
+              <p class="field__error" id="f-diabetes-error" hidden></p>
             </div>
 
             <div class="field">
               <label class="field__label" for="f-chronic">
                 13. {isEn
                   ? "Do you have any pre-existing or chronic disease?"
-                  : "Tem alguma doença pré-existente ou crônica?"}
+                  : "Tem alguma doenca pre-existente ou cronica?"}
                 <span class="field__req">*</span>
               </label>
               <textarea class="field__input field__textarea" id="f-chronic"
-                name="doenca_cronica" required rows="2"
+                name="doenca_cronica" rows="2" autocomplete="off"
                 placeholder={isEn ? "None / describe if applicable" : "Nenhuma / descreva se houver"}></textarea>
+              <p class="field__error" id="f-chronic-error" hidden></p>
             </div>
 
             <div class="field">
               <span class="field__label">
-                14. {isEn ? "Have you had a muscle or joint injury?" : "Já teve lesão muscular ou articular?"}
+                14. {isEn ? "Have you had a muscle or joint injury?" : "Ja teve lesao muscular ou articular?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
-                <label class="radio-label"><input type="radio" name="lesao" value="SIM" id="r-lesao-sim" required /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="lesao" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
+                <label class="radio-label"><input type="radio" name="lesao" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
+                <label class="radio-label"><input type="radio" name="lesao" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
               </div>
-            </div>
-            <div class="field field--conditional" id="cond-lesao" hidden>
-              <label class="field__label" for="f-lesao-detail">
-                {isEn ? "Which injury? Was surgery needed?" : "Qual lesão? Houve necessidade cirúrgica?"}
-              </label>
-              <textarea class="field__input field__textarea" id="f-lesao-detail"
-                name="lesao_detalhe" rows="2"></textarea>
+              <p class="field__error" id="f-lesao-error" hidden></p>
+              <!-- Condicional: aparece se SIM, mas NAO e obrigatorio -->
+              <fieldset class="field field--cond" id="cond-lesao"
+                data-cond-name="lesao"
+                data-cond-value="SIM"
+                data-cond-optional="true"
+                hidden aria-hidden="true">
+                <label class="field__label" for="f-lesao-detail">
+                  {isEn ? "Which injury? Was surgery needed?" : "Qual lesao? Houve necessidade cirurgica?"}
+                </label>
+                <textarea class="field__input field__textarea" id="f-lesao-detail"
+                  name="lesao_detalhe" rows="2" autocomplete="off"></textarea>
+              </fieldset>
             </div>
 
           </div>
         </div>
 
-        <!-- ROTINA ALIMENTAR E SUPLEMENTAÇÃO -->
+        <!-- ROTINA ALIMENTAR E SUPLEMENTACAO -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Diet and Supplementation" : "Rotina Alimentar e Suplementação"}</h3>
+          <h3 class="form-section__title">{isEn ? "Diet and Supplementation" : "Rotina Alimentar e Suplementacao"}</h3>
           <div class="form-stack">
 
             <div class="field">
@@ -419,74 +434,76 @@ const isEn = locale === "en";
               <div class="radio-group radio-group--vertical">
                 {(isEn
                   ? ["Yes, with professional guidance","Yes, on my own","No diet"]
-                  : ["Sim, com acompanhamento profissional","Sim, por conta própria","Não sigo dieta"]
+                  : ["Sim, com acompanhamento profissional","Sim, por conta propria","Nao sigo dieta"]
                 ).map(opt => (
                   <label class="radio-label">
-                    <input type="radio" name="dieta" value={opt} required />
+                    <input type="radio" name="dieta" value={opt} />
                     {opt}
                   </label>
                 ))}
               </div>
-              <p class="field__error" id="f-dieta-error" hidden>
-                {isEn ? "Select your diet status." : "Selecione seu status de rotina alimentar."}
-              </p>
+              <p class="field__error" id="f-dieta-error" hidden></p>
             </div>
 
-            <div class="form-grid form-grid--2">
-              <div class="field">
-                <label class="field__label" for="f-meals">
-                  16. {isEn ? "How many meals per day on average?" : "Em média, quantas refeições por dia?"}
-                  <span class="field__req">*</span>
-                </label>
-                <input class="field__input" type="text" id="f-meals"
-                  name="refeicoes_dia" required
-                  inputmode="numeric"
-                  placeholder="5" />
-              </div>
-              <div class="field">
-                <label class="field__label" for="f-water">
-                  18. {isEn ? "Litres of water per day on average?" : "Em média, quantos litros de água por dia?"}
-                  <span class="field__req">*</span>
-                </label>
-                <input class="field__input numeric-br-field" type="text" id="f-water"
-                  name="agua_litros_visual" required
-                  inputmode="decimal"
-                  placeholder={isEn ? "2.5" : "2,5"} data-field-target="agua_litros" />
-                <input type="hidden" id="real-agua_litros" name="agua_litros" />
-              </div>
+            <div class="field">
+              <label class="field__label" for="f-meals">
+                16. {isEn ? "How many meals per day on average?" : "Em media, quantas refeicoes por dia?"}
+                <span class="field__req">*</span>
+              </label>
+              <input class="field__input" type="text" id="f-meals"
+                name="refeicoes_dia" inputmode="numeric"
+                placeholder="5" autocomplete="off" />
+              <p class="field__error" id="f-meals-error" hidden></p>
             </div>
 
             <div class="field">
               <span class="field__label">
-                17. {isEn ? "Do use supplements?" : "Usa suplementos?"}
+                17. {isEn ? "Do you use supplements?" : "Usa suplementos?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
-                <label class="radio-label"><input type="radio" name="suplementos" value="SIM" id="r-supl-sim" required /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="suplementos" value="NAO" /> {isEn ? "NO" : "NÃO"}</label>
+                <label class="radio-label"><input type="radio" name="suplementos" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
+                <label class="radio-label"><input type="radio" name="suplementos" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
               </div>
-              <p class="field__error" id="f-suplementos-error" hidden>
-                {isEn ? "Answer question 17." : "Responda se faz uso de suplementos."}
-              </p>
+              <p class="field__error" id="f-suplementos-error" hidden></p>
+              <!-- Condicional: aparece se SIM, mas NAO e obrigatorio -->
+              <fieldset class="field field--cond" id="cond-supl"
+                data-cond-name="suplementos"
+                data-cond-value="SIM"
+                data-cond-optional="true"
+                hidden aria-hidden="true">
+                <label class="field__label" for="f-supl-detail">
+                  {isEn ? "Which supplements?" : "Se sim, quais:"}
+                </label>
+                <textarea class="field__input field__textarea" id="f-supl-detail"
+                  name="suplementos_detalhe" rows="2" autocomplete="off"></textarea>
+              </fieldset>
             </div>
-            <div class="field field--conditional" id="cond-supl" hidden>
-              <label class="field__label" for="f-supl-detail">
-                {isEn ? "Which supplements?" : "Se sim, quais:"}
+
+            <div class="field">
+              <label class="field__label" for="f-water">
+                18. {isEn ? "Litres of water per day on average?" : "Em media, quantos litros de agua por dia?"}
+                <span class="field__req">*</span>
               </label>
-              <textarea class="field__input field__textarea" id="f-supl-detail"
-                name="suplementos_detalhe" rows="2"></textarea>
+              <input class="field__input" type="text" id="f-water"
+                name="agua_litros_visual" inputmode="decimal"
+                placeholder={isEn ? "2.5" : "2,5"}
+                autocomplete="off"
+                data-field-target="agua_litros" />
+              <input type="hidden" id="real-agua_litros" name="agua_litros" />
+              <p class="field__error" id="f-water-error" hidden></p>
             </div>
 
           </div>
         </div>
 
-        <!-- AVALIAÇÃO FÍSICA VISUAL -->
+        <!-- AVALIACAO FISICA VISUAL -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Visual Physical Assessment" : "Avaliação Física Visual"}</h3>
+          <h3 class="form-section__title">{isEn ? "Visual Physical Assessment" : "Avaliacao Fisica Visual"}</h3>
           <p class="form-section__intro">
             {isEn
-              ? "Upload up to 5 photos (max 10 MB each). They will be compressed automatically."
-              : "Envie até 5 fotos (máx. 10 MB cada). Elas serão comprimidas automaticamente."}
+              ? "Upload up to 5 photos (max 10 MB each). Compressed automatically."
+              : "Envie ate 5 fotos (max. 10 MB cada). Compressao automatica."}
           </p>
           <div class="field">
             <label class="field__label field__label--file" for="f-photos">
@@ -494,8 +511,8 @@ const isEn = locale === "en";
             </label>
             <input class="field__file" type="file" id="f-photos" name="fotos"
               accept="image/*" multiple />
-            <div class="file-preview" id="file-preview" hidden></div>
-            <div id="toast-placeholder-spacer" style="display:none; height:0px;"></div>
+            <div class="file-preview" id="file-preview"></div>
+            <p class="field__error" id="f-photos-error" hidden></p>
           </div>
         </div>
 
@@ -513,663 +530,838 @@ const isEn = locale === "en";
 </div>
 
 <script>
-  // -- Modal open/close --
-  const modal     = document.getElementById("triage-modal") as HTMLElement;
-  const formEl    = document.getElementById("triage-form") as HTMLFormElement;
-  const successEl = document.getElementById("form-success") as HTMLElement;
-  const errorEl   = document.getElementById("form-error") as HTMLElement;
-  const submitBtn = document.getElementById("form-submit-btn") as HTMLButtonElement;
-
-  function openModal() {
-    if (!modal) return;
-    // Reset form state every time modal opens
-    if (formEl) {
-      formEl.style.display = "";
-      formEl.reset();
-    }
-    if (successEl) successEl.hidden = true;
-    if (errorEl) errorEl.hidden = true;
-    // Clear all field errors
-    modal.querySelectorAll(".field__error").forEach(el => {
-      (el as HTMLElement).hidden = true;
-    });
-    modal.hidden = false;
-    document.body.style.overflow = "hidden";
-    (modal.querySelector(".modal-close") as HTMLElement)?.focus();
-  }
-  function closeModal() {
-    if (!modal) return;
-    modal.hidden = true;
-    document.body.style.overflow = "";
-  }
-
-  document.addEventListener("open-triage-modal", openModal);
-  document.getElementById("modal-close")?.addEventListener("click", closeModal);
-  document.getElementById("success-close")?.addEventListener("click", closeModal);
-  modal?.addEventListener("click", e => { if (e.target === modal) closeModal(); });
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape" && modal && !modal.hidden) closeModal();
-  });
-
-  // -- Wire all CTAs to open modal --
-  document.querySelectorAll<HTMLElement>(
-    "#header-cta-btn, #drawer-cta-btn, .hero__cta, .motivational__cta, .cta-final__btn, .sticky-cta__btn"
-  ).forEach(btn => {
-    btn.addEventListener("click", e => {
-      e.preventDefault();
-      document.dispatchEvent(new CustomEvent("open-triage-modal"));
-    });
-  });
-
-  // -- Conditional: radio SIM/NÃO --
-  function conditionalRadio(
-    radioName: string,
-    condId: string,
-    inputSel: string,
-    optional = false
-  ) {
-    const radios = document.querySelectorAll<HTMLInputElement>(`input[name="${radioName}"]`);
-    const cond   = document.getElementById(condId);
-    const input  = cond?.querySelector<HTMLInputElement | HTMLTextAreaElement>(inputSel);
-    radios.forEach(r => r.addEventListener("change", () => {
-      const show = r.value === "SIM" && r.checked;
-      if (cond) cond.hidden = !show;
-      if (input && !optional) input.required = show;
-    }));
-  }
-
-  conditionalRadio("competicao",  "cond-comp",  "input",    true);
-  conditionalRadio("trt",         "cond-trt",   "textarea");
-  conditionalRadio("lesao",       "cond-lesao", "textarea", true);
-  conditionalRadio("suplementos", "cond-supl",  "textarea", true);
-
-  // -- Conditional: goal "Outro/Other" --
-  document.querySelectorAll<HTMLInputElement>('input[name="objetivo"]').forEach(r => {
-    r.addEventListener("change", () => {
-      const isOther = r.id === "r-goal-other" && r.checked;
-      const cond    = document.getElementById("cond-goal-other");
-      const inp     = document.getElementById("f-goal-other") as HTMLTextAreaElement;
-      if (cond) cond.hidden = !isOther;
-      // NOT required - user can leave blank
-      if (inp) inp.required = false;
-    });
-  });
-
-  // -- Conditional: activity "Outra/Other" (checkbox) --
-  document.getElementById("r-act-other")?.addEventListener("change", function() {
-    const checked = (this as HTMLInputElement).checked;
-    const cond = document.getElementById("cond-act-other");
-    if (cond) cond.hidden = !checked;
-    // NOT required - field is optional
-  });
-
-  // -- CPF mask --
-  const cpfInput = document.getElementById("f-cpf") as HTMLInputElement;
-  cpfInput?.addEventListener("input", () => {
-    let v = cpfInput.value.replace(/\D/g, "").slice(0, 11);
-    if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
-    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
-    else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
-    cpfInput.value = v;
-  });
-
-  // -- PT-BR date mask DD/MM/AAAA --
-  const dobInput = document.getElementById("f-dob") as HTMLInputElement;
-  if (dobInput && dobInput.type === "text") {
-    dobInput.addEventListener("input", () => {
-      let v = dobInput.value.replace(/\D/g, "").slice(0, 8);
-      if (v.length > 4)      v = v.replace(/(\d{2})(\d{2})(\d{1,4})/, "$1/$2/$3");
-      else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,2})/, "$1/$2");
-      dobInput.value = v;
-    });
-  }
-
-  // -- Redirecionamento unificado para o Barramento Global Brutalista Noir --
-  function showValidationToast(msg: string) {
-    if (typeof window !== "undefined" && (window as any).toast) {
-      (window as any).toast.show(msg, 'error');
-    }
-  }
-
-  // -- Validation helpers --
-  function parseDecimal(v: string): number {
-    return parseFloat(v.replace(",", "."));
-  }
-
-  function validaCPF(cpf: string): boolean {
-    const limpo = cpf.replace(/\D/g, "");
-    if (limpo.length !== 11 || /^(\d)\1{10}$/.test(limpo)) return false;
-    let soma = 0;
-    for (let i = 1; i <= 9; i++) soma += parseInt(limpo.substring(i - 1, i)) * (11 - i);
-    let resto = (soma * 10) % 11;
-    if (resto === 10 || resto === 11) resto = 0;
-    if (resto !== parseInt(limpo.substring(9, 10))) return false;
-    soma = 0;
-    for (let i = 1; i <= 10; i++) soma += parseInt(limpo.substring(i - 1, i)) * (12 - i);
-    resto = (soma * 10) % 11;
-    if (resto === 10 || resto === 11) resto = 0;
-    return resto === parseInt(limpo.substring(10, 11));
-  }
-
-  function validateField(id: string, errorId: string, fn: (v: string) => boolean): boolean {
-    const inp = document.getElementById(id) as HTMLInputElement | null;
-    const err = document.getElementById(errorId);
-    if (!inp) return true;
-    const valid = inp.value.trim() !== "" && fn(inp.value.trim());
-    if (err) err.hidden = valid;
-    return valid;
-  }
-
-  // -- Blur validation (show error only after user leaves field) --
-  function attachBlurValidation(id: string, errorId: string, validateFn: (v: string) => boolean) {
-    const inp = document.getElementById(id) as HTMLInputElement | null;
-    const err = document.getElementById(errorId);
-    if (!inp || !err) return;
-    inp.addEventListener("blur", () => {
-      if (!inp.value) return;
-      err.hidden = validateFn(inp.value);
-    });
-    inp.addEventListener("input", () => {
-      if (err && !err.hidden) err.hidden = validateFn(inp.value);
-    });
-  }
-
-  attachBlurValidation("f-cpf",   "f-cpf-error",   v => validaCPF(v));
-  attachBlurValidation("f-email",  "f-email-error", v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
-  attachBlurValidation("f-height", "f-height-error", v => { const n = parseDecimal(v); return n >= 1 && n <= 2.5; });
-  attachBlurValidation("f-weight", "f-weight-error", v => { const n = parseDecimal(v); return n >= 30 && n <= 300; });
-  attachBlurValidation("f-dob", "f-dob-error", v => {
-    if (v.includes("-")) return true;
-    const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if (!m) return false;
-    const d = new Date(`${m[3]}-${m[2]}-${m[1]}`);
-    return !isNaN(d.getTime());
-  });
-
-  // -- Decimal input: allow comma, prevent letters (Algoritmo BR Corrigido) --
-  ["f-height","f-weight","f-act-duration","f-avail","f-water"].forEach(id => {
-    const inp = document.getElementById(id) as HTMLInputElement;
-    if (!inp) return;
-    inp.addEventListener("input", () => {
-      // Sanitização: permite apenas dígitos e uma única vírgula visual
-      let value = inp.value.replace(/[^0-9,]/g, "");
-      
-      const parts = value.split(",");
-      if (parts.length > 2) {
-        value = parts[0] + "," + parts.slice(1).join("");
+// ============================================================
+// FONTE UNICA DE VERDADE: FIELD_RULES
+// Cada entrada define: inputId, errorId, mensagens PT/EN,
+// funcao de validacao, e se e campo de radio/checkbox.
+// ============================================================
+const FIELD_RULES: Array<{
+  key:       string;
+  inputId:   string;
+  errorId:   string;
+  msgPt:     string | ((v: string) => string);
+  msgEn:     string | ((v: string) => string);
+  validate:  (v: string) => boolean;
+  isGroup?:  boolean; // true para radio/checkbox - le via querySelector
+  groupSel?: string;  // selector para radio/checkbox :checked
+  skipIfCondHidden?: boolean; // pular se dentro de fieldset[hidden]
+}> = [
+  {
+    key: "nome", inputId: "f-name", errorId: "f-name-error",
+    msgPt: "Nome completo e obrigatorio.",
+    msgEn: "Full name is required.",
+    validate: v => v.trim().length >= 2,
+  },
+  {
+    key: "cpf", inputId: "f-cpf", errorId: "f-cpf-error",
+    msgPt: v => !v.trim() ? "CPF e obrigatorio." : "CPF invalido - verifique os digitos.",
+    msgEn: v => !v.trim() ? "CPF is required." : "Invalid CPF - check the digits.",
+    validate: v => v.trim() !== "" && validaCPF(v),
+  },
+  {
+    key: "dob", inputId: "f-dob", errorId: "f-dob-error",
+    msgPt: v => !v.trim() ? "Data de nascimento e obrigatoria."
+                           : "Data invalida. Use o formato DD/MM/AAAA.",
+    msgEn: v => !v.trim() ? "Date of birth is required."
+                           : "Invalid date. Use DD/MM/YYYY format.",
+    validate: v => {
+      if (!v.trim()) return false;
+      if (v.includes("-")) { // type=date nativo (EN)
+        return !isNaN(new Date(v).getTime());
       }
-      inp.value = value;
+      const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (!m) return false;
+      const [, dd, mm, yyyy] = m;
+      const d = new Date(`${yyyy}-${mm}-${dd}`);
+      // Anti-overflow: verifica que o Date nao "escorregou" para o mes seguinte
+      return !isNaN(d.getTime())
+        && d.getFullYear() === +yyyy
+        && d.getMonth() + 1 === +mm
+        && d.getDate() === +dd;
+    },
+  },
+  {
+    key: "email", inputId: "f-email", errorId: "f-email-error",
+    msgPt: "Informe um e-mail valido.",
+    msgEn: "Enter a valid e-mail address.",
+    validate: v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()),
+  },
+  {
+    key: "altura", inputId: "f-height", errorId: "f-height-error",
+    msgPt: v => !v.trim() ? "Altura e obrigatoria."
+                           : "Altura deve estar entre 1,00 e 2,50 m.",
+    msgEn: v => !v.trim() ? "Height is required."
+                           : "Height must be between 1.00 and 2.50 m.",
+    validate: v => {
+      if (!v.trim()) return false;
+      const n = parseDecimal(v);
+      return !isNaN(n) && n >= 1.0 && n <= 2.5;
+    },
+  },
+  {
+    key: "peso", inputId: "f-weight", errorId: "f-weight-error",
+    msgPt: v => !v.trim() ? "Peso e obrigatorio."
+                           : "Peso deve estar entre 30 e 300 kg.",
+    msgEn: v => !v.trim() ? "Weight is required."
+                           : "Weight must be between 30 and 300 kg.",
+    validate: v => {
+      if (!v.trim()) return false;
+      const n = parseDecimal(v);
+      return !isNaN(n) && n >= 30 && n <= 300;
+    },
+  },
+  {
+    key: "objetivo", inputId: "f-objetivo-error", errorId: "f-objetivo-error",
+    msgPt: "Selecione seu objetivo principal (Q1).",
+    msgEn: "Select your main goal (Q1).",
+    isGroup: true,
+    groupSel: 'input[name="objetivo"]:checked',
+    validate: () => !!document.querySelector('input[name="objetivo"]:checked'),
+  },
+  // "Descreva seu objetivo" - condicional, nao obrigatorio
+  {
+    key: "atividade", inputId: "f-activity-error", errorId: "f-activity-error",
+    msgPt: "Selecione ao menos uma opcao (Q2).",
+    msgEn: "Select at least one option (Q2).",
+    isGroup: true,
+    groupSel: 'input[name="atividade_fisica"]:checked',
+    validate: () => !!document.querySelector('input[name="atividade_fisica"]:checked'),
+  },
+  {
+    key: "atividade_outra", inputId: "f-act-other", errorId: "f-act-other-error",
+    msgPt: "Informe a atividade praticada.",
+    msgEn: "Please specify the activity.",
+    skipIfCondHidden: true,
+    validate: v => v.trim().length > 0,
+  },
+  {
+    key: "tempo_atividade", inputId: "f-act-duration", errorId: "f-act-duration-error",
+    msgPt: v => !v.trim() ? "Informe ha quanto tempo pratica (Q3)."
+                           : "Informe um valor valido em anos (ex: 2,5).",
+    msgEn: v => !v.trim() ? "Enter how long you have been training (Q3)."
+                           : "Enter a valid value in years (e.g. 2.5).",
+    skipIfCondHidden: true,
+    validate: v => {
+      if (!v.trim()) return false;
+      const n = parseDecimal(v);
+      return !isNaN(n) && n >= 0 && n <= 60;
+    },
+  },
+  {
+    key: "frequencia", inputId: "f-freq", errorId: "f-freq-error",
+    msgPt: "Frequencia semanal e obrigatoria (Q4).",
+    msgEn: "Training frequency is required (Q4).",
+    validate: v => {
+      const n = parseInt(v, 10);
+      return !isNaN(n) && n >= 1 && n <= 7;
+    },
+  },
+  {
+    key: "disponibilidade", inputId: "f-avail", errorId: "f-avail-error",
+    msgPt: v => !v.trim() ? "Disponibilidade diaria e obrigatoria (Q5)."
+                           : "Informe um valor valido em horas (ex: 1,5).",
+    msgEn: v => !v.trim() ? "Daily availability is required (Q5)."
+                           : "Enter a valid value in hours (e.g. 1.5).",
+    validate: v => {
+      if (!v.trim()) return false;
+      const n = parseDecimal(v);
+      return !isNaN(n) && n > 0 && n <= 8;
+    },
+  },
+  {
+    key: "personal_trainer", inputId: "f-personal-error", errorId: "f-personal-error",
+    msgPt: "Responda a questao 6.",
+    msgEn: "Answer question 6.",
+    isGroup: true,
+    groupSel: 'input[name="personal_trainer"]:checked',
+    validate: () => !!document.querySelector('input[name="personal_trainer"]:checked'),
+  },
+  // Q7 competicao: opcional, sem validacao de obrigatoriedade
+  {
+    key: "conhece_coach", inputId: "f-coach-error", errorId: "f-coach-error",
+    msgPt: "Responda a questao 8.",
+    msgEn: "Answer question 8.",
+    isGroup: true,
+    groupSel: 'input[name="conhece_coach"]:checked',
+    validate: () => !!document.querySelector('input[name="conhece_coach"]:checked'),
+  },
+  {
+    key: "medico_esporte", inputId: "f-medico-error", errorId: "f-medico-error",
+    msgPt: "Responda a questao 9.",
+    msgEn: "Answer question 9.",
+    isGroup: true,
+    groupSel: 'input[name="medico_esporte"]:checked',
+    validate: () => !!document.querySelector('input[name="medico_esporte"]:checked'),
+  },
+  {
+    key: "trt", inputId: "f-trt-error", errorId: "f-trt-error",
+    msgPt: "Responda a questao 10.",
+    msgEn: "Answer question 10.",
+    isGroup: true,
+    groupSel: 'input[name="trt"]:checked',
+    validate: () => !!document.querySelector('input[name="trt"]:checked'),
+  },
+  {
+    key: "trt_detalhe", inputId: "f-trt-detail", errorId: "f-trt-detail-error",
+    msgPt: "Informe os hormonios e a frequencia.",
+    msgEn: "Please specify the hormones and frequency.",
+    skipIfCondHidden: true,
+    validate: v => v.trim().length > 0,
+  },
+  {
+    key: "condicao_cardiaca", inputId: "f-cardiac", errorId: "f-cardiac-error",
+    msgPt: "Preencha o campo de condicao cardiaca (Q11).",
+    msgEn: "Fill in the cardiac condition field (Q11).",
+    validate: v => v.trim().length > 0,
+  },
+  {
+    key: "diabetes", inputId: "f-diabetes-error", errorId: "f-diabetes-error",
+    msgPt: "Responda a questao 12.",
+    msgEn: "Answer question 12.",
+    isGroup: true,
+    groupSel: 'input[name="diabetes"]:checked',
+    validate: () => !!document.querySelector('input[name="diabetes"]:checked'),
+  },
+  {
+    key: "doenca_cronica", inputId: "f-chronic", errorId: "f-chronic-error",
+    msgPt: "Preencha o campo de doenca cronica (Q13).",
+    msgEn: "Fill in the chronic disease field (Q13).",
+    validate: v => v.trim().length > 0,
+  },
+  {
+    key: "lesao", inputId: "f-lesao-error", errorId: "f-lesao-error",
+    msgPt: "Responda a questao 14.",
+    msgEn: "Answer question 14.",
+    isGroup: true,
+    groupSel: 'input[name="lesao"]:checked',
+    validate: () => !!document.querySelector('input[name="lesao"]:checked'),
+  },
+  {
+    key: "dieta", inputId: "f-dieta-error", errorId: "f-dieta-error",
+    msgPt: "Selecione sua rotina alimentar (Q15).",
+    msgEn: "Select your diet status (Q15).",
+    isGroup: true,
+    groupSel: 'input[name="dieta"]:checked',
+    validate: () => !!document.querySelector('input[name="dieta"]:checked'),
+  },
+  {
+    key: "refeicoes", inputId: "f-meals", errorId: "f-meals-error",
+    msgPt: v => !v.trim() ? "Numero de refeicoes e obrigatorio (Q16)."
+                           : "Informe um valor entre 1 e 12.",
+    msgEn: v => !v.trim() ? "Number of meals is required (Q16)."
+                           : "Enter a value between 1 and 12.",
+    validate: v => {
+      const n = parseInt(v, 10);
+      return !isNaN(n) && n >= 1 && n <= 12;
+    },
+  },
+  {
+    key: "suplementos", inputId: "f-suplementos-error", errorId: "f-suplementos-error",
+    msgPt: "Responda a questao 17.",
+    msgEn: "Answer question 17.",
+    isGroup: true,
+    groupSel: 'input[name="suplementos"]:checked',
+    validate: () => !!document.querySelector('input[name="suplementos"]:checked'),
+  },
+  {
+    key: "agua", inputId: "f-water", errorId: "f-water-error",
+    msgPt: v => !v.trim() ? "Consumo de agua e obrigatorio (Q18)."
+                           : "Informe um valor valido em litros (ex: 2,5).",
+    msgEn: v => !v.trim() ? "Water intake is required (Q18)."
+                           : "Enter a valid value in litres (e.g. 2.5).",
+    validate: v => {
+      if (!v.trim()) return false;
+      const n = parseDecimal(v);
+      return !isNaN(n) && n >= 0 && n <= 20;
+    },
+  },
+  {
+    key: "fotos", inputId: "f-photos-error", errorId: "f-photos-error",
+    msgPt: "Envie ao menos uma foto para avaliacao visual.",
+    msgEn: "Upload at least one photo for visual assessment.",
+    isGroup: true,
+    validate: () => compressedFiles.length > 0,
+  },
+];
 
-      // Captura o data-field-target associado e espelha no hidden input correspondente como Float (.)
-      const targetKey = inp.dataset.fieldTarget;
-      if (targetKey) {
-        const hiddenInput = document.getElementById(`real-${targetKey}`) as HTMLInputElement;
-        if (hiddenInput) {
-          const rawFloatString = value.replace(",", ".");
-          hiddenInput.value = rawFloatString ? parseFloat(rawFloatString).toString() : "";
-        }
+// ============================================================
+// HELPERS
+// ============================================================
+const isEnPage = document.documentElement.lang === "en";
+let compressedFiles: File[] = [];
+
+function parseDecimal(v: string): number {
+  return parseFloat(v.replace(",", "."));
+}
+
+function getMsg(rule: typeof FIELD_RULES[0], val = ""): string {
+  const msg = isEnPage ? rule.msgEn : rule.msgPt;
+  return typeof msg === "function" ? msg(val) : msg;
+}
+
+function validaCPF(cpf: string): boolean {
+  const c = cpf.replace(/\D/g, "");
+  if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+  let soma = 0;
+  for (let i = 1; i <= 9; i++) soma += +c[i-1] * (11 - i);
+  let r = (soma * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  if (r !== +c[9]) return false;
+  soma = 0;
+  for (let i = 1; i <= 10; i++) soma += +c[i-1] * (12 - i);
+  r = (soma * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  return r === +c[10];
+}
+
+function showValidationToast(msg: string) {
+  if ((window as any).toast) {
+    (window as any).toast.show(msg, "error");
+  }
+}
+
+function showSuccessToast(msg: string) {
+  if ((window as any).toast) {
+    (window as any).toast.show(msg, "success");
+  }
+}
+
+// ============================================================
+// CAMPOS CONDICIONAIS - gerenciamento centralizado
+// ============================================================
+function updateConditionals() {
+  // 1. Condicionais por radio (data-cond-name / data-cond-value)
+  document.querySelectorAll<HTMLElement>("fieldset[data-cond-name]").forEach(fs => {
+    const name = fs.dataset.condName!;
+    const value = fs.dataset.condValue!;
+    const optional = fs.dataset.condOptional === "true";
+
+    // Casos especiais tratados separadamente
+    if (name.startsWith("__")) return;
+
+    const checked = document.querySelector<HTMLInputElement>(
+      `input[name="${name}"][value="${value}"]:checked`
+    );
+    const show = !!checked;
+    fs.hidden = !show;
+    fs.setAttribute("aria-hidden", String(!show));
+    fs.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input:not([type=hidden]), textarea").forEach(inp => {
+      if (!optional) inp.required = show;
+    });
+  });
+
+  // 2. Condicional "Outra atividade" - checkbox especifico
+  const actOther = document.getElementById("r-act-other") as HTMLInputElement | null;
+  const condActOther = document.getElementById("cond-act-other") as HTMLElement | null;
+  if (actOther && condActOther) {
+    const show = actOther.checked;
+    condActOther.hidden = !show;
+    condActOther.setAttribute("aria-hidden", String(!show));
+    const inp = condActOther.querySelector<HTMLInputElement>("input");
+    if (inp) inp.required = show;
+  }
+
+  // 3. Condicional "Ha quanto tempo" - aparece se qualquer checkbox de atividade
+  //    marcado, EXCETO "Nenhuma/None"
+  const condDuration = document.getElementById("cond-act-duration") as HTMLElement | null;
+  if (condDuration) {
+    const anyActivity = Array.from(
+      document.querySelectorAll<HTMLInputElement>('input[name="atividade_fisica"]:checked')
+    ).some(cb => cb.value !== "Nenhuma" && cb.value !== "None");
+    condDuration.hidden = !anyActivity;
+    condDuration.setAttribute("aria-hidden", String(!anyActivity));
+    const inp = condDuration.querySelector<HTMLInputElement>("input[type=text]");
+    if (inp) inp.required = anyActivity;
+  }
+}
+
+// ============================================================
+// VALIDACAO UNIFICADA - unica fonte de verdade
+// ============================================================
+function validateAll(): boolean {
+  const errors: Array<{ rule: typeof FIELD_RULES[0]; val: string }> = [];
+
+  for (const rule of FIELD_RULES) {
+    // Pular se dentro de fieldset condicional oculto
+    if (rule.skipIfCondHidden) {
+      const inp = document.getElementById(rule.inputId);
+      if (inp?.closest("fieldset[data-cond-name]")?.hasAttribute("hidden")) {
+        const errEl = document.getElementById(rule.errorId);
+        if (errEl) errEl.hidden = true;
+        continue;
       }
-    });
-    // Prevent autocomplete from overwriting comma format
-    inp.setAttribute("autocomplete", "off");
-  });
-  ["f-freq","f-meals"].forEach(id => {
-    const inp = document.getElementById(id) as HTMLInputElement;
-    if (!inp) return;
-    inp.addEventListener("input", () => {
-      inp.value = inp.value.replace(/[^0-9]/g, "");
-    });
-    inp.setAttribute("autocomplete", "off");
-  });
+    }
 
-  // -- Activity: at least one checkbox required --
-  const activityGroup = document.getElementById("activity-group");
-  const activityError = document.getElementById("f-activity-error");
+    const inp = document.getElementById(rule.inputId) as HTMLInputElement | null;
+    const val = rule.isGroup ? "" : (inp?.value ?? "");
+    const valid = rule.validate(val);
+    const errEl = document.getElementById(rule.errorId);
 
-  function validateActivity(): boolean {
-    const checked = activityGroup?.querySelectorAll<HTMLInputElement>("input:checked") ?? [];
-    return checked.length > 0;
-  }
-
-  // -- Compressão de Imagens integrada ao Barramento Global --
-  const fileInput   = document.getElementById("f-photos") as HTMLInputElement;
-  const filePreview = document.getElementById("file-preview") as HTMLElement;
-  let compressedFiles: File[] = [];
-
-  function showToast(msg: string) {
-    if (typeof window !== "undefined" && (window as any).toast) {
-      (window as any).toast.show(msg, 'success');
+    if (!valid) {
+      const msg = getMsg(rule, val);
+      errors.push({ rule, val });
+      if (errEl) {
+        errEl.textContent = msg;
+        errEl.hidden = false;
+      }
+    } else {
+      if (errEl) errEl.hidden = true;
     }
   }
 
-  async function compressImage(file: File): Promise<File> {
-    return new Promise(resolve => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const MAX = 1200;
-        let { width, height } = img;
-        if (width > MAX || height > MAX) {
-          if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
-          else { width = Math.round(width * MAX / height); height = MAX; }
-        }
-        const canvas = document.createElement("canvas");
-        canvas.width = width; canvas.height = height;
-        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
-        canvas.toBlob(blob => {
-          if (!blob) { resolve(file); return; }
-          const out = new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), { type: "image/webp" });
-          const pct = Math.round((1 - blob.size / file.size) * 100);
-          showToast(`${file.name}: ${(file.size/1024).toFixed(0)} KB -> ${(blob.size/1024).toFixed(0)} KB (${pct}% menor)`);
-          resolve(out);
-        }, "image/webp", 0.82);
-      };
-      img.src = url;
-    });
+  if (errors.length > 0) {
+    // Toast 1: primeiro erro
+    showValidationToast(getMsg(errors[0].rule, errors[0].val));
+    // Toast 2: resumo se multiplos
+    if (errors.length > 1) {
+      setTimeout(() => {
+        showValidationToast(
+          isEnPage
+            ? `${errors.length} fields require attention.`
+            : `${errors.length} campos precisam de atencao.`
+        );
+      }, 1400);
+    }
+    // Scroll ate o primeiro erro dentro do modal-body
+    const firstEl = document.getElementById(errors[0].rule.inputId);
+    const container = firstEl?.closest(".field") ?? firstEl;
+    if (container) {
+      const modalBody = document.getElementById("modal-body");
+      if (modalBody) {
+        const offset = (container as HTMLElement).offsetTop - 80;
+        modalBody.scrollTo({ top: offset, behavior: "smooth" });
+      }
+    }
+    return false;
   }
+  return true;
+}
 
-  fileInput?.addEventListener("change", async () => {
-    const files = Array.from(fileInput.files ?? []);
-    if (!files.length) return;
+// ============================================================
+// VALIDACAO ON-BLUR (usa o mesmo FIELD_RULES)
+// ============================================================
+function attachBlurValidation(rule: typeof FIELD_RULES[0]) {
+  if (rule.isGroup) return; // radio/checkbox nao tem blur individual
+  const inp = document.getElementById(rule.inputId) as HTMLInputElement | null;
+  const errEl = document.getElementById(rule.errorId);
+  if (!inp || !errEl) return;
 
-    if (files.length > 5) {
-      const isEnPage = document.documentElement.lang === "en";
-      showToast(isEnPage ? "Maximum 5 photos. The rest will be discarded." : "Máximo de 5 fotos. O excesso foi descartado.");
-    }
-
-    compressedFiles = [];
-    filePreview.innerHTML = "";
-    filePreview.hidden = false;
-    for (const file of files.slice(0, 5)) {
-      const compressed = await compressImage(file);
-      compressedFiles.push(compressed);
-      const url = URL.createObjectURL(compressed);
-      const img = document.createElement("img");
-      img.src = url; img.className = "file-preview__img"; img.alt = compressed.name;
-      filePreview.appendChild(img);
-    }
+  inp.addEventListener("blur", () => {
+    if (!inp.value.trim()) return; // nao mostrar erro em campo vazio nao tocado
+    const valid = rule.validate(inp.value);
+    errEl.textContent = valid ? "" : getMsg(rule, inp.value);
+    errEl.hidden = valid;
   });
 
-  // -- Submit --
-  formEl?.addEventListener("submit", async e => {
+  inp.addEventListener("input", () => {
+    if (!errEl.hidden) {
+      const valid = rule.validate(inp.value);
+      if (valid) errEl.hidden = true;
+      else errEl.textContent = getMsg(rule, inp.value);
+    }
+  });
+}
+
+// Inicializa blur para todos os campos de texto
+FIELD_RULES.forEach(rule => attachBlurValidation(rule));
+
+// ============================================================
+// MASCARAS E SANITIZACAO DE ENTRADA
+// ============================================================
+
+// CPF: mascara xxx.xxx.xxx-xx
+const cpfInput = document.getElementById("f-cpf") as HTMLInputElement;
+cpfInput?.addEventListener("input", () => {
+  let v = cpfInput.value.replace(/\D/g, "").slice(0, 11);
+  if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+  cpfInput.value = v;
+});
+
+// Data PT-BR: mascara DD/MM/AAAA
+const dobInput = document.getElementById("f-dob") as HTMLInputElement;
+if (dobInput?.type === "text") {
+  dobInput.addEventListener("input", () => {
+    let v = dobInput.value.replace(/\D/g, "").slice(0, 8);
+    if (v.length > 4)      v = v.replace(/(\d{2})(\d{2})(\d{1,4})/, "$1/$2/$3");
+    else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,2})/, "$1/$2");
+    dobInput.value = v;
+  });
+}
+
+// Decimais com virgula: sanitizacao + espelhamento em hidden field (ponto)
+// autocomplete="off" ja definido no HTML - este bloco nao re-seta para preservar
+// campos que usam autocomplete legitimamente (nome, email, bday)
+const DECIMAL_IDS = ["f-height","f-weight","f-avail","f-water","f-act-duration"];
+DECIMAL_IDS.forEach(id => {
+  const inp = document.getElementById(id) as HTMLInputElement | null;
+  if (!inp) return;
+
+  const syncHidden = (value: string) => {
+    const targetKey = inp.dataset.fieldTarget;
+    if (!targetKey) return;
+    const hidden = document.getElementById(`real-${targetKey}`) as HTMLInputElement | null;
+    if (hidden) {
+      const float = parseFloat(value.replace(",", "."));
+      hidden.value = isNaN(float) ? "" : float.toString();
+    }
+  };
+
+  inp.addEventListener("input", () => {
+    // Permite apenas digitos e uma unica virgula
+    let v = inp.value.replace(/[^0-9,]/g, "");
+    const parts = v.split(",");
+    if (parts.length > 2) v = parts[0] + "," + parts.slice(1).join("");
+    inp.value = v;
+    syncHidden(v);
+  });
+
+  // Previne autocomplete de sobrescrever a formatacao com ponto
+  // (autocomplete="off" no HTML e o principal mecanismo;
+  //  este listener e fallback para browsers que ignoram o atributo)
+  inp.addEventListener("change", () => {
+    // Normaliza: se o browser inseriu ponto (ex: via autofill), converte para virgula
+    if (!isEnPage && inp.value.includes(".") && !inp.value.includes(",")) {
+      inp.value = inp.value.replace(".", ",");
+    }
+    syncHidden(inp.value);
+  });
+});
+
+// Inteiros: apenas digitos
+["f-freq","f-meals"].forEach(id => {
+  const inp = document.getElementById(id) as HTMLInputElement | null;
+  if (!inp) return;
+  inp.addEventListener("input", () => {
+    inp.value = inp.value.replace(/[^0-9]/g, "");
+  });
+  inp.addEventListener("change", () => {
+    inp.value = inp.value.replace(/[^0-9]/g, "");
+  });
+});
+
+// ============================================================
+// MODAL OPEN / CLOSE
+// ============================================================
+const modal     = document.getElementById("triage-modal") as HTMLElement;
+const formEl    = document.getElementById("triage-form") as HTMLFormElement;
+const successEl = document.getElementById("form-success") as HTMLElement;
+const errorEl   = document.getElementById("form-error") as HTMLElement;
+const modalBody = document.getElementById("modal-body") as HTMLElement;
+
+function openModal() {
+  if (!modal) return;
+  // Resetar estado
+  formEl?.style && (formEl.style.display = "");
+  formEl?.reset();
+  if (successEl) successEl.hidden = true;
+  if (errorEl) errorEl.hidden = true;
+  compressedFiles = [];
+  const preview = document.getElementById("file-preview");
+  if (preview) preview.innerHTML = "";
+  // Limpar todos os erros inline
+  modal.querySelectorAll<HTMLElement>(".field__error").forEach(el => {
+    el.hidden = true;
+    el.textContent = "";
+  });
+  // Resetar condicionais
+  updateConditionals();
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+  (modal.querySelector(".modal-close") as HTMLElement)?.focus();
+}
+
+function closeModal() {
+  if (!modal) return;
+  modal.hidden = true;
+  document.body.style.overflow = "";
+}
+
+document.addEventListener("open-triage-modal", openModal);
+document.getElementById("modal-close")?.addEventListener("click", closeModal);
+document.getElementById("success-close")?.addEventListener("click", closeModal);
+modal?.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && modal && !modal.hidden) closeModal();
+});
+
+// Wire CTAs
+document.querySelectorAll<HTMLElement>(
+  "#header-cta-btn, #drawer-cta-btn, .hero__cta, .motivational__cta, .cta-final__btn, .sticky-cta__btn"
+).forEach(btn => {
+  btn.addEventListener("click", e => {
     e.preventDefault();
+    document.dispatchEvent(new CustomEvent("open-triage-modal"));
+  });
+});
 
-    const isEnPage = document.documentElement.lang === "en";
-    const toasts: string[] = [];
-    let firstInvalidEl: HTMLElement | null = null;
+// ============================================================
+// CONDICIONAIS: ouvintes de mudanca
+// ============================================================
+// Radios que disparam condicionais
+["competicao","trt","lesao","suplementos","objetivo"].forEach(name => {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+    r.addEventListener("change", updateConditionals);
+  });
+});
 
-    // Função utilitária interna para registrar falhas e injetar textos vermelhos inline dinamicamente
-    function markInvalid(elementIdOrQuery: string, message: string) {
-      toasts.push(message);
-      
-      const targetInput = elementIdOrQuery.startsWith('.') || elementIdOrQuery.includes('[')
-        ? modal.querySelector(elementIdOrQuery)
-        : document.getElementById(elementIdOrQuery);
+// Checkboxes de atividade (disparam duracao condicional + "Outra")
+document.querySelectorAll('input[name="atividade_fisica"]').forEach(cb => {
+  cb.addEventListener("change", updateConditionals);
+});
 
-      if (targetInput) {
-        const fieldContainer = targetInput.closest(".field");
-        if (fieldContainer) {
-          // Busca a tag de erro estática e força a exibição do texto vermelho abaixo do campo
-          const inlineErrorTag = fieldContainer.querySelector(".field__error");
-          if (inlineErrorTag) {
-            (inlineErrorTag as HTMLElement).hidden = false;
-          }
-          if (!firstInvalidEl) firstInvalidEl = fieldContainer as HTMLElement;
-        }
+// ============================================================
+// COMPRESSAO DE IMAGENS
+// ============================================================
+const fileInput   = document.getElementById("f-photos") as HTMLInputElement;
+const filePreview = document.getElementById("file-preview") as HTMLElement;
+
+async function compressImage(file: File): Promise<File> {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const MAX = 1200;
+      let { width, height } = img;
+      if (width > MAX || height > MAX) {
+        if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
+        else { width = Math.round(width * MAX / height); height = MAX; }
       }
-    }
+      const canvas = document.createElement("canvas");
+      canvas.width = width; canvas.height = height;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(blob => {
+        if (!blob) { resolve(file); return; }
+        const out = new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), { type: "image/webp" });
+        const pct = Math.round((1 - blob.size / file.size) * 100);
+        showSuccessToast(
+          `${file.name}: ${(file.size/1024).toFixed(0)} KB -> ${(blob.size/1024).toFixed(0)} KB (${pct}% menor)`
+        );
+        resolve(out);
+      }, "image/webp", 0.82);
+    };
+    img.src = url;
+  });
+}
 
-    // 1. Nome Completo
-    const nameVal = (document.getElementById("f-name") as HTMLInputElement)?.value.trim();
-    const nameErr = document.getElementById("f-name-error");
-    if (!nameVal) {
-      markInvalid("f-name", isEnPage ? "Full name is required." : "Nome completo é obrigatório.");
-      if (nameErr) nameErr.hidden = false;
-    } else { if (nameErr) nameErr.hidden = true; }
+fileInput?.addEventListener("change", async () => {
+  const files = Array.from(fileInput.files ?? []);
+  if (!files.length) return;
 
-    // 2. CPF (Com validação Módulo 11 integrada)
-    const cpfVal = (document.getElementById("f-cpf") as HTMLInputElement)?.value.trim();
-    const cpfErr = document.getElementById("f-cpf-error");
-    if (!cpfVal) {
-      markInvalid("f-cpf", isEnPage ? "CPF is required." : "CPF é obrigatório.");
-      if (cpfErr) cpfErr.hidden = false;
-    } else if (!validaCPF(cpfVal)) {
-      markInvalid("f-cpf", isEnPage ? "Invalid CPF matrix." : "CPF inválido.");
-      if (cpfErr) cpfErr.hidden = false;
-    } else { if (cpfErr) cpfErr.hidden = true; }
+  if (files.length > 5) {
+    showValidationToast(
+      isEnPage ? "Maximum 5 photos. The rest will be discarded."
+               : "Maximo de 5 fotos. O excesso foi descartado."
+    );
+  }
 
-    // 3. Data de Nascimento
-    const dobVal = (document.getElementById("f-dob") as HTMLInputElement)?.value.trim();
-    const dobErr = document.getElementById("f-dob-error");
-    let isDobValid = true;
-    if (!dobVal) {
-      isDobValid = false;
-      markInvalid("f-dob", isEnPage ? "Date of birth is required." : "Data de nascimento é obrigatória.");
-    } else if (dobInput?.type === "text") {
-      const m = dobVal.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-      if (!m) {
-        isDobValid = false;
-        markInvalid("f-dob", isEnPage ? "Date must be DD/MM/YYYY." : "Data deve estar no formato DD/MM/AAAA.");
-      } else {
-        const d = new Date(`${m[3]}-${m[2]}-${m[1]}`);
-        if (isNaN(d.getTime())) isDobValid = false;
-      }
-    }
-    if (dobErr) dobErr.hidden = isDobValid;
+  // Preservar posicao do scroll do modal-body durante insercao de imagens
+  const savedScroll = modalBody?.scrollTop ?? 0;
 
-    // 4. E-mail
-    const emailVal = (document.getElementById("f-email") as HTMLInputElement)?.value.trim();
-    const emailErr = document.getElementById("f-email-error");
-    if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-      markInvalid("f-email", isEnPage ? "Enter a valid e-mail address." : "Informe um e-mail válido.");
-      if (emailErr) emailErr.hidden = false;
-    } else { if (emailErr) emailErr.hidden = true; }
+  compressedFiles = [];
+  filePreview.innerHTML = "";
 
-    // 5. Altura
-    const heightVal = (document.getElementById("f-height") as HTMLInputElement)?.value.trim();
-    const heightN = parseDecimal(heightVal);
-    const heightErr = document.getElementById("f-height-error");
-    if (!heightVal || heightN < 1 || heightN > 2.5) {
-      markInvalid("f-height", isEnPage ? "Height must be between 1.00 and 2.50 m." : "Altura deve estar entre 1,00 e 2,50 m.");
-      if (heightErr) heightErr.hidden = false;
-    } else { if (heightErr) heightErr.hidden = true; }
+  for (const file of files.slice(0, 5)) {
+    const compressed = await compressImage(file);
+    compressedFiles.push(compressed);
+    const url = URL.createObjectURL(compressed);
+    const img = document.createElement("img");
+    img.src = url;
+    img.className = "file-preview__img";
+    img.alt = compressed.name;
+    filePreview.appendChild(img);
+  }
 
-    // 6. Peso
-    const weightVal = (document.getElementById("f-weight") as HTMLInputElement)?.value.trim();
-    const weightN = parseDecimal(weightVal);
-    const weightErr = document.getElementById("f-weight-error");
-    if (!weightVal || weightN < 30 || weightN > 300) {
-      markInvalid("f-weight", isEnPage ? "Weight must be between 30 and 300 kg." : "Peso deve estar entre 30 e 300 kg.");
-      if (weightErr) weightErr.hidden = false;
-    } else { if (weightErr) weightErr.hidden = true; }
-
-    // 7. Q1: Objetivo Principal
-    const goalChecked = modal.querySelector<HTMLInputElement>('input[name="objetivo"]:checked');
-    if (!goalChecked) {
-      markInvalid('input[name="objetivo"]', isEnPage ? "Select your main goal (Question 1)." : "Selecione seu objetivo principal (Questão 1).");
-    }
-
-    // 8. Q2: Atividade Física (Checkboxes Coletivos)
-    const activityGroup = document.getElementById("activity-group");
-    const activityError = document.getElementById("f-activity-error");
-    const actChecked = modal.querySelectorAll<HTMLInputElement>('input[name="atividade_fisica"]:checked');
-    if (!actChecked.length) {
-      markInvalid('#activity-group', isEnPage ? "Select at least one activity (Question 2)." : "Selecione ao menos uma atividade (Questão 2).");
-      if (activityError) activityError.hidden = false;
-    } else { if (activityError) activityError.hidden = true; }
-
-    // 9. Q3: Frequência Semanal
-    const freqVal = (document.getElementById("f-freq") as HTMLInputElement)?.value.trim();
-    if (!freqVal) {
-      markInvalid("f-freq", isEnPage ? "Training frequency is required (Question 3)." : "Frequência semanal é obrigatória (Questão 3).");
-    }
-
-    // 10. Q4: Disponibilidade Diária
-    const availVal = (document.getElementById("f-avail") as HTMLInputElement)?.value.trim();
-    if (!availVal) {
-      markInvalid("f-avail", isEnPage ? "Daily availability is required (Question 4)." : "Disponibilidade diária é obrigatória (Questão 4).");
-    }
-
-    // 11. Q5: Personal Trainer
-    const ptVal = modal.querySelector<HTMLInputElement>('input[name="personal_trainer"]:checked');
-    if (!ptVal) {
-      markInvalid('input[name="personal_trainer"]', isEnPage ? "Answer if you train with a Personal (Question 5)." : "Responda se treina com personal trainer (Questão 5).");
-    }
-
-    // 12. Q7: Conhece o Trabalho do Coach
-    const coachVal = modal.querySelector<HTMLInputElement>('input[name="conhece_coach"]:checked');
-    if (!coachVal) {
-      markInvalid('input[name="conhece_coach"]', isEnPage ? "Answer if you know the coach's work (Question 7)." : "Responda se conhece o trabalho do coach (Questão 7).");
-    }
-
-    // 13. Q8: Médico do Esporte
-    const medVal = modal.querySelector<HTMLInputElement>('input[name="medico_esporte"]:checked');
-    if (!medVal) {
-      markInvalid('input[name="medico_esporte"]', isEnPage ? "Answer regarding sports medicine (Question 8)." : "Faz acompanhamento com médico do esporte? (Questão 8).");
-    }
-
-    // 14. Q9: TRT
-    const trtVal = modal.querySelector<HTMLInputElement>('input[name="trt"]:checked');
-    if (!trtVal) {
-      markInvalid('input[name="trt"]', isEnPage ? "Answer regarding TRT (Question 9)." : "Responda sobre reposição hormonal/TRT (Questão 9).");
-    }
-
-    // 15. Q11: Condição Cardíaca
-    const cardiacVal = (document.getElementById("f-cardiac") as HTMLInputElement)?.value.trim();
-    if (!cardiacVal) {
-      markInvalid("f-cardiac", isEnPage ? "Cardiac history is required (Question 11)." : "Histórico de condição cardíaca é obrigatório (Questão 11).");
-    }
-
-    // 16. Q12: Diabetes
-    const diabVal = modal.querySelector<HTMLInputElement>('input[name="diabetes"]:checked');
-    if (!diabVal) {
-      markInvalid('input[name="diabetes"]', isEnPage ? "Answer if you have diabetes (Question 12)." : "Responda se possui diabetes (Questão 12).");
-    }
-
-    // 17. Q13: Doença Crônica
-    const chronicVal = (document.getElementById("f-chronic") as HTMLInputElement)?.value.trim();
-    if (!chronicVal) {
-      markInvalid("f-chronic", isEnPage ? "Chronic disease information is required (Question 13)." : "Informações sobre doenças crônicas são obrigatórias (Questão 13).");
-    }
-
-    // 18. Q14: Lesão Muscular
-    const lesaoVal = modal.querySelector<HTMLInputElement>('input[name="lesao"]:checked');
-    if (!lesaoVal) {
-      markInvalid('input[name="lesao"]', isEnPage ? "Answer regarding muscle injuries (Question 14)." : "Responda sobre lesões musculares/articulares (Questão 14).");
-    }
-
-    // 19. Q15: Dieta
-    const dietaVal = modal.querySelector<HTMLInputElement>('input[name="dieta"]:checked');
-    if (!dietaVal) {
-      markInvalid('input[name="dieta"]', isEnPage ? "Select your diet status (Question 15)." : "Selecione seu status de dieta (Questão 15).");
-    }
-
-    // 20. Q16: Refeições por Dia
-    const mealsVal = (document.getElementById("f-meals") as HTMLInputElement)?.value.trim();
-    if (!mealsVal) {
-      markInvalid("f-meals", isEnPage ? "Number of meals is required (Question 16)." : "Número de refeições diárias é obrigatório (Questão 16).");
-    }
-
-    // 21. Q17: Suplementos
-    const suplVal = modal.querySelector<HTMLInputElement>('input[name="suplementos"]:checked');
-    if (!suplVal) {
-      markInvalid('input[name="suplementos"]', isEnPage ? "Answer regarding supplement use (Question 17)." : "Responda se faz uso de suplementos (Questão 17).");
-    }
-
-    // 22. Q18: Consumo de Água
-    const waterVal = (document.getElementById("f-water") as HTMLInputElement)?.value.trim();
-    if (!waterVal) {
-      markInvalid("f-water", isEnPage ? "Water intake volume is required (Question 18)." : "Volume de consumo de água é obrigatório (Questão 18).");
-    }
-
-    // Trava de Segurança Extra: Obrigatoriedade Física de Imagens (Fase 3)
-    if (compressedFiles.length === 0) {
-      markInvalid("f-photos", isEnPage ? "At least one assessment photo is required." : "É obrigatório enviar pelo menos uma foto para avaliação.");
-    }
-
-    // Orquestração de Feedback Visual Sem Sobreposição e Rotação de Mensagem
-    if (toasts.length > 0) {
-      // Remove mensagens dinâmicas injetadas na rodada anterior antes de aplicar as novas
-      modal.querySelectorAll(".dynamic-field-error").forEach(el => el.remove());
-
-      // Exibe estritamente o primeiro erro no Barramento Global Brutalista Superior imediatamente
-      showValidationToast(toasts[0]);
-          
-      // Se houver múltiplos erros, agenda um aviso consolidado para não obstruir a tela
-      if (toasts.length > 1) {
-        setTimeout(() => {
-          showValidationToast(
-            isEnPage ? `Form incomplete. There are ${toasts.length} issues that require your attention.`
-                     : `Ficha incompleta. Existem ${toasts.length} itens pendentes de atenção.`
-          );
-        }, 1800);
-      }
-
-      // Conduz a rolagem de tela suave até o contêiner do primeiro elemento inválido do fluxo
-      if (firstInvalidEl) {
-        firstInvalidEl.scrollIntoView({ behavior: "smooth", block: "center" });
-        setTimeout(() => {
-          try {
-            const inputElement = firstInvalidEl!.querySelector("input, textarea, select");
-            if (inputElement) (inputElement as HTMLElement).focus();
-          } catch(e){}
-        }, 450);
-      }
-      return;
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = "...";
-    if (errorEl) errorEl.hidden = true;
-
-    try {
-      // Collect all form fields as JSON (files handled separately)
-      const formData = new FormData(formEl);
-      const fields: Record<string, string> = {};
-      formData.forEach((value, key) => {
-        if (key === "fotos") return; // skip files
-        if (key === "atividade_fisica") {
-          // Aggregate checkboxes into comma-separated string
-          const existing = fields[key];
-          fields[key] = existing ? `${existing}, ${value}` : String(value);
-        } else {
-          fields[key] = String(value);
-        }
-      });
-
-      const res = await fetch("/.netlify/functions/submit-lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(fields),
-      });
-
-      if (!res.ok) throw new Error(await res.text());
-
-      // Show success, hide form
-      formEl.style.display = "none";
-      if (successEl) {
-        successEl.hidden = false;
-        successEl.focus();
-      }
-
-      if (typeof window !== "undefined" && (window as any).fbq) {
-        (window as any).fbq("track", "Lead");
-      }
-    } catch {
-      if (errorEl) {
-        errorEl.textContent = "Erro ao enviar. Tente novamente.";
-        errorEl.hidden = false;
-      }
-      submitBtn.disabled = false;
-      submitBtn.textContent = submitBtn.dataset.label ?? "Solicitar avaliação";
-    }
+  // Restaurar scroll apos todas as insercoes
+  requestAnimationFrame(() => {
+    if (modalBody) modalBody.scrollTop = savedScroll;
   });
 
-  // -- Sticky CTA: hide when #triagem visible --
-  const stickyCta      = document.getElementById("sticky-cta");
-  const triagemSection = document.getElementById("triagem");
-  if (stickyCta && triagemSection) {
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        stickyCta.style.opacity = entry.isIntersecting ? "0" : "";
-        stickyCta.style.pointerEvents = entry.isIntersecting ? "none" : "";
-      });
-    }, { threshold: 0.1 });
-    obs.observe(triagemSection);
+  // Limpar erro de foto se tinha
+  const photoErr = document.getElementById("f-photos-error");
+  if (photoErr && compressedFiles.length > 0) {
+    photoErr.hidden = true;
   }
+});
+
+// ============================================================
+// SUBMIT
+// ============================================================
+const submitBtn = document.getElementById("form-submit-btn") as HTMLButtonElement;
+
+formEl?.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  if (!validateAll()) return;
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = isEnPage ? "Sending..." : "Enviando...";
+  if (errorEl) errorEl.hidden = true;
+
+  try {
+    const formData = new FormData(formEl);
+    const fields: Record<string, string> = {};
+    formData.forEach((value, key) => {
+      if (key === "fotos") return;
+      if (key === "atividade_fisica") {
+        fields[key] = fields[key]
+          ? `${fields[key]}, ${value}`
+          : String(value);
+      } else {
+        fields[key] = String(value);
+      }
+    });
+
+    const res = await fetch("/.netlify/functions/submit-lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(fields),
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    formEl.style.display = "none";
+    if (successEl) {
+      successEl.hidden = false;
+      successEl.focus();
+    }
+
+    if ((window as any).fbq) {
+      (window as any).fbq("track", "Lead");
+    }
+  } catch {
+    if (errorEl) {
+      errorEl.textContent = isEnPage
+        ? "Submission failed. Please try again."
+        : "Erro ao enviar. Tente novamente.";
+      errorEl.hidden = false;
+    }
+    submitBtn.disabled = false;
+    submitBtn.textContent = isEnPage ? "Request evaluation" : "Solicitar avaliacao";
+  }
+});
 </script>
 
 <style>
-  /* Modal overlay */
-  .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.88);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:var(--space-4);overflow-y:auto;}
-  .modal-overlay[hidden]{display:none;}
-
-  /* Container */
-  .modal-container{background:var(--c-darkbg);border:var(--border-card);border-radius:8px;width:100%;max-width:680px;max-height:90vh;display:flex;flex-direction:column;position:relative;animation:modal-in 200ms ease;}
-  @keyframes modal-in{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-
-  /* Header */
-  .modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);padding:var(--space-5) var(--space-6);border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;}
-  .modal-eyebrow{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--c-lime);margin-bottom:var(--space-1);}
-  .modal-title{font-family:var(--font-display);font-size:var(--fs-display-sm);color:var(--c-white);text-transform:uppercase;}
-  .modal-close{font-size:1.2rem;color:var(--c-textsub);background:none;border:none;cursor:pointer;padding:var(--space-1);transition:color var(--transition-base);line-height:1;flex-shrink:0;}
-  .modal-close:hover{color:var(--c-lime);}
-
-  /* Body scrollable */
-  .modal-body{overflow-y:auto;padding:var(--space-5) var(--space-6);flex:1;scrollbar-width:thin;scrollbar-color:var(--c-lime) var(--c-darkbg);}
-  .modal-body::-webkit-scrollbar{width:4px;}
-  .modal-body::-webkit-scrollbar-track{background:var(--c-darkbg);}
-  .modal-body::-webkit-scrollbar-thumb{background:var(--c-lime);border-radius:2px;}
-
-  /* Form */
-  .triage-form{display:flex;flex-direction:column;gap:var(--space-6);}
-  .form-section{display:flex;flex-direction:column;gap:var(--space-4);}
-  .form-section__title{font-family:var(--font-display);font-size:var(--fs-display-sm);color:var(--c-lime);text-transform:uppercase;padding-bottom:var(--space-3);border-bottom:1px solid rgba(166,195,0,0.2);}
-  .form-section__intro{font-size:var(--fs-body-sm);color:var(--c-textsub);font-style:italic;line-height:1.6;margin-top:calc(-1 * var(--space-2));}
-  .form-grid{display:grid;gap:var(--space-4);}
-  .form-grid--2{grid-template-columns:1fr 1fr;}
-  .form-stack{display:flex;flex-direction:column;gap:var(--space-4);}
-  @media(max-width:520px){.form-grid--2{grid-template-columns:1fr;}}
-
-  /* Fields */
-  .field{display:flex;flex-direction:column;gap:var(--space-2);}
-  .field__label{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-textsub);line-height:1.5;}
-  .field__req{color:var(--c-lime);margin-left:2px;}
-  .field__input,.field__textarea{background:var(--c-black);border:1px solid #2a2a2a;border-radius:4px;color:var(--c-white);font-family:var(--font-body);font-size:var(--fs-body-md);padding:0.75rem 1rem;transition:border-color var(--transition-base);width:100%;scrollbar-width:thin;scrollbar-color:var(--c-lime) var(--c-black);}
-  .field__input::-webkit-scrollbar,.field__textarea::-webkit-scrollbar{width:4px;}
-  .field__input::-webkit-scrollbar-thumb,.field__textarea::-webkit-scrollbar-thumb{background:var(--c-lime);border-radius:2px;}
-  .field__input:focus,.field__textarea:focus{outline:none;border-color:var(--c-lime);}
-  .field__input::placeholder,.field__textarea::placeholder{color:#444;}
-  /* Only show red border after user has interacted AND field is invalid */
-  .field__input.touched:invalid,.field__textarea.touched:invalid{border-color:rgba(231,76,60,0.5);}
-  .field__textarea{resize:vertical;min-height:72px;}
-  .field__error{font-size:var(--fs-body-sm);color:#E74C3C;margin-top:calc(-1 * var(--space-1));}
-
-  /* Checkboxes + Radios */
-  .radio-group{display:flex;gap:var(--space-5);flex-wrap:wrap;}
-  .radio-group--vertical{flex-direction:column;gap:var(--space-3);}
-  .radio-label{display:flex;align-items:center;gap:var(--space-2);font-size:var(--fs-body-md);color:var(--c-textbody);cursor:pointer;}
-  .radio-label input[type="radio"],.radio-label input[type="checkbox"]{accent-color:var(--c-lime);width:16px;height:16px;flex-shrink:0;}
-
-  /* File input */
-  .field__label--file{cursor:pointer;display:inline-flex;align-items:center;gap:var(--space-2);border:1px dashed rgba(166,195,0,0.4);border-radius:4px;padding:var(--space-4);color:var(--c-lime);transition:border-color var(--transition-base),background var(--transition-base);}
-  .field__label--file:hover{border-color:var(--c-lime);background:rgba(166,195,0,0.04);}
-  .field__file{position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;}
-  .file-preview{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-2);}
-  .file-preview__img{width:72px;height:72px;object-fit:cover;border-radius:4px;border:var(--border-lime);}
-
-  /* Toast */
-  .toast-area{
-    position:fixed;
-    bottom:80px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:300;
-    display:flex;
-    flex-direction:column;
-    gap:var(--space-2);
-    width:min(480px,90vw);
-    pointer-events:none;
+  /* ===== OVERLAY: nao tem scroll proprio ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.88);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--space-4);
+    /* SEM overflow-y:auto aqui - evita o segundo scrollbar */
   }
-  .compress-toast{background:var(--c-darkbg);border-left:3px solid var(--c-lime);border-radius:0 4px 4px 0;padding:var(--space-2) var(--space-3);font-size:var(--fs-body-sm);color:var(--c-textbody);font-family:var(--font-label);letter-spacing:0.05em;animation:toast-in 300ms ease;transition:opacity 400ms ease;}
-  .compress-toast--out{opacity:0;}
-  .compress-toast--error{border-left-color:#E74C3C;}
-  @keyframes toast-in{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+  .modal-overlay[hidden] { display: none; }
 
-  /* Form footer */
-  .form-footer{display:flex;flex-direction:column;gap:var(--space-3);padding-top:var(--space-4);border-top:1px solid rgba(255,255,255,0.06);}
-  .form-privacy{font-size:var(--fs-body-sm);color:var(--c-textsub);line-height:1.5;}
-  .form-submit{width:100%;}
-  .form-error{font-size:var(--fs-body-sm);color:#E74C3C;text-align:center;}
+  /* ===== CONTAINER: altura limitada, flex column ===== */
+  .modal-container {
+    background: var(--c-darkbg);
+    border: var(--border-card);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 680px;
+    height: 90vh;          /* altura fixa para que modal-body possa fazer scroll */
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    animation: modal-in 200ms ease;
+  }
+  @keyframes modal-in { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 
-  /* Success screen */
-  .form-success{display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--space-4);padding:var(--space-8) var(--space-5);}
-  .form-success[hidden]{display:none !important;}
-  .form-success__icon{width:72px;height:72px;border-radius:50%;background:rgba(166,195,0,0.1);border:2px solid var(--c-lime);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.8rem;color:var(--c-lime);}
-  .form-success__title{font-family:var(--font-display);font-size:var(--fs-display-md);color:var(--c-white);text-transform:uppercase;}
-  .form-success__message{font-size:var(--fs-body-lg);color:var(--c-textbody);line-height:1.7;max-width:400px;}
-  .form-success__sub{font-family:var(--font-label);font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--c-textsub);}
+  /* ===== HEADER: nao cresce, fica fixo no topo ===== */
+  .modal-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: var(--space-4);
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+  .modal-eyebrow { font-family:var(--font-label); font-size:var(--fs-label); font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--c-lime); margin-bottom:var(--space-1); }
+  .modal-title   { font-family:var(--font-display); font-size:var(--fs-display-sm); color:var(--c-white); text-transform:uppercase; }
+  .modal-close   { font-size:1.2rem; color:var(--c-textsub); background:none; border:none; cursor:pointer; padding:var(--space-1); transition:color var(--transition-base); line-height:1; flex-shrink:0; }
+  .modal-close:hover { color:var(--c-lime); }
 
-  @media(prefers-reduced-motion:reduce){.modal-container{animation:none;}}
+  /* ===== BODY: unico scroll do modal ===== */
+  .modal-body {
+    overflow-y: auto;
+    padding: var(--space-5) var(--space-6);
+    flex: 1;
+    min-height: 0;    /* necessario para que flex:1 + overflow funcionem corretamente */
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-lime) var(--c-darkbg);
+  }
+  .modal-body::-webkit-scrollbar       { width: 4px; }
+  .modal-body::-webkit-scrollbar-track { background: var(--c-darkbg); }
+  .modal-body::-webkit-scrollbar-thumb { background: var(--c-lime); border-radius: 2px; }
+
+  /* ===== FORM ===== */
+  .triage-form         { display:flex; flex-direction:column; gap:var(--space-6); }
+  .form-section        { display:flex; flex-direction:column; gap:var(--space-4); }
+  .form-section__title { font-family:var(--font-display); font-size:var(--fs-display-sm); color:var(--c-lime); text-transform:uppercase; padding-bottom:var(--space-3); border-bottom:1px solid rgba(166,195,0,0.2); }
+  .form-section__intro { font-size:var(--fs-body-sm); color:var(--c-textsub); font-style:italic; line-height:1.6; margin-top:calc(-1 * var(--space-2)); }
+  .form-grid           { display:grid; gap:var(--space-4); }
+  .form-grid--2        { grid-template-columns:1fr 1fr; }
+  .form-stack          { display:flex; flex-direction:column; gap:var(--space-4); }
+  @media (max-width:520px) { .form-grid--2 { grid-template-columns:1fr; } }
+
+  /* ===== FIELDS ===== */
+  .field         { display:flex; flex-direction:column; gap:var(--space-2); }
+  .field__label  { font-family:var(--font-label); font-size:var(--fs-label); font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--c-textsub); line-height:1.5; }
+  .field__req    { color:var(--c-lime); margin-left:2px; }
+  .field__input,
+  .field__textarea {
+    background:var(--c-black); border:1px solid #2a2a2a; border-radius:4px;
+    color:var(--c-white); font-family:var(--font-body); font-size:var(--fs-body-md);
+    padding:0.75rem 1rem; width:100%;
+    transition:border-color var(--transition-base);
+    scrollbar-width:thin; scrollbar-color:var(--c-lime) var(--c-black);
+  }
+  .field__input::-webkit-scrollbar,
+  .field__textarea::-webkit-scrollbar       { width:4px; }
+  .field__input::-webkit-scrollbar-thumb,
+  .field__textarea::-webkit-scrollbar-thumb { background:var(--c-lime); border-radius:2px; }
+  .field__input:focus,
+  .field__textarea:focus  { outline:none; border-color:var(--c-lime); }
+  .field__input::placeholder,
+  .field__textarea::placeholder { color:#444; }
+  .field__textarea { resize:vertical; min-height:72px; }
+  .field__error   { font-size:var(--fs-body-sm); color:#E74C3C; margin-top:calc(-1 * var(--space-1)); }
+
+  /* Condicional: transicao suave de entrada/saida */
+  .field--cond         { border:none; padding:0; margin:0; }
+  .field--cond[hidden] { display:none; }
+
+  /* ===== RADIO / CHECKBOX ===== */
+  .radio-group          { display:flex; gap:var(--space-5); flex-wrap:wrap; }
+  .radio-group--vertical { flex-direction:column; gap:var(--space-3); }
+  .radio-label          { display:flex; align-items:center; gap:var(--space-2); font-size:var(--fs-body-md); color:var(--c-textbody); cursor:pointer; }
+  .radio-label input[type="radio"],
+  .radio-label input[type="checkbox"] { accent-color:var(--c-lime); width:16px; height:16px; flex-shrink:0; }
+
+  /* ===== FILE INPUT ===== */
+  .field__label--file { cursor:pointer; display:inline-flex; align-items:center; gap:var(--space-2); border:1px dashed rgba(166,195,0,0.4); border-radius:4px; padding:var(--space-4); color:var(--c-lime); transition:border-color var(--transition-base),background var(--transition-base); }
+  .field__label--file:hover { border-color:var(--c-lime); background:rgba(166,195,0,0.04); }
+  .field__file   { position:absolute; opacity:0; width:1px; height:1px; overflow:hidden; }
+  .file-preview  { display:flex; flex-wrap:wrap; gap:var(--space-2); margin-top:var(--space-2); min-height:0; }
+  .file-preview__img { width:72px; height:72px; object-fit:cover; border-radius:4px; border:var(--border-lime); }
+
+  /* ===== FOOTER ===== */
+  .form-footer    { display:flex; flex-direction:column; gap:var(--space-3); padding-top:var(--space-4); border-top:1px solid rgba(255,255,255,0.06); }
+  .form-privacy   { font-size:var(--fs-body-sm); color:var(--c-textsub); line-height:1.5; }
+  .form-submit    { width:100%; }
+  .form-error     { font-size:var(--fs-body-sm); color:#E74C3C; text-align:center; }
+
+  /* ===== SUCESSO ===== */
+  .form-success          { display:flex; flex-direction:column; align-items:center; text-align:center; gap:var(--space-4); padding:var(--space-8) var(--space-5); }
+  .form-success[hidden]  { display:none !important; }
+  .form-success__icon    { width:72px; height:72px; border-radius:50%; background:rgba(166,195,0,0.1); border:2px solid var(--c-lime); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:1.8rem; color:var(--c-lime); }
+  .form-success__title   { font-family:var(--font-display); font-size:var(--fs-display-md); color:var(--c-white); text-transform:uppercase; }
+  .form-success__message { font-size:var(--fs-body-lg); color:var(--c-textbody); line-height:1.7; max-width:400px; }
+  .form-success__sub     { font-family:var(--font-label); font-size:var(--fs-label); font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--c-textsub); }
+
+  @media (prefers-reduced-motion:reduce) { .modal-container { animation:none; } }
 </style>
