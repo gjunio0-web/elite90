@@ -764,14 +764,28 @@ const isEn = locale === "en";
     const toasts: string[] = [];
     let firstInvalidEl: HTMLElement | null = null;
 
-    // Função utilitária interna para registrar falhas e capturar o primeiro elemento inválido do fluxo
+    // Função utilitária interna para registrar falhas e injetar textos vermelhos inline dinamicamente
     function markInvalid(elementIdOrQuery: string, message: string) {
       toasts.push(message);
-      if (!firstInvalidEl) {
-        if (elementIdOrQuery.startsWith('.') || elementIdOrQuery.includes('[')) {
-          firstInvalidEl = modal.querySelector(elementIdOrQuery);
-        } else {
-          firstInvalidEl = document.getElementById(elementIdOrQuery);
+      
+      const targetInput = elementIdOrQuery.startsWith('.') || elementIdOrQuery.includes('[')
+        ? modal.querySelector(elementIdOrQuery)
+        : document.getElementById(elementIdOrQuery);
+
+      if (targetInput) {
+        const fieldContainer = targetInput.closest(".field");
+        if (fieldContainer) {
+          const hasErrorTag = fieldContainer.querySelector(".field__error");
+          if (!hasErrorTag) {
+            // Injeta o parágrafo de erro ausente dinamicamente para as seções de Imersão e Rotina
+            const dErr = document.createElement("p");
+            dErr.className = "field__error dynamic-field-error";
+            dErr.textContent = message;
+            fieldContainer.appendChild(dErr);
+          } else {
+            (hasErrorTag as HTMLElement).hidden = false;
+          }
+          if (!firstInvalidEl) firstInvalidEl = fieldContainer as HTMLElement;
         }
       }
     }
@@ -944,25 +958,33 @@ const isEn = locale === "en";
       markInvalid("f-photos", isEnPage ? "At least one assessment photo is required." : "É obrigatório enviar pelo menos uma foto para avaliação.");
     }
 
-    // Orquestração e Desobstrução do Feedback Visual (Fase 2 UI/UX)
+    // Orquestração de Feedback Visual Sem Sobreposição e Rotação de Mensagem
     if (toasts.length > 0) {
-      // Despara as mensagens sequenciais em rajada organizada no topo
-      toasts.slice(0, 4).forEach((msg, i) => {
-        setTimeout(() => showValidationToast(msg), i * 220);
-      });
-      if (toasts.length > 4) {
-        setTimeout(() => showValidationToast(
-          isEnPage ? `...and ${toasts.length - 4} more required fields to complete.`
-                   : `...e mais ${toasts.length - 4} item(ns) obrigatório(s) a preencher.`
-        ), 880);
+      // Remove mensagens dinâmicas injetadas na rodada anterior antes de aplicar as novas
+      modal.querySelectorAll(".dynamic-field-error").forEach(el => el.remove());
+
+      // Exibe estritamente o primeiro erro no Barramento Global Brutalista Superior imediatamente
+      showValidationToast(toasts[0]);
+          
+      // Se houver múltiplos erros, agenda um aviso consolidado para não obstruir a tela
+      if (toasts.length > 1) {
+        setTimeout(() => {
+          showValidationToast(
+            isEnPage ? `Form incomplete. There are ${toasts.length} issues that require your attention.`
+                     : `Ficha incompleta. Existem ${toasts.length} itens pendentes de atenção.`
+          );
+        }, 1800);
       }
 
-      // Efetua o Scroll focado até o primeiro campo problemático, centralizando o elemento na tela (Segunda Imagem)
+      // Conduz a rolagem de tela suave até o contêiner do primeiro elemento inválido do fluxo
       if (firstInvalidEl) {
-        (firstInvalidEl as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
+        firstInvalidEl.scrollIntoView({ behavior: "smooth", block: "center" });
         setTimeout(() => {
-          try { (firstInvalidEl as HTMLElement).focus(); } catch(e){}
-        }, 400);
+          try {
+            const inputElement = firstInvalidEl!.querySelector("input, textarea, select");
+            if (inputElement) (inputElement as HTMLElement).focus();
+          } catch(e){}
+        }, 450);
       }
       return;
     }
