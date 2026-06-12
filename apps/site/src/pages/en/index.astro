@@ -18,6 +18,7 @@ import TestimonialsSection from "../../components/sections/TestimonialsSection.a
 import PartnersSection from "../../components/sections/PartnersSection.astro";
 import FaqSection from "../../components/sections/FaqSection.astro";
 import CtaFinalSection from "../../components/sections/CtaFinalSection.astro";
+import ToastContainer from "../../components/sections/ToastContainer.astro";
 import { useTranslations } from "../../i18n/utils";
 
 const locale = "en";
@@ -57,8 +58,9 @@ const t = useTranslations(locale);
     stage1={t.nav.applyCta}
     stage2={t.nav.applyCta}
     stage3={t.nav.applyCta}
-    targetId="triagem"
+    targetId="triagem" 
   />
+  <ToastContainer />
 </Layout>
 
 <style>
