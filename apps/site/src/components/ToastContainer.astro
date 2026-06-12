@@ -1,0 +1,138 @@
+---
+// --- ELITE 90 · Global Toast Container
+---
+
+<div 
+  id="toast-container" 
+  class="toast-container" 
+  aria-live="assertive" 
+  aria-atomic="true"
+></div>
+
+<style is:global>
+  /* Contêiner flutuante fixado na linha de leitura central superior */
+  .toast-container {
+    position: fixed;
+    top: var(--space-5, 24px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000; /* Garante precedência sobre cabeçalhos e modais */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 8px);
+    width: 100%;
+    max-width: 420px;
+    padding-inline: var(--space-4, 16px);
+    pointer-events: none; /* Não bloqueia cliques na página enquanto vazio */
+  }
+
+  /* Item de Notificação - Flat Brutalista Noir */
+  .toast-item {
+    pointer-events: auto; /* Reabilita cliques apenas para o botão de fechar */
+    background-color: #0A0A0A; /* Preto Absoluto */
+    color: #FFFFFF;
+    font-family: var(--font-label, sans-serif);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 16px 20px;
+    border-radius: 0; /* Ângulos retos estritos */
+    box-shadow: 6px 6px 0px #000000; /* Sombra sólida Brutalista */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4, 16px);
+    
+    /* Estado inicial oculto para animação de entrada */
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  }
+
+  /* Animação de ativação */
+  .toast-item.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Variação de Status: Erro (Terracota / Vermelho Profundo Brutalista) */
+  .toast-item--error {
+    border: 2px solid #922B21;
+  }
+
+  /* Variação de Status: Sucesso (Lime Green) */
+  .toast-item--success {
+    border: 2px solid var(--c-lime, #A6C300);
+  }
+
+  /* Botão de Fechamento Manual */
+  .toast-item__close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: 1.2rem;
+    font-weight: 900;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 var(--space-1, 4px);
+    opacity: 0.5;
+    transition: opacity 200ms;
+  }
+
+  .toast-item__close:hover {
+    opacity: 1;
+  }
+</style>
+
+<script is:inline>
+  // Inicialização da API Global de Notificações
+  window.toast = {
+    show(message, type = 'error') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      // Singleton por Tipo: Remove notificações idênticas ativas para evitar empilhamento visual
+      const existingToasts = container.querySelectorAll(`.toast-item--${type}`);
+      existingToasts.forEach(oldToast => {
+        oldToast.classList.remove('show');
+        setTimeout(() => oldToast.remove(), 300);
+      });
+
+      // Criação estrutural do elemento
+      const toast = document.createElement('div');
+      toast.className = `toast-item toast-item--${type}`;
+      
+      const textSpan = document.createElement('span');
+      textSpan.textContent = message;
+      toast.appendChild(textSpan);
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'toast-item__close';
+      closeBtn.innerHTML = '&times;';
+      closeBtn.setAttribute('aria-label', 'Fechar notificação');
+      closeBtn.onclick = () => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      };
+      toast.appendChild(closeBtn);
+
+      // Injeção ativa na fila do contêiner
+      container.appendChild(toast);
+
+      // Engatilha a animação no frame seguinte para garantir a transição CSS
+      requestAnimationFrame(() => {
+        toast.classList.add('show');
+      });
+
+      // Ciclo de Vida: Auto-destruição e remoção física do DOM após 4 segundos
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.classList.remove('show');
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, 4000);
+    }
+  };
+</script>

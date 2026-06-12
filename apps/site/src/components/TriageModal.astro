@@ -603,6 +603,21 @@ const isEn = locale === "en";
     return parseFloat(v.replace(",", "."));
   }
 
+  function validaCPF(cpf: string): boolean {
+    const limpo = cpf.replace(/\D/g, "");
+    if (limpo.length !== 11 || /^(\d)\1{10}$/.test(limpo)) return false;
+    let soma = 0;
+    for (let i = 1; i <= 9; i++) soma += parseInt(limpo.substring(i - 1, i)) * (11 - i);
+    let resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(limpo.substring(9, 10))) return false;
+    soma = 0;
+    for (let i = 1; i <= 10; i++) soma += parseInt(limpo.substring(i - 1, i)) * (12 - i);
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    return resto === parseInt(limpo.substring(10, 11));
+  }
+
   function validateField(id: string, errorId: string, fn: (v: string) => boolean): boolean {
     const inp = document.getElementById(id) as HTMLInputElement | null;
     const err = document.getElementById(errorId);
@@ -730,6 +745,12 @@ const isEn = locale === "en";
   fileInput?.addEventListener("change", async () => {
     const files = Array.from(fileInput.files ?? []);
     if (!files.length) return;
+
+    if (files.length > 5) {
+      const isEnPage = document.documentElement.lang === "en";
+      showToast(isEnPage ? "Maximum 5 photos. The rest will be discarded." : "Máximo de 5 fotos. O excesso foi descartado.");
+    }
+
     compressedFiles = [];
     filePreview.innerHTML = "";
     filePreview.hidden = false;
@@ -784,7 +805,11 @@ const isEn = locale === "en";
     }
 
     const cpfVal = (document.getElementById("f-cpf") as HTMLInputElement)?.value.trim();
-    if (!cpfVal) toasts.push(isEnPage ? "CPF is required." : "CPF é obrigatório.");
+    if (!cpfVal) {
+      toasts.push(isEnPage ? "CPF is required." : "CPF é obrigatório.");
+    } else if (!validaCPF(cpfVal)) {
+      toasts.push(isEnPage ? "Invalid CPF." : "CPF inválido.");
+    }
 
     const emailVal = (document.getElementById("f-email") as HTMLInputElement)?.value.trim();
     if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
@@ -839,6 +864,7 @@ const isEn = locale === "en";
     const waterVal = (document.getElementById("f-water") as HTMLInputElement)?.value.trim();
     if (!waterVal) toasts.push(isEnPage ? "Water intake is required." : "Consumo de água é obrigatório.");
 
+    if (compressedFiles.length === 0) toasts.push(isEnPage ? "At least one photo is required." : "É obrigatório enviar pelo menos uma foto.");
     if (toasts.length > 0) {
       toasts.slice(0, 4).forEach((msg, i) => {
         setTimeout(() => showValidationToast(msg), i * 200);
