@@ -270,7 +270,7 @@ const isEn = locale === "en";
               </span>
               <div class="radio-group">
                 <label class="radio-label"><input type="radio" name="personal_trainer" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="personal_trainer" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
+                <label class="radio-label"><input type="radio" name="personal_trainer" value="NÃO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
               <p class="field__error" id="f-personal-error" hidden></p>
             </div>
@@ -281,9 +281,9 @@ const isEn = locale === "en";
               </span>
               <div class="radio-group">
                 <label class="radio-label"><input type="radio" name="competicao" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="competicao" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
+                <label class="radio-label"><input type="radio" name="competicao" value="NÃO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
-              <!-- Condicional: aparece se SIM, mas NAO é obrigatório -->
+              <!-- Condicional: aparece se SIM, mas NÃO é obrigatório -->
               <fieldset class="field field--cond" id="cond-comp"
                 data-cond-name="competicao"
                 data-cond-value="SIM"
@@ -306,7 +306,7 @@ const isEn = locale === "en";
               </span>
               <div class="radio-group">
                 <label class="radio-label"><input type="radio" name="conhece_coach" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="conhece_coach" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
+                <label class="radio-label"><input type="radio" name="conhece_coach" value="NÃO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
               <p class="field__error" id="f-coach-error" hidden></p>
             </div>
@@ -318,7 +318,7 @@ const isEn = locale === "en";
               </span>
               <div class="radio-group">
                 <label class="radio-label"><input type="radio" name="medico_esporte" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="medico_esporte" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
+                <label class="radio-label"><input type="radio" name="medico_esporte" value="NÃO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
               <p class="field__error" id="f-medico-error" hidden></p>
             </div>
@@ -330,7 +330,7 @@ const isEn = locale === "en";
               </span>
               <div class="radio-group">
                 <label class="radio-label"><input type="radio" name="trt" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="trt" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
+                <label class="radio-label"><input type="radio" name="trt" value="NÃO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
               <p class="field__error" id="f-trt-error" hidden></p>
               <!-- Condicional: aparece se SIM, obrigatorio -->
@@ -353,7 +353,7 @@ const isEn = locale === "en";
 
         <!-- HISTORICO DE SAUDE -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Health History" : "Historico de Saude"}</h3>
+          <h3 class="form-section__title">{isEn ? "Health History" : "Historico de Saúde"}</h3>
           <div class="form-stack">
 
             <div class="field">
@@ -376,7 +376,7 @@ const isEn = locale === "en";
               </span>
               <div class="radio-group">
                 <label class="radio-label"><input type="radio" name="diabetes" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="diabetes" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
+                <label class="radio-label"><input type="radio" name="diabetes" value="NÃO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
               <p class="field__error" id="f-diabetes-error" hidden></p>
             </div>
@@ -396,22 +396,22 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
-                14. {isEn ? "Have you had a muscle or joint injury?" : "Ja teve lesao muscular ou articular?"}
+                14. {isEn ? "Have you had a muscle or joint injury?" : "Ja teve lesão muscular ou articular?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
                 <label class="radio-label"><input type="radio" name="lesao" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="lesao" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
+                <label class="radio-label"><input type="radio" name="lesao" value="NÃO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
               <p class="field__error" id="f-lesao-error" hidden></p>
-              <!-- Condicional: aparece se SIM, mas NAO é obrigatório -->
+              <!-- Condicional: aparece se SIM, mas NÃO é obrigatório -->
               <fieldset class="field field--cond" id="cond-lesao"
                 data-cond-name="lesao"
                 data-cond-value="SIM"
                 data-cond-optional="true"
                 hidden aria-hidden="true">
                 <label class="field__label" for="f-lesao-detail">
-                  {isEn ? "Which injury? Was surgery needed?" : "Qual lesao? Houve necessidade cirurgica?"}
+                  {isEn ? "Which injury? Was surgery needed?" : "Qual lesão? Houve necessidade cirurgica?"}
                 </label>
                 <textarea class="field__input field__textarea" id="f-lesao-detail"
                   name="lesao_detalhe" rows="2" autocomplete="off"></textarea>
@@ -463,10 +463,10 @@ const isEn = locale === "en";
               </span>
               <div class="radio-group">
                 <label class="radio-label"><input type="radio" name="suplementos" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
-                <label class="radio-label"><input type="radio" name="suplementos" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
+                <label class="radio-label"><input type="radio" name="suplementos" value="NÃO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
               <p class="field__error" id="f-suplementos-error" hidden></p>
-              <!-- Condicional: aparece se SIM, mas NAO é obrigatório -->
+              <!-- Condicional: aparece se SIM, mas NÃO é obrigatório -->
               <fieldset class="field field--cond" id="cond-supl"
                 data-cond-name="suplementos"
                 data-cond-value="SIM"
@@ -918,7 +918,7 @@ function validateAll(): boolean {
         showValidationToast(
           isEnPage
             ? `${errors.length} fields require attention.`
-            : `${errors.length} campos precisam de atencao.`
+            : `${errors.length} campos precisam de atenção.`
         );
       }, 1400);
     }
