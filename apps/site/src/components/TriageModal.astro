@@ -214,7 +214,7 @@ const isEn = locale === "en";
               </fieldset>
             </div>
 
-            <!-- Q3: ha quanto tempo (condicional: so se alguma atividade marcada, exceto Nenhuma) -->
+            <!-- Q3: há quanto tempo (condicional: so se alguma atividade marcada, exceto Nenhuma) -->
             <fieldset class="field field--cond" id="cond-act-duration"
               data-cond-name="__activity-any"
               data-cond-value="yes"
@@ -250,7 +250,7 @@ const isEn = locale === "en";
                 <label class="field__label" for="f-avail">
                   5. {isEn
                     ? "Daily hours available for training?"
-                    : "Disponibilidade diaria de horas para treinos?"}
+                    : "Disponibilidade diária de horas para treinos?"}
                   <span class="field__req">*</span>
                 </label>
                 <input class="field__input" type="text" id="f-avail"
@@ -283,7 +283,7 @@ const isEn = locale === "en";
                 <label class="radio-label"><input type="radio" name="competicao" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
                 <label class="radio-label"><input type="radio" name="competicao" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
               </div>
-              <!-- Condicional: aparece se SIM, mas NAO e obrigatorio -->
+              <!-- Condicional: aparece se SIM, mas NAO é obrigatório -->
               <fieldset class="field field--cond" id="cond-comp"
                 data-cond-name="competicao"
                 data-cond-value="SIM"
@@ -404,7 +404,7 @@ const isEn = locale === "en";
                 <label class="radio-label"><input type="radio" name="lesao" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
               </div>
               <p class="field__error" id="f-lesao-error" hidden></p>
-              <!-- Condicional: aparece se SIM, mas NAO e obrigatorio -->
+              <!-- Condicional: aparece se SIM, mas NAO é obrigatório -->
               <fieldset class="field field--cond" id="cond-lesao"
                 data-cond-name="lesao"
                 data-cond-value="SIM"
@@ -466,7 +466,7 @@ const isEn = locale === "en";
                 <label class="radio-label"><input type="radio" name="suplementos" value="NAO" /> {isEn ? "NO" : "NAO"}</label>
               </div>
               <p class="field__error" id="f-suplementos-error" hidden></p>
-              <!-- Condicional: aparece se SIM, mas NAO e obrigatorio -->
+              <!-- Condicional: aparece se SIM, mas NAO é obrigatório -->
               <fieldset class="field field--cond" id="cond-supl"
                 data-cond-name="suplementos"
                 data-cond-value="SIM"
@@ -548,20 +548,20 @@ const FIELD_RULES: Array<{
 }> = [
   {
     key: "nome", inputId: "f-name", errorId: "f-name-error",
-    msgPt: "Nome completo e obrigatorio.",
+    msgPt: "Nome completo é obrigatório.",
     msgEn: "Full name is required.",
     validate: v => v.trim().length >= 2,
   },
   {
     key: "cpf", inputId: "f-cpf", errorId: "f-cpf-error",
-    msgPt: v => !v.trim() ? "CPF e obrigatorio." : "CPF invalido - verifique os digitos.",
+    msgPt: v => !v.trim() ? "CPF é obrigatório." : "CPF inválido - verifique os digitos.",
     msgEn: v => !v.trim() ? "CPF is required." : "Invalid CPF - check the digits.",
     validate: v => v.trim() !== "" && validaCPF(v),
   },
   {
     key: "dob", inputId: "f-dob", errorId: "f-dob-error",
-    msgPt: v => !v.trim() ? "Data de nascimento e obrigatoria."
-                           : "Data invalida. Use o formato DD/MM/AAAA.",
+    msgPt: v => !v.trim() ? "Data de nascimento é obrigatória."
+                           : "Data inválida. Use o formato DD/MM/AAAA.",
     msgEn: v => !v.trim() ? "Date of birth is required."
                            : "Invalid date. Use DD/MM/YYYY format.",
     validate: v => {
@@ -582,13 +582,13 @@ const FIELD_RULES: Array<{
   },
   {
     key: "email", inputId: "f-email", errorId: "f-email-error",
-    msgPt: "Informe um e-mail valido.",
+    msgPt: "Informe um e-mail válido.",
     msgEn: "Enter a valid e-mail address.",
     validate: v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()),
   },
   {
     key: "altura", inputId: "f-height", errorId: "f-height-error",
-    msgPt: v => !v.trim() ? "Altura e obrigatoria."
+    msgPt: v => !v.trim() ? "Altura é obrigatória."
                            : "Altura deve estar entre 1,00 e 2,50 m.",
     msgEn: v => !v.trim() ? "Height is required."
                            : "Height must be between 1.00 and 2.50 m.",
@@ -600,7 +600,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "peso", inputId: "f-weight", errorId: "f-weight-error",
-    msgPt: v => !v.trim() ? "Peso e obrigatorio."
+    msgPt: v => !v.trim() ? "Peso é obrigatório."
                            : "Peso deve estar entre 30 e 300 kg.",
     msgEn: v => !v.trim() ? "Weight is required."
                            : "Weight must be between 30 and 300 kg.",
@@ -636,8 +636,8 @@ const FIELD_RULES: Array<{
   },
   {
     key: "tempo_atividade", inputId: "f-act-duration", errorId: "f-act-duration-error",
-    msgPt: v => !v.trim() ? "Informe ha quanto tempo pratica (Q3)."
-                           : "Informe um valor valido em anos (ex: 2,5).",
+    msgPt: v => !v.trim() ? "Informe há quanto tempo pratica (Q3)."
+                           : "Informe um valor válido em anos (ex: 2,5).",
     msgEn: v => !v.trim() ? "Enter how long you have been training (Q3)."
                            : "Enter a valid value in years (e.g. 2.5).",
     skipIfCondHidden: true,
@@ -649,7 +649,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "frequencia", inputId: "f-freq", errorId: "f-freq-error",
-    msgPt: "Frequencia semanal e obrigatoria (Q4).",
+    msgPt: "Frequencia semanal é obrigatória (Q4).",
     msgEn: "Training frequency is required (Q4).",
     validate: v => {
       const n = parseInt(v, 10);
@@ -658,8 +658,8 @@ const FIELD_RULES: Array<{
   },
   {
     key: "disponibilidade", inputId: "f-avail", errorId: "f-avail-error",
-    msgPt: v => !v.trim() ? "Disponibilidade diaria e obrigatoria (Q5)."
-                           : "Informe um valor valido em horas (ex: 1,5).",
+    msgPt: v => !v.trim() ? "Disponibilidade diária é obrigatória (Q5)."
+                           : "Informe um valor válido em horas (ex: 1,5).",
     msgEn: v => !v.trim() ? "Daily availability is required (Q5)."
                            : "Enter a valid value in hours (e.g. 1.5).",
     validate: v => {
@@ -670,7 +670,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "personal_trainer", inputId: "f-personal-error", errorId: "f-personal-error",
-    msgPt: "Responda a questao 6.",
+    msgPt: "Responda a questão 6.",
     msgEn: "Answer question 6.",
     isGroup: true,
     groupSel: 'input[name="personal_trainer"]:checked',
@@ -679,7 +679,7 @@ const FIELD_RULES: Array<{
   // Q7 competicao: opcional, sem validacao de obrigatoriedade
   {
     key: "conhece_coach", inputId: "f-coach-error", errorId: "f-coach-error",
-    msgPt: "Responda a questao 8.",
+    msgPt: "Responda a questão 8.",
     msgEn: "Answer question 8.",
     isGroup: true,
     groupSel: 'input[name="conhece_coach"]:checked',
@@ -687,7 +687,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "medico_esporte", inputId: "f-medico-error", errorId: "f-medico-error",
-    msgPt: "Responda a questao 9.",
+    msgPt: "Responda a questão 9.",
     msgEn: "Answer question 9.",
     isGroup: true,
     groupSel: 'input[name="medico_esporte"]:checked',
@@ -695,7 +695,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "trt", inputId: "f-trt-error", errorId: "f-trt-error",
-    msgPt: "Responda a questao 10.",
+    msgPt: "Responda a questão 10.",
     msgEn: "Answer question 10.",
     isGroup: true,
     groupSel: 'input[name="trt"]:checked',
@@ -710,13 +710,13 @@ const FIELD_RULES: Array<{
   },
   {
     key: "condicao_cardiaca", inputId: "f-cardiac", errorId: "f-cardiac-error",
-    msgPt: "Preencha o campo de condicao cardiaca (Q11).",
+    msgPt: "Preencha o campo de condição cardíaca (Q11).",
     msgEn: "Fill in the cardiac condition field (Q11).",
     validate: v => v.trim().length > 0,
   },
   {
     key: "diabetes", inputId: "f-diabetes-error", errorId: "f-diabetes-error",
-    msgPt: "Responda a questao 12.",
+    msgPt: "Responda a questão 12.",
     msgEn: "Answer question 12.",
     isGroup: true,
     groupSel: 'input[name="diabetes"]:checked',
@@ -724,13 +724,13 @@ const FIELD_RULES: Array<{
   },
   {
     key: "doenca_cronica", inputId: "f-chronic", errorId: "f-chronic-error",
-    msgPt: "Preencha o campo de doenca cronica (Q13).",
+    msgPt: "Preencha o campo de doenca crônica (Q13).",
     msgEn: "Fill in the chronic disease field (Q13).",
     validate: v => v.trim().length > 0,
   },
   {
     key: "lesao", inputId: "f-lesao-error", errorId: "f-lesao-error",
-    msgPt: "Responda a questao 14.",
+    msgPt: "Responda a questão 14.",
     msgEn: "Answer question 14.",
     isGroup: true,
     groupSel: 'input[name="lesao"]:checked',
@@ -746,7 +746,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "refeicoes", inputId: "f-meals", errorId: "f-meals-error",
-    msgPt: v => !v.trim() ? "Numero de refeicoes e obrigatorio (Q16)."
+    msgPt: v => !v.trim() ? "Número de refeições é obrigatório (Q16)."
                            : "Informe um valor entre 1 e 12.",
     msgEn: v => !v.trim() ? "Number of meals is required (Q16)."
                            : "Enter a value between 1 and 12.",
@@ -757,7 +757,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "suplementos", inputId: "f-suplementos-error", errorId: "f-suplementos-error",
-    msgPt: "Responda a questao 17.",
+    msgPt: "Responda a questão 17.",
     msgEn: "Answer question 17.",
     isGroup: true,
     groupSel: 'input[name="suplementos"]:checked',
@@ -765,8 +765,8 @@ const FIELD_RULES: Array<{
   },
   {
     key: "agua", inputId: "f-water", errorId: "f-water-error",
-    msgPt: v => !v.trim() ? "Consumo de agua e obrigatorio (Q18)."
-                           : "Informe um valor valido em litros (ex: 2,5).",
+    msgPt: v => !v.trim() ? "Consumo de água é obrigatório (Q18)."
+                           : "Informe um valor válido em litros (ex: 2,5).",
     msgEn: v => !v.trim() ? "Water intake is required (Q18)."
                            : "Enter a valid value in litres (e.g. 2.5).",
     validate: v => {
@@ -777,7 +777,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "fotos", inputId: "f-photos-error", errorId: "f-photos-error",
-    msgPt: "Envie ao menos uma foto para avaliacao visual.",
+    msgPt: "Envie ao menos uma foto para avaliação visual.",
     msgEn: "Upload at least one photo for visual assessment.",
     isGroup: true,
     validate: () => compressedFiles.length > 0,
