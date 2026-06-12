@@ -95,19 +95,7 @@ const canon = canonicalUrl ?? Astro.url.href;
     </noscript>
   </head>
 
-  <body>
-    ---
-    import ToastContainer from '../components/ToastContainer.astro';
-    ---
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-      <head>
-        </head>
-      <body>
-        <ToastContainer />
-        
-        <slot /> </body>
-    </html>
+<body>
     <slot />
   </body>
 </html>
