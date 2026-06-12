@@ -67,6 +67,9 @@ const isEn = locale === "en";
               </label>
               <input class="field__input" type="text" id="f-cpf" name="cpf" required
                 placeholder="000.000.000-00" maxlength="14" inputmode="numeric" />
+              <p class="field__error" id="f-cpf-error" hidden>
+                {isEn ? "Enter a valid CPF." : "Informe um CPF válido."}
+              </p>
             </div>
 
             <div class="field">
@@ -457,7 +460,7 @@ const isEn = locale === "en";
             <input class="field__file" type="file" id="f-photos" name="fotos"
               accept="image/*" multiple />
             <div class="file-preview" id="file-preview" hidden></div>
-            <div class="toast-area" id="toast-area"></div>
+            <div id="toast-placeholder-spacer" style="display:none; height:0px;"></div>
           </div>
         </div>
 
@@ -586,16 +589,11 @@ const isEn = locale === "en";
     });
   }
 
-  // -- Toast notification system --
+  // -- Redirecionamento unificado para o Barramento Global Brutalista Noir --
   function showValidationToast(msg: string) {
-    const area = document.getElementById("toast-area");
-    if (!area) return;
-    const t = document.createElement("div");
-    t.className = "compress-toast compress-toast--error";
-    t.textContent = msg;
-    area.prepend(t);
-    setTimeout(() => t.classList.add("compress-toast--out"), 3200);
-    setTimeout(() => t.remove(), 3800);
+    if (typeof window !== "undefined" && (window as any).toast) {
+      (window as any).toast.show(msg, 'error');
+    }
   }
 
   // -- Validation helpers --
@@ -641,12 +639,10 @@ const isEn = locale === "en";
     });
   }
 
-  attachBlurValidation("f-email",  "f-email-error",
-    v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
-  attachBlurValidation("f-height", "f-height-error",
-    v => { const n = parseDecimal(v); return n >= 1 && n <= 2.5; });
-  attachBlurValidation("f-weight", "f-weight-error",
-    v => { const n = parseDecimal(v); return n >= 30 && n <= 300; });
+  attachBlurValidation("f-cpf",   "f-cpf-error",   v => validaCPF(v));
+  attachBlurValidation("f-email",  "f-email-error", v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+  attachBlurValidation("f-height", "f-height-error", v => { const n = parseDecimal(v); return n >= 1 && n <= 2.5; });
+  attachBlurValidation("f-weight", "f-weight-error", v => { const n = parseDecimal(v); return n >= 30 && n <= 300; });
   attachBlurValidation("f-dob", "f-dob-error", v => {
     if (v.includes("-")) return true;
     const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
@@ -700,19 +696,15 @@ const isEn = locale === "en";
     return checked.length > 0;
   }
 
-  // -- Image compression + toast --
+  // -- Compressão de Imagens integrada ao Barramento Global --
   const fileInput   = document.getElementById("f-photos") as HTMLInputElement;
   const filePreview = document.getElementById("file-preview") as HTMLElement;
-  const toastArea   = document.getElementById("toast-area") as HTMLElement;
   let compressedFiles: File[] = [];
 
   function showToast(msg: string) {
-    const toast = document.createElement("div");
-    toast.className = "compress-toast";
-    toast.textContent = msg;
-    toastArea.appendChild(toast);
-    setTimeout(() => toast.classList.add("compress-toast--out"), 3200);
-    setTimeout(() => toast.remove(), 3800);
+    if (typeof window !== "undefined" && (window as any).toast) {
+      (window as any).toast.show(msg, 'success');
+    }
   }
 
   async function compressImage(file: File): Promise<File> {
@@ -768,112 +760,209 @@ const isEn = locale === "en";
   formEl?.addEventListener("submit", async e => {
     e.preventDefault();
 
-    // Validate activity checkboxes manually
-    if (!validateActivity()) {
-      if (activityError) activityError.hidden = false;
-      activityGroup?.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
-    }
-    if (activityError) activityError.hidden = true;
+    const isEnPage = document.documentElement.lang === "en";
+    const toasts: string[] = [];
+    let firstInvalidEl: HTMLElement | null = null;
 
-    if (!formEl.checkValidity()) { formEl.reportValidity(); return; }
-
-    // Validate PT-BR date
-    const dobVal = (document.getElementById("f-dob") as HTMLInputElement)?.value ?? "";
-    if (dobInput?.type === "text") {
-      const m = dobVal.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-      if (!m) {
-        const err = document.getElementById("f-dob-error");
-        if (err) err.hidden = false;
-        return;
+    // Função utilitária interna para registrar falhas e capturar o primeiro elemento inválido do fluxo
+    function markInvalid(elementIdOrQuery: string, message: string) {
+      toasts.push(message);
+      if (!firstInvalidEl) {
+        if (elementIdOrQuery.startsWith('.') || elementIdOrQuery.includes('[')) {
+          firstInvalidEl = modal.querySelector(elementIdOrQuery);
+        } else {
+          firstInvalidEl = document.getElementById(elementIdOrQuery);
+        }
       }
     }
 
-    // Validate all required fields with toasts
-    const isEnPage = document.documentElement.lang === "en";
-    const toasts: string[] = [];
-
+    // 1. Nome Completo
     const nameVal = (document.getElementById("f-name") as HTMLInputElement)?.value.trim();
-    if (!nameVal) toasts.push(isEnPage ? "Full name is required." : "Nome completo é obrigatório.");
+    const nameErr = document.getElementById("f-name-error");
+    if (!nameVal) {
+      markInvalid("f-name", isEnPage ? "Full name is required." : "Nome completo é obrigatório.");
+      if (nameErr) nameErr.hidden = false;
+    } else { if (nameErr) nameErr.hidden = true; }
 
-    const dobVal2 = (document.getElementById("f-dob") as HTMLInputElement)?.value.trim();
-    if (!dobVal2) {
-      toasts.push(isEnPage ? "Date of birth is required." : "Data de nascimento é obrigatória.");
-    } else if (dobInput?.type === "text") {
-      const m2 = dobVal2.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-      if (!m2) toasts.push(isEnPage ? "Date must be DD/MM/YYYY." : "Data deve estar no formato DD/MM/AAAA.");
-    }
-
+    // 2. CPF (Com validação Módulo 11 integrada)
     const cpfVal = (document.getElementById("f-cpf") as HTMLInputElement)?.value.trim();
+    const cpfErr = document.getElementById("f-cpf-error");
     if (!cpfVal) {
-      toasts.push(isEnPage ? "CPF is required." : "CPF é obrigatório.");
+      markInvalid("f-cpf", isEnPage ? "CPF is required." : "CPF é obrigatório.");
+      if (cpfErr) cpfErr.hidden = false;
     } else if (!validaCPF(cpfVal)) {
-      toasts.push(isEnPage ? "Invalid CPF." : "CPF inválido.");
-    }
+      markInvalid("f-cpf", isEnPage ? "Invalid CPF matrix." : "CPF inválido.");
+      if (cpfErr) cpfErr.hidden = false;
+    } else { if (cpfErr) cpfErr.hidden = true; }
 
+    // 3. Data de Nascimento
+    const dobVal = (document.getElementById("f-dob") as HTMLInputElement)?.value.trim();
+    const dobErr = document.getElementById("f-dob-error");
+    let isDobValid = true;
+    if (!dobVal) {
+      isDobValid = false;
+      markInvalid("f-dob", isEnPage ? "Date of birth is required." : "Data de nascimento é obrigatória.");
+    } else if (dobInput?.type === "text") {
+      const m = dobVal.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (!m) {
+        isDobValid = false;
+        markInvalid("f-dob", isEnPage ? "Date must be DD/MM/YYYY." : "Data deve estar no formato DD/MM/AAAA.");
+      } else {
+        const d = new Date(`${m[3]}-${m[2]}-${m[1]}`);
+        if (isNaN(d.getTime())) isDobValid = false;
+      }
+    }
+    if (dobErr) dobErr.hidden = isDobValid;
+
+    // 4. E-mail
     const emailVal = (document.getElementById("f-email") as HTMLInputElement)?.value.trim();
+    const emailErr = document.getElementById("f-email-error");
     if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-      toasts.push(isEnPage ? "Enter a valid e-mail address." : "Informe um e-mail válido.");
-    }
+      markInvalid("f-email", isEnPage ? "Enter a valid e-mail address." : "Informe um e-mail válido.");
+      if (emailErr) emailErr.hidden = false;
+    } else { if (emailErr) emailErr.hidden = true; }
 
+    // 5. Altura
     const heightVal = (document.getElementById("f-height") as HTMLInputElement)?.value.trim();
     const heightN = parseDecimal(heightVal);
+    const heightErr = document.getElementById("f-height-error");
     if (!heightVal || heightN < 1 || heightN > 2.5) {
-      toasts.push(isEnPage ? "Height must be between 1.00 and 2.50 m." : "Altura deve estar entre 1,00 e 2,50 m.");
-    }
+      markInvalid("f-height", isEnPage ? "Height must be between 1.00 and 2.50 m." : "Altura deve estar entre 1,00 e 2,50 m.");
+      if (heightErr) heightErr.hidden = false;
+    } else { if (heightErr) heightErr.hidden = true; }
 
+    // 6. Peso
     const weightVal = (document.getElementById("f-weight") as HTMLInputElement)?.value.trim();
     const weightN = parseDecimal(weightVal);
+    const weightErr = document.getElementById("f-weight-error");
     if (!weightVal || weightN < 30 || weightN > 300) {
-      toasts.push(isEnPage ? "Weight must be between 30 and 300 kg." : "Peso deve estar entre 30 e 300 kg.");
+      markInvalid("f-weight", isEnPage ? "Weight must be between 30 and 300 kg." : "Peso deve estar entre 30 e 300 kg.");
+      if (weightErr) weightErr.hidden = false;
+    } else { if (weightErr) weightErr.hidden = true; }
+
+    // 7. Q1: Objetivo Principal
+    const goalChecked = modal.querySelector<HTMLInputElement>('input[name="objetivo"]:checked');
+    if (!goalChecked) {
+      markInvalid('input[name="objetivo"]', isEnPage ? "Select your main goal (Question 1)." : "Selecione seu objetivo principal (Questão 1).");
     }
 
-    const goalChecked = modal.querySelector<HTMLInputElement>('input[name="objetivo"]:checked');
-    if (!goalChecked) toasts.push(isEnPage ? "Select your main goal." : "Selecione seu objetivo principal.");
-
+    // 8. Q2: Atividade Física (Checkboxes Coletivos)
+    const activityGroup = document.getElementById("activity-group");
+    const activityError = document.getElementById("f-activity-error");
     const actChecked = modal.querySelectorAll<HTMLInputElement>('input[name="atividade_fisica"]:checked');
-    if (!actChecked.length) toasts.push(isEnPage ? "Select at least one activity." : "Selecione ao menos uma atividade.");
+    if (!actChecked.length) {
+      markInvalid('#activity-group', isEnPage ? "Select at least one activity (Question 2)." : "Selecione ao menos uma atividade (Questão 2).");
+      if (activityError) activityError.hidden = false;
+    } else { if (activityError) activityError.hidden = true; }
 
+    // 9. Q3: Frequência Semanal
     const freqVal = (document.getElementById("f-freq") as HTMLInputElement)?.value.trim();
-    if (!freqVal) toasts.push(isEnPage ? "Training frequency is required." : "Frequência semanal é obrigatória.");
+    if (!freqVal) {
+      markInvalid("f-freq", isEnPage ? "Training frequency is required (Question 3)." : "Frequência semanal é obrigatória (Questão 3).");
+    }
 
+    // 10. Q4: Disponibilidade Diária
     const availVal = (document.getElementById("f-avail") as HTMLInputElement)?.value.trim();
-    if (!availVal) toasts.push(isEnPage ? "Daily availability is required." : "Disponibilidade diária é obrigatória.");
+    if (!availVal) {
+      markInvalid("f-avail", isEnPage ? "Daily availability is required (Question 4)." : "Disponibilidade diária é obrigatória (Questão 4).");
+    }
 
+    // 11. Q5: Personal Trainer
     const ptVal = modal.querySelector<HTMLInputElement>('input[name="personal_trainer"]:checked');
-    if (!ptVal) toasts.push(isEnPage ? "Answer question 5." : "Responda a questão 5.");
+    if (!ptVal) {
+      markInvalid('input[name="personal_trainer"]', isEnPage ? "Answer if you train with a Personal (Question 5)." : "Responda se treina com personal trainer (Questão 5).");
+    }
 
+    // 12. Q7: Conhece o Trabalho do Coach
     const coachVal = modal.querySelector<HTMLInputElement>('input[name="conhece_coach"]:checked');
-    if (!coachVal) toasts.push(isEnPage ? "Answer question 7." : "Responda a questão 7.");
+    if (!coachVal) {
+      markInvalid('input[name="conhece_coach"]', isEnPage ? "Answer if you know the coach's work (Question 7)." : "Responda se conhece o trabalho do coach (Questão 7).");
+    }
 
+    // 13. Q8: Médico do Esporte
     const medVal = modal.querySelector<HTMLInputElement>('input[name="medico_esporte"]:checked');
-    if (!medVal) toasts.push(isEnPage ? "Answer question 8." : "Responda a questão 8.");
+    if (!medVal) {
+      markInvalid('input[name="medico_esporte"]', isEnPage ? "Answer regarding sports medicine (Question 8)." : "Faz acompanhamento com médico do esporte? (Questão 8).");
+    }
 
+    // 14. Q9: TRT
     const trtVal = modal.querySelector<HTMLInputElement>('input[name="trt"]:checked');
-    if (!trtVal) toasts.push(isEnPage ? "Answer question 9." : "Responda a questão 9.");
+    if (!trtVal) {
+      markInvalid('input[name="trt"]', isEnPage ? "Answer regarding TRT (Question 9)." : "Responda sobre reposição hormonal/TRT (Questão 9).");
+    }
 
+    // 15. Q11: Condição Cardíaca
+    const cardiacVal = (document.getElementById("f-cardiac") as HTMLInputElement)?.value.trim();
+    if (!cardiacVal) {
+      markInvalid("f-cardiac", isEnPage ? "Cardiac history is required (Question 11)." : "Histórico de condição cardíaca é obrigatório (Questão 11).");
+    }
+
+    // 16. Q12: Diabetes
     const diabVal = modal.querySelector<HTMLInputElement>('input[name="diabetes"]:checked');
-    if (!diabVal) toasts.push(isEnPage ? "Answer question 12." : "Responda a questão 12.");
+    if (!diabVal) {
+      markInvalid('input[name="diabetes"]', isEnPage ? "Answer if you have diabetes (Question 12)." : "Responda se possui diabetes (Questão 12).");
+    }
 
+    // 17. Q13: Doença Crônica
+    const chronicVal = (document.getElementById("f-chronic") as HTMLInputElement)?.value.trim();
+    if (!chronicVal) {
+      markInvalid("f-chronic", isEnPage ? "Chronic disease information is required (Question 13)." : "Informações sobre doenças crônicas são obrigatórias (Questão 13).");
+    }
+
+    // 18. Q14: Lesão Muscular
+    const lesaoVal = modal.querySelector<HTMLInputElement>('input[name="lesao"]:checked');
+    if (!lesaoVal) {
+      markInvalid('input[name="lesao"]', isEnPage ? "Answer regarding muscle injuries (Question 14)." : "Responda sobre lesões musculares/articulares (Questão 14).");
+    }
+
+    // 19. Q15: Dieta
     const dietaVal = modal.querySelector<HTMLInputElement>('input[name="dieta"]:checked');
-    if (!dietaVal) toasts.push(isEnPage ? "Select your diet type (question 15)." : "Selecione a dieta (questão 15).");
+    if (!dietaVal) {
+      markInvalid('input[name="dieta"]', isEnPage ? "Select your diet status (Question 15)." : "Selecione seu status de dieta (Questão 15).");
+    }
 
+    // 20. Q16: Refeições por Dia
+    const mealsVal = (document.getElementById("f-meals") as HTMLInputElement)?.value.trim();
+    if (!mealsVal) {
+      markInvalid("f-meals", isEnPage ? "Number of meals is required (Question 16)." : "Número de refeições diárias é obrigatório (Questão 16).");
+    }
+
+    // 21. Q17: Suplementos
     const suplVal = modal.querySelector<HTMLInputElement>('input[name="suplementos"]:checked');
-    if (!suplVal) toasts.push(isEnPage ? "Answer question 17." : "Responda a questão 17.");
+    if (!suplVal) {
+      markInvalid('input[name="suplementos"]', isEnPage ? "Answer regarding supplement use (Question 17)." : "Responda se faz uso de suplementos (Questão 17).");
+    }
 
+    // 22. Q18: Consumo de Água
     const waterVal = (document.getElementById("f-water") as HTMLInputElement)?.value.trim();
-    if (!waterVal) toasts.push(isEnPage ? "Water intake is required." : "Consumo de água é obrigatório.");
+    if (!waterVal) {
+      markInvalid("f-water", isEnPage ? "Water intake volume is required (Question 18)." : "Volume de consumo de água é obrigatório (Questão 18).");
+    }
 
-    if (compressedFiles.length === 0) toasts.push(isEnPage ? "At least one photo is required." : "É obrigatório enviar pelo menos uma foto.");
+    // Trava de Segurança Extra: Obrigatoriedade Física de Imagens (Fase 3)
+    if (compressedFiles.length === 0) {
+      markInvalid("f-photos", isEnPage ? "At least one assessment photo is required." : "É obrigatório enviar pelo menos uma foto para avaliação.");
+    }
+
+    // Orquestração e Desobstrução do Feedback Visual (Fase 2 UI/UX)
     if (toasts.length > 0) {
+      // Despara as mensagens sequenciais em rajada organizada no topo
       toasts.slice(0, 4).forEach((msg, i) => {
-        setTimeout(() => showValidationToast(msg), i * 200);
+        setTimeout(() => showValidationToast(msg), i * 220);
       });
       if (toasts.length > 4) {
         setTimeout(() => showValidationToast(
-          isEnPage ? `...and ${toasts.length - 4} more fields to fill.`
-                   : `...e mais ${toasts.length - 4} campo(s) a preencher.`
-        ), 800);
+          isEnPage ? `...and ${toasts.length - 4} more required fields to complete.`
+                   : `...e mais ${toasts.length - 4} item(ns) obrigatório(s) a preencher.`
+        ), 880);
+      }
+
+      // Efetua o Scroll focado até o primeiro campo problemático, centralizando o elemento na tela (Segunda Imagem)
+      if (firstInvalidEl) {
+        (firstInvalidEl as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => {
+          try { (firstInvalidEl as HTMLElement).focus(); } catch(e){}
+        }, 400);
       }
       return;
     }
