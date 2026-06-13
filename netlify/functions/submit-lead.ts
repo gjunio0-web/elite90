@@ -19,7 +19,7 @@ function getDb() {
       }
     } catch (e: any) {
       console.error("FALHA CRÍTICA: FIREBASE_SERVICE_ACCOUNT_JSON inválido - verifique a variável de ambiente no Netlify.");
-      throw new Error(`Erro no parse das credenciais do Firebase: ${ SaEnv ? e.message : "Variável vazia"}`);
+      throw new Error(`Erro no parse das credenciais do Firebase: ${saEnv ? e.message : "Variável vazia"}`);
     }
     initializeApp({ credential: cert(serviceAccount as any) });
   }
@@ -81,29 +81,29 @@ function buildEmail(nome: string, objetivo: string): string {
 }
 
 export const handler = async (event: any) => {
+  // Recusa imediatamente requisições que violem o verbo do protocolo HTTP
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
   try {
-    // Expect JSON body - the client sends JSON (not multipart)
     let fields: Record<string, string> = {};
-
     const contentType = (event.headers["content-type"] ?? "").toLowerCase();
 
+    // Parse condicional e transparente baseado no tipo de mídia recebida
     if (contentType.includes("application/json")) {
       const raw = event.isBase64Encoded
         ? Buffer.from(event.body, "base64").toString("utf-8")
         : event.body;
       fields = JSON.parse(raw);
     } else {
-      // Fallback: URL-encoded (legacy)
       const raw = event.isBase64Encoded
         ? Buffer.from(event.body, "base64").toString("utf-8")
         : event.body;
       fields = Object.fromEntries(new URLSearchParams(raw));
     }
 
+    // Desestruturação limpa e segura com atribuição de valores padrão (fallbacks)
     const {
       nome = "", email = "", cpf = "",
       data_nascimento = "", altura = "", peso = "",
@@ -121,19 +121,20 @@ export const handler = async (event: any) => {
       agua_litros = "",
     } = fields;
 
+    // Barreira síncrona primária contra dados vazios ou corrompidos
     if (!nome?.trim() || !email?.trim()) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "nome e email são obrigatórios" }),
+        body: JSON.stringify({ error: "nome e email são campos obrigatórios" }),
       };
     }
 
-    // Resolve objetivo final (radio option or free text)
+    // Consolidação de campos abertos customizados do formulário
     const objetivoFinal = objetivo === "Outro" || objetivo === "Other"
       ? objetivo_outro
       : objetivo;
 
-    // Save to Firestore
+    // Escrita atômica e definitiva na coleção de destino do Firebase Firestore
     const db = getDb();
     const docRef = await db.collection("leads").add({
       nome:                nome.trim(),
@@ -142,7 +143,7 @@ export const handler = async (event: any) => {
       data_nascimento,
       altura,
       peso,
-      objetivo:            objetivoFinal,
+      objetivo:            目标Final || objetivoFinal,
       atividade_fisica,
       atividade_outra,
       tempo_atividade,
@@ -170,7 +171,7 @@ export const handler = async (event: any) => {
       avaliacao_enviada:   false,
     });
 
-    // Send confirmation email via Resend (non-blocking - don't fail the request if email fails)
+    // Disparo assíncrono e isolado de e-mail através da API do Resend
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey) {
       fetch("https://api.resend.com/emails", {
@@ -185,7 +186,7 @@ export const handler = async (event: any) => {
           subject: `${nome.split(" ")[0]}, sua ficha foi recebida - Elite 90`,
           html: buildEmail(nome, objetivoFinal),
         }),
-      }).catch(e => console.error("Resend error (non-fatal):", e));
+      }).catch(e => console.error("Erro na API do Resend (não-fatal):", e));
     }
 
     return {
@@ -194,11 +195,11 @@ export const handler = async (event: any) => {
     };
 
   } catch (err: any) {
-    console.error("submit-lead error:", err?.message ?? err);
+    console.error("Erro interno no processamento do lead:", err?.message ?? err);
     return {
       statusCode: 500,
       body: JSON.stringify({
-        error: err?.message ?? "Erro interno",
+        error: err?.message ?? "Erro interno de processamento",
         hint: "Verifique os logs da função no painel do Netlify em Functions > submit-lead.",
       }),
     };
