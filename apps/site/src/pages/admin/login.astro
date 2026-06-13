@@ -67,8 +67,20 @@ export const prerender = false;
   .google-error{color:#E74C3C;font-size:12px;text-align:center;margin-top:8px;min-height:16px;}
   .back-link{display:block;text-align:center;margin-top:24px;font-size:12px;color:#666;text-decoration:none;transition:color 200ms;}
     .back-link:hover{color:#A6C300;}
+
+    /* --- AUTOFILL NEUTRALIZATION (CHROME/WEBKIT) --- */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0px 1000px #0D0D0D inset !important;
+      -webkit-text-fill-color: #ffffff !important;
+      transition: background-color 5000s ease-in-out 0s;
+      caret-color: #A6C300;
+    }
   </style>
 </head>
+<body>
 <body>
   <div class="login-wrap">
     <div class="login-logo">
