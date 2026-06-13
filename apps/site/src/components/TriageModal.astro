@@ -566,14 +566,12 @@ const FIELD_RULES: Array<{
                            : "Invalid date. Use DD/MM/YYYY format.",
     validate: v => {
       if (!v.trim()) return false;
-      if (v.includes("-")) { // type=date nativo (EN)
-        return !isNaN(new Date(v).getTime());
-      }
+      if (v.includes("-")) return !isNaN(new Date(v).getTime()); // type=date nativo (EN)
       const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
       if (!m) return false;
       const [, dd, mm, yyyy] = m;
-      const d = new Date(`${yyyy}-${mm}-${dd}`);
-      // Anti-overflow: verifica que o Date nao "escorregou" para o mes seguinte
+      // Construtor com valores numéricos → sempre horário local, sem desvio de UTC
+      const d = new Date(+yyyy, +mm - 1, +dd);
       return !isNaN(d.getTime())
         && d.getFullYear() === +yyyy
         && d.getMonth() + 1 === +mm
