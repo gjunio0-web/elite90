@@ -13,8 +13,14 @@ export const prerender = false;
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     body{background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#ccc;min-height:100vh;scrollbar-width:thin;scrollbar-color:#A6C300 #1A1A1A;}
     body::-webkit-scrollbar{width:6px;}body::-webkit-scrollbar-track{background:#1A1A1A;}body::-webkit-scrollbar-thumb{background:#A6C300;border-radius:3px;}
-    .adm-header{background:#111;border-bottom:1px solid rgba(166,195,0,.15);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+    .adm-header{background:#111;border-bottom:1px solid rgba(166,195,0,.15);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
     .adm-header__left{display:flex;align-items:center;gap:12px;}
+    
+    /* --- STATUS BAR INJECTION --- */
+    .status-bar{margin-top:48px;background:#111;border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:16px 24px;display:flex;align-items:center;gap:12px;}
+    .status-dot{width:8px;height:8px;border-radius:50%;background:#A6C300;flex-shrink:0;}
+    .status-text{font-size:12px;color:#666;}
+
     .adm-logo{font-size:15px;font-weight:900;letter-spacing:.12em;color:#A6C300;text-transform:uppercase;text-decoration:none;}
     .adm-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;background:rgba(166,195,0,.1);color:#A6C300;border:1px solid rgba(166,195,0,.25);border-radius:3px;padding:3px 8px;}
     .adm-header__right{display:flex;align-items:center;gap:8px;}
@@ -79,8 +85,7 @@ export const prerender = false;
       <a href="/" class="adm-logo">Coach Ruiz</a>
       <span class="adm-badge">Fichas</span>
     </div>
-    <div class="adm-header__right">
-      <span class="adm-user" id="adm-email"></span>
+    <div class="adm-header__right">      
       <button class="btn-sm btn-outline" onclick="window.location.href='/admin'" aria-label="Voltar para o menu do painel" style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; min-width: 44px;">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
           <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -131,13 +136,17 @@ export const prerender = false;
         <thead>
           <tr>
             <th>Data</th><th>Nome</th><th>E-mail</th><th>Objetivo</th>
-            <th>Status</th><th>Acoes</th>
+            <th>Status</th><th>Ações</th>
           </tr>
         </thead>
         <tbody id="leads-tbody">
           <tr><td class="td" colspan="6" style="text-align:center;color:#333">Carregando...</td></tr>
         </tbody>
       </table>
+    </div>
+    <div class="status-bar">
+      <span class="status-dot"></span>
+      <span class="status-text"><strong id="adm-email">Carregando...</strong> está autenticado e pode gerenciar o Elite 90 com segurança.</span>
     </div>
   </main>
 
