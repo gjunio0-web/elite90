@@ -5,27 +5,33 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
-function getDb() {
+function getDb(): FirebaseFirestore.Firestore {
   if (!getApps().length) {
-    let saEnv = (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}").trim();
-    let serviceAccount: any;
+    let saEnv: string = (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}").trim();
+    let serviceAccount: any = null;
+    
     try {
-      // Remove aspas externas extras (simples ou duplas) caso a plataforma de CI/CD tenha envelopado o JSON incorretamente
+      // Remove aspas externas extras caso a plataforma de CI/CD tenha envelopado o JSON incorretamente
       if (saEnv.startsWith('"') && saEnv.endsWith('"')) saEnv = saEnv.slice(1, -1);
       if (saEnv.startsWith("'") && saEnv.endsWith("'")) saEnv = saEnv.slice(1, -1);
       
       // Força a sanitização e escape de quebras de linha literais corrompidas no parser da Netlify
-      const sanitizedSa = saEnv.replace(/\\n/g, '\n');
+      const sanitizedSa = saEnv.trim().replace(/\\n/g, '\n');
       serviceAccount = JSON.parse(sanitizedSa);
       
-      if (serviceAccount.private_key) {
+      if (serviceAccount && serviceAccount.private_key) {
         serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
       }
-    } catch (e: any) {
+    } catch (parseError: any) {
       console.error("FALHA CRÍTICA: FIREBASE_SERVICE_ACCOUNT_JSON inválido - verifique a variável de ambiente no Netlify.");
-      throw new Error(`Erro no parse das credenciais do Firebase: ${saEnv ? e.message : "Variável vazia"}`);
+      throw new Error(`Erro no parse das credenciais do Firebase: ${saEnv ? parseError.message : "Variável vazia"}`);
     }
-    initializeApp({ credential: cert(serviceAccount as any) });
+
+    if (!serviceAccount || !serviceAccount.private_key) {
+      throw new Error("Erro na inicialização do Firebase: Objeto de credenciais ou private_key ausente.");
+    }
+
+    initializeApp({ credential: cert(serviceAccount) });
   }
   return getFirestore();
 }
@@ -84,7 +90,7 @@ function buildEmail(nome: string, objetivo: string): string {
 </html>`;
 }
 
-export const handler = async (event: any) => {
+export const handler = async (event: any): Promise<{ statusCode: number; body: string }> => {
   // Recusa imediatamente requisições que violem o verbo do protocolo HTTP
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -94,17 +100,16 @@ export const handler = async (event: any) => {
     let fields: Record<string, string> = {};
     const contentType = (event.headers["content-type"] ?? "").toLowerCase();
 
+    // Extração unificada do corpo bruto (raw) tratando de forma limpa codificações Base64
+    const rawBody = event.isBase64Encoded
+      ? Buffer.from(event.body ?? "", "base64").toString("utf-8")
+      : event.body ?? "";
+
     // Parse condicional e transparente baseado no tipo de mídia recebida
     if (contentType.includes("application/json")) {
-      const raw = event.isBase64Encoded
-        ? Buffer.from(event.body, "base64").toString("utf-8")
-        : event.body;
-      fields = JSON.parse(raw);
+      fields = JSON.parse(rawBody);
     } else {
-      const raw = event.isBase64Encoded
-        ? Buffer.from(event.body, "base64").toString("utf-8")
-        : event.body;
-      fields = Object.fromEntries(new URLSearchParams(raw));
+      fields = Object.fromEntries(new URLSearchParams(rawBody));
     }
 
     // Desestruturação limpa e segura com atribuição de valores padrão (fallbacks)
@@ -147,7 +152,7 @@ export const handler = async (event: any) => {
       data_nascimento,
       altura,
       peso,
-      objetivo:            目标Final || objetivoFinal,
+      objetivo:            objetivoFinal,
       atividade_fisica,
       atividade_outra,
       tempo_atividade,
@@ -175,10 +180,11 @@ export const handler = async (event: any) => {
       avaliacao_enviada:   false,
     });
 
-    // Disparo assíncrono e isolado de e-mail através da API do Resend
+    // Disparo assíncrono e isolado de e-mail através da API do Resend (Global Fetch)
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey) {
-      fetch("https://api.resend.com/emails", {
+      // Uso do escopo global explicitando a chamada de rede não-bloqueante
+      globalThis.fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
