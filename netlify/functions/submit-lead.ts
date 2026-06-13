@@ -7,9 +7,13 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
 function getDb() {
   if (!getApps().length) {
-    const saEnv = process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}";
+    let saEnv = (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}").trim();
     let serviceAccount: any;
     try {
+      // Remove aspas externas extras (simples ou duplas) caso a plataforma de CI/CD tenha envelopado o JSON incorretamente
+      if (saEnv.startsWith('"') && saEnv.endsWith('"')) saEnv = saEnv.slice(1, -1);
+      if (saEnv.startsWith("'") && saEnv.endsWith("'")) saEnv = saEnv.slice(1, -1);
+      
       // Força a sanitização e escape de quebras de linha literais corrompidas no parser da Netlify
       const sanitizedSa = saEnv.replace(/\\n/g, '\n');
       serviceAccount = JSON.parse(sanitizedSa);
