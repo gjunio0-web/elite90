@@ -81,8 +81,17 @@ export const prerender = false;
     </div>
     <div class="adm-header__right">
       <span class="adm-user" id="adm-email"></span>
-      <button class="btn-sm btn-outline" onclick="window.location.href='/admin'">Painel</button>
-      <button class="btn-sm btn-outline" id="btn-logout">Sair</button>
+      <button class="btn-sm btn-outline" onclick="window.location.href='/admin'" aria-label="Voltar para o menu do painel" style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; min-width: 44px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+      <button class="btn-sm btn-outline" id="btn-logout" aria-label="Encerrar sessão e sair" style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; min-width: 44px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+        </svg>
+      </button>
     </div>
   </header>
 
