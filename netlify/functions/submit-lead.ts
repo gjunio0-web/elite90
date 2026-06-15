@@ -15,10 +15,18 @@ function getDb(): FirebaseFirestore.Firestore {
       if (saEnv.startsWith('"') && saEnv.endsWith('"')) saEnv = saEnv.slice(1, -1);
       if (saEnv.startsWith("'") && saEnv.endsWith("'")) saEnv = saEnv.slice(1, -1);
       
-      // Força a sanitização e escape de quebras de linha literais corrompidas no parser da Netlify
-      const sanitizedSa = saEnv.trim().replace(/\\n/g, '\n');
-      serviceAccount = JSON.parse(sanitizedSa);
+      // Parse primário e Fallback: tenta converter a string bruta diretamente para objeto.
+      // Se a infraestrutura de CI/CD aplicar múltiplos invólucros, aciona a recuperação.
+      try {
+        serviceAccount = JSON.parse(saEnv);
+      } catch (initialParseError) {
+        // Fallback Cascata: tentativa de descompressão de escapes excessivos injetados pela host
+        const unescapedEnv = saEnv.replace(/\\"/g, '"');
+        serviceAccount = JSON.parse(unescapedEnv);
+      }
       
+      // Mutação Pós-Parse: Transforma as sequências de escape em quebras de linha reais
+      // estritamente na chave criptográfica isolada, preservando a integridade do JSON original.
       if (serviceAccount && serviceAccount.private_key) {
         serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
       }
@@ -71,8 +79,8 @@ function buildEmail(nome: string, objetivo: string): string {
     Isso já diz algo sobre você - a maioria continua procrastinando. Você agiu.
   </p>
   <p>
-    Objetivo declarado: <span class="highlight">${objetivo || "não informado"}</span>.
-    É com essa informação que começa a análise.
+    Objetivo declarado: <span class="highlight">${objetivo || "não informado"}</span>. 
+    É com essa informação que começo a análise.
   </p>
   <div class="steps">
     <p><strong style="color:#fff;">O que acontece agora:</strong></p>
@@ -83,7 +91,7 @@ function buildEmail(nome: string, objetivo: string): string {
   <p class="scarcity">Vagas limitadas por ciclo. Aprovação sujeita à triagem.</p>
   <div class="sig">
     <div class="sig-name">Fernando Ruiz</div>
-    <div class="sig-title">Coach Ruiz · Elite 90</div>
+    <div class="sig-title">Coach Ruiz | Elite 90</div>
   </div>
 </div>
 </body>
