@@ -152,6 +152,7 @@ import '../../styles/global.css';
 
     /* TOOLBAR DA TABELA */
     .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3); }
+    .toolbar-left { display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center; flex: 1; }
     .filter-select {
       background: var(--c-darkbg);
       border: 1px solid rgba(255,255,255,0.1);
@@ -164,6 +165,24 @@ import '../../styles/global.css';
       outline: none;
     }
     .filter-select:focus { border-color: var(--c-lime); }
+    .search-input {
+      background: var(--c-darkbg);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--c-white);
+      padding: 10px 16px 10px 38px;
+      border-radius: var(--radius-card);
+      font-family: var(--font-body);
+      font-size: var(--fs-body-sm);
+      outline: none;
+      min-width: 220px;
+      flex: 1;
+      max-width: 320px;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 12px center;
+    }
+    .search-input::placeholder { color: var(--c-textsub); }
+    .search-input:focus { border-color: var(--c-lime); }
     .leads-count {
       font-family: var(--font-label);
       font-size: var(--fs-label);
@@ -171,7 +190,67 @@ import '../../styles/global.css';
       color: var(--c-textsub);
       text-transform: uppercase;
       letter-spacing: 0.1em;
+      white-space: nowrap;
     }
+
+    /* BADGES DE STATUS */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-label);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 5px 10px;
+      border-radius: 2px;
+      border: 1px solid currentColor;
+      line-height: 1;
+    }
+    .status-badge::before {
+      content: "";
+      display: block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+    .status-badge--novo       { color: var(--c-status-new); }
+    .status-badge--em_analise { color: var(--c-status-progress); }
+    .status-badge--aprovado   { color: var(--c-status-approved); }
+    .status-badge--recusado   { color: var(--c-status-rejected); }
+    .status-badge--avaliacao_enviada { color: var(--c-lime); }
+
+    /* SELETOR DE STATUS (cor dinâmica via classe) */
+    .status-sel {
+      background-color: transparent;
+      border: 1px solid currentColor;
+      color: var(--c-textsub);
+      padding: 6px 28px 6px 12px;
+      border-radius: 2px;
+      font-family: var(--font-label);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: all var(--transition-base);
+      opacity: 0.85;
+    }
+    .status-sel:focus, .status-sel:hover { opacity: 1; }
+    .status-sel option { background: var(--c-darkbg); color: var(--c-textbody); }
+    .status-sel--novo       { color: var(--c-status-new); background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23E67E22' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+    .status-sel--em_analise { color: var(--c-status-progress); background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%234A90D9' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+    .status-sel--aprovado   { color: var(--c-status-approved); background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%2327AE60' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+    .status-sel--recusado   { color: var(--c-status-rejected); background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23C0392B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+    .status-sel--avaliacao_enviada { color: var(--c-lime); background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23A6C300' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 
     /* TABELA DE LEADS (NOIR EDITORIAL) */
     .table-wrap {
@@ -212,39 +291,66 @@ import '../../styles/global.css';
     
     tr:hover .td { background: rgba(166, 195, 0, 0.02); }
 
-    /* SELETOR ESTILO BADGE OBLIQUO */
-    .status-sel {
-      background-color: transparent;
-      border: 1px solid rgba(166, 195, 0, 0.3);
-      color: var(--c-lime);
-      padding: 6px 28px 6px 12px;
-      border-radius: 2px;
-      font-family: var(--font-label);
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      outline: none;
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23A6C300' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      transition: all var(--transition-base);
+    /* RESPONSIVE: CARD LIST (mobile) */
+    .leads-cards { display: none; }
+    .lead-card {
+      background: var(--c-darkbg);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius-card);
+      padding: var(--space-4);
+      margin-bottom: var(--space-3);
     }
-    .status-sel:focus, .status-sel:hover { 
-      border-color: var(--c-lime); 
-      background-color: rgba(166, 195, 0, 0.05); 
+    .lead-card__hdr {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: var(--space-3); margin-bottom: var(--space-3);
     }
-    .status-sel option { background: var(--c-darkbg); color: var(--c-textbody); }
+    .lead-card__name { font-weight: 700; color: var(--c-white); font-size: 0.95rem; letter-spacing: 0.02em; }
+    .lead-card__date {
+      font-family: var(--font-label); font-size: 0.65rem; font-weight: 700;
+      color: var(--c-textsub); text-transform: uppercase; letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
+    .lead-card__row { font-size: 0.8rem; color: var(--c-textsub); margin-bottom: var(--space-2); }
+    .lead-card__row strong { color: var(--c-textbody); font-weight: 400; }
+    .lead-card__goal { color: var(--c-textbody); font-size: 0.78rem; margin-bottom: var(--space-3); }
+    .lead-card__footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: var(--space-3); padding-top: var(--space-3);
+      border-top: 1px solid rgba(255,255,255,0.04); flex-wrap: wrap; gap: var(--space-2);
+    }
 
+    @media (max-width: 760px) {
+      .table-wrap { display: none; }
+      .leads-cards { display: block; }
+      main { padding: var(--space-5) var(--space-3); }
+      .page-title { font-size: 2.25rem; }
+      .stats-row { gap: var(--space-2); }
+      .stat-card { min-width: 0; flex: 1 1 calc(50% - var(--space-2)); padding: var(--space-3) var(--space-4); }
+      .search-input { max-width: none; }
+    }
+
+    /* SKELETON LOADING */
+    .skel {
+      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.09) 37%, rgba(255,255,255,0.04) 63%);
+      background-size: 400% 100%;
+      animation: skel-pulse 1.4s ease infinite;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    @keyframes skel-pulse {
+      0% { background-position: 100% 50%; }
+      100% { background-position: 0 50%; }
+    }
+    .skel-row .td { padding: 1.25rem var(--space-4); }
+    .skel-line { height: 12px; width: 100%; }
+    .skel-line--sm { width: 60%; }
+    .skel-card { height: 18px; }
     /* ACTION LINKS ELEGANTES (Substituindo botões) */
     .btn-action-link {
       background: transparent;
       color: var(--c-textsub);
       border: none;
-      padding: 0;
+      padding: 8px 0;
       font-size: 0.65rem;
       font-family: var(--font-label);
       font-weight: 700;
@@ -258,6 +364,7 @@ import '../../styles/global.css';
       align-items: center;
       gap: 6px;
     }
+    .btn-action-link svg { width: 13px; height: 13px; flex-shrink: 0; }
     .btn-action-link:hover { 
       color: var(--c-lime); 
       border-bottom-color: rgba(166, 195, 0, 0.4); 
@@ -323,15 +430,34 @@ import '../../styles/global.css';
     .drawer-close {
       background: none; border: none;
       color: var(--c-textsub);
-      font-size: 1.8rem;
       cursor: pointer;
       line-height: 1;
       transition: color var(--transition-base);
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; flex-shrink: 0;
+      margin: -8px -8px 0 0;
     }
+    .drawer-close svg { width: 22px; height: 22px; }
     .drawer-close:hover { color: var(--c-lime); }
 
-    /* TABELA DE DETALHES DA FICHA DO ATLETA (DESCOMPRIMIDA) */
-    .detail-table { width: 100%; border-collapse: collapse; margin-top: var(--space-4); }
+    @media (max-width: 760px) {
+      .drawer-panel { width: 100vw; padding: var(--space-4); }
+    }
+
+    /* TABELA DE DETALHES DA FICHA DO ATLETA — SEÇÕES */
+    .detail-section { margin-bottom: var(--space-5); }
+    .detail-section__title {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--c-lime);
+      margin-bottom: var(--space-1);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid rgba(166, 195, 0, 0.15);
+    }
+    .detail-table { width: 100%; border-collapse: collapse; }
     .detail-th {
       font-family: var(--font-label);
       font-size: 0.65rem;
@@ -339,7 +465,7 @@ import '../../styles/global.css';
       text-transform: uppercase;
       letter-spacing: 0.15em;
       color: var(--c-textsub);
-      padding: 1.25rem 0;
+      padding: 1rem 0;
       vertical-align: top;
       width: 220px;
       border-bottom: 1px solid rgba(255,255,255,0.02);
@@ -348,9 +474,29 @@ import '../../styles/global.css';
       font-family: var(--font-body);
       font-size: 0.85rem;
       color: var(--c-white);
-      padding: 1.25rem 0 1.25rem var(--space-4);
+      padding: 1rem 0 1rem var(--space-4);
       border-bottom: 1px solid rgba(255,255,255,0.02);
       line-height: 1.8;
+    }
+    .detail-row--alert .detail-th,
+    .detail-row--alert .detail-td { color: var(--c-status-alert); }
+    .detail-row--alert .detail-td { font-weight: 700; }
+    .detail-alert-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-label); font-size: 0.6rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--c-status-alert);
+      border: 1px solid var(--c-status-alert);
+      border-radius: 2px; padding: 2px 8px; margin-left: var(--space-3);
+    }
+
+    @media (max-width: 760px) {
+      .detail-table, .detail-table tbody, .detail-table tr { display: block; }
+      .detail-th, .detail-td {
+        display: block; width: 100%; padding: 0.4rem 0; border-bottom: none;
+      }
+      .detail-th { color: var(--c-textsub); padding-top: 0.75rem; }
+      .detail-td { padding-bottom: 0.6rem; }
     }
 
     /* FORMULARIO DE AVALIACAO (EVAL) */
@@ -396,6 +542,99 @@ import '../../styles/global.css';
       min-height: 18px;
     }
     .eval-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-4); }
+
+    /* BOTAO IA EM DESTAQUE */
+    .btn-ai {
+      background: rgba(166, 195, 0, 0.08);
+      color: var(--c-lime);
+      border: 1px solid var(--c-lime);
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-ai:hover { background: rgba(166, 195, 0, 0.15); box-shadow: var(--shadow-cta); }
+    .btn-ai svg { width: 14px; height: 14px; }
+
+    /* TEXTAREA EM ESTADO DE CARREGAMENTO */
+    .eval-ta--loading {
+      background-image: linear-gradient(90deg, rgba(166,195,0,0.06) 25%, rgba(166,195,0,0.14) 37%, rgba(166,195,0,0.06) 63%);
+      background-size: 400% 100%;
+      animation: skel-pulse 1.4s ease infinite;
+    }
+
+    /* NOTAS INTERNAS - CONTAINER DIFERENCIADO */
+    .eval-internal {
+      margin-top: var(--space-6);
+      padding: var(--space-4);
+      border: 1px dashed rgba(255,255,255,0.15);
+      border-radius: 4px;
+      background: rgba(255,255,255,0.015);
+    }
+    .eval-internal .eval-label {
+      color: var(--c-textsub);
+      margin-top: 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .eval-internal .eval-label svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .eval-internal .eval-ta { background: var(--c-black); }
+
+    /* MODAL DE CONFIRMACAO */
+    .confirm-overlay {
+      position: fixed; inset: 0; z-index: 300;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(2px);
+      padding: var(--space-4);
+    }
+    .confirm-overlay[hidden] { display: none; }
+    .confirm-box {
+      background: var(--c-darkbg);
+      border: var(--border-lime);
+      border-radius: var(--radius-card);
+      max-width: 520px; width: 100%;
+      padding: var(--space-5);
+      max-height: 85vh; overflow-y: auto;
+    }
+    .confirm-title {
+      font-family: var(--font-display);
+      font-size: var(--fs-display-sm);
+      color: var(--c-white);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-3);
+    }
+    .confirm-title span { color: var(--c-lime); }
+    .confirm-summary {
+      font-family: var(--font-body);
+      font-size: var(--fs-body-sm);
+      color: var(--c-textsub);
+      line-height: 1.7;
+      margin-bottom: var(--space-4);
+    }
+    .confirm-preview {
+      background: var(--c-black);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 4px;
+      padding: var(--space-4);
+      margin-bottom: var(--space-5);
+      max-height: 240px;
+      overflow-y: auto;
+    }
+    .confirm-preview h4 {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--c-lime);
+      margin: var(--space-3) 0 var(--space-1);
+    }
+    .confirm-preview h4:first-child { margin-top: 0; }
+    .confirm-preview p {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--c-textbody);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    .confirm-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: flex-end; }
   </style>
 </head>
 <body>
@@ -440,14 +679,17 @@ import '../../styles/global.css';
     </div>
 
     <div class="toolbar">
-      <select class="filter-select" id="status-filter">
-        <option value="">Todos os status</option>
-        <option value="novo">Novo</option>
-        <option value="em_analise">Em análise</option>
-        <option value="aprovado">Aprovado</option>
-        <option value="recusado">Recusado</option>
-        <option value="avaliacao_enviada">Avaliação enviada</option>
-      </select>
+      <div class="toolbar-left">
+        <input type="search" class="search-input" id="search-input" placeholder="Buscar por nome ou e-mail..." aria-label="Buscar fichas por nome ou e-mail" />
+        <select class="filter-select" id="status-filter">
+          <option value="">Todos os status</option>
+          <option value="novo">Novo</option>
+          <option value="em_analise">Em análise</option>
+          <option value="aprovado">Aprovado</option>
+          <option value="recusado">Recusado</option>
+          <option value="avaliacao_enviada">Avaliação enviada</option>
+        </select>
+      </div>
       <span class="leads-count" id="leads-count"></span>
     </div>
 
@@ -464,6 +706,8 @@ import '../../styles/global.css';
         </tbody>
       </table>
     </div>
+
+    <div class="leads-cards" id="leads-cards"></div>
  
     <div class="status-bar">
       <span class="status-dot"></span>
@@ -476,7 +720,9 @@ import '../../styles/global.css';
     <div class="drawer-panel">
       <div class="drawer-hdr">
         <span class="drawer-title">Ficha do atleta</span>
-        <button class="drawer-close" id="detail-close">x</button>
+        <button class="drawer-close" id="detail-close" aria-label="Fechar ficha do atleta">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
       <div id="detail-content"></div>
     </div>
@@ -487,27 +733,51 @@ import '../../styles/global.css';
     <div class="drawer-panel">
       <div class="drawer-hdr">
         <span class="drawer-title">Avaliação - <span id="eval-name"></span></span>
-        <button class="drawer-close" id="eval-close">x</button>
+        <button class="drawer-close" id="eval-close" aria-label="Fechar avaliação">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
       <div class="eval-actions">
-        <button class="btn-sm btn-outline" id="btn-gen-ai">Gerar com IA (Gemini)</button>
+        <button class="btn-sm btn-ai" id="btn-gen-ai">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="2.5"/></svg>
+          Gerar rascunho com IA (Gemini)
+        </button>
       </div>
       <p class="eval-status" id="eval-status"></p>
       <label class="eval-label" for="eval-s1">01 - Diagnóstico Estético</label>
-      <textarea class="eval-ta" id="eval-s1" rows="5"></textarea>
+      <textarea class="eval-ta" id="eval-s1" rows="5" placeholder="Descreva o ponto de partida estético do atleta, áreas prioritárias e expectativa realista de evolução em 90 dias."></textarea>
       <label class="eval-label" for="eval-s2">02 - Planejamento de Treino</label>
-      <textarea class="eval-ta" id="eval-s2" rows="5"></textarea>
+      <textarea class="eval-ta" id="eval-s2" rows="5" placeholder="Divisão de treino, volume e progressão recomendados para o ciclo, considerando objetivo e disponibilidade do atleta."></textarea>
       <label class="eval-label" for="eval-s3">03 - Protocolo de Saúde</label>
-      <textarea class="eval-ta" id="eval-s3" rows="5"></textarea>
+      <textarea class="eval-ta" id="eval-s3" rows="5" placeholder="Recomendações de saúde, cuidados e pontos de atenção com base nas respostas do atleta na triagem."></textarea>
       <label class="eval-label" for="eval-s4">04 - Estratégia de Competição</label>
-      <textarea class="eval-ta" id="eval-s4" rows="5"></textarea>
+      <textarea class="eval-ta" id="eval-s4" rows="5" placeholder="Orientações específicas para preparação de competição, se aplicável, ou plano de evolução contínua."></textarea>
       <label class="eval-label" for="eval-s5">05 - Alinhamento Operacional</label>
-      <textarea class="eval-ta" id="eval-s5" rows="5"></textarea>
-      <label class="eval-label" for="eval-notes">Notas internas (não enviadas)</label>
-    
-      <textarea class="eval-ta" id="eval-notes" rows="3"></textarea>
+      <textarea class="eval-ta" id="eval-s5" rows="5" placeholder="Próximos passos, frequência de acompanhamento e expectativas de comunicação com o coach."></textarea>
+
+      <div class="eval-internal">
+        <label class="eval-label" for="eval-notes">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Notas internas (não enviadas ao atleta)
+        </label>
+        <textarea class="eval-ta" id="eval-notes" rows="3" placeholder="Observações privadas para a equipe — não farão parte do e-mail enviado."></textarea>
+      </div>
+
       <div class="eval-actions" style="margin-top:24px">
         <button class="btn-sm btn-primary" id="btn-send-eval">Enviar avaliação ao atleta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation modal -->
+  <div class="confirm-overlay" id="confirm-overlay" hidden>
+    <div class="confirm-box">
+      <h3 class="confirm-title">Revisar e <span>enviar avaliação</span></h3>
+      <p class="confirm-summary">Esta ação enviará um e-mail com a avaliação abaixo para <strong id="confirm-name"></strong>. As notas internas não serão incluídas. Esta ação não pode ser desfeita.</p>
+      <div class="confirm-preview" id="confirm-preview"></div>
+      <div class="confirm-actions">
+        <button class="btn-sm btn-outline" id="confirm-cancel">Voltar e revisar</button>
+        <button class="btn-sm btn-primary" id="confirm-send">Confirmar envio</button>
       </div>
     </div>
   </div>
@@ -538,14 +808,35 @@ import '../../styles/global.css';
 
     // Load leads with Error Boundary
     async function loadLeads(){
+      renderSkeleton();
       try {
         const snap=await getDocs(query(collection(db,"leads"),orderBy("createdAt","desc")));
         leads=snap.docs.map(d=>({id:d.id,...d.data()}));
         renderStats(); renderTable();
       } catch (err) {
         console.error("Erro sistêmico ao carregar fichas:", err);
-        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="6" style="text-align:center;color:#E67E22;font-weight:700;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede. Verifique as regras do Firestore.</td></tr>`;
+        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="6" style="text-align:center;color:var(--c-status-alert);font-weight:700;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede. Verifique as regras do Firestore.</td></tr>`;
+        document.getElementById("leads-cards").innerHTML=`<div class="lead-card" style="color:var(--c-status-alert);font-weight:700;text-align:center;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede.</div>`;
       }
+    }
+
+    function renderSkeleton(){
+      const skelRow=`<tr class="skel-row">
+        <td class="td"><span class="skel skel-line skel-line--sm"></span></td>
+        <td class="td"><span class="skel skel-line"></span></td>
+        <td class="td"><span class="skel skel-line"></span></td>
+        <td class="td"><span class="skel skel-line"></span></td>
+        <td class="td"><span class="skel skel-line skel-line--sm"></span></td>
+        <td class="td"><span class="skel skel-line skel-line--sm"></span></td>
+      </tr>`;
+      document.getElementById("leads-tbody").innerHTML=skelRow.repeat(4);
+      const skelCard=`<div class="lead-card">
+        <div class="lead-card__hdr"><span class="skel skel-card" style="width:50%"></span><span class="skel skel-card" style="width:25%"></span></div>
+        <span class="skel skel-line" style="margin-bottom:8px"></span>
+        <span class="skel skel-line skel-line--sm"></span>
+      </div>`;
+      document.getElementById("leads-cards").innerHTML=skelCard.repeat(3);
+      document.getElementById("leads-count").textContent="";
     }
 
     function renderStats(){
@@ -555,11 +846,26 @@ import '../../styles/global.css';
       document.getElementById("stat-eval").textContent=leads.filter(l=>l.status==="avaliacao_enviada").length;
     }
 
+    const STATUS_LABEL={"novo":"Novo","em_analise":"Em análise","aprovado":"Aprovado","recusado":"Recusado","avaliacao_enviada":"Avaliação enviada"};
+
     function renderTable(){
       const filter=document.getElementById("status-filter").value;
-      const filtered=filter?leads.filter(l=>l.status===filter):leads;
+      const search=document.getElementById("search-input").value.trim().toLowerCase();
+      let filtered=filter?leads.filter(l=>l.status===filter):leads;
+      if(search){
+        filtered=filtered.filter(l=>
+          (l.nome??"").toLowerCase().includes(search) ||
+          (l.email??"").toLowerCase().includes(search)
+        );
+      }
       document.getElementById("leads-count").textContent=`${filtered.length} ficha${filtered.length!==1?"s":""}`;
-      const statusLabel={"novo":"Novo","em_analise":"Em análise","aprovado":"Aprovado","recusado":"Recusado","avaliacao_enviada":"Avaliação enviada"};
+
+      if(!filtered.length){
+        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="6" style="text-align:center;color:var(--c-textsub)">Nenhuma ficha encontrada.</td></tr>`;
+        document.getElementById("leads-cards").innerHTML=`<div class="lead-card" style="text-align:center;color:var(--c-textsub)">Nenhuma ficha encontrada.</div>`;
+        return;
+      }
+
       document.getElementById("leads-tbody").innerHTML=filtered.map(lead=>{
         const date=lead.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"--";
         return `<tr>
@@ -568,7 +874,7 @@ import '../../styles/global.css';
           <td class="td">${lead.email??""}</td>
           <td class="td td--goal">${(lead.objetivo??"").slice(0,50)}</td>
           <td class="td">
-            <select class="status-sel" data-id="${lead.id}" onchange="window.__updStatus(this)">
+            <select class="status-sel status-sel--${lead.status}" data-id="${lead.id}" onchange="window.__updStatus(this)">
               <option value="novo" ${lead.status==="novo"?"selected":""}>Novo</option>
               <option value="em_analise" ${lead.status==="em_analise"?"selected":""}>Em análise</option>
               <option value="aprovado" ${lead.status==="aprovado"?"selected":""}>Aprovado</option>
@@ -578,15 +884,43 @@ import '../../styles/global.css';
           </td>
           <td class="td" style="white-space: nowrap;">
             <button class="btn-action-link" onclick="window.__openDetail('${lead.id}')">
-              Ver ficha ↗
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              Ver ficha
             </button>
             <span class="action-sep">/</span>
             <button class="btn-action-link" onclick="window.__openEval('${lead.id}')">
-              Avaliar ↗
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              Avaliar
             </button>
           </td>
         </tr>`;
-      }).join("") || `<tr><td class="td" colspan="6" style="text-align:center;color:var(--c-textsub)">Nenhuma ficha encontrada.</td></tr>`;
+      }).join("");
+
+      document.getElementById("leads-cards").innerHTML=filtered.map(lead=>{
+        const date=lead.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"--";
+        return `<div class="lead-card">
+          <div class="lead-card__hdr">
+            <span class="lead-card__name">${lead.nome??""}</span>
+            <span class="lead-card__date">${date}</span>
+          </div>
+          <div class="lead-card__row">${lead.email??""}</div>
+          <div class="lead-card__goal">${(lead.objetivo??"").slice(0,80)}</div>
+          <div class="lead-card__footer">
+            <select class="status-sel status-sel--${lead.status}" data-id="${lead.id}" onchange="window.__updStatus(this)">
+              <option value="novo" ${lead.status==="novo"?"selected":""}>Novo</option>
+              <option value="em_analise" ${lead.status==="em_analise"?"selected":""}>Em análise</option>
+              <option value="aprovado" ${lead.status==="aprovado"?"selected":""}>Aprovado</option>
+              <option value="recusado" ${lead.status==="recusado"?"selected":""}>Recusado</option>
+              <option value="avaliacao_enviada" ${lead.status==="avaliacao_enviada"?"selected":""}>Avaliação enviada</option>
+            </select>
+            <div>
+              <button class="btn-action-link" onclick="window.__openDetail('${lead.id}')">Ver ficha</button>
+              <span class="action-sep">/</span>
+              <button class="btn-action-link" onclick="window.__openEval('${lead.id}')">Avaliar</button>
+            </div>
+          </div>
+        </div>`;
+      }).join("");
     }
 
     // Update Status with Rollback
@@ -595,7 +929,7 @@ import '../../styles/global.css';
       try {
         await updateDoc(doc(db,"leads",sel.dataset.id),{status:sel.value});
         leads=leads.map(l=>l.id===sel.dataset.id?{...l,status:sel.value}:l);
-        renderStats();
+        renderStats(); renderTable();
       } catch (err) {
         console.error("Erro sistêmico ao atualizar status:", err);
         alert("[ERRO] Falha de permissão ao tentar atualizar a ficha. A operação será revertida.");
@@ -603,36 +937,71 @@ import '../../styles/global.css';
       }
     };
 
-    // Detail drawer
+    // Detail drawer — campos que indicam alerta de saúde quando valor afirmativo
+    const HEALTH_ALERT_VALUES=["sim","Sim","SIM","yes","Yes"];
+    function isAlert(val){ return HEALTH_ALERT_VALUES.includes((val??"").toString().trim()); }
+
+    function detailRow(label, value, alertFlag){
+      const v = value || "--";
+      const alertCls = alertFlag ? " detail-row--alert" : "";
+      const tag = alertFlag ? `<span class="detail-alert-tag">Atenção</span>` : "";
+      return `<tr class="detail-row${alertCls}"><th class="detail-th">${label}</th><td class="detail-td">${v}${tag}</td></tr>`;
+    }
+
     window.__openDetail=function(id){
       const lead=leads.find(l=>l.id===id);if(!lead)return;
-      const rows=[
-        ["Nome", lead.nome],
-        ["E-mail", lead.email ? `<a href="mailto:${lead.email}" style="color: var(--c-lime); text-decoration: underline;">${lead.email}</a>` : ""],
-        ["CPF", lead.cpf],
-        ["Nascimento", lead.data_nascimento],
-        ["Altura", lead.altura],
-        ["Peso", lead.peso],
-        ["Objetivo", lead.objetivo],
-        ["Atividade Física", lead.atividade_fisica],
-        ["Tempo de Atividade", lead.tempo_atividade ? `${lead.tempo_atividade} anos` : ""],
-        ["Frequência Semanal", lead.frequencia_semanal],
-        ["Disponibilidade Diária", lead.disponibilidade_diaria],
-        ["Personal Trainer", lead.personal_trainer],
-        ["Competição", lead.competicao + (lead.competicao_detalhe ? ` - ${lead.competicao_detalhe}` : "")],
-        ["Conhece Coach", lead.conhece_coach],
-        ["Médico do Esporte", lead.medico_esporte],
-        ["Uso de TRT", lead.trt + (lead.trt_detalhe ? ` - ${lead.trt_detalhe}` : "")],
-        ["Condição Cardíaca", lead.condicao_cardiaca],
-        ["Diabetes", lead.diabetes],
-        ["Doença Crônica", lead.doenca_cronica],
-        ["Lesão Prévia", lead.lesao + (lead.lesao_detalhe ? ` - ${lead.lesao_detalhe}` : "")],
-        ["Dieta Atual", lead.dieta],
-        ["Refeições por Dia", lead.refeicoes_dia],
-        ["Suplementação", lead.suplementos + (lead.suplementos_detalhe ? ` - ${lead.suplementos_detalhe}` : "")],
-        ["Consumo de Água", lead.agua_litros ? `${lead.agua_litros} Litros` : ""]
+
+      const secIdentificacao=[
+        detailRow("Nome", lead.nome),
+        detailRow("E-mail", lead.email ? `<a href="mailto:${lead.email}" style="color: var(--c-lime); text-decoration: underline;">${lead.email}</a>` : ""),
+        detailRow("CPF", lead.cpf),
+        detailRow("Nascimento", lead.data_nascimento),
       ];
-      document.getElementById("detail-content").innerHTML=`<table class="detail-table">${rows.map(([k,v])=>`<tr><th class="detail-th">${k}</th><td class="detail-td">${v||"--"}</td></tr>`).join("")}</table>`;
+
+      const secPerfil=[
+        detailRow("Altura", lead.altura),
+        detailRow("Peso", lead.peso),
+        detailRow("Atividade Física", lead.atividade_fisica),
+        detailRow("Tempo de Atividade", lead.tempo_atividade ? `${lead.tempo_atividade} anos` : ""),
+        detailRow("Frequência Semanal", lead.frequencia_semanal),
+        detailRow("Disponibilidade Diária", lead.disponibilidade_diaria),
+        detailRow("Personal Trainer", lead.personal_trainer),
+      ];
+
+      const secObjetivo=[
+        detailRow("Objetivo", lead.objetivo),
+        detailRow("Competição", (lead.competicao||"") + (lead.competicao_detalhe ? ` - ${lead.competicao_detalhe}` : "")),
+        detailRow("Conhece Coach", lead.conhece_coach),
+      ];
+
+      const secSaude=[
+        detailRow("Médico do Esporte", lead.medico_esporte),
+        detailRow("Uso de TRT", (lead.trt||"") + (lead.trt_detalhe ? ` - ${lead.trt_detalhe}` : ""), isAlert(lead.trt)),
+        detailRow("Condição Cardíaca", lead.condicao_cardiaca, isAlert(lead.condicao_cardiaca)),
+        detailRow("Diabetes", lead.diabetes, isAlert(lead.diabetes)),
+        detailRow("Doença Crônica", lead.doenca_cronica, isAlert(lead.doenca_cronica)),
+        detailRow("Lesão Prévia", (lead.lesao||"") + (lead.lesao_detalhe ? ` - ${lead.lesao_detalhe}` : ""), isAlert(lead.lesao)),
+      ];
+
+      const secNutricao=[
+        detailRow("Dieta Atual", lead.dieta),
+        detailRow("Refeições por Dia", lead.refeicoes_dia),
+        detailRow("Suplementação", (lead.suplementos||"") + (lead.suplementos_detalhe ? ` - ${lead.suplementos_detalhe}` : "")),
+        detailRow("Consumo de Água", lead.agua_litros ? `${lead.agua_litros} Litros` : ""),
+      ];
+
+      const section=(title, rows)=>`<div class="detail-section">
+        <div class="detail-section__title">${title}</div>
+        <table class="detail-table"><tbody>${rows.join("")}</tbody></table>
+      </div>`;
+
+      document.getElementById("detail-content").innerHTML=
+        section("Identificação", secIdentificacao) +
+        section("Perfil Físico", secPerfil) +
+        section("Objetivo & Treino", secObjetivo) +
+        section("Saúde", secSaude) +
+        section("Nutrição", secNutricao);
+
       document.getElementById("detail-drawer").hidden=false;
     };
     
@@ -640,6 +1009,14 @@ import '../../styles/global.css';
     document.getElementById("detail-drawer")?.addEventListener("click",e=>{if(e.target===document.getElementById("detail-drawer"))document.getElementById("detail-drawer").hidden=true;});
 
     // Eval drawer
+    const SECTION_TITLES={
+      s1:"01 - Diagnóstico Estético",
+      s2:"02 - Planejamento de Treino",
+      s3:"03 - Protocolo de Saúde",
+      s4:"04 - Estratégia de Competição",
+      s5:"05 - Alinhamento Operacional"
+    };
+
     window.__openEval=function(id){
       currentLeadId=id;
       const lead=leads.find(l=>l.id===id);
@@ -649,22 +1026,47 @@ import '../../styles/global.css';
       document.getElementById("eval-drawer").hidden=false;
     };
     document.getElementById("eval-close")?.addEventListener("click",()=>{document.getElementById("eval-drawer").hidden=true;});
+    document.getElementById("eval-drawer")?.addEventListener("click",e=>{if(e.target===document.getElementById("eval-drawer"))document.getElementById("eval-drawer").hidden=true;});
 
     document.getElementById("btn-gen-ai")?.addEventListener("click",async()=>{
       if(!currentLeadId)return;
       const statusEl=document.getElementById("eval-status");
-      statusEl.textContent="Gerando com Gemini 2.0 Flash...";
+      const taIds=["s1","s2","s3","s4","s5"];
+      taIds.forEach(k=>document.getElementById(`eval-${k}`).classList.add("eval-ta--loading"));
+      statusEl.textContent="Gerando rascunho com Gemini 2.0 Flash...";
       try{
         const res=await fetch("/.netlify/functions/generate-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${idToken}`},body:JSON.stringify({leadId:currentLeadId})});
         if(!res.ok)throw new Error(await res.text());
         const {sections}=await res.json();
-        ["s1","s2","s3","s4","s5"].forEach(k=>{document.getElementById(`eval-${k}`).value=sections[k]??"";});
-        statusEl.textContent="Rascunho gerado. Revise e envie.";
-      }catch(e){statusEl.textContent="Erro ao gerar: "+e.message;}
+        taIds.forEach(k=>{document.getElementById(`eval-${k}`).value=sections[k]??"";});
+        statusEl.textContent="Rascunho gerado. Revise antes de enviar.";
+      }catch(e){
+        console.error("Erro ao gerar avaliação:",e);
+        statusEl.textContent="Não foi possível gerar o rascunho agora. Tente novamente em instantes ou preencha manualmente.";
+      }finally{
+        taIds.forEach(k=>document.getElementById(`eval-${k}`).classList.remove("eval-ta--loading"));
+      }
     });
-    
-    document.getElementById("btn-send-eval")?.addEventListener("click",async()=>{
+
+    // Confirmation modal before sending
+    document.getElementById("btn-send-eval")?.addEventListener("click",()=>{
       if(!currentLeadId)return;
+      const lead=leads.find(l=>l.id===currentLeadId);
+      document.getElementById("confirm-name").textContent=lead?.nome??"o atleta";
+      const preview=["s1","s2","s3","s4","s5"].map(k=>{
+        const val=document.getElementById(`eval-${k}`).value.trim();
+        return `<h4>${SECTION_TITLES[k]}</h4><p>${val||"(em branco)"}</p>`;
+      }).join("");
+      document.getElementById("confirm-preview").innerHTML=preview;
+      document.getElementById("confirm-overlay").hidden=false;
+    });
+
+    document.getElementById("confirm-cancel")?.addEventListener("click",()=>{document.getElementById("confirm-overlay").hidden=true;});
+    document.getElementById("confirm-overlay")?.addEventListener("click",e=>{if(e.target===document.getElementById("confirm-overlay"))document.getElementById("confirm-overlay").hidden=true;});
+
+    document.getElementById("confirm-send")?.addEventListener("click",async()=>{
+      if(!currentLeadId)return;
+      document.getElementById("confirm-overlay").hidden=true;
       const statusEl=document.getElementById("eval-status");
       const sections={};
       ["s1","s2","s3","s4","s5"].forEach(k=>{sections[k]=document.getElementById(`eval-${k}`).value;});
@@ -675,7 +1077,10 @@ import '../../styles/global.css';
         if(!res.ok)throw new Error(await res.text());
         statusEl.textContent="Avaliação enviada com sucesso.";
         await loadLeads();
-      }catch(e){statusEl.textContent="Erro: "+e.message;}
+      }catch(e){
+        console.error("Erro ao enviar avaliação:",e);
+        statusEl.textContent="Não foi possível enviar a avaliação agora. Tente novamente em instantes.";
+      }
     });
     
     // Export CSV
@@ -689,6 +1094,7 @@ import '../../styles/global.css';
     });
 
     document.getElementById("status-filter")?.addEventListener("change",renderTable);
+    document.getElementById("search-input")?.addEventListener("input",renderTable);
     document.getElementById("btn-refresh")?.addEventListener("click",loadLeads);
   </script>
 
