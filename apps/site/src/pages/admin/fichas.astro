@@ -214,11 +214,16 @@ export const prerender = false;
 
     document.getElementById("btn-logout")?.addEventListener("click", async()=>{await signOut(auth);window.location.href="/admin/login";});
 
-    // Load leads
+    // Load leads with Error Boundary
     async function loadLeads(){
-      const snap=await getDocs(query(collection(db,"leads"),orderBy("createdAt","desc")));
-      leads=snap.docs.map(d=>({id:d.id,...d.data()}));
-      renderStats(); renderTable();
+      try {
+        const snap=await getDocs(query(collection(db,"leads"),orderBy("createdAt","desc")));
+        leads=snap.docs.map(d=>({id:d.id,...d.data()}));
+        renderStats(); renderTable();
+      } catch (err) {
+        console.error("Erro sistêmico ao carregar fichas:", err);
+        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="6" style="text-align:center;color:#E67E22;font-weight:700;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede. Verifique as regras do Firestore.</td></tr>`;
+      }
     }
 
     function renderStats(){
@@ -257,10 +262,18 @@ export const prerender = false;
       }).join("") || `<tr><td class="td" colspan="6" style="text-align:center;color:#333">Nenhuma ficha encontrada.</td></tr>`;
     }
 
+    // Update Status with Rollback
     window.__updStatus=async function(sel){
-      await updateDoc(doc(db,"leads",sel.dataset.id),{status:sel.value});
-      leads=leads.map(l=>l.id===sel.dataset.id?{...l,status:sel.value}:l);
-      renderStats();
+      const originalValue = leads.find(l=>l.id===sel.dataset.id)?.status;
+      try {
+        await updateDoc(doc(db,"leads",sel.dataset.id),{status:sel.value});
+        leads=leads.map(l=>l.id===sel.dataset.id?{...l,status:sel.value}:l);
+        renderStats();
+      } catch (err) {
+        console.error("Erro sistêmico ao atualizar status:", err);
+        alert("[ERRO] Falha de permissão ao tentar atualizar a ficha. A operação será revertida.");
+        if (originalValue) sel.value = originalValue;
+      }
     };
 
     // Detail drawer
