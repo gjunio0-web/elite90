@@ -109,12 +109,20 @@ import '../../styles/global.css';
     }
     .page-title {
       font-family: var(--font-display);
-      font-size: var(--fs-display-xl);
+      font-size: 2.75rem;
+      font-weight: 400;
+      letter-spacing: 0.06em;
       color: var(--c-white);
       text-transform: uppercase;
       line-height: 1;
     }
-    .page-title span { color: var(--c-lime); font-family: inherit; }
+    .page-title span { 
+      color: var(--c-lime); 
+      font-family: var(--font-label); 
+      font-style: italic; 
+      font-weight: 400;
+      letter-spacing: 0.04em;
+    }
     .page-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
     
     /* CARDS DE ESTATISTICAS */
@@ -165,76 +173,101 @@ import '../../styles/global.css';
       letter-spacing: 0.1em;
     }
 
-    /* TABELA DE LEADS (BRUTALIST NOIR) */
+    /* TABELA DE LEADS (NOIR EDITORIAL) */
     .table-wrap {
       overflow-x: auto;
       scrollbar-width: thin;
-      scrollbar-color: var(--c-lime) var(--c-darkbg);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: var(--radius-card);
-      background: var(--c-darkbg);
+      scrollbar-color: var(--c-lime) transparent;
+      margin-top: var(--space-5);
     }
-    .table-wrap::-webkit-scrollbar { height: 6px; }
-    .table-wrap::-webkit-scrollbar-track { background: var(--c-darkbg); }
-    .table-wrap::-webkit-scrollbar-thumb { background: var(--c-lime); border-radius: 3px; }
+    .table-wrap::-webkit-scrollbar { height: 4px; }
+    .table-wrap::-webkit-scrollbar-track { background: transparent; }
+    .table-wrap::-webkit-scrollbar-thumb { background: rgba(166,195,0,0.3); border-radius: 2px; }
     
     table { width: 100%; border-collapse: collapse; min-width: 1000px; text-align: left; }
+    
     th {
       font-family: var(--font-label);
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--c-textsub);
-      padding: var(--space-4) var(--space-4);
+      letter-spacing: 0.18em;
+      color: var(--c-lime);
+      padding: var(--space-3) var(--space-4);
       border-bottom: 1px solid rgba(255,255,255,0.08);
-      background: rgba(0,0,0,0.4);
+      background: transparent;
     }
+    
     .td {
-      padding: var(--space-4);
-      border-bottom: 1px solid rgba(255,255,255,0.03);
+      padding: 1.5rem var(--space-4);
+      border-bottom: 1px solid rgba(255,255,255,0.02);
       vertical-align: middle;
       font-family: var(--font-body);
-      font-size: var(--fs-body-sm);
-      color: var(--c-textbody);
+      font-size: 0.8rem;
+      color: var(--c-textsub);
       transition: background var(--transition-base);
     }
-    .td--name { font-weight: 700; color: var(--c-white); font-size: var(--fs-body-md); }
-    .td--goal { color: var(--c-textsub); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    tr:hover .td { background: rgba(166, 195, 0, 0.04); }
+    .td--name { font-weight: 700; color: var(--c-white); font-size: 0.9rem; letter-spacing: 0.02em; }
+    .td--goal { color: var(--c-textbody); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.75rem; }
+    
+    tr:hover .td { background: rgba(166, 195, 0, 0.02); }
 
+    /* SELETOR ESTILO BADGE OBLIQUO */
     .status-sel {
-      background: var(--c-black);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: var(--c-white);
-      padding: 8px 12px;
-      border-radius: 4px;
-      font-family: var(--font-body);
-      font-size: var(--fs-body-sm);
-      font-weight: 600;
+      background-color: transparent;
+      border: 1px solid rgba(166, 195, 0, 0.3);
+      color: var(--c-lime);
+      padding: 6px 28px 6px 12px;
+      border-radius: 2px;
+      font-family: var(--font-label);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
       cursor: pointer;
       outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23A6C300' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: all var(--transition-base);
     }
-    .status-sel:focus { border-color: var(--c-lime); }
+    .status-sel:focus, .status-sel:hover { 
+      border-color: var(--c-lime); 
+      background-color: rgba(166, 195, 0, 0.05); 
+    }
+    .status-sel option { background: var(--c-darkbg); color: var(--c-textbody); }
 
-    .btn-action {
-      background: rgba(166, 195, 0, 0.08);
-      color: var(--c-lime);
-      border: 1px solid rgba(166, 195, 0, 0.2);
-      border-radius: 4px;
-      padding: 8px 16px;
-      font-size: 0.7rem;
+    /* ACTION LINKS ELEGANTES (Substituindo botões) */
+    .btn-action-link {
+      background: transparent;
+      color: var(--c-textsub);
+      border: none;
+      padding: 0;
+      font-size: 0.65rem;
       font-family: var(--font-label);
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.1em;
       cursor: pointer;
-      white-space: nowrap;
-      transition: background var(--transition-base), color var(--transition-base);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: all var(--transition-base);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    .btn-action:hover { background: rgba(166, 195, 0, 0.15); color: var(--c-white); }
-    .btn-action + .btn-action { margin-left: 8px; background: rgba(255, 255, 255, 0.04); color: var(--c-textsub); border-color: rgba(255, 255, 255, 0.1); }
-    .btn-action + .btn-action:hover { background: rgba(255, 255, 255, 0.1); color: var(--c-white); }
+    .btn-action-link:hover { 
+      color: var(--c-lime); 
+      border-bottom-color: rgba(166, 195, 0, 0.4); 
+    }
+    .action-sep { 
+      color: rgba(255, 255, 255, 0.1); 
+      margin: 0 10px; 
+      font-size: 0.8rem; 
+      font-weight: 300;
+    }
 
     /* STATUS BAR INFERIOR */
     .status-bar {
@@ -297,27 +330,27 @@ import '../../styles/global.css';
     }
     .drawer-close:hover { color: var(--c-lime); }
 
-    /* TABELA DE DETALHES DA FICHA DO ATLETA */
-    .detail-table { width: 100%; border-collapse: collapse; }
+    /* TABELA DE DETALHES DA FICHA DO ATLETA (DESCOMPRIMIDA) */
+    .detail-table { width: 100%; border-collapse: collapse; margin-top: var(--space-4); }
     .detail-th {
       font-family: var(--font-label);
-      font-size: 0.75rem;
+      font-size: 0.65rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.15em;
       color: var(--c-textsub);
-      padding: var(--space-3) 0;
+      padding: 1.25rem 0;
       vertical-align: top;
-      width: 180px;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
+      width: 220px;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
     }
     .detail-td {
       font-family: var(--font-body);
-      font-size: var(--fs-body-md);
+      font-size: 0.85rem;
       color: var(--c-white);
-      padding: var(--space-3) 0 var(--space-3) var(--space-4);
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      line-height: 1.6;
+      padding: 1.25rem 0 1.25rem var(--space-4);
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+      line-height: 1.8;
     }
 
     /* FORMULARIO DE AVALIACAO (EVAL) */
@@ -543,9 +576,14 @@ import '../../styles/global.css';
               <option value="avaliacao_enviada" ${lead.status==="avaliacao_enviada"?"selected":""}>Avaliação enviada</option>
             </select>
           </td>
-          <td class="td">
-            <button class="btn-action" onclick="window.__openDetail('${lead.id}')">Ver</button>
-            <button class="btn-action" onclick="window.__openEval('${lead.id}')">Avaliar</button>
+          <td class="td" style="white-space: nowrap;">
+            <button class="btn-action-link" onclick="window.__openDetail('${lead.id}')">
+              Ver ficha ↗
+            </button>
+            <span class="action-sep">/</span>
+            <button class="btn-action-link" onclick="window.__openEval('${lead.id}')">
+              Avaliar ↗
+            </button>
           </td>
         </tr>`;
       }).join("") || `<tr><td class="td" colspan="6" style="text-align:center;color:var(--c-textsub)">Nenhuma ficha encontrada.</td></tr>`;
