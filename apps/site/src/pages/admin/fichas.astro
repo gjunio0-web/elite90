@@ -11,7 +11,7 @@ import '../../styles/global.css';
   <title>Elite 90 - Fichas de Triagem</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" href="/favicon.ico" />
-  <style>
+  <style is:global>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     
     body {
@@ -278,8 +278,8 @@ import '../../styles/global.css';
     }
     
     .td {
-      padding: 1.5rem var(--space-4);
-      border-bottom: 1px solid rgba(255,255,255,0.02);
+      padding: 1.25rem var(--space-4);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
       vertical-align: middle;
       font-family: var(--font-body);
       font-size: 0.8rem;
@@ -288,8 +288,9 @@ import '../../styles/global.css';
     }
     .td--name { font-weight: 700; color: var(--c-white); font-size: 0.9rem; letter-spacing: 0.02em; }
     .td--goal { color: var(--c-textbody); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.75rem; }
-    
-    tr:hover .td { background: rgba(166, 195, 0, 0.02); }
+
+    tbody tr:nth-child(even) .td { background: rgba(255,255,255,0.012); }
+    tr:hover .td { background: rgba(166, 195, 0, 0.04); }
 
     /* RESPONSIVE: CARD LIST (mobile) */
     .leads-cards { display: none; }
