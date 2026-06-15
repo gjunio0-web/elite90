@@ -9,6 +9,9 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+[functions."purge-rejected-leads"]
+  schedule = "0 3 * * *"
+
 [[redirects]]
   from = "/app/*"
   to = "/app/index.html"

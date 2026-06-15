@@ -151,6 +151,7 @@ export const handler = async (event: any) => {
       status: "avaliacao_enviada",
       avaliacao_enviada: true,
       avaliacao_token: token,
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     // Send email via Resend

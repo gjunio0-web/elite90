@@ -139,6 +139,10 @@ import '../../styles/global.css';
       padding: var(--space-4) var(--space-5);
       min-width: 160px;
     }
+    .stat-card--total {
+      border-left: 3px solid var(--c-lime);
+      background: linear-gradient(135deg, rgba(166,195,0,0.06) 0%, var(--c-darkbg) 60%);
+    }
     .stat-card__label {
       font-family: var(--font-label);
       font-size: var(--fs-label);
@@ -148,11 +152,16 @@ import '../../styles/global.css';
       color: var(--c-textsub);
       margin-bottom: var(--space-2);
     }
+    .stat-card--total .stat-card__label { color: var(--c-lime); }
     .stat-card__value {
       font-family: var(--font-display);
       font-size: var(--fs-display-md);
       color: var(--c-lime);
       line-height: 1;
+    }
+    .stat-card--total .stat-card__value {
+      font-size: var(--fs-display-lg);
+      color: var(--c-white);
     }
 
     /* TOOLBAR DA TABELA */
@@ -665,6 +674,33 @@ import '../../styles/global.css';
       white-space: pre-wrap;
     }
     .confirm-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: flex-end; }
+
+    /* ZONA DE PRIVACIDADE / LGPD */
+    .detail-section--danger {
+      margin-top: var(--space-6);
+      padding: var(--space-4);
+      border: 1px solid rgba(192, 57, 43, 0.3);
+      border-radius: var(--radius-card);
+      background: rgba(192, 57, 43, 0.04);
+    }
+    .detail-section__title--danger {
+      color: var(--c-status-rejected) !important;
+      border-bottom-color: rgba(192, 57, 43, 0.2) !important;
+    }
+    .privacy-note {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      color: var(--c-textsub);
+      line-height: 1.7;
+      margin: var(--space-3) 0 var(--space-4);
+    }
+    .btn-danger {
+      background: transparent;
+      color: var(--c-status-rejected);
+      border: 1px solid var(--c-status-rejected);
+    }
+    .btn-danger:hover { background: rgba(192, 57, 43, 0.1); }
+    .btn-danger:disabled { opacity: 0.5; cursor: default; }
   </style>
 </head>
 <body>
@@ -702,10 +738,12 @@ import '../../styles/global.css';
     </div>
 
     <div class="stats-row">
-      <div class="stat-card"><div class="stat-card__label">Total</div><div class="stat-card__value" id="stat-total">0</div></div>
-      <div class="stat-card"><div class="stat-card__label">Novos</div><div class="stat-card__value" id="stat-new" style="color:#E67E22">0</div></div>
-      <div class="stat-card"><div class="stat-card__label">Aprovados</div><div class="stat-card__value" id="stat-app" style="color:#27AE60">0</div></div>
-      <div class="stat-card"><div class="stat-card__label">Avaliados</div><div class="stat-card__value" id="stat-eval" style="color:#4A90D9">0</div></div>
+      <div class="stat-card stat-card--total"><div class="stat-card__label">Total</div><div class="stat-card__value" id="stat-total">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Novos</div><div class="stat-card__value" id="stat-new" style="color:var(--c-status-new)">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Em análise</div><div class="stat-card__value" id="stat-progress" style="color:var(--c-status-progress)">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Aprovados</div><div class="stat-card__value" id="stat-app" style="color:var(--c-status-approved)">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Recusados</div><div class="stat-card__value" id="stat-rejected" style="color:var(--c-status-rejected)">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Avaliados</div><div class="stat-card__value" id="stat-eval" style="color:var(--c-status-sent)">0</div></div>
     </div>
 
     <div class="toolbar">
@@ -812,10 +850,26 @@ import '../../styles/global.css';
     </div>
   </div>
 
+  <!-- Delete confirmation modal -->
+  <div class="confirm-overlay" id="delete-overlay" hidden>
+    <div class="confirm-box">
+      <h3 class="confirm-title">Excluir <span>ficha permanentemente</span></h3>
+      <p class="confirm-summary">
+        Você está prestes a excluir <strong id="delete-name"></strong> e todos os dados pessoais
+        e de saúde associados a esta ficha. Esta ação é <strong>irreversível</strong> e não pode
+        ser desfeita — os dados não poderão ser recuperados.
+      </p>
+      <div class="confirm-actions">
+        <button class="btn-sm btn-outline" id="delete-cancel">Cancelar</button>
+        <button class="btn-sm btn-danger" id="delete-confirm">Confirmar exclusão definitiva</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs, doc, updateDoc, query, orderBy }
+    import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
       
     const cfg={apiKey:document.querySelector('meta[name="fb-api"]')?.content,authDomain:document.querySelector('meta[name="fb-auth"]')?.content,projectId:document.querySelector('meta[name="fb-proj"]')?.content,storageBucket:document.querySelector('meta[name="fb-bucket"]')?.content,messagingSenderId:document.querySelector('meta[name="fb-sender"]')?.content,appId:document.querySelector('meta[name="fb-appid"]')?.content};
@@ -823,7 +877,7 @@ import '../../styles/global.css';
     const auth=getAuth(app);
     const db=getFirestore(app);
 
-    let leads=[], currentLeadId=null, idToken="";
+    let leads=[], currentLeadId=null, currentDetailLeadId=null, idToken="";
     
     // Auth guard
     onAuthStateChanged(auth, async user => {
@@ -872,7 +926,9 @@ import '../../styles/global.css';
     function renderStats(){
       document.getElementById("stat-total").textContent=leads.length;
       document.getElementById("stat-new").textContent=leads.filter(l=>l.status==="novo").length;
+      document.getElementById("stat-progress").textContent=leads.filter(l=>l.status==="em_analise").length;
       document.getElementById("stat-app").textContent=leads.filter(l=>l.status==="aprovado").length;
+      document.getElementById("stat-rejected").textContent=leads.filter(l=>l.status==="recusado").length;
       document.getElementById("stat-eval").textContent=leads.filter(l=>l.status==="avaliacao_enviada").length;
     }
 
@@ -962,7 +1018,7 @@ import '../../styles/global.css';
     window.__updStatus=async function(sel){
       const originalValue = leads.find(l=>l.id===sel.dataset.id)?.status;
       try {
-        await updateDoc(doc(db,"leads",sel.dataset.id),{status:sel.value});
+        await updateDoc(doc(db,"leads",sel.dataset.id),{status:sel.value, updatedAt: serverTimestamp()});
         leads=leads.map(l=>l.id===sel.dataset.id?{...l,status:sel.value}:l);
         renderStats(); renderTable();
       } catch (err) {
@@ -994,6 +1050,7 @@ import '../../styles/global.css';
 
     window.__openDetail=function(id){
       const lead=leads.find(l=>l.id===id);if(!lead)return;
+      currentDetailLeadId=id;
 
       const secIdentificacao=[
         detailRow("Nome", lead.nome),
@@ -1039,18 +1096,58 @@ import '../../styles/global.css';
         <table class="detail-table"><tbody>${rows.join("")}</tbody></table>
       </div>`;
 
+      const privacySection=`<div class="detail-section detail-section--danger">
+        <div class="detail-section__title detail-section__title--danger">Privacidade &amp; LGPD</div>
+        <p class="privacy-note">
+          O titular destes dados pode solicitar a exclusão definitiva desta ficha
+          a qualquer momento (Art. 18, VI da LGPD). Esta ação remove permanentemente
+          os dados pessoais e de saúde do atleta e não pode ser desfeita.
+        </p>
+        <button class="btn-sm btn-danger" id="btn-delete-lead">Excluir ficha permanentemente</button>
+      </div>`;
+
       document.getElementById("detail-content").innerHTML=
         section("Identificação", secIdentificacao) +
         section("Perfil Físico", secPerfil) +
         section("Objetivo & Treino", secObjetivo) +
         section("Saúde", secSaude) +
-        section("Nutrição", secNutricao);
+        section("Nutrição", secNutricao) +
+        privacySection;
 
       document.getElementById("detail-drawer").hidden=false;
     };
     
     document.getElementById("detail-close")?.addEventListener("click",()=>{document.getElementById("detail-drawer").hidden=true;});
     document.getElementById("detail-drawer")?.addEventListener("click",e=>{if(e.target===document.getElementById("detail-drawer"))document.getElementById("detail-drawer").hidden=true;});
+
+    // Delete lead — opens confirmation modal (delegated, since button is injected via innerHTML)
+    document.getElementById("detail-content")?.addEventListener("click",e=>{
+      if(e.target.id!=="btn-delete-lead")return;
+      const lead=leads.find(l=>l.id===currentDetailLeadId);
+      document.getElementById("delete-name").textContent=lead?.nome??"este atleta";
+      document.getElementById("delete-overlay").hidden=false;
+    });
+
+    document.getElementById("delete-cancel")?.addEventListener("click",()=>{document.getElementById("delete-overlay").hidden=true;});
+    document.getElementById("delete-overlay")?.addEventListener("click",e=>{if(e.target===document.getElementById("delete-overlay"))document.getElementById("delete-overlay").hidden=true;});
+
+    document.getElementById("delete-confirm")?.addEventListener("click",async()=>{
+      if(!currentDetailLeadId)return;
+      const btn=document.getElementById("delete-confirm");
+      btn.disabled=true; btn.textContent="Excluindo...";
+      try{
+        await deleteDoc(doc(db,"leads",currentDetailLeadId));
+        leads=leads.filter(l=>l.id!==currentDetailLeadId);
+        document.getElementById("delete-overlay").hidden=true;
+        document.getElementById("detail-drawer").hidden=true;
+        renderStats(); renderTable();
+      }catch(err){
+        console.error("Erro ao excluir ficha:",err);
+        alert("Não foi possível excluir a ficha agora. Tente novamente em instantes.");
+      }finally{
+        btn.disabled=false; btn.textContent="Confirmar exclusão definitiva";
+      }
+    });
 
     // Eval drawer
     const SECTION_TITLES={
