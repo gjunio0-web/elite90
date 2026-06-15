@@ -1,5 +1,7 @@
 ---
 export const prerender = false;
+import '../../styles/tokens.css';
+import '../../styles/global.css';
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -11,7 +13,7 @@ export const prerender = false;
   <link rel="icon" href="/favicon.ico" />
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#ccc;min-height:100vh;scrollbar-width:thin;scrollbar-color:#A6C300 #1A1A1A;}
+    body{background:#080808;font-family:'Montserrat', 'Helvetica Neue',Arial,sans-serif;color:#ccc;min-height:100vh;scrollbar-width:thin;scrollbar-color:#A6C300 #1A1A1A;}
     body::-webkit-scrollbar{width:6px;}body::-webkit-scrollbar-track{background:#1A1A1A;}body::-webkit-scrollbar-thumb{background:#A6C300;border-radius:3px;}
     .adm-header{background:#111;border-bottom:1px solid rgba(166,195,0,.15);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
     .adm-header__left{display:flex;align-items:center;gap:12px;}
@@ -21,18 +23,18 @@ export const prerender = false;
     .status-dot{width:8px;height:8px;border-radius:50%;background:#A6C300;flex-shrink:0;}
     .status-text{font-size:12px;color:#666;}
 
-    .adm-logo{font-size:15px;font-weight:900;letter-spacing:.12em;color:#A6C300;text-transform:uppercase;text-decoration:none;}
+    .adm-logo{font-size:15px;font-weight:900;letter-spacing:.12em;color:#A6C300;text-transform:uppercase;text-decoration:none;font-family:'Bebas Neue', sans-serif;}
     .adm-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;background:rgba(166,195,0,.1);color:#A6C300;border:1px solid rgba(166,195,0,.25);border-radius:3px;padding:3px 8px;}
     .adm-header__right{display:flex;align-items:center;gap:8px;}
     .adm-user{font-size:12px;color:#666;}
-    .btn-sm{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;border-radius:4px;cursor:pointer;border:none;}
+    .btn-sm{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;border-radius:4px;cursor:pointer;border:none;font-family:inherit;}
     .btn-outline{background:transparent;color:#A6C300;border:1px solid rgba(166,195,0,.3);}
     .btn-primary{background:#A6C300;color:#000;}
     .btn-danger{background:transparent;color:#E67E22;border:1px solid rgba(230,126,34,.3);}
     main{max-width:1200px;margin:0 auto;padding:36px 32px;}
     .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;gap:16px;flex-wrap:wrap;}
     .page-title-block .page-eyebrow{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.18em;color:#666;margin-bottom:6px;}
-    .page-title{font-size:36px;font-weight:900;color:#fff;}
+    .page-title{font-size:36px;font-weight:900;color:#fff;font-family:'Bebas Neue', sans-serif;}
     .page-title span{color:#A6C300;font-style:italic;font-weight:400;}
     .page-actions{display:flex;gap:8px;flex-wrap:wrap;}
     .stats-row{display:flex;gap:16px;margin-bottom:28px;flex-wrap:wrap;}
@@ -40,9 +42,10 @@ export const prerender = false;
     .stat-card__label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#666;margin-bottom:6px;}
     .stat-card__value{font-size:28px;font-weight:900;color:#A6C300;}
     .toolbar{display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap;}
-    .filter-select{background:#1A1A1A;border:1px solid #2a2a2a;color:#ccc;padding:7px 12px;border-radius:4px;font-size:12px;cursor:pointer;}
+    .filter-select{background:#1A1A1A;border:1px solid #2a2a2a;color:#ccc;padding:7px 12px;border-radius:4px;font-size:12px;cursor:pointer;font-family:inherit;}
     .leads-count{font-size:12px;color:#555;margin-left:auto;}
     .table-wrap{overflow-x:auto;scrollbar-width:thin;scrollbar-color:#A6C300 #1A1A1A;}
+  
     .table-wrap::-webkit-scrollbar{height:5px;}
     .table-wrap::-webkit-scrollbar-track{background:#1A1A1A;}
     .table-wrap::-webkit-scrollbar-thumb{background:#A6C300;border-radius:3px;}
@@ -52,8 +55,8 @@ export const prerender = false;
     .td--name{font-weight:700;color:#fff;}
     .td--goal{color:#888;font-size:12px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     tr:hover .td{background:rgba(255,255,255,.015);}
-    .status-sel{background:#121212;border:1px solid #2a2a2a;color:#ccc;padding:4px 8px;border-radius:3px;font-size:11px;cursor:pointer;scrollbar-width:thin;}
-    .btn-action{background:rgba(166,195,0,.08);color:#A6C300;border:1px solid rgba(166,195,0,.2);border-radius:3px;padding:4px 10px;font-size:10px;cursor:pointer;white-space:nowrap;}
+    .status-sel{background:#121212;border:1px solid #2a2a2a;color:#ccc;padding:4px 8px;border-radius:3px;font-size:11px;cursor:pointer;scrollbar-width:thin;font-family:inherit;}
+    .btn-action{background:rgba(166,195,0,.08);color:#A6C300;border:1px solid rgba(166,195,0,.2);border-radius:3px;padding:4px 10px;font-size:10px;cursor:pointer;white-space:nowrap;font-family:inherit;}
     .btn-action+.btn-action{margin-left:4px;background:rgba(255,255,255,.04);color:#888;border-color:rgba(255,255,255,.1);}
     /* DRAWER */
     .drawer{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-start;justify-content:flex-end;background:rgba(0,0,0,.75);}
@@ -64,6 +67,7 @@ export const prerender = false;
     .drawer-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
     .drawer-title{font-size:18px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;}
     .drawer-close{background:none;border:none;color:#555;font-size:18px;cursor:pointer;line-height:1;}
+ 
     .drawer-close:hover{color:#A6C300;}
     .detail-table{width:100%;border-collapse:collapse;}
     .detail-th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#555;padding:8px 0;vertical-align:top;width:140px;}
@@ -85,7 +89,7 @@ export const prerender = false;
       <a href="/" class="adm-logo">Coach Ruiz</a>
       <span class="adm-badge">Fichas</span>
     </div>
-    <div class="adm-header__right">      
+    <div class="adm-header__right">     
       <button class="btn-sm btn-outline" onclick="window.location.href='/admin'" aria-label="Voltar para o menu do painel" style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; min-width: 44px;">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
           <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -103,7 +107,7 @@ export const prerender = false;
   <main>
     <div class="page-header">
       <div class="page-title-block">
-        <p class="page-eyebrow">Modulo 1 - Fichas</p>
+        <p class="page-eyebrow">Módulo 1 - Fichas</p>
         <h1 class="page-title">Triagem <span>&amp; Leads</span></h1>
       </div>
       <div class="page-actions">
@@ -123,10 +127,10 @@ export const prerender = false;
       <select class="filter-select" id="status-filter">
         <option value="">Todos os status</option>
         <option value="novo">Novo</option>
-        <option value="em_analise">Em analise</option>
+        <option value="em_analise">Em análise</option>
         <option value="aprovado">Aprovado</option>
         <option value="recusado">Recusado</option>
-        <option value="avaliacao_enviada">Avaliacao enviada</option>
+        <option value="avaliacao_enviada">Avaliação enviada</option>
       </select>
       <span class="leads-count" id="leads-count"></span>
     </div>
@@ -144,13 +148,13 @@ export const prerender = false;
         </tbody>
       </table>
     </div>
+ 
     <div class="status-bar">
       <span class="status-dot"></span>
       <span class="status-text"><strong id="adm-email">Carregando...</strong> está autenticado e pode gerenciar o Elite 90 com segurança.</span>
     </div>
   </main>
 
-  <!-- Detail drawer -->
   <div class="drawer" id="detail-drawer" hidden>
     <div class="drawer-panel">
       <div class="drawer-hdr">
@@ -161,31 +165,31 @@ export const prerender = false;
     </div>
   </div>
 
-  <!-- Eval drawer -->
   <div class="drawer" id="eval-drawer" hidden>
     <div class="drawer-panel">
       <div class="drawer-hdr">
-        <span class="drawer-title">Avaliacao - <span id="eval-name"></span></span>
+        <span class="drawer-title">Avaliação - <span id="eval-name"></span></span>
         <button class="drawer-close" id="eval-close">x</button>
       </div>
       <div class="eval-actions">
         <button class="btn-sm btn-outline" id="btn-gen-ai">Gerar com IA (Gemini)</button>
       </div>
       <p class="eval-status" id="eval-status"></p>
-      <label class="eval-label" for="eval-s1">01 - Diagnostico Estetico</label>
+      <label class="eval-label" for="eval-s1">01 - Diagnóstico Estético</label>
       <textarea class="eval-ta" id="eval-s1" rows="5"></textarea>
       <label class="eval-label" for="eval-s2">02 - Planejamento de Treino</label>
       <textarea class="eval-ta" id="eval-s2" rows="5"></textarea>
-      <label class="eval-label" for="eval-s3">03 - Protocolo de Saude</label>
+      <label class="eval-label" for="eval-s3">03 - Protocolo de Saúde</label>
       <textarea class="eval-ta" id="eval-s3" rows="5"></textarea>
-      <label class="eval-label" for="eval-s4">04 - Estrategia de Competicao</label>
+      <label class="eval-label" for="eval-s4">04 - Estratégia de Competição</label>
       <textarea class="eval-ta" id="eval-s4" rows="5"></textarea>
       <label class="eval-label" for="eval-s5">05 - Alinhamento Operacional</label>
       <textarea class="eval-ta" id="eval-s5" rows="5"></textarea>
-      <label class="eval-label" for="eval-notes">Notas internas (nao enviadas)</label>
+      <label class="eval-label" for="eval-notes">Notas internas (não enviadas)</label>
+    
       <textarea class="eval-ta" id="eval-notes" rows="3"></textarea>
       <div class="eval-actions" style="margin-top:16px">
-        <button class="btn-sm btn-primary" id="btn-send-eval">Enviar avaliacao ao atleta</button>
+        <button class="btn-sm btn-primary" id="btn-send-eval">Enviar avaliação ao atleta</button>
       </div>
     </div>
   </div>
@@ -195,14 +199,14 @@ export const prerender = false;
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, collection, getDocs, doc, updateDoc, query, orderBy }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+      
     const cfg={apiKey:document.querySelector('meta[name="fb-api"]')?.content,authDomain:document.querySelector('meta[name="fb-auth"]')?.content,projectId:document.querySelector('meta[name="fb-proj"]')?.content,storageBucket:document.querySelector('meta[name="fb-bucket"]')?.content,messagingSenderId:document.querySelector('meta[name="fb-sender"]')?.content,appId:document.querySelector('meta[name="fb-appid"]')?.content};
     const app=initializeApp(cfg);
     const auth=getAuth(app);
     const db=getFirestore(app);
 
     let leads=[], currentLeadId=null, idToken="";
-
+    
     // Auth guard
     onAuthStateChanged(auth, async user => {
       if (!user) { window.location.href="/admin/login"; return; }
@@ -211,7 +215,7 @@ export const prerender = false;
       idToken = await user.getIdToken();
       loadLeads();
     });
-
+    
     document.getElementById("btn-logout")?.addEventListener("click", async()=>{await signOut(auth);window.location.href="/admin/login";});
 
     // Load leads with Error Boundary
@@ -237,7 +241,7 @@ export const prerender = false;
       const filter=document.getElementById("status-filter").value;
       const filtered=filter?leads.filter(l=>l.status===filter):leads;
       document.getElementById("leads-count").textContent=`${filtered.length} ficha${filtered.length!==1?"s":""}`;
-      const statusLabel={"novo":"Novo","em_analise":"Em analise","aprovado":"Aprovado","recusado":"Recusado","avaliacao_enviada":"Avaliacao enviada"};
+      const statusLabel={"novo":"Novo","em_analise":"Em análise","aprovado":"Aprovado","recusado":"Recusado","avaliacao_enviada":"Avaliação enviada"};
       document.getElementById("leads-tbody").innerHTML=filtered.map(lead=>{
         const date=lead.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"--";
         return `<tr>
@@ -248,10 +252,10 @@ export const prerender = false;
           <td class="td">
             <select class="status-sel" data-id="${lead.id}" onchange="window.__updStatus(this)">
               <option value="novo" ${lead.status==="novo"?"selected":""}>Novo</option>
-              <option value="em_analise" ${lead.status==="em_analise"?"selected":""}>Em analise</option>
+              <option value="em_analise" ${lead.status==="em_analise"?"selected":""}>Em análise</option>
               <option value="aprovado" ${lead.status==="aprovado"?"selected":""}>Aprovado</option>
               <option value="recusado" ${lead.status==="recusado"?"selected":""}>Recusado</option>
-              <option value="avaliacao_enviada" ${lead.status==="avaliacao_enviada"?"selected":""}>Avaliacao enviada</option>
+              <option value="avaliacao_enviada" ${lead.status==="avaliacao_enviada"?"selected":""}>Avaliação enviada</option>
             </select>
           </td>
           <td class="td">
@@ -279,10 +283,36 @@ export const prerender = false;
     // Detail drawer
     window.__openDetail=function(id){
       const lead=leads.find(l=>l.id===id);if(!lead)return;
-      const rows=[["Nome",lead.nome],["E-mail",lead.email],["CPF",lead.cpf],["Nascimento",lead.data_nascimento],["Altura",lead.altura],["Peso",lead.peso],["Objetivo",lead.objetivo],["Atividade fisica",lead.atividade_fisica],["Tempo atividade",lead.tempo_atividade?`${lead.tempo_atividade} anos`:""],["Frequencia/sem",lead.frequencia_semanal],["Disponibilidade",lead.disponibilidade_diaria],["Personal",lead.personal_trainer],["Competicao",lead.competicao+(lead.competicao_detalhe?` - ${lead.competicao_detalhe}`:"")],["Coach BB",lead.conhece_coach],["Medico esporte",lead.medico_esporte],["TRT",lead.trt+(lead.trt_detalhe?` - ${lead.trt_detalhe}`:"")],["Cardiaca",lead.condicao_cardiaca],["Diabetes",lead.diabetes],["Cronica",lead.doenca_cronica],["Lesao",lead.lesao+(lead.lesao_detalhe?` - ${lead.lesao_detalhe}`:"")],["Dieta",lead.dieta],["Refeicoes/dia",lead.refeicoes_dia],["Suplementos",lead.suplementos+(lead.suplementos_detalhe?` - ${lead.suplementos_detalhe}`:"")],["Agua/dia",lead.agua_litros?`${lead.agua_litros}L`:""]];
+      const rows=[
+        ["Nome", lead.nome],
+        ["E-mail", lead.email ? `<a href="mailto:${lead.email}" style="color: #A6C300; text-decoration: underline;">${lead.email}</a>` : ""],
+        ["CPF", lead.cpf],
+        ["Nascimento", lead.data_nascimento],
+        ["Altura", lead.altura],
+        ["Peso", lead.peso],
+        ["Objetivo", lead.objetivo],
+        ["Atividade Física", lead.atividade_fisica],
+        ["Tempo de Atividade", lead.tempo_atividade ? `${lead.tempo_atividade} anos` : ""],
+        ["Frequência Semanal", lead.frequencia_semanal],
+        ["Disponibilidade Diária", lead.disponibilidade_diaria],
+        ["Personal Trainer", lead.personal_trainer],
+        ["Competição", lead.competicao + (lead.competicao_detalhe ? ` - ${lead.competicao_detalhe}` : "")],
+        ["Conhece Coach", lead.conhece_coach],
+        ["Médico do Esporte", lead.medico_esporte],
+        ["Uso de TRT", lead.trt + (lead.trt_detalhe ? ` - ${lead.trt_detalhe}` : "")],
+        ["Condição Cardíaca", lead.condicao_cardiaca],
+        ["Diabetes", lead.diabetes],
+        ["Doença Crônica", lead.doenca_cronica],
+        ["Lesão Prévia", lead.lesao + (lead.lesao_detalhe ? ` - ${lead.lesao_detalhe}` : "")],
+        ["Dieta Atual", lead.dieta],
+        ["Refeições por Dia", lead.refeicoes_dia],
+        ["Suplementação", lead.suplementos + (lead.suplementos_detalhe ? ` - ${lead.suplementos_detalhe}` : "")],
+        ["Consumo de Água", lead.agua_litros ? `${lead.agua_litros} Litros` : ""]
+      ];
       document.getElementById("detail-content").innerHTML=`<table class="detail-table">${rows.map(([k,v])=>`<tr><th class="detail-th">${k}</th><td class="detail-td">${v||"--"}</td></tr>`).join("")}</table>`;
       document.getElementById("detail-drawer").hidden=false;
     };
+    
     document.getElementById("detail-close")?.addEventListener("click",()=>{document.getElementById("detail-drawer").hidden=true;});
     document.getElementById("detail-drawer")?.addEventListener("click",e=>{if(e.target===document.getElementById("detail-drawer"))document.getElementById("detail-drawer").hidden=true;});
 
@@ -309,7 +339,7 @@ export const prerender = false;
         statusEl.textContent="Rascunho gerado. Revise e envie.";
       }catch(e){statusEl.textContent="Erro ao gerar: "+e.message;}
     });
-
+    
     document.getElementById("btn-send-eval")?.addEventListener("click",async()=>{
       if(!currentLeadId)return;
       const statusEl=document.getElementById("eval-status");
@@ -320,11 +350,11 @@ export const prerender = false;
       try{
         const res=await fetch("/.netlify/functions/send-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${idToken}`},body:JSON.stringify({leadId:currentLeadId,sections,coachNotes})});
         if(!res.ok)throw new Error(await res.text());
-        statusEl.textContent="Avaliacao enviada com sucesso.";
+        statusEl.textContent="Avaliação enviada com sucesso.";
         await loadLeads();
       }catch(e){statusEl.textContent="Erro: "+e.message;}
     });
-
+    
     // Export CSV
     document.getElementById("btn-csv")?.addEventListener("click",()=>{
       const headers=["Data","Nome","Email","CPF","Nascimento","Altura","Peso","Objetivo","Atividade","Tempo","Frequencia","Disponibilidade","Personal","Competicao","Coach BB","Medico","TRT","Cardiaca","Diabetes","Cronica","Lesao","Dieta","Refeicoes","Suplementos","Agua","Status"];
