@@ -177,13 +177,13 @@ const isEn = locale === "en";
               <span class="field__label">
                 2. {isEn
                   ? "Do you currently practice any physical activity? If so, which?"
-                  : "Atualmente pratica alguma atividade fisica? Se sim, qual?"}
+                  : "Atualmente pratica alguma atividade física? Se sim, qual?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group radio-group--vertical" id="activity-group">
                 {(isEn
                   ? ["Weight training","CrossFit","Running","Swimming","Martial arts","Cycling","None"]
-                  : ["Musculacao","CrossFit","Corrida","Natacao","Artes marciais","Ciclismo","Nenhuma"]
+                  : ["Musculação","CrossFit","Corrida","Natação","Artes marciais","Ciclismo","Nenhuma"]
                 ).map((opt) => (
                   <label class="radio-label">
                     <input type="checkbox" name="atividade_fisica" value={opt}
@@ -220,7 +220,7 @@ const isEn = locale === "en";
               data-cond-value="yes"
               hidden aria-hidden="true">
               <label class="field__label" for="f-act-duration">
-                3. {isEn ? "How long? (years, e.g. 2.5)" : "Ha quanto tempo? (anos, ex: 2,5)"}
+                3. {isEn ? "How long? (years, e.g. 2.5)" : "Há quanto tempo? (anos, ex: 2,5)"}
                 <span class="field__req">*</span>
               </label>
               <input class="field__input" type="text" id="f-act-duration"
@@ -277,7 +277,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
-                7. {isEn ? "Have you competed before?" : "Ja participou de alguma competicao?"}
+                7. {isEn ? "Have you competed before?" : "Já participou de alguma competição?"}
               </span>
               <div class="radio-group">
                 <label class="radio-label"><input type="radio" name="competicao" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
@@ -313,7 +313,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
-                9. {isEn ? "Do you see a sports medicine doctor?" : "Faz acompanhamento com medico do esporte?"}
+                9. {isEn ? "Do you see a sports medicine doctor?" : "Faz acompanhamento com médico do esporte?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
@@ -325,7 +325,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
-                10. {isEn ? "Have you done or are you doing TRT?" : "Ja fez ou esta fazendo reposicao hormonal (TRT)?"}
+                10. {isEn ? "Have you done or are you doing TRT?" : "Ja fez ou esta fazendo reposição hormonal (TRT)?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
@@ -339,7 +339,7 @@ const isEn = locale === "en";
                 data-cond-value="SIM"
                 hidden aria-hidden="true">
                 <label class="field__label" for="f-trt-detail">
-                  {isEn ? "Which hormones and at what frequency?" : "Quais hormonios e em qual frequencia?"}
+                  {isEn ? "Which hormones and at what frequency?" : "Quais hormônios e em qual frequência?"}
                   <span class="field__req">*</span>
                 </label>
                 <textarea class="field__input field__textarea" id="f-trt-detail"
@@ -353,14 +353,14 @@ const isEn = locale === "en";
 
         <!-- HISTORICO DE SAUDE -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Health History" : "Historico de Saúde"}</h3>
+          <h3 class="form-section__title">{isEn ? "Health History" : "Histórico de Saúde"}</h3>
           <div class="form-stack">
 
             <div class="field">
               <label class="field__label" for="f-cardiac">
                 11. {isEn
                   ? "Do you have any cardiac condition? (hypertension, arrhythmia, pacemaker, angina, etc.)"
-                  : "Possui alguma condicao cardiaca? (hipertensao, arritmia, uso de marcapasso, angina, etc.)"}
+                  : "Possui alguma condição cardíaca? (hipertensão, arritmia, uso de marcapasso, angina, etc.)"}
                 <span class="field__req">*</span>
               </label>
               <textarea class="field__input field__textarea" id="f-cardiac"
@@ -385,7 +385,7 @@ const isEn = locale === "en";
               <label class="field__label" for="f-chronic">
                 13. {isEn
                   ? "Do you have any pre-existing or chronic disease?"
-                  : "Tem alguma doenca pre-existente ou cronica?"}
+                  : "Tem alguma doenca pre-existente ou crônica?"}
                 <span class="field__req">*</span>
               </label>
               <textarea class="field__input field__textarea" id="f-chronic"
@@ -411,7 +411,7 @@ const isEn = locale === "en";
                 data-cond-optional="true"
                 hidden aria-hidden="true">
                 <label class="field__label" for="f-lesao-detail">
-                  {isEn ? "Which injury? Was surgery needed?" : "Qual lesão? Houve necessidade cirurgica?"}
+                  {isEn ? "Which injury? Was surgery needed?" : "Qual lesão? Houve necessidade cirúrgica?"}
                 </label>
                 <textarea class="field__input field__textarea" id="f-lesao-detail"
                   name="lesao_detalhe" rows="2" autocomplete="off"></textarea>
@@ -423,7 +423,7 @@ const isEn = locale === "en";
 
         <!-- ROTINA ALIMENTAR E SUPLEMENTACAO -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Diet and Supplementation" : "Rotina Alimentar e Suplementacao"}</h3>
+          <h3 class="form-section__title">{isEn ? "Diet and Supplementation" : "Rotina Alimentar e Suplementação"}</h3>
           <div class="form-stack">
 
             <div class="field">
@@ -434,7 +434,7 @@ const isEn = locale === "en";
               <div class="radio-group radio-group--vertical">
                 {(isEn
                   ? ["Yes, with professional guidance","Yes, on my own","No diet"]
-                  : ["Sim, com acompanhamento profissional","Sim, por conta propria","Nao sigo dieta"]
+                  : ["Sim, com acompanhamento profissional","Sim, por conta própria","Não sigo dieta"]
                 ).map(opt => (
                   <label class="radio-label">
                     <input type="radio" name="dieta" value={opt} />
@@ -447,7 +447,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <label class="field__label" for="f-meals">
-                16. {isEn ? "How many meals per day on average?" : "Em media, quantas refeicoes por dia?"}
+                16. {isEn ? "How many meals per day on average?" : "Em média, quantas refeições por dia?"}
                 <span class="field__req">*</span>
               </label>
               <input class="field__input" type="text" id="f-meals"
@@ -482,7 +482,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <label class="field__label" for="f-water">
-                18. {isEn ? "Litres of water per day on average?" : "Em media, quantos litros de agua por dia?"}
+                18. {isEn ? "Litres of water per day on average?" : "Em média, quantos litros de água por dia?"}
                 <span class="field__req">*</span>
               </label>
               <input class="field__input" type="text" id="f-water"
@@ -499,11 +499,11 @@ const isEn = locale === "en";
 
         <!-- AVALIACAO FISICA VISUAL -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Visual Physical Assessment" : "Avaliacao Fisica Visual"}</h3>
+          <h3 class="form-section__title">{isEn ? "Visual Physical Assessment" : "Avaliaçõo Física Visual"}</h3>
           <p class="form-section__intro">
             {isEn
               ? "Upload up to 5 photos (max 10 MB each). Compressed automatically."
-              : "Envie ate 5 fotos (max. 10 MB cada). Compressao automatica."}
+              : "Envie até 5 fotos (máx. 10 MB cada). Compressão automatica."}
           </p>
           <div class="field">
             <label class="field__label field__label--file" for="f-photos">

@@ -1,5 +1,10 @@
 ---
 export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
 import '../../styles/tokens.css';
 import '../../styles/global.css';
 ---
@@ -314,10 +319,31 @@ import '../../styles/global.css';
     .lead-card__row { font-size: 0.8rem; color: var(--c-textsub); margin-bottom: var(--space-2); }
     .lead-card__row strong { color: var(--c-textbody); font-weight: 400; }
     .lead-card__goal { color: var(--c-textbody); font-size: 0.78rem; margin-bottom: var(--space-3); }
-    .lead-card__footer {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-top: var(--space-3); padding-top: var(--space-3);
-      border-top: 1px solid rgba(255,255,255,0.04); flex-wrap: wrap; gap: var(--space-2);
+    .lead-card__status {
+      margin-bottom: var(--space-3); padding-top: var(--space-3);
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+    .lead-card__status .status-sel { width: 100%; text-align: left; }
+    .lead-card__actions {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2);
+    }
+    .btn-card-action {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      background: var(--c-black);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--c-textbody);
+      font-family: var(--font-label);
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 12px 0;
+      border-radius: var(--radius-card);
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+    .btn-card-action svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .btn-card-action:active, .btn-card-action:hover {
+      border-color: var(--c-lime); color: var(--c-lime);
+      background: rgba(166, 195, 0, 0.06);
     }
 
     @media (max-width: 760px) {
@@ -404,6 +430,7 @@ import '../../styles/global.css';
       width: min(640px, 95vw);
       height: 100%;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: var(--space-6);
       border-left: var(--border-lime);
       box-shadow: -10px 0 40px rgba(0,0,0,0.9);
@@ -458,7 +485,7 @@ import '../../styles/global.css';
       padding-bottom: var(--space-2);
       border-bottom: 1px solid rgba(166, 195, 0, 0.15);
     }
-    .detail-table { width: 100%; border-collapse: collapse; }
+    .detail-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
     .detail-th {
       font-family: var(--font-label);
       font-size: 0.65rem;
@@ -478,6 +505,8 @@ import '../../styles/global.css';
       padding: 1rem 0 1rem var(--space-4);
       border-bottom: 1px solid rgba(255,255,255,0.02);
       line-height: 1.8;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     .detail-row--alert .detail-th,
     .detail-row--alert .detail-td { color: var(--c-status-alert); }
@@ -906,7 +935,7 @@ import '../../styles/global.css';
           </div>
           <div class="lead-card__row">${lead.email??""}</div>
           <div class="lead-card__goal">${(lead.objetivo??"").slice(0,80)}</div>
-          <div class="lead-card__footer">
+          <div class="lead-card__status">
             <select class="status-sel status-sel--${lead.status}" data-id="${lead.id}" onchange="window.__updStatus(this)">
               <option value="novo" ${lead.status==="novo"?"selected":""}>Novo</option>
               <option value="em_analise" ${lead.status==="em_analise"?"selected":""}>Em análise</option>
@@ -914,11 +943,16 @@ import '../../styles/global.css';
               <option value="recusado" ${lead.status==="recusado"?"selected":""}>Recusado</option>
               <option value="avaliacao_enviada" ${lead.status==="avaliacao_enviada"?"selected":""}>Avaliação enviada</option>
             </select>
-            <div>
-              <button class="btn-action-link" onclick="window.__openDetail('${lead.id}')">Ver ficha</button>
-              <span class="action-sep">/</span>
-              <button class="btn-action-link" onclick="window.__openEval('${lead.id}')">Avaliar</button>
-            </div>
+          </div>
+          <div class="lead-card__actions">
+            <button class="btn-card-action" onclick="window.__openDetail('${lead.id}')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              Ver ficha
+            </button>
+            <button class="btn-card-action" onclick="window.__openEval('${lead.id}')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              Avaliar
+            </button>
           </div>
         </div>`;
       }).join("");
@@ -942,6 +976,15 @@ import '../../styles/global.css';
     const HEALTH_ALERT_VALUES=["sim","Sim","SIM","yes","Yes"];
     function isAlert(val){ return HEALTH_ALERT_VALUES.includes((val??"").toString().trim()); }
 
+    // Formata números no padrão pt-BR (vírgula decimal) com unidade e casas decimais fixas
+    function formatNumberBR(value, decimals, unit){
+      if(value===undefined || value===null || value==="") return "";
+      const n=Number(value);
+      if(isNaN(n)) return `${value}${unit?` ${unit}`:""}`;
+      const formatted=n.toFixed(decimals).replace(".", ",");
+      return `${formatted}${unit?` ${unit}`:""}`;
+    }
+
     function detailRow(label, value, alertFlag){
       const v = value || "--";
       const alertCls = alertFlag ? " detail-row--alert" : "";
@@ -960,8 +1003,8 @@ import '../../styles/global.css';
       ];
 
       const secPerfil=[
-        detailRow("Altura", lead.altura),
-        detailRow("Peso", lead.peso),
+        detailRow("Altura", lead.altura!==undefined && lead.altura!==null && lead.altura!=="" ? formatNumberBR(lead.altura, 2, "m") : ""),
+        detailRow("Peso", lead.peso!==undefined && lead.peso!==null && lead.peso!=="" ? formatNumberBR(lead.peso, 1, "kg") : ""),
         detailRow("Atividade Física", lead.atividade_fisica),
         detailRow("Tempo de Atividade", lead.tempo_atividade ? `${lead.tempo_atividade} anos` : ""),
         detailRow("Frequência Semanal", lead.frequencia_semanal),
@@ -988,7 +1031,7 @@ import '../../styles/global.css';
         detailRow("Dieta Atual", lead.dieta),
         detailRow("Refeições por Dia", lead.refeicoes_dia),
         detailRow("Suplementação", (lead.suplementos||"") + (lead.suplementos_detalhe ? ` - ${lead.suplementos_detalhe}` : "")),
-        detailRow("Consumo de Água", lead.agua_litros ? `${lead.agua_litros} Litros` : ""),
+        detailRow("Consumo de Água", lead.agua_litros ? formatNumberBR(lead.agua_litros, 1, "L") : ""),
       ];
 
       const section=(title, rows)=>`<div class="detail-section">
