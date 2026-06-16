@@ -12,20 +12,15 @@ function getDb() {
     let serviceAccount: any = null;
 
     try {
-      // Remove aspas externas caso o CI/CD tenha envelopado o JSON
       if (saEnv.startsWith('"') && saEnv.endsWith('"')) saEnv = saEnv.slice(1, -1);
       if (saEnv.startsWith("'") && saEnv.endsWith("'")) saEnv = saEnv.slice(1, -1);
 
-      // Parse direto — o JSON.parse já interpreta \n escapado corretamente.
-      // NÃO substituir \n antes do parse: transforma JSON válido em inválido.
       try {
         serviceAccount = JSON.parse(saEnv);
       } catch {
-        // Fallback: escapes duplos injetados pelo CI/CD
         serviceAccount = JSON.parse(saEnv.replace(/\\"/g, '"'));
       }
 
-      // Após o parse, garante quebras de linha reais no private_key
       if (serviceAccount?.private_key) {
         serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
       }
@@ -43,7 +38,6 @@ function getDb() {
   return getFirestore();
 }
 
-// -- Referência do documento avaliacao_elite90.html (estrutura e tom)
 const REFERENCE_STRUCTURE = `
 O documento de avaliação do Coach Ruiz tem 5 seções:
 
@@ -73,10 +67,8 @@ O documento de avaliação do Coach Ruiz tem 5 seções:
 Tom: técnico, direto, linguagem de fisiculturismo de alto nível.
 Evitar motivacional genérico. Usar terminologia específica (BF, AEJ, TRT, bulking, cutting, etc.).
 O coach fala como estrategista biológico, não como personal trainer.
-Cada seção deve ser resumida em 1 parágrafo contínuo, extremamente denso, direto e focado nas métricas ou condutas do atleta, evitando introduções ou repetições. Seja conciso e cirúrgico para otimizar a estrutura de resposta.
 `;
 
-// -- Build prompt from lead data
 function buildPrompt(lead: Record<string, any>, previousDocs: string[]): string {
   const prevContext = previousDocs.length > 0
     ? `\n\nDOCUMENTOS ANTERIORES DO COACH (para calibrar o estilo):\n${previousDocs.slice(0, 3).join("\n---\n")}`
@@ -112,13 +104,65 @@ ESTRUTURA E TOM ESPERADOS:
 ${REFERENCE_STRUCTURE}
 ${prevContext}
 
-INSTRUÇÕES DE PREENCHIMENTO:
-- Redija as diretrizes de forma contínua para cada campo do objeto de resposta.
-- Seja específico aos dados do atleta fornecidos acima — evite generalismos.
+INSTRUÇÕES DE PREENCHIMENTO CRÍTICAS:
+- Cada seção deve ser resumida em apenas 1 parágrafo contínuo, extremamente denso, direto e focado nas condutas do atleta, sem enrolação.
 - Use exclusivamente a linguagem técnica e a terminologia do fisiculturismo de alto nível.
-- Onde os dados do atleta forem insuficientes para estruturar uma conduta em determinada seção, sinalize estritamente com a expressão [COMPLETAR] para que o coach faça a revisão manual posterior.
-- IMPORTANTE: Forneça apenas o texto corrido e os parágrafos densos correspondentes a cada seção. Não inclua títulos (ex: "01. DIAGNÓSTICO ESTÉTICO"), não use blocos de código Markdown (\`\`\`) e não tente estruturar chaves ou sintaxe JSON manualmente. O ecossistema de infraestrutura já mapeará o seu texto diretamente para as propriedades correspondentes.
+- Onde os dados do atleta forem insuficientes para estruturar uma conduta, sinalize com [COMPLETAR] para que o coach revise manualmente depois.
+- IMPORTANTE: Forneça apenas o texto corrido correspondente a cada seção. Não inclua títulos, não use blocos de código Markdown (\`\`\`) e não tente estruturar chaves ou sintaxe JSON manualmente.
 `;
+}
+
+// Função de reparação cirúrgica para JSONs truncados na exaustão de tokens
+function tentarRepararJsonTruncado(rawText: string): Record<string, string> {
+  let textoLimpo = rawText.trim();
+  
+  // Se o JSON já estiver completo, tenta dar o parse direto
+  try {
+    return JSON.parse(textoLimpo);
+  } catch (e) {
+    console.warn("[Lax Parser]: Detectada quebra de token de saída. Iniciando reparo cirúrgico...");
+  }
+
+  // Mapeia quais chaves existem no texto para reconstruir a estrutura de fechamento
+  const chaves = ["\"s1\"", "\"s2\"", "\"s3\"", "\"s4\"", "\"s5\""];
+  let ultimaChaveEncontrada = "";
+  
+  for (const chave of chaves) {
+    if (textoLimpo.includes(chave)) {
+      ultimaChaveEncontrada = chave.replace(/"/g, "");
+    }
+  }
+
+  // Garante que o texto termine fechando as aspas da string cortada, a chave e o objeto externo
+  if (textoLimpo.endsWith(",")) {
+    textoLimpo = textoLimpo.slice(0, -1);
+  }
+  
+  // Força o fechamento da string e do objeto dependendo de onde o corte ocorreu
+  if (!textoLimpo.endsWith("\"}")) {
+    if (textoLimpo.endsWith("\"")) {
+      textoLimpo += "}";
+    } else {
+      textoLimpo += "\"}";
+    }
+  }
+
+  try {
+    const objetoReparado = JSON.parse(textoLimpo);
+    
+    // Preenche com string vazia as chaves que nem chegaram a ser abertas antes do corte
+    const chavesObrigatorias = ["s1", "s2", "s3", "s4", "s5"];
+    for (const k of chavesObrigatorias) {
+      if (objetoReparado[k] === undefined) {
+        objetoReparado[k] = "";
+      }
+    }
+    return objetoReparado;
+  } catch (erroSegundoParse) {
+    // Fallback definitivo caso a quebra ocorra em ponto impossível de reconstrução por regex simples
+    console.error("[Lax Parser]: Falha severa de truncamento. Acionando fallback padrão.");
+    return { s1: rawText, s2: "", s3: "", s4: "", s5: "" };
+  }
 }
 
 // -- Handler
@@ -127,9 +171,6 @@ export const handler = async (event: any) => {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
-  // getDb() deve ser chamado antes de getAuth() — é ele quem garante
-  // que initializeApp() rode. getAuth(getApps()[0]) com app ainda não
-  // inicializado retorna undefined e lança exceção, causando 401 falso.
   const db = getDb();
 
   // Verificação do token Firebase Auth
@@ -167,11 +208,11 @@ export const handler = async (event: any) => {
     const schemaRigido = {
       type: "OBJECT",
       properties: {
-        s1: { type: "STRING", description: "Texto completo do Diagnóstico Estético e Análise de Proporções" },
-        s2: { type: "STRING", description: "Texto completo do Planejamento de Treinamento e Cardio" },
-        s3: { type: "STRING", description: "Texto completo do Protocolo de Saúde Cardiovascular e Suporte Mitocondrial" },
-        s4: { type: "STRING", description: "Texto completo do Estratégia de Competição e Direcionamento de Categoria" },
-        s5: { type: "STRING", description: "Texto completo do Alinhamento Operacional e Dinâmica de Parceria" }
+        s1: { type: "STRING", description: "Texto do Diagnóstico Estético e Análise de Proporções" },
+        s2: { type: "STRING", description: "Texto do Planejamento de Treinamento e Cardio" },
+        s3: { type: "STRING", description: "Texto do Protocolo de Saúde Cardiovascular e Suporte Mitocondrial" },
+        s4: { type: "STRING", description: "Texto do Estratégia de Competição e Direcionamento de Categoria" },
+        s5: { type: "STRING", description: "Texto do Alinhamento Operacional e Dinâmica de Parceria" }
       },
       required: ["s1", "s2", "s3", "s4", "s5"]
     };
@@ -186,7 +227,7 @@ export const handler = async (event: any) => {
             parts: [{ text: buildPrompt(lead, previousDocs) }]
           }],
           generationConfig: {
-            temperature: 0.5,
+            temperature: 0.4,
             maxOutputTokens: 4096,
             responseMimeType: "application/json",
             responseSchema: schemaRigido
@@ -203,15 +244,8 @@ export const handler = async (event: any) => {
     const geminiData = await geminiRes.json();
     const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
 
-    // Parse JSON response
-    let sections: Record<string, string>;
-    try {
-      const clean = rawText.trim();
-      sections = JSON.parse(clean);
-    } catch {
-      // Fallback: em caso de falha crítica de parse, retorna o texto bruto no campo s1
-      sections = { s1: rawText, s2: "", s3: "", s4: "", s5: "" };
-    }
+    // Executa a estratégia de parsing tolerante a truncamento de tokens
+    const sections = tentarRepararJsonTruncado(rawText);
 
     return {
       statusCode: 200,
