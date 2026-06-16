@@ -6,6 +6,16 @@ interface Props { t: Translations; locale?: Locale; }
 const { t, locale = "pt-br" } = Astro.props;
 const f = t.form;
 const isEn = locale === "en";
+
+// Config pública do Firebase — exposta ao browser via define:vars
+const fbConfig = {
+  apiKey:            import.meta.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.PUBLIC_FIREBASE_APP_ID,
+};
 ---
 
 <div class="modal-overlay" id="triage-modal" role="dialog" aria-modal="true"
@@ -325,7 +335,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
-                10. {isEn ? "Have you done or are you doing TRT?" : "Ja fez ou esta fazendo reposição hormonal (TRT)?"}
+                10. {isEn ? "Have you done or are you doing TRT?" : "Ja fez ou esta fazendo reposicao hormonal (TRT)?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
@@ -360,7 +370,7 @@ const isEn = locale === "en";
               <label class="field__label" for="f-cardiac">
                 11. {isEn
                   ? "Do you have any cardiac condition? (hypertension, arrhythmia, pacemaker, angina, etc.)"
-                  : "Possui alguma condição cardíaca? (hipertensão, arritmia, uso de marcapasso, angina, etc.)"}
+                  : "Possui alguma condicao cardiaca? (hipertensao, arritmia, uso de marcapasso, angina, etc.)"}
                 <span class="field__req">*</span>
               </label>
               <textarea class="field__input field__textarea" id="f-cardiac"
@@ -385,7 +395,7 @@ const isEn = locale === "en";
               <label class="field__label" for="f-chronic">
                 13. {isEn
                   ? "Do you have any pre-existing or chronic disease?"
-                  : "Tem alguma doenca pré-existente ou crônica?"}
+                  : "Tem alguma doenca pre-existente ou cronica?"}
                 <span class="field__req">*</span>
               </label>
               <textarea class="field__input field__textarea" id="f-chronic"
@@ -434,7 +444,7 @@ const isEn = locale === "en";
               <div class="radio-group radio-group--vertical">
                 {(isEn
                   ? ["Yes, with professional guidance","Yes, on my own","No diet"]
-                  : ["Sim, com acompanhamento profissional","Sim, por conta própria","Não sigo dieta"]
+                  : ["Sim, com acompanhamento profissional","Sim, por conta propria","Nao sigo dieta"]
                 ).map(opt => (
                   <label class="radio-label">
                     <input type="radio" name="dieta" value={opt} />
@@ -447,7 +457,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <label class="field__label" for="f-meals">
-                16. {isEn ? "How many meals per day on average?" : "Em média, quantas refeições por dia?"}
+                16. {isEn ? "How many meals per day on average?" : "Em media, quantas refeicoes por dia?"}
                 <span class="field__req">*</span>
               </label>
               <input class="field__input" type="text" id="f-meals"
@@ -482,7 +492,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <label class="field__label" for="f-water">
-                18. {isEn ? "Litres of water per day on average?" : "Em média, quantos litros de água por dia?"}
+                18. {isEn ? "Litres of water per day on average?" : "Em media, quantos litros de agua por dia?"}
                 <span class="field__req">*</span>
               </label>
               <input class="field__input" type="text" id="f-water"
@@ -553,7 +563,7 @@ const isEn = locale === "en";
   </div>
 </div>
 
-<script>
+<script define:vars={{ fbConfig }}>
 // ============================================================
 // FONTE UNICA DE VERDADE: FIELD_RULES
 // Cada entrada define: inputId, errorId, mensagens PT/EN,
@@ -1224,7 +1234,7 @@ formEl?.addEventListener("submit", async e => {
 
   try {
     const formData = new FormData(formEl);
-    const fields: Record<string, string> = {};
+    const fields: Record<string, any> = {};
     formData.forEach((value, key) => {
       if (key === "fotos") return;
       // Pular os campos visuais de formatação pt-br para dar lugar aos inputs type=hidden normalizados com ponto decimal
@@ -1238,6 +1248,46 @@ formEl?.addEventListener("submit", async e => {
         fields[key] = String(value);
       }
     });
+
+    // Upload de fotos para Firebase Storage (se houver)
+    if (compressedFiles.length > 0) {
+      submitBtn.textContent = isEnPage
+        ? `Uploading photos (0/${compressedFiles.length})...`
+        : `Enviando fotos (0/${compressedFiles.length})...`;
+
+      // Importação dinâmica do Firebase Storage Client SDK
+      const { initializeApp, getApps } = await import(
+        "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"
+      );
+      const { getStorage, ref, uploadBytes, getDownloadURL } = await import(
+        "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js"
+      );
+
+      // Reutilizar app existente ou inicializar (fbConfig injetado via define:vars)
+      const app = getApps().length ? getApps()[0] : initializeApp(fbConfig);
+      const storage = getStorage(app);
+
+      // ID temporário para organizar as fotos no Storage antes de ter o docId do Firestore
+      const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const fotosUrls: string[] = [];
+
+      for (let i = 0; i < compressedFiles.length; i++) {
+        const file = compressedFiles[i];
+        submitBtn.textContent = isEnPage
+          ? `Uploading photos (${i + 1}/${compressedFiles.length})...`
+          : `Enviando fotos (${i + 1}/${compressedFiles.length})...`;
+
+        const storageRef = ref(storage, `leads/${uploadId}/foto-${i + 1}.webp`);
+        await uploadBytes(storageRef, file, { contentType: "image/webp" });
+        const url = await getDownloadURL(storageRef);
+        fotosUrls.push(url);
+      }
+
+      fields.fotos_urls   = fotosUrls;
+      fields.fotos_upload_id = uploadId; // permite vincular ao docId depois, se necessário
+    }
+
+    submitBtn.textContent = isEnPage ? "Sending..." : "Enviando...";
 
     // Transmissão assíncrona blindada direcionada à Netlify Function em formato JSON de alta performance
     const res = await fetch("/.netlify/functions/submit-lead", {

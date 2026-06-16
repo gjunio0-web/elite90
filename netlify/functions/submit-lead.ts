@@ -137,6 +137,8 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       suplementos = "", suplementos_detalhe = "",
       agua_litros = "",
       consentimento_saude = "",
+      fotos_urls = [],
+      fotos_upload_id = "",
     } = fields;
 
     // Barreira síncrona primária contra dados vazios ou corrompidos
@@ -189,6 +191,8 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       avaliacao_enviada:   false,
       consentimento_saude:           consentimento_saude === "on" || consentimento_saude === "true",
       consentimento_saude_timestamp: FieldValue.serverTimestamp(),
+      fotos_urls:          Array.isArray(fotos_urls) ? fotos_urls : [],
+      fotos_upload_id:     fotos_upload_id || "",
     });
 
     // Disparo assíncrono e isolado de e-mail através da API do Resend (Global Fetch)

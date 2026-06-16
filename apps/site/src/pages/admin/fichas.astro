@@ -635,6 +635,32 @@ import AdminHeader from '../../components/AdminHeader.astro';
     }
     .confirm-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: flex-end; }
 
+    /* GALERIA DE FOTOS DO ATLETA */
+    .fotos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: var(--space-3);
+      margin-top: var(--space-3);
+    }
+    .foto-thumb {
+      display: block;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border-radius: var(--radius-card);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: border-color var(--transition-base), transform var(--transition-base);
+    }
+    .foto-thumb:hover {
+      border-color: var(--c-lime);
+      transform: scale(1.02);
+    }
+    .foto-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
     /* ZONA DE PRIVACIDADE / LGPD */
     .detail-section--danger {
       margin-top: var(--space-6);
@@ -1056,12 +1082,26 @@ import AdminHeader from '../../components/AdminHeader.astro';
         <button class="btn-sm btn-danger" id="btn-delete-lead">Excluir ficha permanentemente</button>
       </div>`;
 
+      const fotosUrls = Array.isArray(lead.fotos_urls) ? lead.fotos_urls : [];
+      const fotosSection = fotosUrls.length > 0
+        ? `<div class="detail-section">
+            <div class="detail-section__title">Fotos de referência</div>
+            <div class="fotos-grid">
+              ${fotosUrls.map((url, i) => `
+                <a href="${url}" target="_blank" rel="noopener" class="foto-thumb" aria-label="Abrir foto ${i+1} em tamanho completo">
+                  <img src="${url}" alt="Foto ${i+1}" loading="lazy" />
+                </a>`).join("")}
+            </div>
+          </div>`
+        : "";
+
       document.getElementById("detail-content").innerHTML=
         section("Identificação", secIdentificacao) +
         section("Perfil Físico", secPerfil) +
         section("Objetivo & Treino", secObjetivo) +
         section("Saúde", secSaude) +
         section("Nutrição", secNutricao) +
+        fotosSection +
         privacySection;
 
       document.getElementById("detail-drawer").hidden=false;
@@ -1176,8 +1216,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
     
     // Export CSV
     document.getElementById("btn-csv")?.addEventListener("click",()=>{
-      const headers=["Data","Nome","Email","CPF","Nascimento","Altura","Peso","Objetivo","Atividade","Tempo","Frequencia","Disponibilidade","Personal","Competicao","Coach BB","Medico","TRT","Cardiaca","Diabetes","Cronica","Lesao","Dieta","Refeicoes","Suplementos","Agua","Status"];
-      const rows=leads.map(l=>[l.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"",l.nome??"",l.email??"",l.cpf??"",l.data_nascimento??"",l.altura??"",l.peso??"",l.objetivo??"",l.atividade_fisica??"",l.tempo_atividade??"",l.frequencia_semanal??"",l.disponibilidade_diaria??"",l.personal_trainer??"",`${l.competicao??""}${l.competicao_detalhe?` - ${l.competicao_detalhe}`:""}`,l.conhece_coach??"",l.medico_esporte??"",`${l.trt??""}${l.trt_detalhe?` - ${l.trt_detalhe}`:""}`,l.condicao_cardiaca??"",l.diabetes??"",l.doenca_cronica??"",`${l.lesao??""}${l.lesao_detalhe?` - ${l.lesao_detalhe}`:""}`,l.dieta??"",l.refeicoes_dia??"",`${l.suplementos??""}${l.suplementos_detalhe?` - ${l.suplementos_detalhe}`:""}`,l.agua_litros??"",l.status??""]);
+      const headers=["Data","Nome","Email","CPF","Nascimento","Altura","Peso","Objetivo","Atividade","Tempo","Frequencia","Disponibilidade","Personal","Competicao","Coach BB","Medico","TRT","Cardiaca","Diabetes","Cronica","Lesao","Dieta","Refeicoes","Suplementos","Agua","Status","Fotos (URLs)"];
+      const rows=leads.map(l=>[l.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"",l.nome??"",l.email??"",l.cpf??"",l.data_nascimento??"",l.altura??"",l.peso??"",l.objetivo??"",l.atividade_fisica??"",l.tempo_atividade??"",l.frequencia_semanal??"",l.disponibilidade_diaria??"",l.personal_trainer??"",`${l.competicao??""}${l.competicao_detalhe?` - ${l.competicao_detalhe}`:""}`,l.conhece_coach??"",l.medico_esporte??"",`${l.trt??""}${l.trt_detalhe?` - ${l.trt_detalhe}`:""}`,l.condicao_cardiaca??"",l.diabetes??"",l.doenca_cronica??"",`${l.lesao??""}${l.lesao_detalhe?` - ${l.lesao_detalhe}`:""}`,l.dieta??"",l.refeicoes_dia??"",`${l.suplementos??""}${l.suplementos_detalhe?` - ${l.suplementos_detalhe}`:""}`,l.agua_litros??"",l.status??"",(l.fotos_urls??[]).join(" | ")]);
       const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
       const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
       const url=URL.createObjectURL(blob);
