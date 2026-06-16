@@ -325,7 +325,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
-                10. {isEn ? "Have you done or are you doing TRT?" : "Ja fez ou esta fazendo reposicao hormonal (TRT)?"}
+                10. {isEn ? "Have you done or are you doing TRT?" : "Ja fez ou esta fazendo reposição hormonal (TRT)?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
@@ -360,7 +360,7 @@ const isEn = locale === "en";
               <label class="field__label" for="f-cardiac">
                 11. {isEn
                   ? "Do you have any cardiac condition? (hypertension, arrhythmia, pacemaker, angina, etc.)"
-                  : "Possui alguma condicao cardiaca? (hipertensao, arritmia, uso de marcapasso, angina, etc.)"}
+                  : "Possui alguma condição cardíaca? (hipertensão, arritmia, uso de marcapasso, angina, etc.)"}
                 <span class="field__req">*</span>
               </label>
               <textarea class="field__input field__textarea" id="f-cardiac"
@@ -385,7 +385,7 @@ const isEn = locale === "en";
               <label class="field__label" for="f-chronic">
                 13. {isEn
                   ? "Do you have any pre-existing or chronic disease?"
-                  : "Tem alguma doenca pre-existente ou cronica?"}
+                  : "Tem alguma doenca pré-existente ou crônica?"}
                 <span class="field__req">*</span>
               </label>
               <textarea class="field__input field__textarea" id="f-chronic"
@@ -434,7 +434,7 @@ const isEn = locale === "en";
               <div class="radio-group radio-group--vertical">
                 {(isEn
                   ? ["Yes, with professional guidance","Yes, on my own","No diet"]
-                  : ["Sim, com acompanhamento profissional","Sim, por conta propria","Nao sigo dieta"]
+                  : ["Sim, com acompanhamento profissional","Sim, por conta própria","Não sigo dieta"]
                 ).map(opt => (
                   <label class="radio-label">
                     <input type="radio" name="dieta" value={opt} />
@@ -447,7 +447,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <label class="field__label" for="f-meals">
-                16. {isEn ? "How many meals per day on average?" : "Em media, quantas refeicoes por dia?"}
+                16. {isEn ? "How many meals per day on average?" : "Em média, quantas refeições por dia?"}
                 <span class="field__req">*</span>
               </label>
               <input class="field__input" type="text" id="f-meals"
@@ -482,7 +482,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <label class="field__label" for="f-water">
-                18. {isEn ? "Litres of water per day on average?" : "Em media, quantos litros de agua por dia?"}
+                18. {isEn ? "Litres of water per day on average?" : "Em média, quantos litros de água por dia?"}
                 <span class="field__req">*</span>
               </label>
               <input class="field__input" type="text" id="f-water"

@@ -123,10 +123,6 @@ import '../../styles/global.css';
     }
     .page-title span { 
       color: var(--c-lime); 
-      font-family: var(--font-label); 
-      font-style: italic; 
-      font-weight: 400;
-      letter-spacing: 0.04em;
     }
     .page-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
     
@@ -877,14 +873,21 @@ import '../../styles/global.css';
     const auth=getAuth(app);
     const db=getFirestore(app);
 
-    let leads=[], currentLeadId=null, currentDetailLeadId=null, idToken="";
+    let leads=[], currentLeadId=null, currentDetailLeadId=null;
+
+    // Obtém sempre um token fresco (o SDK renova automaticamente se expirado).
+    // NUNCA armazenar o idToken em variável — tokens Firebase expiram em 1h.
+    async function getFreshToken(){
+      const user = auth.currentUser;
+      if(!user) throw new Error("Sessão expirada. Recarregue a página.");
+      return user.getIdToken(/* forceRefresh */ false);
+    }
     
     // Auth guard
     onAuthStateChanged(auth, async user => {
       if (!user) { window.location.href="/admin/login"; return; }
       const el=document.getElementById("adm-email");
       if(el)el.textContent=user.email??"";
-      idToken = await user.getIdToken();
       loadLeads();
     });
     
@@ -934,6 +937,21 @@ import '../../styles/global.css';
 
     const STATUS_LABEL={"novo":"Novo","em_analise":"Em análise","aprovado":"Aprovado","recusado":"Recusado","avaliacao_enviada":"Avaliação enviada"};
 
+    // Quando status é "avaliacao_enviada", exibe badge somente-leitura — não permitir reversão manual,
+    // pois o estado é criado exclusivamente pelo fluxo de envio (send-evaluation) e
+    // revertê-lo manualmente causaria inconsistência com a coleção "avaliacoes".
+    function statusControl(lead){
+      if(lead.status==="avaliacao_enviada"){
+        return `<span class="status-badge status-badge--avaliacao_enviada">Avaliação enviada</span>`;
+      }
+      return `<select class="status-sel status-sel--${lead.status}" data-id="${lead.id}" onchange="window.__updStatus(this)">
+        <option value="novo" ${lead.status==="novo"?"selected":""}>Novo</option>
+        <option value="em_analise" ${lead.status==="em_analise"?"selected":""}>Em análise</option>
+        <option value="aprovado" ${lead.status==="aprovado"?"selected":""}>Aprovado</option>
+        <option value="recusado" ${lead.status==="recusado"?"selected":""}>Recusado</option>
+      </select>`;
+    }
+
     function renderTable(){
       const filter=document.getElementById("status-filter").value;
       const search=document.getElementById("search-input").value.trim().toLowerCase();
@@ -959,15 +977,7 @@ import '../../styles/global.css';
           <td class="td td--name">${lead.nome??""}</td>
           <td class="td">${lead.email??""}</td>
           <td class="td td--goal">${(lead.objetivo??"").slice(0,50)}</td>
-          <td class="td">
-            <select class="status-sel status-sel--${lead.status}" data-id="${lead.id}" onchange="window.__updStatus(this)">
-              <option value="novo" ${lead.status==="novo"?"selected":""}>Novo</option>
-              <option value="em_analise" ${lead.status==="em_analise"?"selected":""}>Em análise</option>
-              <option value="aprovado" ${lead.status==="aprovado"?"selected":""}>Aprovado</option>
-              <option value="recusado" ${lead.status==="recusado"?"selected":""}>Recusado</option>
-              <option value="avaliacao_enviada" ${lead.status==="avaliacao_enviada"?"selected":""}>Avaliação enviada</option>
-            </select>
-          </td>
+          <td class="td">${statusControl(lead)}</td>
           <td class="td" style="white-space: nowrap;">
             <button class="btn-action-link" onclick="window.__openDetail('${lead.id}')">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -992,13 +1002,7 @@ import '../../styles/global.css';
           <div class="lead-card__row">${lead.email??""}</div>
           <div class="lead-card__goal">${(lead.objetivo??"").slice(0,80)}</div>
           <div class="lead-card__status">
-            <select class="status-sel status-sel--${lead.status}" data-id="${lead.id}" onchange="window.__updStatus(this)">
-              <option value="novo" ${lead.status==="novo"?"selected":""}>Novo</option>
-              <option value="em_analise" ${lead.status==="em_analise"?"selected":""}>Em análise</option>
-              <option value="aprovado" ${lead.status==="aprovado"?"selected":""}>Aprovado</option>
-              <option value="recusado" ${lead.status==="recusado"?"selected":""}>Recusado</option>
-              <option value="avaliacao_enviada" ${lead.status==="avaliacao_enviada"?"selected":""}>Avaliação enviada</option>
-            </select>
+            ${statusControl(lead)}
           </div>
           <div class="lead-card__actions">
             <button class="btn-card-action" onclick="window.__openDetail('${lead.id}')">
@@ -1176,7 +1180,7 @@ import '../../styles/global.css';
       taIds.forEach(k=>document.getElementById(`eval-${k}`).classList.add("eval-ta--loading"));
       statusEl.textContent="Gerando rascunho com Gemini 2.0 Flash...";
       try{
-        const res=await fetch("/.netlify/functions/generate-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${idToken}`},body:JSON.stringify({leadId:currentLeadId})});
+        const res=await fetch("/.netlify/functions/generate-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId})});
         if(!res.ok)throw new Error(await res.text());
         const {sections}=await res.json();
         taIds.forEach(k=>{document.getElementById(`eval-${k}`).value=sections[k]??"";});
@@ -1214,7 +1218,7 @@ import '../../styles/global.css';
       const coachNotes=document.getElementById("eval-notes").value;
       statusEl.textContent="Enviando...";
       try{
-        const res=await fetch("/.netlify/functions/send-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${idToken}`},body:JSON.stringify({leadId:currentLeadId,sections,coachNotes})});
+        const res=await fetch("/.netlify/functions/send-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId,sections,coachNotes})});
         if(!res.ok)throw new Error(await res.text());
         statusEl.textContent="Avaliação enviada com sucesso.";
         await loadLeads();
