@@ -61,7 +61,9 @@ export const handler = async (event: any) => {
       return { statusCode: 400, body: "paths[] obrigatório" };
     }
 
-    const bucket = getStorage().bucket();
+    // Nome do bucket explícito — mesma correção aplicada em submit-lead.ts
+    const bucketName = process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? "elite90-c716b.firebasestorage.app";
+    const bucket = getStorage().bucket(bucketName);
     const expiry = Date.now() + SIGNED_URL_EXPIRY_MS;
 
     const signedUrls = await Promise.all(

@@ -51,7 +51,11 @@ function getDb(): FirebaseFirestore.Firestore {
 // Upload de fotos base64 para Firebase Storage via Admin SDK (sem CORS, sem restrições de bucket)
 // Fotos salvas como privadas — acesso via Signed URL gerada no painel admin sob demanda.
 async function uploadFotos(fotosB64: string[], uploadId: string): Promise<string[]> {
-  const bucket = getStorage().bucket();
+  // Nome do bucket passado explicitamente — evita resolução implícita via
+  // app.options.storageBucket, que retornou "bucket does not exist" mesmo
+  // com storageBucket configurado corretamente no initializeApp().
+  const bucketName = process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? "elite90-c716b.firebasestorage.app";
+  const bucket = getStorage().bucket(bucketName);
   const paths: string[] = [];
 
   for (let i = 0; i < fotosB64.length; i++) {
