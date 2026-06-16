@@ -22,7 +22,7 @@ const isEn = locale === "en";
 
     <div class="modal-body" id="modal-body">
 
-      <!-- SUCESSO: oculto por padrao, exibido apenas apos envio bem-sucedido -->
+      <!-- SUCESSO: oculto por padrão, exibido apenas após envio bem-sucedido -->
       <div class="form-success" id="form-success" hidden tabindex="-1">
         <div class="form-success__icon" aria-hidden="true">&#x2713;</div>
         <h3 class="form-success__title">
@@ -31,19 +31,19 @@ const isEn = locale === "en";
         <p class="form-success__message">
           {isEn
             ? "Your application is under review. You will be contacted within 48 hours."
-            : "Sua solicitação esta em análise. Em até 48 horas voce receberá um contato."}
+            : "Sua solicitação está em análise. Em até 48 horas você receberá um contato."}
         </p>
         <p class="form-success__sub">
           {isEn
             ? "Limited spots per cycle. Your application is in the queue."
-            : "Vagas limitadas por ciclo. Sua ficha esta na fila de análise."}
+            : "Vagas limitadas por ciclo. Sua ficha está na fila de análise."}
         </p>
         <button class="btn-cta" type="button" id="success-close">
           {isEn ? "Close" : "Fechar"}
         </button>
       </div>
 
-      <!-- FORMULARIO -->
+      <!-- FORMULÁRIO -->
       <form class="triage-form" id="triage-form" novalidate>
 
         <!-- DADOS PESSOAIS -->
@@ -126,13 +126,13 @@ const isEn = locale === "en";
           </div>
         </div>
 
-        <!-- IMERSAO DO ATLETA -->
+        <!-- IMERSÃO DO ATLETA -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Athlete Immersion" : "Imersao do Atleta"}</h3>
+          <h3 class="form-section__title">{isEn ? "Athlete Immersion" : "Imersão do Atleta"}</h3>
           <p class="form-section__intro">
             {isEn
               ? "Honest answers shape your entire protocol."
-              : "Bora mergulhar de cabeca no processo? Seja honesto - e o seu corpo, sua evolucao."}
+              : "Bora mergulhar de cabeça no processo? Seja honesto - é o seu corpo, sua evolução."}
           </p>
 
           <div class="form-stack">
@@ -148,7 +148,7 @@ const isEn = locale === "en";
               <div class="radio-group radio-group--vertical" id="group-objetivo">
                 {(isEn
                   ? ["Muscle gain","Fat loss","Body recomposition","Competition preparation","Improve general fitness","Other"]
-                  : ["Ganho de massa muscular","Perda de gordura","Recomposicao corporal","Preparacao para competicao","Melhorar condicionamento geral","Outro"]
+                  : ["Ganho de massa muscular","Perda de gordura","Recomposição corporal","Preparação para competição","Melhorar condicionamento geral","Outro"]
                 ).map((opt, i, arr) => (
                   <label class="radio-label">
                     <input type="radio" name="objetivo" value={opt}
@@ -172,18 +172,18 @@ const isEn = locale === "en";
               </fieldset>
             </div>
 
-            <!-- Q2: atividade fisica -->
+            <!-- Q2: atividade física -->
             <div class="field">
               <span class="field__label">
                 2. {isEn
                   ? "Do you currently practice any physical activity? If so, which?"
-                  : "Atualmente pratica alguma atividade fisica? Se sim, qual?"}
+                  : "Atualmente pratica alguma atividade física? Se sim, qual?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group radio-group--vertical" id="activity-group">
                 {(isEn
                   ? ["Weight training","CrossFit","Running","Swimming","Martial arts","Cycling","None"]
-                  : ["Musculacao","CrossFit","Corrida","Natacao","Artes marciais","Ciclismo","Nenhuma"]
+                  : ["Musculação","CrossFit","Corrida","Natação","Artes marciais","Ciclismo","Nenhuma"]
                 ).map((opt) => (
                   <label class="radio-label">
                     <input type="checkbox" name="atividade_fisica" value={opt}
@@ -214,13 +214,13 @@ const isEn = locale === "en";
               </fieldset>
             </div>
 
-            <!-- Q3: há quanto tempo (condicional: so se alguma atividade marcada, exceto Nenhuma) -->
+            <!-- Q3: há quanto tempo (condicional: só se alguma atividade marcada, exceto Nenhuma) -->
             <fieldset class="field field--cond" id="cond-act-duration"
               data-cond-name="__activity-any"
               data-cond-value="yes"
               hidden aria-hidden="true">
               <label class="field__label" for="f-act-duration">
-                3. {isEn ? "How long? (years, e.g. 2.5)" : "Ha quanto tempo? (anos, ex: 2,5)"}
+                3. {isEn ? "How long? (years, e.g. 2.5)" : "Há quanto tempo? (anos, ex: 2,5)"}
                 <span class="field__req">*</span>
               </label>
               <input class="field__input" type="text" id="f-act-duration"
@@ -277,7 +277,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
-                7. {isEn ? "Have you competed before?" : "Ja participou de alguma competicao?"}
+                7. {isEn ? "Have you competed before?" : "Já participou de alguma competição?"}
               </span>
               <div class="radio-group">
                 <label class="radio-label"><input type="radio" name="competicao" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
@@ -301,7 +301,7 @@ const isEn = locale === "en";
               <span class="field__label">
                 8. {isEn
                   ? "Do you know or follow a bodybuilding coach?"
-                  : "Ja conhece ou acompanha o trabalho de um coach bodybuilding?"}
+                  : "Já conhece ou acompanha o trabalho de um coach bodybuilding?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
@@ -313,7 +313,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
-                9. {isEn ? "Do you see a sports medicine doctor?" : "Faz acompanhamento com medico do esporte?"}
+                9. {isEn ? "Do you see a sports medicine doctor?" : "Faz acompanhamento com médico do esporte?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
@@ -325,7 +325,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
-                10. {isEn ? "Have you done or are you doing TRT?" : "Ja fez ou esta fazendo reposicao hormonal (TRT)?"}
+                10. {isEn ? "Have you done or are you doing TRT?" : "Já fez ou está fazendo reposição hormonal (TRT)?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
@@ -333,13 +333,13 @@ const isEn = locale === "en";
                 <label class="radio-label"><input type="radio" name="trt" value="NÃO" /> {isEn ? "NO" : "NÃO"}</label>
               </div>
               <p class="field__error" id="f-trt-error" hidden></p>
-              <!-- Condicional: aparece se SIM, obrigatorio -->
+              <!-- Condicional: aparece se SIM, obrigatório -->
               <fieldset class="field field--cond" id="cond-trt"
                 data-cond-name="trt"
                 data-cond-value="SIM"
                 hidden aria-hidden="true">
                 <label class="field__label" for="f-trt-detail">
-                  {isEn ? "Which hormones and at what frequency?" : "Quais hormonios e em qual frequencia?"}
+                  {isEn ? "Which hormones and at what frequency?" : "Quais hormônios e em qual frequência?"}
                   <span class="field__req">*</span>
                 </label>
                 <textarea class="field__input field__textarea" id="f-trt-detail"
@@ -351,16 +351,16 @@ const isEn = locale === "en";
           </div>
         </div>
 
-        <!-- HISTORICO DE SAUDE -->
+        <!-- HISTÓRICO DE SAÚDE -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Health History" : "Historico de Saúde"}</h3>
+          <h3 class="form-section__title">{isEn ? "Health History" : "Histórico de Saúde"}</h3>
           <div class="form-stack">
 
             <div class="field">
               <label class="field__label" for="f-cardiac">
                 11. {isEn
                   ? "Do you have any cardiac condition? (hypertension, arrhythmia, pacemaker, angina, etc.)"
-                  : "Possui alguma condicao cardiaca? (hipertensao, arritmia, uso de marcapasso, angina, etc.)"}
+                  : "Possui alguma condição cardíaca? (hipertensão, arritmia, uso de marcapasso, angina, etc.)"}
                 <span class="field__req">*</span>
               </label>
               <textarea class="field__input field__textarea" id="f-cardiac"
@@ -385,7 +385,7 @@ const isEn = locale === "en";
               <label class="field__label" for="f-chronic">
                 13. {isEn
                   ? "Do you have any pre-existing or chronic disease?"
-                  : "Tem alguma doenca pre-existente ou cronica?"}
+                  : "Tem alguma doença pré-existente ou crônica?"}
                 <span class="field__req">*</span>
               </label>
               <textarea class="field__input field__textarea" id="f-chronic"
@@ -396,7 +396,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <span class="field__label">
-                14. {isEn ? "Have you had a muscle or joint injury?" : "Ja teve lesão muscular ou articular?"}
+                14. {isEn ? "Have you had a muscle or joint injury?" : "Já teve lesão muscular ou articular?"}
                 <span class="field__req">*</span>
               </span>
               <div class="radio-group">
@@ -411,7 +411,7 @@ const isEn = locale === "en";
                 data-cond-optional="true"
                 hidden aria-hidden="true">
                 <label class="field__label" for="f-lesao-detail">
-                  {isEn ? "Which injury? Was surgery needed?" : "Qual lesão? Houve necessidade cirurgica?"}
+                  {isEn ? "Which injury? Was surgery needed?" : "Qual lesão? Houve necessidade cirúrgica?"}
                 </label>
                 <textarea class="field__input field__textarea" id="f-lesao-detail"
                   name="lesao_detalhe" rows="2" autocomplete="off"></textarea>
@@ -421,9 +421,9 @@ const isEn = locale === "en";
           </div>
         </div>
 
-        <!-- ROTINA ALIMENTAR E SUPLEMENTACAO -->
+        <!-- ROTINA ALIMENTAR E SUPLEMENTAÇÃO -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Diet and Supplementation" : "Rotina Alimentar e Suplementacao"}</h3>
+          <h3 class="form-section__title">{isEn ? "Diet and Supplementation" : "Rotina Alimentar e Suplementação"}</h3>
           <div class="form-stack">
 
             <div class="field">
@@ -434,7 +434,7 @@ const isEn = locale === "en";
               <div class="radio-group radio-group--vertical">
                 {(isEn
                   ? ["Yes, with professional guidance","Yes, on my own","No diet"]
-                  : ["Sim, com acompanhamento profissional","Sim, por conta propria","Nao sigo dieta"]
+                  : ["Sim, com acompanhamento profissional","Sim, por conta própria","Não sigo dieta"]
                 ).map(opt => (
                   <label class="radio-label">
                     <input type="radio" name="dieta" value={opt} />
@@ -447,7 +447,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <label class="field__label" for="f-meals">
-                16. {isEn ? "How many meals per day on average?" : "Em media, quantas refeicoes por dia?"}
+                16. {isEn ? "How many meals per day on average?" : "Em média, quantas refeições por dia?"}
                 <span class="field__req">*</span>
               </label>
               <input class="field__input" type="text" id="f-meals"
@@ -482,7 +482,7 @@ const isEn = locale === "en";
 
             <div class="field">
               <label class="field__label" for="f-water">
-                18. {isEn ? "Litres of water per day on average?" : "Em media, quantos litros de agua por dia?"}
+                18. {isEn ? "Litres of water per day on average?" : "Em média, quantos litros de água por dia?"}
                 <span class="field__req">*</span>
               </label>
               <input class="field__input" type="text" id="f-water"
@@ -497,13 +497,13 @@ const isEn = locale === "en";
           </div>
         </div>
 
-        <!-- AVALIACAO FISICA VISUAL -->
+        <!-- AVALIAÇÃO FÍSICA VISUAL -->
         <div class="form-section">
-          <h3 class="form-section__title">{isEn ? "Visual Physical Assessment" : "Avaliacao Fisica Visual"}</h3>
+          <h3 class="form-section__title">{isEn ? "Visual Physical Assessment" : "Avaliação Física Visual"}</h3>
           <p class="form-section__intro">
             {isEn
               ? "Upload up to 5 photos (max 10 MB each). Compressed automatically."
-              : "Envie ate 5 fotos (max. 10 MB cada). Compressao automatica."}
+              : "Envie até 5 fotos (máx. 10 MB cada). Compressão automática."}
           </p>
           <div class="field">
             <label class="field__label field__label--file" for="f-photos">
@@ -555,9 +555,9 @@ const isEn = locale === "en";
 
 <script>
 // ============================================================
-// FONTE UNICA DE VERDADE: FIELD_RULES
+// FONTE ÚNICA DE VERDADE: FIELD_RULES
 // Cada entrada define: inputId, errorId, mensagens PT/EN,
-// funcao de validacao, e se e campo de radio/checkbox.
+// função de validação, e se é campo de radio/checkbox.
 // ============================================================
 const FIELD_RULES: Array<{
   key:       string;
@@ -578,7 +578,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "cpf", inputId: "f-cpf", errorId: "f-cpf-error",
-    msgPt: v => !v.trim() ? "CPF é obrigatório." : "CPF inválido - verifique os digitos.",
+    msgPt: v => !v.trim() ? "CPF é obrigatório." : "CPF inválido - verifique os dígitos.",
     msgEn: v => !v.trim() ? "CPF is required." : "Invalid CPF - check the digits.",
     validate: v => v.trim() !== "" && validaCPF(v),
   },
@@ -640,7 +640,7 @@ const FIELD_RULES: Array<{
     groupSel: 'input[name="objetivo"]:checked',
     validate: () => !!document.querySelector('input[name="objetivo"]:checked'),
   },
-  // "Descreva seu objetivo" - condicional, nao obrigatorio
+  // "Descreva seu objetivo" - condicional, não obrigatório
   {
     key: "atividade", inputId: "f-activity-error", errorId: "f-activity-error",
     msgPt: "Selecione ao menos uma opção (Q2).",
@@ -671,7 +671,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "frequencia", inputId: "f-freq", errorId: "f-freq-error",
-    msgPt: "Frequencia semanal é obrigatória (Q4).",
+    msgPt: "Frequência semanal é obrigatória (Q4).",
     msgEn: "Training frequency is required (Q4).",
     validate: v => {
       const n = parseInt(v, 10);
@@ -698,7 +698,7 @@ const FIELD_RULES: Array<{
     groupSel: 'input[name="personal_trainer"]:checked',
     validate: () => !!document.querySelector('input[name="personal_trainer"]:checked'),
   },
-  // Q7 competicao: opcional, sem validacao de obrigatoriedade
+  // Q7 competição: opcional, sem validação de obrigatoriedade
   {
     key: "conhece_coach", inputId: "f-coach-error", errorId: "f-coach-error",
     msgPt: "Responda a questão 8.",
@@ -725,7 +725,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "trt_detalhe", inputId: "f-trt-detail", errorId: "f-trt-detail-error",
-    msgPt: "Informe os hormonios e a frequencia.",
+    msgPt: "Informe os hormônios e a frequência.",
     msgEn: "Please specify the hormones and frequency.",
     skipIfCondHidden: true,
     validate: v => v.trim().length > 0,
@@ -746,7 +746,7 @@ const FIELD_RULES: Array<{
   },
   {
     key: "doenca_cronica", inputId: "f-chronic", errorId: "f-chronic-error",
-    msgPt: "Preencha o campo de doenca crônica (Q13).",
+    msgPt: "Preencha o campo de doença crônica (Q13).",
     msgEn: "Fill in the chronic disease field (Q13).",
     validate: v => v.trim().length > 0,
   },
@@ -897,7 +897,7 @@ function updateConditionals() {
     if (inp) inp.required = show;
   }
 
-  // 3. Condicional "Ha quanto tempo" - aparece se qualquer checkbox de atividade
+  // 3. Condicional "Há quanto tempo" - aparece se qualquer checkbox de atividade
   //    marcado, EXCETO "Nenhuma/None"
   const condDuration = document.getElementById("cond-act-duration") as HTMLElement | null;
   if (condDuration) {
@@ -912,7 +912,7 @@ function updateConditionals() {
 }
 
 // ============================================================
-// VALIDACAO UNIFICADA - unica fonte de verdade
+// VALIDAÇÃO UNIFICADA - única fonte de verdade
 // ============================================================
 function validateAll(): boolean {
   const errors: Array<{ rule: typeof FIELD_RULES[0]; val: string }> = [];
@@ -948,7 +948,7 @@ function validateAll(): boolean {
   if (errors.length > 0) {
     // Toast 1: primeiro erro
     showValidationToast(getMsg(errors[0].rule, errors[0].val));
-    // Toast 2: resumo se multiplos
+    // Toast 2: resumo se múltiplos
     if (errors.length > 1) {
       setTimeout(() => {
         showValidationToast(
@@ -958,7 +958,7 @@ function validateAll(): boolean {
         );
       }, 1400);
     }
-    // Scroll ate o primeiro erro dentro do modal-body
+    // Scroll até o primeiro erro dentro do modal-body
     const firstEl = document.getElementById(errors[0].rule.inputId);
     const container = firstEl?.closest(".field") ?? firstEl;
     if (container) {
@@ -977,13 +977,13 @@ function validateAll(): boolean {
 // VALIDACAO ON-BLUR (usa o mesmo FIELD_RULES)
 // ============================================================
 function attachBlurValidation(rule: typeof FIELD_RULES[0]) {
-  if (rule.isGroup) return; // radio/checkbox nao tem blur individual
+  if (rule.isGroup) return; // radio/checkbox não tem blur individual
   const inp = document.getElementById(rule.inputId) as HTMLInputElement | null;
   const errEl = document.getElementById(rule.errorId);
   if (!inp || !errEl) return;
 
   inp.addEventListener("blur", () => {
-    if (!inp.value.trim()) return; // nao mostrar erro em campo vazio nao tocado
+    if (!inp.value.trim()) return; // não mostrar erro em campo vazio não tocado
     const valid = rule.validate(inp.value);
     errEl.textContent = valid ? "" : getMsg(rule, inp.value);
     errEl.hidden = valid;
@@ -1027,7 +1027,7 @@ if (dobInput?.type === "text") {
 }
 
 // Decimais com virgula: sanitizacao + espelhamento em hidden field (ponto)
-// autocomplete="off" ja definido no HTML - este bloco nao re-seta para preservar
+// autocomplete="off" já definido no HTML - este bloco não re-seta para preservar
 // campos que usam autocomplete legitimamente (nome, email, bday)
 const DECIMAL_IDS = ["f-height","f-weight","f-avail","f-water","f-act-duration"];
 DECIMAL_IDS.forEach(id => {
@@ -1045,7 +1045,7 @@ DECIMAL_IDS.forEach(id => {
   };
 
   inp.addEventListener("input", () => {
-    // Permite apenas digitos e uma unica virgula
+    // Permite apenas dígitos e uma única vírgula
     let v = inp.value.replace(/[^0-9,]/g, "");
     const parts = v.split(",");
     if (parts.length > 2) v = parts[0] + "," + parts.slice(1).join("");
@@ -1065,7 +1065,7 @@ DECIMAL_IDS.forEach(id => {
   });
 });
 
-// Inteiros: apenas digitos
+// Inteiros: apenas dígitos
 ["f-freq","f-meals"].forEach(id => {
   const inp = document.getElementById(id) as HTMLInputElement | null;
   if (!inp) return;
@@ -1142,7 +1142,7 @@ document.querySelectorAll<HTMLElement>(
   });
 });
 
-// Checkboxes de atividade (disparam duracao condicional + "Outra")
+// Checkboxes de atividade (disparam duração condicional + "Outra")
 document.querySelectorAll('input[name="atividade_fisica"]').forEach(cb => {
   cb.addEventListener("change", updateConditionals);
 });
@@ -1189,11 +1189,11 @@ fileInput?.addEventListener("change", async () => {
   if (files.length > 5) {
     showValidationToast(
       isEnPage ? "Maximum 5 photos. The rest will be discarded."
-               : "Maximo de 5 fotos. O excesso foi descartado."
+               : "Máximo de 5 fotos. O excesso foi descartado."
     );
   }
 
-  // Preservar posicao do scroll do modal-body durante insercao de imagens
+  // Preservar posição do scroll do modal-body durante inserção de imagens
   const savedScroll = modalBody?.scrollTop ?? 0;
 
   compressedFiles = [];
@@ -1210,7 +1210,7 @@ fileInput?.addEventListener("change", async () => {
     filePreview.appendChild(img);
   }
 
-  // Restaurar scroll apos todas as insercoes
+  // Restaurar scroll após todas as inserções
   requestAnimationFrame(() => {
     if (modalBody) modalBody.scrollTop = savedScroll;
   });
@@ -1305,13 +1305,13 @@ formEl?.addEventListener("submit", async e => {
       errorEl.hidden = false;
     }
     submitBtn.disabled = false;
-    submitBtn.textContent = isEnPage ? "Request evaluation" : "Solicitar avaliacao";
+    submitBtn.textContent = isEnPage ? "Request evaluation" : "Solicitar avaliação";
   }
 });
 </script>
 
 <style>
-  /* ===== OVERLAY: nao tem scroll proprio ===== */
+  /* ===== OVERLAY: não tem scroll próprio ===== */
   .modal-overlay {
     position: fixed; inset: 0; z-index: 200;
     background: rgba(0,0,0,0.88);
@@ -1338,7 +1338,7 @@ formEl?.addEventListener("submit", async e => {
   }
   @keyframes modal-in { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 
-  /* ===== HEADER: nao cresce, fica fixo no topo ===== */
+  /* ===== HEADER: não cresce, fica fixo no topo ===== */
   .modal-header {
     display: flex; align-items: flex-start;
     justify-content: space-between; gap: var(--space-4);
@@ -1351,7 +1351,7 @@ formEl?.addEventListener("submit", async e => {
   .modal-close   { font-size:1.2rem; color:var(--c-textsub); background:none; border:none; cursor:pointer; padding:var(--space-1); transition:color var(--transition-base); line-height:1; flex-shrink:0; }
   .modal-close:hover { color:var(--c-lime); }
 
-  /* ===== BODY: unico scroll do modal ===== */
+  /* ===== BODY: único scroll do modal ===== */
   .modal-body {
     overflow-y: auto;
     padding: var(--space-5) var(--space-6);
