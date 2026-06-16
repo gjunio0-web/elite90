@@ -1024,7 +1024,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       return `<tr class="detail-row${alertCls}"><th class="detail-th">${label}</th><td class="detail-td">${v}${tag}</td></tr>`;
     }
 
-    window.__openDetail=function(id){
+    window.__openDetail=async function(id){
       const lead=leads.find(l=>l.id===id);if(!lead)return;
       currentDetailLeadId=id;
 
