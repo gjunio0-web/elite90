@@ -112,19 +112,13 @@ ESTRUTURA E TOM ESPERADOS:
 ${REFERENCE_STRUCTURE}
 ${prevContext}
 
-INSTRUÇÕES:
-- Gere o documento completo com as 5 seções numeradas
-- Seja específico aos dados do atleta - não genérico
-- Use linguagem técnica do fisiculturismo
-- Onde os dados forem insuficientes para uma seção, sinalize com [COMPLETAR] para o coach revisar
-- Responda APENAS com o conteúdo das 5 seções, em formato JSON com esta estrutura:
-{
-  "s1": "conteúdo da seção 01",
-  "s2": "conteúdo da seção 02",
-  "s3": "conteúdo da seção 03",
-  "s4": "conteúdo da seção 04",
-  "s5": "conteúdo da seção 05"
-}`;
+INSTRUÇÕES DE PREENCHIMENTO:
+- Redija as diretrizes de forma contínua para cada campo do objeto de resposta.
+- Seja específico aos dados do atleta fornecidos acima — evite generalismos.
+- Use exclusivamente a linguagem técnica e a terminologia do fisiculturismo de alto nível.
+- Onde os dados do atleta forem insuficientes para estruturar uma conduta em determinada seção, sinalize estritamente com a expressão [COMPLETAR] para que o coach faça a revisão manual posterior.
+- IMPORTANTE: Forneça apenas o texto corrido e os parágrafos densos correspondentes a cada seção. Não inclua títulos (ex: "01. DIAGNÓSTICO ESTÉTICO"), não use blocos de código Markdown (\`\`\`) e não tente estruturar chaves ou sintaxe JSON manualmente. O ecossistema de infraestrutura já mapeará o seu texto diretamente para as propriedades correspondentes.
+`;
 }
 
 // -- Handler
@@ -152,8 +146,6 @@ export const handler = async (event: any) => {
     const { leadId } = JSON.parse(event.body);
     if (!leadId) return { statusCode: 400, body: "leadId obrigatório" };
 
-    // db já inicializado acima
-
     // Fetch lead data
     const leadDoc = await db.collection("leads").doc(leadId).get();
     if (!leadDoc.exists) return { statusCode: 404, body: "Lead não encontrado" };
@@ -172,6 +164,18 @@ export const handler = async (event: any) => {
       return { statusCode: 500, body: "GOOGLE_GEMINI_KEY não configurada" };
     }
 
+    const schemaRigido = {
+      type: "OBJECT",
+      properties: {
+        s1: { type: "STRING", description: "Texto completo do Diagnóstico Estético e Análise de Proporções" },
+        s2: { type: "STRING", description: "Texto completo do Planejamento de Treinamento e Cardio" },
+        s3: { type: "STRING", description: "Texto completo do Protocolo de Saúde Cardiovascular e Suporte Mitocondrial" },
+        s4: { type: "STRING", description: "Texto completo do Estratégia de Competição e Direcionamento de Categoria" },
+        s5: { type: "STRING", description: "Texto completo do Alinhamento Operacional e Dinâmica de Parceria" }
+      },
+      required: ["s1", "s2", "s3", "s4", "s5"]
+    };
+
     const geminiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
       {
@@ -182,9 +186,10 @@ export const handler = async (event: any) => {
             parts: [{ text: buildPrompt(lead, previousDocs) }]
           }],
           generationConfig: {
-            temperature: 0.7,
+            temperature: 0.5,
             maxOutputTokens: 4096,
             responseMimeType: "application/json",
+            responseSchema: schemaRigido
           },
         }),
       }
@@ -201,10 +206,10 @@ export const handler = async (event: any) => {
     // Parse JSON response
     let sections: Record<string, string>;
     try {
-      const clean = rawText.replace(/```json|```/g, "").trim();
+      const clean = rawText.trim();
       sections = JSON.parse(clean);
     } catch {
-      // Fallback: return raw text in s1
+      // Fallback: em caso de falha crítica de parse, retorna o texto bruto no campo s1
       sections = { s1: rawText, s2: "", s3: "", s4: "", s5: "" };
     }
 

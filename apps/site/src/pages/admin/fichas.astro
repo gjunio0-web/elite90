@@ -1181,21 +1181,28 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     document.getElementById("btn-gen-ai")?.addEventListener("click",async()=>{
       if(!currentLeadId)return;
+      const btnGen = document.getElementById("btn-gen-ai");
       const statusEl=document.getElementById("eval-status");
       const taIds=["s1","s2","s3","s4","s5"];
+      
+      btnGen.disabled = true;
+      btnGen.textContent = "Processando...";
       taIds.forEach(k=>document.getElementById(`eval-${k}`).classList.add("eval-ta--loading"));
-      statusEl.textContent="Gerando rascunho com Gemini 2.5 Flash...";
+      statusEl.textContent="Orquestrando matriz biológica com Gemini 2.5 Flash...";
+      
       try{
         const res=await fetch("/.netlify/functions/generate-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId})});
         if(!res.ok)throw new Error(await res.text());
         const {sections}=await res.json();
         taIds.forEach(k=>{document.getElementById(`eval-${k}`).value=sections[k]??"";});
-        statusEl.textContent="Rascunho gerado. Revise antes de enviar.";
+        statusEl.textContent="Rascunho gerado com sucesso. Revise antes de enviar.";
       }catch(e){
         console.error("Erro ao gerar avaliação:",e);
         statusEl.textContent="Não foi possível gerar o rascunho agora. Tente novamente em instantes ou preencha manualmente.";
       }finally{
         taIds.forEach(k=>document.getElementById(`eval-${k}`).classList.remove("eval-ta--loading"));
+        btnGen.disabled = false;
+        btnGen.textContent = "Gerar rascunho com IA (Gemini)";
       }
     });
 
@@ -1217,20 +1224,37 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     document.getElementById("confirm-send")?.addEventListener("click",async()=>{
       if(!currentLeadId)return;
-      document.getElementById("confirm-overlay").hidden=true;
+      const btnConfirm = document.getElementById("confirm-send");
       const statusEl=document.getElementById("eval-status");
       const sections={};
       ["s1","s2","s3","s4","s5"].forEach(k=>{sections[k]=document.getElementById(`eval-${k}`).value;});
       const coachNotes=document.getElementById("eval-notes").value;
-      statusEl.textContent="Enviando...";
+      
+      if (!sections.s1.trim()) {
+        alert("Não é possível enviar uma avaliação vazia. Gere o rascunho com IA ou escreva as diretrizes.");
+        document.getElementById("confirm-overlay").hidden = true;
+        return;
+      }
+
+      btnConfirm.disabled = true;
+      btnConfirm.textContent = "Despachando...";
+      document.getElementById("confirm-overlay").hidden=true;
+      statusEl.textContent="Salvando histórico e disparando e-mail via Resend...";
+      
       try{
         const res=await fetch("/.netlify/functions/send-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId,sections,coachNotes})});
         if(!res.ok)throw new Error(await res.text());
-        statusEl.textContent="Avaliação enviada com sucesso.";
+        
+        // Colapso completo da gaveta lateral e alerta inegociável
+        document.getElementById("eval-drawer").hidden = true;
+        alert("SUCESSO: Planejamento estratégico salvo e enviado por e-mail ao atleta!");
         await loadLeads();
       }catch(e){
         console.error("Erro ao enviar avaliação:",e);
         statusEl.textContent="Não foi possível enviar a avaliação agora. Tente novamente em instantes.";
+      }finally{
+        btnConfirm.disabled = false;
+        btnConfirm.textContent = "Confirmar envio";
       }
     });
     
