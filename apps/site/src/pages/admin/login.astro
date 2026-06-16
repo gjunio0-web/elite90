@@ -55,7 +55,10 @@ import '../../styles/global.css';
     .login-logo img {
       height: 110px;
       width: auto;
+      max-width: 100%;
       object-fit: contain;
+      margin: 0 auto;
+      display: block;
     }
 
     /* ── CARD ────────────────────────────────────────────────────────── */
@@ -222,11 +225,10 @@ import '../../styles/global.css';
 <body>
 
   <div class="login-wrap">
-    <div class="login-logo">
-      <img src="/images/brand/logo-hero.webp" alt="Coach Ruiz Elite 90" />
-    </div>
-
     <div class="login-card">
+      <div class="login-logo">
+        <img src="/images/brand/logo-hero.webp" alt="Coach Ruiz Elite 90" />
+      </div>
       <p class="login-eyebrow">Área Restrita</p>
       <h1 class="login-title">Acesso ao Painel</h1>
 
