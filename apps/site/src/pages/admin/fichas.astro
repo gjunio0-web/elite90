@@ -943,8 +943,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
       
     const cfg={apiKey:document.querySelector('meta[name="fb-api"]')?.content,authDomain:document.querySelector('meta[name="fb-auth"]')?.content,projectId:document.querySelector('meta[name="fb-proj"]')?.content,storageBucket:document.querySelector('meta[name="fb-bucket"]')?.content,messagingSenderId:document.querySelector('meta[name="fb-sender"]')?.content,appId:document.querySelector('meta[name="fb-appid"]')?.content};
     const app=initializeApp(cfg);
