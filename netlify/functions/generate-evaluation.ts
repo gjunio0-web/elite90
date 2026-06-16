@@ -1,5 +1,5 @@
 // --- ELITE 90 · generate-evaluation
-// Netlify Function: gera rascunho do documento de avaliação via Gemini 2.0 Flash.
+// Netlify Function: gera rascunho do documento de avaliação via Gemini 2.5 Flash.
 // Chamada pelo painel admin ao clicar em "Gerar avaliação".
 
 import { initializeApp, getApps, cert } from "firebase-admin/app";
@@ -166,14 +166,14 @@ export const handler = async (event: any) => {
       .get();
     const previousDocs = prevSnap.docs.map(d => d.data().content_s1 ?? "");
 
-    // Call Gemini 2.0 Flash
+    // Call Gemini 2.5 Flash
     const geminiKey = process.env.GOOGLE_GEMINI_KEY;
     if (!geminiKey) {
       return { statusCode: 500, body: "GOOGLE_GEMINI_KEY não configurada" };
     }
 
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

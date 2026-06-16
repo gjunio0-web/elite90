@@ -1164,7 +1164,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const statusEl=document.getElementById("eval-status");
       const taIds=["s1","s2","s3","s4","s5"];
       taIds.forEach(k=>document.getElementById(`eval-${k}`).classList.add("eval-ta--loading"));
-      statusEl.textContent="Gerando rascunho com Gemini 2.0 Flash...";
+      statusEl.textContent="Gerando rascunho com Gemini 2.5 Flash...";
       try{
         const res=await fetch("/.netlify/functions/generate-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId})});
         if(!res.ok)throw new Error(await res.text());
