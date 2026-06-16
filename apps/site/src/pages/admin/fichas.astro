@@ -7,6 +7,7 @@ import '@fontsource/montserrat/400.css';
 import '@fontsource/montserrat/700.css';
 import '../../styles/tokens.css';
 import '../../styles/global.css';
+import AdminHeader from '../../components/AdminHeader.astro';
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -32,43 +33,6 @@ import '../../styles/global.css';
     body::-webkit-scrollbar-track { background: var(--c-darkbg); }
     body::-webkit-scrollbar-thumb { background: var(--c-lime); border-radius: 3px; }
 
-    /* HEADER */
-    .adm-header {
-      background: var(--c-darkbg);
-      border-bottom: 1px solid rgba(166, 195, 0, 0.15);
-      padding: 0 var(--space-5);
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .adm-header__left { display: flex; align-items: center; gap: var(--space-3); }
-    .adm-logo {
-      font-family: var(--font-display);
-      font-size: var(--fs-display-sm);
-      font-weight: 400;
-      letter-spacing: 0.05em;
-      color: var(--c-lime);
-      text-transform: uppercase;
-      text-decoration: none;
-    }
-    .adm-badge {
-      font-family: var(--font-label);
-      font-size: var(--fs-label);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      background: rgba(166, 195, 0, 0.1);
-      color: var(--c-lime);
-      border: 1px solid rgba(166, 195, 0, 0.25);
-      border-radius: 3px;
-      padding: 4px 10px;
-    }
-    .adm-header__right { display: flex; align-items: center; gap: var(--space-2); }
-    
     /* BOTOES E UTILITARIOS */
     .btn-sm {
       font-family: var(--font-label);
@@ -701,25 +665,7 @@ import '../../styles/global.css';
 </head>
 <body>
 
-  <header class="adm-header">
-    <div class="adm-header__left">
-      <a href="/" class="adm-logo">Coach Ruiz</a>
-      <span class="adm-badge">Fichas</span>
-    </div>
-    <div class="adm-header__right">     
-      <button class="btn-sm btn-outline" onclick="window.location.href='/admin'" aria-label="Voltar para o menu do painel" style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; min-width: 44px;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-      </button>
-      <button class="btn-sm btn-outline" id="btn-logout" aria-label="Encerrar sessão e sair" style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; min-width: 44px;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
-        </svg>
-      </button>
-    </div>
-  </header>
+  <AdminHeader badge="Fichas" backHref="/admin" />
 
   <main>
     <div class="page-header">

@@ -1,0 +1,107 @@
+---
+// AdminHeader.astro — Cabeçalho compartilhado das páginas do painel admin.
+// Importado por: /admin/index.astro, /admin/fichas.astro, /admin/login.astro
+//
+// Props:
+//   badge   — rótulo do contexto atual (ex: "Admin", "Fichas"). Obrigatório.
+//   backHref — se fornecido, exibe botão de voltar apontando para este href.
+//   showLogout — exibe botão de logout (padrão: true).
+
+interface Props {
+  badge: string;
+  backHref?: string;
+  showLogout?: boolean;
+}
+
+const { badge, backHref, showLogout = true } = Astro.props;
+---
+
+<header class="adm-header">
+  <div class="adm-header__left">
+    <a href="/admin" class="adm-logo">Coach Ruiz</a>
+    <span class="adm-badge">{badge}</span>
+  </div>
+  <div class="adm-header__right">
+    {backHref && (
+      <button
+        class="adm-btn-icon"
+        onclick={`window.location.href='${backHref}'`}
+        aria-label="Voltar"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </button>
+    )}
+    {showLogout && (
+      <button
+        class="adm-btn-icon"
+        id="btn-logout"
+        aria-label="Encerrar sessão"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+        </svg>
+      </button>
+    )}
+  </div>
+</header>
+
+<style is:global>
+  /* Estilos globais do header admin — usados em todas as páginas admin */
+  .adm-header {
+    background: var(--c-darkbg);
+    border-bottom: 1px solid rgba(166, 195, 0, 0.15);
+    padding: 0 var(--space-5);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .adm-header__left  { display: flex; align-items: center; gap: var(--space-3); }
+  .adm-header__right { display: flex; align-items: center; gap: var(--space-2); }
+
+  .adm-logo {
+    font-family: var(--font-display);
+    font-size: var(--fs-display-sm);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: var(--c-lime);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .adm-badge {
+    font-family: var(--font-label);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    background: rgba(166, 195, 0, 0.1);
+    color: var(--c-lime);
+    border: 1px solid rgba(166, 195, 0, 0.25);
+    border-radius: 3px;
+    padding: 4px 10px;
+  }
+  .adm-btn-icon {
+    background: transparent;
+    color: var(--c-textsub);
+    border: 1px solid rgba(166, 195, 0, 0.25);
+    border-radius: var(--radius-card);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    transition: color var(--transition-base), border-color var(--transition-base), background var(--transition-base);
+  }
+  .adm-btn-icon:hover {
+    color: var(--c-lime);
+    border-color: rgba(166, 195, 0, 0.6);
+    background: rgba(166, 195, 0, 0.05);
+  }
+</style>

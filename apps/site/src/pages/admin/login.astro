@@ -1,113 +1,254 @@
 ---
 export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../../styles/tokens.css';
+import '../../styles/global.css';
 ---
 <!DOCTYPE html>
 <html lang="pt-BR" class="locked">
 <head>
-
+  <!-- Anti-flash: esconde o body até que o JS valide o gateway -->
   <style is:inline>
-    /* A classe 'locked' esconde todo o corpo da página e exibe apenas o vazio negro */
-    html.locked body {
-      display: none !important;
-    }
-    html.locked {
-      background-color: #0A0A0A; /* Fundo Brutalista Noir */
-    }
+    html.locked body { display: none !important; }
+    html.locked { background-color: var(--c-black, #0D0D0D); }
   </style>
-
   <script is:inline>
-    // Função de interceptação (IIFE) executada em milissegundos
     (function() {
-      const isUnlocked = sessionStorage.getItem('gateway_unlocked');
-      
-      if (!isUnlocked) {
-        // Acesso direto detectado ou token ausente. Expulsão silenciosa.
-        // Usa 'replace' para não deixar rastro no botão "Voltar" do navegador
-        window.location.replace('/'); 
+      if (!sessionStorage.getItem('gateway_unlocked')) {
+        window.location.replace('/');
       } else {
-        // Salvo-conduto validado. Destranca a interface para o formulário.
         document.documentElement.classList.remove('locked');
-        
-        // Opcional de Defesa Ativa: Apagar a chave após abrir a porta.
-        // Se você quiser que recarregar a página exija os 5 cliques de novo, descomente a linha abaixo:
-        // sessionStorage.removeItem('gateway_unlocked');
       }
     })();
   </script>
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Elite 90 · Acesso ao Painel</title>
+  <title>Elite 90 — Acesso ao Painel</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" href="/favicon.ico" />
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#ccc;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-    .login-wrap{width:100%;max-width:420px;}
-    .login-logo{text-align:center;margin-bottom:40px;}
-    .login-logo img{height:80px;width:auto;object-fit:contain;}
-    .login-card{background:#1A1A1A;border:1px solid rgba(166,195,0,.2);border-radius:12px;padding:40px 36px;}
-    .login-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:#A6C300;text-align:center;margin-bottom:8px;}
-    .login-title{font-family:'Arial Black',sans-serif;font-size:26px;font-weight:900;color:#fff;text-align:center;letter-spacing:.04em;margin-bottom:32px;}
-    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;}
-    .field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#999;}
-    .field input{background:#0D0D0D;border:1px solid #2a2a2a;border-radius:6px;color:#fff;font-size:15px;padding:14px 16px;transition:border-color 200ms;}
-    .field input:focus{outline:none;border-color:#A6C300;}
-    .field input::placeholder{color:#444;}
-    .btn-primary{width:100%;background:#A6C300;color:#000;font-weight:900;text-transform:uppercase;letter-spacing:.1em;padding:16px;border:none;border-radius:50px;cursor:pointer;font-size:13px;margin-top:8px;transition:box-shadow 200ms;}
-    .btn-primary:hover{box-shadow:0 0 20px rgba(166,195,0,.4);}
-    .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
-    .error-msg{color:#E74C3C;font-size:12px;text-align:center;margin-top:12px;min-height:18px;}
-    .divider-or{display:flex;align-items:center;gap:12px;margin:20px 0;}
-  .divider-or::before,.divider-or::after{content:"";flex:1;height:1px;background:#222;}
-  .divider-or span{font-size:11px;color:#444;text-transform:uppercase;letter-spacing:.1em;}
-  .btn-google{width:100%;background:transparent;border:1px solid #333;border-radius:50px;color:#ccc;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:14px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;font-size:12px;transition:border-color 200ms,background 200ms;}
-  .btn-google:hover{border-color:#555;background:rgba(255,255,255,.04);}
-  .btn-google:disabled{opacity:.5;cursor:not-allowed;}
-  .google-error{color:#E74C3C;font-size:12px;text-align:center;margin-top:8px;min-height:16px;}
-  .back-link{display:block;text-align:center;margin-top:24px;font-size:12px;color:#666;text-decoration:none;transition:color 200ms;}
-    .back-link:hover{color:#A6C300;}
 
-    /* --- AUTOFILL NEUTRALIZATION (CHROME/WEBKIT) --- */
+  <style is:global>
+    /* ── LAYOUT ──────────────────────────────────────────────────────── */
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-5) var(--space-3);
+    }
+
+    .login-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* ── LOGO ────────────────────────────────────────────────────────── */
+    .login-logo {
+      text-align: center;
+      margin-bottom: var(--space-6);
+    }
+    .login-logo img {
+      height: 72px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    /* ── CARD ────────────────────────────────────────────────────────── */
+    .login-card {
+      background: var(--c-darkbg);
+      border: 1px solid rgba(166,195,0,0.2);
+      border-top: 3px solid var(--c-lime);
+      border-radius: var(--radius-card);
+      padding: var(--space-6) var(--space-5);
+    }
+
+    .login-eyebrow {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--c-lime);
+      text-align: center;
+      margin-bottom: var(--space-2);
+    }
+    .login-title {
+      font-family: var(--font-display);
+      font-size: var(--fs-display-md);
+      font-weight: 400;
+      color: var(--c-white);
+      text-transform: uppercase;
+      text-align: center;
+      letter-spacing: 0.05em;
+      line-height: 1;
+      margin-bottom: var(--space-6);
+    }
+
+    /* ── FIELDS ──────────────────────────────────────────────────────── */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+    .field label {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--c-textsub);
+    }
+    .field input {
+      background: var(--c-black);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-card);
+      color: var(--c-white);
+      font-family: var(--font-body);
+      font-size: var(--fs-body-md);
+      padding: 14px var(--space-4);
+      transition: border-color var(--transition-base);
+      outline: none;
+    }
+    .field input:focus { border-color: var(--c-lime); }
+    .field input::placeholder { color: rgba(255,255,255,0.2); }
+
+    /* ── BUTTONS ─────────────────────────────────────────────────────── */
+    .btn-login {
+      width: 100%;
+      background: var(--c-lime);
+      color: #000;
+      font-family: var(--font-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 16px;
+      border: none;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: var(--space-2);
+      transition: box-shadow var(--transition-base);
+    }
+    .btn-login:hover { box-shadow: var(--shadow-cta); }
+    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .divider-or {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin: var(--space-5) 0;
+    }
+    .divider-or::before,
+    .divider-or::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+    }
+    .divider-or span {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      color: var(--c-textsub);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .btn-google {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-pill);
+      color: var(--c-textbody);
+      font-family: var(--font-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: border-color var(--transition-base), background var(--transition-base);
+    }
+    .btn-google:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.03); }
+    .btn-google:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── FEEDBACK ────────────────────────────────────────────────────── */
+    .error-msg {
+      font-family: var(--font-body);
+      font-size: var(--fs-body-sm);
+      color: #E74C3C;
+      text-align: center;
+      margin-top: var(--space-3);
+      min-height: 1.2em;
+    }
+
+    /* ── BACK LINK ───────────────────────────────────────────────────── */
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: var(--space-4);
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--c-textsub);
+      text-decoration: none;
+      transition: color var(--transition-base);
+    }
+    .back-link:hover { color: var(--c-lime); }
+
+    /* ── AUTOFILL (WEBKIT) ───────────────────────────────────────────── */
     input:-webkit-autofill,
     input:-webkit-autofill:hover,
     input:-webkit-autofill:focus,
     input:-webkit-autofill:active {
-      -webkit-box-shadow: 0 0 0px 1000px #0D0D0D inset !important;
-      -webkit-text-fill-color: #ffffff !important;
+      -webkit-box-shadow: 0 0 0px 1000px var(--c-black) inset !important;
+      -webkit-text-fill-color: var(--c-white) !important;
       transition: background-color 5000s ease-in-out 0s;
-      caret-color: #A6C300;
+      caret-color: var(--c-lime);
     }
   </style>
 </head>
 <body>
-<body>
+
   <div class="login-wrap">
     <div class="login-logo">
       <img src="/images/brand/logo-hero.webp" alt="Coach Ruiz Elite 90" />
     </div>
+
     <div class="login-card">
-      <p class="login-eyebrow">Area Restrita</p>
+      <p class="login-eyebrow">Área Restrita</p>
       <h1 class="login-title">Acesso ao Painel</h1>
 
       <form id="login-form" novalidate>
         <div class="field">
-          <label for="l-email">E-MAIL</label>
+          <label for="l-email">E-mail</label>
           <input type="email" id="l-email" name="email" required
             placeholder="admin@coachruiz.com.br" autocomplete="email" />
         </div>
         <div class="field">
-          <label for="l-password">SENHA</label>
+          <label for="l-password">Senha</label>
           <input type="password" id="l-password" name="password" required
             placeholder="••••••••" autocomplete="current-password" />
         </div>
-        <button class="btn-primary" type="submit" id="login-btn">ENTRAR</button>
-        <p class="error-msg" id="login-error"></p>
+        <button class="btn-login" type="submit" id="login-btn">Entrar</button>
+        <p class="error-msg" id="login-error" aria-live="polite"></p>
       </form>
 
-      <div class="divider-or"><span>Ou</span></div>
+      <div class="divider-or"><span>ou</span></div>
+
       <button class="btn-google" id="btn-google-auth-trigger" type="button">
-        <svg class="google-icon" viewBox="0 0 24 24" style="width:16px; height:16px; display:inline-block; vertical-align:middle; margin-right:8px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
           <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.33 0 3.357 2.673 1.405 6.564l3.86 3.201z"/>
           <path fill="#4285F4" d="M23.49 12.275c0-.825-.075-1.62-.21-2.385H12v4.51h6.44c-.28 1.47-1.11 2.71-2.36 3.55l3.67 2.84c2.14-1.97 3.38-4.88 3.38-8.515z"/>
           <path fill="#FBBC05" d="M5.266 14.235L1.405 17.436A11.943 11.943 0 0 0 12 24c3.055 0 5.782-1.01 7.69-2.73l-3.67-2.84c-1.07.72-2.44 1.15-4.02 1.15-3.23 0-5.968-2.182-6.734-5.345z"/>
@@ -115,15 +256,16 @@ export const prerender = false;
         </svg>
         Entrar com o Google
       </button>
-      <p class="error-msg" id="google-error-display"></p>
-
+      <p class="error-msg" id="google-error-display" aria-live="polite"></p>
     </div>
+
     <a class="back-link" href="/">← Voltar ao site</a>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const cfg = {
       apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
@@ -133,67 +275,65 @@ export const prerender = false;
       messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
       appId:             document.querySelector('meta[name="fb-appid"]')?.content,
     };
-
     const app  = initializeApp(cfg);
     const auth = getAuth(app);
 
-    const form   = document.getElementById("login-form");
-    const btn    = document.getElementById("login-btn");
-    const errEl  = document.getElementById("login-error");
-
-    const errorMessages = {
-      "auth/user-not-found":    "Conta nao encontrada.",
-      "auth/wrong-password":    "Senha incorreta.",
-      "auth/invalid-email":     "E-mail invalido.",
-      "auth/too-many-requests": "Muitas tentativas. Aguarde alguns minutos.",
-      "auth/invalid-credential":"E-mail ou senha incorretos.",
+    const ERROR_MESSAGES = {
+      "auth/user-not-found":     "Conta não encontrada.",
+      "auth/wrong-password":     "Senha incorreta.",
+      "auth/invalid-email":      "E-mail inválido.",
+      "auth/too-many-requests":  "Muitas tentativas. Aguarde alguns minutos.",
+      "auth/invalid-credential": "E-mail ou senha incorretos.",
     };
 
-    form.addEventListener("submit", async e => {
-      e.preventDefault();
-      btn.disabled = true;
-      btn.textContent = "ENTRANDO...";
-      errEl.textContent = "";
-
-      const email    = document.getElementById("l-email").value;
-      const password = document.getElementById("l-password").value;
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = "/admin";
-      } catch (err) {
-        errEl.textContent = errorMessages[err.code] ?? "Erro ao autenticar.";
-        btn.disabled = false;
-        btn.textContent = "ENTRAR";
-      }
-    });
-
-    // If already logged in, redirect
+    // Redireciona se já autenticado
     auth.onAuthStateChanged(user => {
       if (user) window.location.href = "/admin";
     });
 
-    // Google sign-in (Fluxo Corrigido e Vinculado ao Botão Físico)
-  const googleBtn = document.getElementById("btn-google-auth-trigger");
-  const googleError = document.getElementById("google-error-display");
-  const provider = new GoogleAuthProvider();
+    // Login com e-mail/senha
+    const form    = document.getElementById("login-form");
+    const loginBtn = document.getElementById("login-btn");
+    const loginErr = document.getElementById("login-error");
 
-  // Injeção explícita de escopos para assegurar a leitura do e-mail administrativo
-  provider.addScope('profile');
-  provider.addScope('email');
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Entrando...";
+      loginErr.textContent = "";
+      try {
+        await signInWithEmailAndPassword(
+          auth,
+          document.getElementById("l-email").value,
+          document.getElementById("l-password").value
+        );
+        window.location.href = "/admin";
+      } catch (err) {
+        loginErr.textContent = ERROR_MESSAGES[err.code] ?? "Erro ao autenticar.";
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Entrar";
+      }
+    });
 
-  googleBtn?.addEventListener("click", async () => {
-    googleBtn.disabled = true;
-    if (googleError) googleError.textContent = "";
-    try {
-      await signInWithPopup(auth, provider);
-      window.location.href = "/admin";
-    } catch (err) {
-      console.error("Erro na autenticação federada Google:", err);
-      if (googleError) googleError.textContent = "Erro ao autenticar com a conta do Google.";
-      googleBtn.disabled = false;
-    }
-  });
+    // Login com Google
+    const googleBtn = document.getElementById("btn-google-auth-trigger");
+    const googleErr = document.getElementById("google-error-display");
+    const provider  = new GoogleAuthProvider();
+    provider.addScope("profile");
+    provider.addScope("email");
+
+    googleBtn.addEventListener("click", async () => {
+      googleBtn.disabled = true;
+      googleErr.textContent = "";
+      try {
+        await signInWithPopup(auth, provider);
+        window.location.href = "/admin";
+      } catch (err) {
+        console.error("Erro na autenticação Google:", err);
+        googleErr.textContent = "Erro ao autenticar com o Google.";
+        googleBtn.disabled = false;
+      }
+    });
   </script>
 
   <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />

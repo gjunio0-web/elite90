@@ -1,103 +1,236 @@
 ---
 export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../../styles/tokens.css';
+import '../../styles/global.css';
+import AdminHeader from '../../components/AdminHeader.astro';
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Elite 90 - Painel de Controle</title>
+  <title>Elite 90 — Painel de Controle</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" href="/favicon.ico" />
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#ccc;min-height:100vh;}
-    .adm-header{background:#111;border-bottom:1px solid rgba(166,195,0,.15);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
-    .adm-header__left{display:flex;align-items:center;gap:12px;}
-    .adm-logo{font-size:15px;font-weight:900;letter-spacing:.12em;color:#A6C300;text-transform:uppercase;text-decoration:none;}
-    .adm-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;background:rgba(166,195,0,.1);color:#A6C300;border:1px solid rgba(166,195,0,.25);border-radius:3px;padding:3px 8px;}
-    .adm-header__right{display:flex;align-items:center;gap:12px;}
-    .adm-user{font-size:12px;color:#666;}
-    .btn-ghost{background:transparent;color:#A6C300;border:1px solid rgba(166,195,0,.3);border-radius:4px;padding:6px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;}
-    main{max-width:1100px;margin:0 auto;padding:48px 32px;}
-    .dash-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.18em;color:#666;margin-bottom:8px;}
-    .dash-title{font-size:42px;font-weight:900;color:#fff;margin-bottom:48px;line-height:1.1;}
-    .dash-title span{color:#A6C300;font-style:italic;font-weight:400;}
-    .modules{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;}
-    .mod-card{background:#121212;border:1px solid rgba(255,255,255,.05);border-radius:8px;display:flex;flex-direction:column;overflow:hidden;transition:border-color 200ms;}
-    .mod-card:hover{border-color:rgba(166,195,0,.2);}
-    .mod-bar{height:3px;background:linear-gradient(to right,#A6C300,#556600);}
-    .mod-body{padding:28px 28px 20px;flex:1;display:flex;flex-direction:column;gap:12px;}
-    .mod-eyebrow{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#A6C300;}
-    .mod-title{font-size:26px;font-weight:900;color:#fff;line-height:1.15;}
-    .mod-sub{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#444;}
-    .mod-desc{font-size:13px;color:#888;line-height:1.7;flex:1;}
-    .mod-footer{border-top:1px solid rgba(255,255,255,.05);padding:16px 28px;}
-    .mod-link{display:flex;align-items:center;justify-content:space-between;text-decoration:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#A6C300;}
-    .mod-link--off{color:#333;pointer-events:none;}
-    .status-bar{margin-top:48px;background:#111;border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:16px 24px;display:flex;align-items:center;gap:12px;}
-    .status-dot{width:8px;height:8px;border-radius:50%;background:#A6C300;flex-shrink:0;}
-    .status-text{font-size:12px;color:#666;}
+  <style is:global>
+    /* ── LAYOUT ─────────────────────────────────────────────────────── */
+    body { min-height: 100vh; }
+
+    .dash-main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: var(--space-7) var(--space-5);
+    }
+
+    /* ── PAGE HEADER ─────────────────────────────────────────────────── */
+    .dash-eyebrow {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--c-textsub);
+      margin-bottom: var(--space-2);
+    }
+    .dash-title {
+      font-family: var(--font-display);
+      font-size: var(--fs-display-lg);
+      font-weight: 400;
+      color: var(--c-white);
+      text-transform: uppercase;
+      line-height: 1;
+      margin-bottom: var(--space-7);
+    }
+    .dash-title span { color: var(--c-lime); }
+
+    /* ── MODULE GRID ─────────────────────────────────────────────────── */
+    .modules {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-4);
+    }
+
+    .mod-card {
+      background: var(--c-darkbg);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius-card);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: border-color var(--transition-base);
+      text-decoration: none;
+    }
+    .mod-card:hover { border-color: rgba(166,195,0,0.25); }
+    .mod-card--disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .mod-bar {
+      height: 3px;
+      background: linear-gradient(to right, var(--c-lime), var(--c-olive));
+      flex-shrink: 0;
+    }
+    .mod-bar--blue  { background: linear-gradient(to right, #4A90D9, #2C5F8A); }
+    .mod-bar--muted { background: rgba(255,255,255,0.06); }
+
+    .mod-body {
+      padding: var(--space-5) var(--space-5) var(--space-4);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .mod-eyebrow {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--c-lime);
+    }
+    .mod-eyebrow--blue  { color: #4A90D9; }
+    .mod-eyebrow--muted { color: rgba(255,255,255,0.2); }
+
+    .mod-title {
+      font-family: var(--font-display);
+      font-size: var(--fs-display-sm);
+      font-weight: 400;
+      color: var(--c-white);
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+    .mod-title--muted { color: rgba(255,255,255,0.2); }
+
+    .mod-sub {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--c-textsub);
+    }
+    .mod-sub--muted { color: rgba(255,255,255,0.12); }
+
+    .mod-desc {
+      font-family: var(--font-body);
+      font-size: var(--fs-body-sm);
+      color: var(--c-textsub);
+      line-height: 1.7;
+      flex: 1;
+      margin-top: var(--space-1);
+    }
+    .mod-desc--muted { color: rgba(255,255,255,0.15); }
+
+    .mod-footer {
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding: var(--space-3) var(--space-5);
+    }
+    .mod-link {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--c-lime);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+    }
+    .mod-link--muted { color: rgba(255,255,255,0.15); }
+
+    /* ── STATUS BAR ──────────────────────────────────────────────────── */
+    .status-bar {
+      margin-top: var(--space-7);
+      background: var(--c-darkbg);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius-card);
+      padding: var(--space-3) var(--space-5);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--c-lime);
+      flex-shrink: 0;
+      box-shadow: 0 0 8px rgba(166,195,0,0.5);
+    }
+    .status-text {
+      font-family: var(--font-body);
+      font-size: var(--fs-body-sm);
+      color: var(--c-textsub);
+    }
+    .status-text strong { color: var(--c-white); font-weight: 700; }
+
+    @media (max-width: 600px) {
+      .dash-main { padding: var(--space-5) var(--space-3); }
+      .dash-title { font-size: var(--fs-display-md); margin-bottom: var(--space-5); }
+      .modules { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <header class="adm-header">
-    <div class="adm-header__left">
-      <a href="/" class="adm-logo">Coach Ruiz</a>
-      <span class="adm-badge">Admin</span>
-    </div>
-    <div class="adm-header__right">
-      <button class="btn-ghost" id="btn-logout" aria-label="Encerrar sessão e sair" style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; min-width: 44px;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
-        </svg>
-      </button>
-    </div>
-  </header>
 
-  <main>
+  <AdminHeader badge="Admin" />
+
+  <main class="dash-main">
     <p class="dash-eyebrow">Painel de Controle</p>
     <h1 class="dash-title">Escolha o que <span>gerenciar</span></h1>
 
     <div class="modules">
-      <div class="mod-card">
+
+      <!-- Módulo 1: Captação & Triagem -->
+      <a class="mod-card" href="/admin/fichas">
         <div class="mod-bar"></div>
         <div class="mod-body">
           <p class="mod-eyebrow">Captação &amp; Triagem</p>
           <h2 class="mod-title">Fichas de Triagem</h2>
-          <p class="mod-sub">Gestao de Leads</p>
+          <p class="mod-sub">Gestão de Leads</p>
           <p class="mod-desc">Acesse todas as fichas preenchidas pelos atletas, filtre por status, visualize os dados completos, altere o andamento de cada lead e exporte para CSV com um clique.</p>
         </div>
         <div class="mod-footer">
-          <a class="mod-link" href="/admin/fichas">Acessar fichas -&gt;</a>
+          <span class="mod-link">Acessar fichas <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
         </div>
-      </div>
+      </a>
 
-      <div class="mod-card">
-        <div class="mod-bar" style="background:linear-gradient(to right,#4A90D9,#2C5F8A)"></div>
+      <!-- Módulo 2: Avaliação & Protocolo -->
+      <a class="mod-card" href="/admin/fichas">
+        <div class="mod-bar mod-bar--blue"></div>
         <div class="mod-body">
-          <p class="mod-eyebrow" style="color:#4A90D9">Avaliação &amp; Protocolo</p>
+          <p class="mod-eyebrow mod-eyebrow--blue">Avaliação &amp; Protocolo</p>
           <h2 class="mod-title">Avaliações</h2>
           <p class="mod-sub">Documentos Enviados</p>
-          <p class="mod-desc">Gere e envie documentos de avaliação personalizados com suporte de IA (Gemini 2.0 Flash). Acompanhe o historico por atleta.</p>
+          <p class="mod-desc">Gere e envie documentos de avaliação personalizados com suporte de IA (Gemini 2.0 Flash). Acompanhe o histórico por atleta.</p>
         </div>
         <div class="mod-footer">
-          <a class="mod-link" href="/admin/fichas">Acessar via fichas -&gt;</a>
+          <span class="mod-link" style="color:#4A90D9">Acessar via fichas <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
+
+      <!-- Módulo 3: Portal do Atleta (Sprint 2+) -->
+      <div class="mod-card mod-card--disabled">
+        <div class="mod-bar mod-bar--muted"></div>
+        <div class="mod-body">
+          <p class="mod-eyebrow mod-eyebrow--muted">Portal do Atleta</p>
+          <h2 class="mod-title mod-title--muted">Atletas</h2>
+          <p class="mod-sub mod-sub--muted">Acesso e Dados</p>
+          <p class="mod-desc mod-desc--muted">Gerencie o acesso dos atletas ao portal, acompanhe progresso de treinos, peso e evolução fotográfica.</p>
+        </div>
+        <div class="mod-footer">
+          <span class="mod-link mod-link--muted">Em desenvolvimento (Sprint 2+)</span>
         </div>
       </div>
 
-      <div class="mod-card" style="opacity:.45">
-        <div class="mod-bar" style="background:#2a2a2a"></div>
-        <div class="mod-body">
-          <p class="mod-eyebrow" style="color:#444">Portal do Atleta</p>
-          <h2 class="mod-title" style="color:#555">Atletas</h2>
-          <p class="mod-sub">Acesso e Dados</p>
-          <p class="mod-desc" style="color:#444">Gerencie o acesso dos atletas ao portal, acompanhe progresso de treinos, peso e evolucao fotografica.</p>
-        </div>
-        <div class="mod-footer">
-          <span class="mod-link mod-link--off">Em desenvolvimento (Sprint 2+)</span>
-        </div>
-      </div>
     </div>
 
     <div class="status-bar">
@@ -109,10 +242,28 @@ export const prerender = false;
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    const cfg={apiKey:document.querySelector('meta[name="fb-api"]')?.content,authDomain:document.querySelector('meta[name="fb-auth"]')?.content,projectId:document.querySelector('meta[name="fb-proj"]')?.content,storageBucket:document.querySelector('meta[name="fb-bucket"]')?.content,messagingSenderId:document.querySelector('meta[name="fb-sender"]')?.content,appId:document.querySelector('meta[name="fb-appid"]')?.content};
-    const app=initializeApp(cfg);const auth=getAuth(app);
-    onAuthStateChanged(auth,user=>{if(!user){window.location.href="/admin/login";return;}const el=document.getElementById("adm-email");if(el)el.textContent=user.email??""});
-    document.getElementById("btn-logout")?.addEventListener("click",async()=>{await signOut(auth);window.location.href="/admin/login";});
+
+    const cfg = {
+      apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
+      authDomain:        document.querySelector('meta[name="fb-auth"]')?.content,
+      projectId:         document.querySelector('meta[name="fb-proj"]')?.content,
+      storageBucket:     document.querySelector('meta[name="fb-bucket"]')?.content,
+      messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
+      appId:             document.querySelector('meta[name="fb-appid"]')?.content,
+    };
+    const app  = initializeApp(cfg);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, user => {
+      if (!user) { window.location.href = "/admin/login"; return; }
+      const el = document.getElementById("adm-email");
+      if (el) el.textContent = user.email ?? "";
+    });
+
+    document.getElementById("btn-logout")?.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "/admin/login";
+    });
   </script>
 
   <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
