@@ -1428,15 +1428,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
         const res=await fetch("/.netlify/functions/send-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId,sections,coachNotes})});
         if(!res.ok)throw new Error(await res.text());
         
-        // Fecha a gaveta de escrita lateral imediatamente
         document.getElementById("eval-drawer").hidden = true;
         
-        // Injeta a notificação dentro do Design System da Plataforma
         let container = document.getElementById("toast-container");
         if (!container) {
           container = document.createElement("div");
           container.id = "toast-container";
-          // Layout responsivo: centraliza no mobile, joga na direita no desktop
           container.style.position = "fixed";
           container.style.bottom = "24px";
           container.style.left = "50%";
@@ -1454,7 +1451,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
               @keyframes sIn { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } 
               @keyframes sOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(40px); opacity: 0; } }
               @media (min-width: 768px) {
-                #toast-container { left: auto; right: 24px; transform: none; width: auto; }
+                #toast-container { left: auto; right: 24px; transform: none; width: auto; min-width: 380px; }
               }
             `;
             document.head.appendChild(st);
@@ -1463,45 +1460,48 @@ import AdminHeader from '../../components/AdminHeader.astro';
         }
 
         const toast = document.createElement("div");
+        toast.style.boxSizing = "border-box";
+        toast.style.width = "100%";
         toast.style.background = "#0A0A0A";
         toast.style.border = "1px solid var(--c-lime)";
-        toast.style.borderRadius = "var(--radius-card, 4px)";
-        toast.style.padding = "16px 20px";
-        toast.style.color = "#FFFFFF";
-        // Alinhamento tipográfico inegociável ao Design System
-        toast.style.fontFamily = "var(--font-label), 'Bebas Neue', sans-serif";
-        toast.style.fontSize = "0.9rem";
-        toast.style.fontWeight = "700";
-        toast.style.textTransform = "uppercase";
-        toast.style.letterSpacing = "0.08em";
+        toast.style.padding = "24px";
+        toast.style.display = "flex";
+        toast.style.justifyContent = "space-between";
+        toast.style.alignItems = "flex-start";
         toast.style.boxShadow = "0 10px 40px rgba(0,0,0,0.9)";
-        toast.style.animation = "sIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards";
+        toast.style.animation = "sIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards";
         
         toast.innerHTML = `
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="color: var(--c-lime); font-size: 1.1rem;">[✓]</span>
-            <span style="line-height: 1.2;">Planejamento estratégico salvo e enviado por e-mail ao atleta!</span>
+          <div style="display: flex; align-items: flex-start; gap: 16px; flex: 1;">
+            <span style="color: var(--c-lime); font-size: 1.2rem; font-family: var(--font-label, sans-serif); line-height: 1.2;">[✓]</span>
+            <span style="color: #FFFFFF; font-family: var(--font-label, sans-serif); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.5;">
+              PLANEJAMENTO ESTRATÉGICO SALVO E ENVIADO POR E-MAIL AO ATLETA!
+            </span>
           </div>
+          <button onclick="this.parentElement.remove()" aria-label="Fechar notificação" style="background: transparent; border: none; color: #FFFFFF; font-size: 1.2rem; cursor: pointer; padding: 0 0 0 16px; opacity: 0.4; transition: opacity 0.2s; line-height: 1;">
+            ✖
+          </button>
         `;
         
         container.appendChild(toast);
-        setTimeout(() => { toast.style.animation = "sOut 0.25s ease-in forwards"; setTimeout(() => toast.remove(), 250); }, 4500);
-        container.appendChild(toast);
-        setTimeout(() => { toast.style.animation = "sOut 0.3s ease-in forwards"; setTimeout(() => toast.remove(), 300); }, 4000);
+        setTimeout(() => { 
+          if(toast.parentElement) {
+            toast.style.animation = "sOut 0.3s ease-in forwards"; 
+            setTimeout(() => toast.remove(), 300); 
+          }
+        }, 5000);
 
-        // Atualização Multi-Tela Sincronizada ( desktop table + mobile cards )
         const botoesAtleta = document.querySelectorAll(`[data-lead-id="${currentLeadId}"]`);
         botoesAtleta.forEach(btn => {
           btn.textContent = "Avaliação";
           btn.setAttribute("onclick", `window.__viewSentEval('${currentLeadId}')`);
-          // Adapta o link de estilo para manter a cor de destaque de leitura se necessário
           btn.style.color = "var(--c-lime)";
+          btn.style.borderColor = "var(--c-lime)";
         });
 
         await loadLeads();
       }catch(e){
         console.error("Erro ao enviar avaliação:",e);
-        alert("Falha crítica no envio: " + e.message);
         statusEl.textContent="Não foi possível enviar a avaliação agora. Tente novamente.";
       }finally{
         btnConfirm.disabled = false;
