@@ -649,6 +649,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
       border-radius: var(--radius-card);
       border: 1px solid rgba(255,255,255,0.08);
       transition: border-color var(--transition-base), transform var(--transition-base);
+      /* reset de <button> nativo */
+      background: none;
+      padding: 0;
+      cursor: pointer;
+      width: 100%;
     }
     .foto-thumb:hover {
       border-color: var(--c-lime);
@@ -659,6 +664,78 @@ import AdminHeader from '../../components/AdminHeader.astro';
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+
+    /* LIGHTBOX DE FOTOS */
+    .lightbox-overlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.92);
+      display: flex; align-items: center; justify-content: center;
+      padding: var(--space-5);
+    }
+    .lightbox-overlay[hidden] { display: none; }
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: var(--radius-card);
+    }
+    .lightbox-close {
+      position: absolute;
+      top: var(--space-4);
+      right: var(--space-4);
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50%;
+      color: var(--c-white);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-base), border-color var(--transition-base);
+    }
+    .lightbox-close:hover { background: rgba(166,195,0,0.1); border-color: var(--c-lime); color: var(--c-lime); }
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 52px;
+      height: 52px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50%;
+      color: var(--c-white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-base), border-color var(--transition-base);
+    }
+    .lightbox-nav:hover { background: rgba(166,195,0,0.1); border-color: var(--c-lime); color: var(--c-lime); }
+    .lightbox-nav--prev { left: var(--space-4); }
+    .lightbox-nav--next { right: var(--space-4); }
+    .lightbox-nav:disabled { opacity: 0.25; cursor: not-allowed; }
+    .lightbox-counter {
+      position: absolute;
+      bottom: var(--space-4);
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--c-textsub);
+      background: rgba(0,0,0,0.5);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+    }
+    @media (max-width: 600px) {
+      .lightbox-nav { width: 44px; height: 44px; }
+      .lightbox-nav--prev { left: var(--space-2); }
+      .lightbox-nav--next { right: var(--space-2); }
     }
 
     /* ZONA DE PRIVACIDADE / LGPD */
@@ -832,6 +909,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
         <button class="btn-sm btn-danger" id="delete-confirm">Confirmar exclusão definitiva</button>
       </div>
     </div>
+  </div>
+
+  <!-- Lightbox de fotos com navegação -->
+  <div class="lightbox-overlay" id="lightbox-overlay" hidden>
+    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Fechar">&#x2715;</button>
+    <button type="button" class="lightbox-nav lightbox-nav--prev" id="lightbox-prev" aria-label="Foto anterior">&#x2039;</button>
+    <img class="lightbox-img" id="lightbox-img" src="" alt="" />
+    <button type="button" class="lightbox-nav lightbox-nav--next" id="lightbox-next" aria-label="Próxima foto">&#x203A;</button>
+    <span class="lightbox-counter" id="lightbox-counter"></span>
   </div>
 
   <script type="module">
@@ -1024,6 +1110,52 @@ import AdminHeader from '../../components/AdminHeader.astro';
       return `<tr class="detail-row${alertCls}"><th class="detail-th">${label}</th><td class="detail-td">${v}${tag}</td></tr>`;
     }
 
+    // ── LIGHTBOX DE FOTOS ──────────────────────────────────────────────
+    let __lightboxIndex = 0;
+    const lbOverlay  = document.getElementById("lightbox-overlay");
+    const lbImg      = document.getElementById("lightbox-img");
+    const lbCounter  = document.getElementById("lightbox-counter");
+    const lbPrev     = document.getElementById("lightbox-prev");
+    const lbNext     = document.getElementById("lightbox-next");
+
+    function __renderLightbox(){
+      const urls = window.__currentFotoUrls || [];
+      if (!urls.length) return;
+      lbImg.src = urls[__lightboxIndex];
+      lbImg.alt = `Foto ${__lightboxIndex + 1} de ${urls.length}`;
+      lbCounter.textContent = `${__lightboxIndex + 1} / ${urls.length}`;
+      lbPrev.disabled = __lightboxIndex === 0;
+      lbNext.disabled = __lightboxIndex === urls.length - 1;
+    }
+
+    window.__openLightbox = function(index){
+      __lightboxIndex = index;
+      __renderLightbox();
+      lbOverlay.hidden = false;
+      document.body.style.overflow = "hidden";
+    };
+
+    function __closeLightbox(){
+      lbOverlay.hidden = true;
+      document.body.style.overflow = "";
+    }
+
+    lbPrev?.addEventListener("click", () => {
+      if (__lightboxIndex > 0) { __lightboxIndex--; __renderLightbox(); }
+    });
+    lbNext?.addEventListener("click", () => {
+      const urls = window.__currentFotoUrls || [];
+      if (__lightboxIndex < urls.length - 1) { __lightboxIndex++; __renderLightbox(); }
+    });
+    document.getElementById("lightbox-close")?.addEventListener("click", __closeLightbox);
+    lbOverlay?.addEventListener("click", e => { if (e.target === lbOverlay) __closeLightbox(); });
+    document.addEventListener("keydown", e => {
+      if (lbOverlay?.hidden) return;
+      if (e.key === "Escape") __closeLightbox();
+      if (e.key === "ArrowLeft") lbPrev?.click();
+      if (e.key === "ArrowRight") lbNext?.click();
+    });
+
     window.__openDetail=async function(id){
       const lead=leads.find(l=>l.id===id);if(!lead)return;
       currentDetailLeadId=id;
@@ -1097,14 +1229,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
           });
           if (res.ok) {
             const { urls } = await res.json();
+            window.__currentFotoUrls = urls; // usado pelo lightbox para navegação
             fotosSection = `<div class="detail-section">
               <div class="detail-section__title">Fotos de referência</div>
               <p class="privacy-note" style="margin-bottom:var(--space-3)">Links temporários — expiram em 15 minutos por segurança.</p>
               <div class="fotos-grid">
                 ${urls.map((url, i) => `
-                  <a href="${url}" target="_blank" rel="noopener" class="foto-thumb" aria-label="Abrir foto ${i+1} em tamanho completo">
+                  <button type="button" class="foto-thumb" onclick="window.__openLightbox(${i})" aria-label="Ampliar foto ${i+1}">
                     <img src="${url}" alt="Foto ${i+1}" loading="lazy" />
-                  </a>`).join("")}
+                  </button>`).join("")}
               </div>
             </div>`;
           } else {
@@ -1181,28 +1314,21 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     document.getElementById("btn-gen-ai")?.addEventListener("click",async()=>{
       if(!currentLeadId)return;
-      const btnGen = document.getElementById("btn-gen-ai");
       const statusEl=document.getElementById("eval-status");
       const taIds=["s1","s2","s3","s4","s5"];
-      
-      btnGen.disabled = true;
-      btnGen.textContent = "Processando...";
       taIds.forEach(k=>document.getElementById(`eval-${k}`).classList.add("eval-ta--loading"));
-      statusEl.textContent="Orquestrando matriz biológica com Gemini 2.5 Flash...";
-      
+      statusEl.textContent="Gerando rascunho com Gemini 2.5 Flash...";
       try{
         const res=await fetch("/.netlify/functions/generate-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId})});
         if(!res.ok)throw new Error(await res.text());
         const {sections}=await res.json();
         taIds.forEach(k=>{document.getElementById(`eval-${k}`).value=sections[k]??"";});
-        statusEl.textContent="Rascunho gerado com sucesso. Revise antes de enviar.";
+        statusEl.textContent="Rascunho gerado. Revise antes de enviar.";
       }catch(e){
         console.error("Erro ao gerar avaliação:",e);
         statusEl.textContent="Não foi possível gerar o rascunho agora. Tente novamente em instantes ou preencha manualmente.";
       }finally{
         taIds.forEach(k=>document.getElementById(`eval-${k}`).classList.remove("eval-ta--loading"));
-        btnGen.disabled = false;
-        btnGen.textContent = "Gerar rascunho com IA (Gemini)";
       }
     });
 
@@ -1224,37 +1350,20 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     document.getElementById("confirm-send")?.addEventListener("click",async()=>{
       if(!currentLeadId)return;
-      const btnConfirm = document.getElementById("confirm-send");
+      document.getElementById("confirm-overlay").hidden=true;
       const statusEl=document.getElementById("eval-status");
       const sections={};
       ["s1","s2","s3","s4","s5"].forEach(k=>{sections[k]=document.getElementById(`eval-${k}`).value;});
       const coachNotes=document.getElementById("eval-notes").value;
-      
-      if (!sections.s1.trim()) {
-        alert("Não é possível enviar uma avaliação vazia. Gere o rascunho com IA ou escreva as diretrizes.");
-        document.getElementById("confirm-overlay").hidden = true;
-        return;
-      }
-
-      btnConfirm.disabled = true;
-      btnConfirm.textContent = "Despachando...";
-      document.getElementById("confirm-overlay").hidden=true;
-      statusEl.textContent="Salvando histórico e disparando e-mail via Resend...";
-      
+      statusEl.textContent="Enviando...";
       try{
         const res=await fetch("/.netlify/functions/send-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId,sections,coachNotes})});
         if(!res.ok)throw new Error(await res.text());
-        
-        // Colapso completo da gaveta lateral e alerta inegociável
-        document.getElementById("eval-drawer").hidden = true;
-        alert("SUCESSO: Planejamento estratégico salvo e enviado por e-mail ao atleta!");
+        statusEl.textContent="Avaliação enviada com sucesso.";
         await loadLeads();
       }catch(e){
         console.error("Erro ao enviar avaliação:",e);
         statusEl.textContent="Não foi possível enviar a avaliação agora. Tente novamente em instantes.";
-      }finally{
-        btnConfirm.disabled = false;
-        btnConfirm.textContent = "Confirmar envio";
       }
     });
     
