@@ -8,20 +8,36 @@ import { getFirestore } from "firebase-admin/firestore";
 
 function getDb() {
   if (!getApps().length) {
-    const saEnv = process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}";
-    let serviceAccount: any;
+    let saEnv: string = (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}").trim();
+    let serviceAccount: any = null;
+
     try {
-      // Sanitização de strings e quebras de linha literais corrompidas no parser da Netlify
-      const sanitizedSa = saEnv.replace(/\\n/g, '\n');
-      serviceAccount = JSON.parse(sanitizedSa);
-      
-      if (serviceAccount.private_key) {
+      // Remove aspas externas caso o CI/CD tenha envelopado o JSON
+      if (saEnv.startsWith('"') && saEnv.endsWith('"')) saEnv = saEnv.slice(1, -1);
+      if (saEnv.startsWith("'") && saEnv.endsWith("'")) saEnv = saEnv.slice(1, -1);
+
+      // Parse direto — o JSON.parse já interpreta \n escapado corretamente.
+      // NÃO substituir \n antes do parse: transforma JSON válido em inválido.
+      try {
+        serviceAccount = JSON.parse(saEnv);
+      } catch {
+        // Fallback: escapes duplos injetados pelo CI/CD
+        serviceAccount = JSON.parse(saEnv.replace(/\\"/g, '"'));
+      }
+
+      // Após o parse, garante quebras de linha reais no private_key
+      if (serviceAccount?.private_key) {
         serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
       }
     } catch (e: any) {
       console.error("FALHA CRÍTICA (generate-evaluation): FIREBASE_SERVICE_ACCOUNT_JSON inválido.");
       throw new Error(`Erro no parse das credenciais do Firebase: ${e.message}`);
     }
+
+    if (!serviceAccount?.private_key) {
+      throw new Error("Credenciais do Firebase ausentes ou incompletas.");
+    }
+
     initializeApp({ credential: cert(serviceAccount as any) });
   }
   return getFirestore();
