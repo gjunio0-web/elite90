@@ -822,6 +822,20 @@ const FIELD_RULES: Array<{
     isGroup: true,
     validate: () => compressedFiles.length > 0,
   },
+  {
+    // LGPD Art. 11 — consentimento explícito para dados de saúde é obrigatório.
+    // Sem marcação, a ficha não é salva — validateAll() bloqueia o submit.
+    key: "consentimento_saude",
+    inputId: "f-consent-health",
+    errorId: "f-consent-health-error",
+    msgPt: "É necessário consentir com o tratamento dos dados de saúde para enviar a ficha.",
+    msgEn: "You must consent to the processing of health data to submit this form.",
+    isGroup: true,
+    validate: () => {
+      const el = document.getElementById("f-consent-health") as HTMLInputElement | null;
+      return el?.checked === true;
+    },
+  },
 ];
 
 // ============================================================
@@ -1265,10 +1279,10 @@ formEl?.addEventListener("submit", async e => {
 
       // Importação dinâmica do Firebase Storage Client SDK
       const { initializeApp, getApps } = await import(
-        "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"
+        "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"
       );
       const { getStorage, ref, uploadBytes, getDownloadURL } = await import(
-        "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js"
+        "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js"
       );
 
       // Reutilizar app existente ou inicializar (fbConfig injetado via window.__fbConfig)
