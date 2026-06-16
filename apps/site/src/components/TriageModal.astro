@@ -1287,7 +1287,9 @@ formEl?.addEventListener("submit", async e => {
 
       // Reutilizar app existente ou inicializar (fbConfig injetado via window.__fbConfig)
       const app = getApps().length ? getApps()[0] : initializeApp(window.__fbConfig);
-      const storage = getStorage(app);
+      // Passa o bucket explicitamente para evitar fallback automático para .appspot.com
+      const bucketUrl = `gs://${window.__fbConfig.storageBucket}`;
+      const storage = getStorage(app, bucketUrl);
 
       // ID temporário para organizar as fotos no Storage antes de ter o docId do Firestore
       const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
