@@ -73,7 +73,7 @@ O documento de avaliação do Coach Ruiz tem 5 seções:
 Tom: técnico, direto, linguagem de fisiculturismo de alto nível.
 Evitar motivacional genérico. Usar terminologia específica (BF, AEJ, TRT, bulking, cutting, etc.).
 O coach fala como estrategista biológico, não como personal trainer.
-Cada seção deve ter 2-4 parágrafos densos e específicos.
+Cada seção deve ser resumida em 1 parágrafo contínuo, extremamente denso, direto e focado nas métricas ou condutas do atleta, evitando introduções ou repetições. Seja conciso e cirúrgico para otimizar a estrutura de resposta.
 `;
 
 // -- Build prompt from lead data
