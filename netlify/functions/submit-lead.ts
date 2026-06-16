@@ -186,20 +186,22 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       : objetivo;
 
     // Upload de fotos para Firebase Storage via Admin SDK (server-side, sem CORS)
+    // getDb() deve ser chamado ANTES de uploadFotos para garantir que initializeApp()
+    // rode antes de getStorage() ser acessado.
+    const db = getDb();
     const uploadId = fotos_upload_id || `${Date.now()}-srv`;
     let fotosUrlsFinal: string[] = Array.isArray(fotos_urls) ? fotos_urls : [];
     if (Array.isArray(fotos_b64) && fotos_b64.length > 0) {
       try {
         fotosUrlsFinal = await uploadFotos(fotos_b64, uploadId);
       } catch (uploadErr: any) {
-        console.error("Erro no upload de fotos:", uploadErr?.message ?? uploadErr);
+        console.error("[submit-lead] Erro no upload de fotos:", uploadErr?.message ?? uploadErr);
         // Não bloqueia o envio da ficha — fotos ficam vazias
         fotosUrlsFinal = [];
       }
     }
 
     // Escrita atômica e definitiva na coleção de destino do Firebase Firestore
-    const db = getDb();
     const docRef = await db.collection("leads").add({
       nome:                nome.trim(),
       email:               email.trim().toLowerCase(),
