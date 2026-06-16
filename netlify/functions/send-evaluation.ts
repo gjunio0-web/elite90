@@ -107,7 +107,12 @@ export const handler = async (event: any) => {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
-  // Verify Firebase Auth ID token
+  // getDb() antes de getAuth() — garante que initializeApp() rode antes
+  // de getApps()[0] ser acessado. Sem isso, getApps() = [] e getAuth(undefined)
+  // lança exceção que se manifesta como 401 "Invalid token" falso.
+  const db = getDb();
+
+  // Verificação do token Firebase Auth
   const authHeader = event.headers["authorization"] ?? "";
   const idToken = authHeader.replace("Bearer ", "").trim();
   if (!idToken) return { statusCode: 401, body: "Unauthorized" };
@@ -123,7 +128,7 @@ export const handler = async (event: any) => {
       return { statusCode: 400, body: "leadId e sections obrigatórios" };
     }
 
-    const db = getDb();
+    // db já inicializado acima
 
     // Get lead
     const leadDoc = await db.collection("leads").doc(leadId).get();
