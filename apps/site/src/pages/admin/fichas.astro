@@ -1101,7 +1101,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
               <div class="detail-section__title">Fotos de referência</div>
               <p class="privacy-note" style="margin-bottom:var(--space-3)">Links temporários — expiram em 15 minutos por segurança.</p>
               <div class="fotos-grid">
-                ${(urls as string[]).map((url, i) => `
+                ${urls.map((url, i) => `
                   <a href="${url}" target="_blank" rel="noopener" class="foto-thumb" aria-label="Abrir foto ${i+1} em tamanho completo">
                     <img src="${url}" alt="Foto ${i+1}" loading="lazy" />
                   </a>`).join("")}
