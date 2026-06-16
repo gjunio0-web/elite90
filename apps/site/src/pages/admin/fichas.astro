@@ -857,6 +857,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
         </button>
       </div>
       <p class="eval-status" id="eval-status"></p>
+      
+      <div id="ia-truncation-alert" style="background: rgba(239, 68, 68, 0.04); border: 1px solid #EF4444; padding: var(--space-4); margin-bottom: var(--space-4); color: #EF4444; font-family: var(--font-body); font-size: 0.8rem; line-height: 1.6;" hidden></div>
+      
       <label class="eval-label" for="eval-s1">01 - Diagnóstico Estético</label>
       <textarea class="eval-ta" id="eval-s1" rows="5" placeholder="Descreva o ponto de partida estético do atleta, áreas prioritárias e expectativa realista de evolução em 90 dias."></textarea>
       <label class="eval-label" for="eval-s2">02 - Planejamento de Treino</label>
@@ -1049,11 +1052,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
         const date=lead.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"--";
         
         const evalButton = lead.status === "avaliacao_enviada"
-          ? `<button class="btn-action-link" style="color: var(--c-lime);" onclick="window.__viewSentEval('${lead.id}')">
+          ? `<button class="btn-action-link" style="color: var(--c-lime);" data-lead-id="${lead.id}" onclick="window.__viewSentEval('${lead.id}')">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              Ver Enviada ↗
+              Avaliação
              </button>`
-          : `<button class="btn-action-link" onclick="window.__openEval('${lead.id}')">
+          : `<button class="btn-action-link" data-lead-id="${lead.id}" onclick="window.__openEval('${lead.id}')">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
               Avaliar
              </button>`;
@@ -1341,26 +1344,40 @@ import AdminHeader from '../../components/AdminHeader.astro';
       if(!currentLeadId)return;
       const btnGen = document.getElementById("btn-gen-ai");
       const statusEl=document.getElementById("eval-status");
+      const alertBox = document.getElementById("ia-truncation-alert");
       const taIds=["s1","s2","s3","s4","s5"];
       
+      if (alertBox) { alertBox.hidden = true; alertBox.innerHTML = ""; }
       btnGen.disabled = true;
       btnGen.textContent = "Processando...";
       taIds.forEach(k=>document.getElementById(`eval-${k}`).classList.add("eval-ta--loading"));
       statusEl.textContent="Estruturando matriz analítica com o Gemini...";
+      statusEl.style.color = "var(--c-lime)";
       
       try{
         const res=await fetch("/.netlify/functions/generate-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId})});
         if(!res.ok)throw new Error(await res.text());
-        const {sections}=await res.json();
         
-        taIds.forEach(k=>{document.getElementById(`eval-${k}`).value=sections[k]??"";});
+        const dados = await res.json();
+        const secoesRecebidas = dados.sections || {};
         
-        if (!sections.s5 || sections.s5.length < 5) {
+        // Preenche os campos textareas com o mapa aninhado correto
+        taIds.forEach(k=>{document.getElementById(`eval-${k}`).value=secoesRecebidas[k]??"";});
+        
+        // Validação Full Stack: Verifica flag do backend ou ausência de qualquer bloco essencial
+        const possuiSecaoIncompleta = taIds.some(k => !secoesRecebidas[k] || secoesRecebidas[k].trim() === "");
+        
+        if (dados.truncated || possuiSecaoIncompleta) {
           statusEl.style.color = "var(--c-status-new)";
-          statusEl.textContent="O rascunho foi gerado com sucesso, mas atingiu a capacidade máxima de texto suportada pela inteligência artificial nesta execução. Parte do conteúdo final pode ter sido interrompido. Você pode revisar as caixas e complementar o texto manualmente se necessário.";
+          statusEl.textContent = "Rascunho integrado com ressalvas estruturais.";
+          
+          if (alertBox) {
+            alertBox.innerHTML = `<strong>[ALERTA DE CAPACIDADE DE CONTEXTO]</strong><br>O rascunho foi gerado com sucesso, mas atingiu a capacidade máxima de texto suportada pela inteligência artificial nesta execução. Parte do conteúdo final pode ter sido interrompido. Você pode revisar as caixas e complementar o texto manualmente se necessário.`;
+            alertBox.hidden = false;
+          }
         } else {
           statusEl.style.color = "var(--c-lime)";
-          statusEl.textContent="Rascunho integrado com sucesso. Revise o conteúdo antes do despacho.";
+          statusEl.textContent = "Rascunho integrado com sucesso. Revise o conteúdo antes do despacho.";
         }
       }catch(e){
         console.error("Erro ao gerar avaliação:",e);
@@ -1405,8 +1422,40 @@ import AdminHeader from '../../components/AdminHeader.astro';
         const res=await fetch("/.netlify/functions/send-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId,sections,coachNotes})});
         if(!res.ok)throw new Error(await res.text());
         
+        // Fecha a gaveta de escrita lateral imediatamente
         document.getElementById("eval-drawer").hidden = true;
-        alert("SUCESSO: Planejamento estratégico salvo e enviado por e-mail ao atleta!");
+        
+        // Injeta a notificação dentro do Design System da Plataforma
+        let container = document.getElementById("toast-container");
+        if (!container) {
+          container = document.createElement("div");
+          container.id = "toast-container";
+          container.style.position = "fixed"; container.style.bottom = "24px"; container.style.right = "24px";
+          container.style.zIndex = "9999"; container.style.display = "flex"; container.style.flexDirection = "column"; container.style.gap = "12px";
+          if (!document.getElementById("ts-anim")) {
+            const st = document.createElement("style"); st.id = "ts-anim";
+            st.innerHTML = `@keyframes sIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes sOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }`;
+            document.head.appendChild(st);
+          }
+          document.body.appendChild(container);
+        }
+        const toast = document.createElement("div");
+        toast.style.background = "#0A0A0A"; toast.style.border = "1px solid var(--c-lime)"; toast.style.padding = "16px 24px"; toast.style.color = "#FFFFFF";
+        toast.style.fontFamily = "var(--font-body)"; toast.style.fontSize = "0.85rem"; toast.style.textTransform = "uppercase"; toast.style.letterSpacing = "0.05em";
+        toast.style.boxShadow = "0 8px 32px rgba(0,0,0,0.9)"; toast.style.animation = "sIn 0.3s ease-out forwards";
+        toast.innerHTML = `<div style="display: flex; align-items: center; gap: 12px;"><span style="color: var(--c-lime); font-weight: bold;">[✓]</span><span>Planejamento estratégico salvo e enviado por e-mail ao atleta!</span></div>`;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.animation = "sOut 0.3s ease-in forwards"; setTimeout(() => toast.remove(), 300); }, 4000);
+
+        // Atualização Multi-Tela Sincronizada ( desktop table + mobile cards )
+        const botoesAtleta = document.querySelectorAll(`[data-lead-id="${currentLeadId}"]`);
+        botoesAtleta.forEach(btn => {
+          btn.textContent = "Avaliação";
+          btn.setAttribute("onclick", `window.__viewSentEval('${currentLeadId}')`);
+          // Adapta o link de estilo para manter a cor de destaque de leitura se necessário
+          btn.style.color = "var(--c-lime)";
+        });
+
         await loadLeads();
       }catch(e){
         console.error("Erro ao enviar avaliação:",e);
@@ -1441,23 +1490,34 @@ import AdminHeader from '../../components/AdminHeader.astro';
       document.getElementById("view-eval-drawer").hidden = false;
 
       try {
-        const snap = await getDocs(query(collection(db, "avaliacoes")));
-        const todasdolead = snap.docs
-          .map(d => ({id: d.id, ...d.data()}))
-          .filter(a => a.leadId === id);
+        const q = query(collection(db, "avaliacoes"), where("leadId", "==", id));
+        const snap = await getDocs(q);
+        const todasdolead = snap.docs.map(d => ({id: d.id, ...d.data()}));
 
         if (!todasdolead.length) {
           document.getElementById("view-eval-body").innerHTML = `<p style="color: var(--c-status-alert);">Nenhum registro físico de envio localizado para este atleta no banco.</p>`;
           return;
         }
 
-        todasdolead.sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0));
+        // Multi-Ficha: Garante isolamento ordenando estritamente por segundos decrescentes do servidor
+        todasdolead.sort((a, b) => {
+          const tA = a.createdAt && typeof a.createdAt.seconds === 'number' ? a.createdAt.seconds : 0;
+          const tB = b.createdAt && typeof b.createdAt.seconds === 'number' ? b.createdAt.seconds : 0;
+          return tB - tA;
+        });
+
         const atual = todasdolead[0];
         
-        const dataEnvio = atual.createdAt?.toDate?.()?.toLocaleString("pt-BR") ?? "--";
+        let dataEnvio = "--";
+        if (atual.createdAt) {
+          if (typeof atual.createdAt.toDate === "function") {
+            dataEnvio = atual.createdAt.toDate().toLocaleString("pt-BR");
+          } else if (atual.createdAt.seconds) {
+            dataEnvio = new Date(atual.createdAt.seconds * 1000).toLocaleString("pt-BR");
+          }
+        }
         document.getElementById("view-eval-date").textContent = `Enviado em: ${dataEnvio}`;
 
-        // 1. Dicionário corrigido com as chaves puras do banco (s1 a s5)
         const chavesLabels = {
           s1: "01 - Diagnóstico Estético",
           s2: "02 - Planejamento de Treino",
@@ -1466,13 +1526,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
           s5: "05 - Alinhamento Operacional"
         };
 
-        // 2. Criação do ponteiro para o mapa aninhado do Firestore
+        // Acessa as chaves reais de dentro do mapa aninhado 'sections' extraído do banco
         const mapaDeSecoes = atual.sections || {};
 
-        // 3. Renderização acessando o mapa correto (mapaDeSecoes[chave])
         const htmlCorpo = Object.entries(chavesLabels).map(([chave, label]) => {
           const textoReal = mapaDeSecoes[chave] ? mapaDeSecoes[chave].trim() : "";
-          
           return `
             <div style="margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 16px;">
               <h4 style="font-family: var(--font-label); font-size: 0.75rem; color: var(--c-lime); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">${label}</h4>
