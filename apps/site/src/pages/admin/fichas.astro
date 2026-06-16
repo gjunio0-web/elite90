@@ -1457,20 +1457,29 @@ import AdminHeader from '../../components/AdminHeader.astro';
         const dataEnvio = atual.createdAt?.toDate?.()?.toLocaleString("pt-BR") ?? "--";
         document.getElementById("view-eval-date").textContent = `Enviado em: ${dataEnvio}`;
 
+        // 1. Dicionário corrigido com as chaves puras do banco (s1 a s5)
         const chavesLabels = {
-          content_s1: "01 - Diagnóstico Estético",
-          content_s2: "02 - Planejamento de Treino",
-          content_s3: "03 - Protocolo de Saúde",
-          content_s4: "04 - Estratégia de Competição",
-          content_s5: "05 - Alinhamento Operacional"
+          s1: "01 - Diagnóstico Estético",
+          s2: "02 - Planejamento de Treino",
+          s3: "03 - Protocolo de Saúde",
+          s4: "04 - Estratégia de Competição",
+          s5: "05 - Alinhamento Operacional"
         };
 
-        const htmlCorpo = Object.entries(chavesLabels).map(([chave, label]) => `
-          <div style="margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 16px;">
-            <h4 style="font-family: var(--font-label); font-size: 0.75rem; color: var(--c-lime); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">${label}</h4>
-            <p style="font-family: var(--font-body); font-size: 0.85rem; color: var(--c-white); line-height: 1.7; white-space: pre-wrap;">${atual[chave] || "(Seção em branco ou não preenchida)"}</p>
-          </div>
-        `).join("");
+        // 2. Criação do ponteiro para o mapa aninhado do Firestore
+        const mapaDeSecoes = atual.sections || {};
+
+        // 3. Renderização acessando o mapa correto (mapaDeSecoes[chave])
+        const htmlCorpo = Object.entries(chavesLabels).map(([chave, label]) => {
+          const textoReal = mapaDeSecoes[chave] ? mapaDeSecoes[chave].trim() : "";
+          
+          return `
+            <div style="margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 16px;">
+              <h4 style="font-family: var(--font-label); font-size: 0.75rem; color: var(--c-lime); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">${label}</h4>
+              <p style="font-family: var(--font-body); font-size: 0.85rem; color: var(--c-white); line-height: 1.7; white-space: pre-wrap;">${textoReal || "(Seção em branco ou não preenchida)"}</p>
+            </div>
+          `;
+        }).join("");
 
         const notasHtml = atual.coachNotes 
           ? `<div style="margin-top: 32px; padding: 16px; border: 1px dashed rgba(255,255,255,0.1); background: rgba(255,255,255,0.01);">
