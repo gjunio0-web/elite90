@@ -1082,18 +1082,38 @@ import AdminHeader from '../../components/AdminHeader.astro';
         <button class="btn-sm btn-danger" id="btn-delete-lead">Excluir ficha permanentemente</button>
       </div>`;
 
-      const fotosUrls = Array.isArray(lead.fotos_urls) ? lead.fotos_urls : [];
-      const fotosSection = fotosUrls.length > 0
-        ? `<div class="detail-section">
-            <div class="detail-section__title">Fotos de referência</div>
-            <div class="fotos-grid">
-              ${fotosUrls.map((url, i) => `
-                <a href="${url}" target="_blank" rel="noopener" class="foto-thumb" aria-label="Abrir foto ${i+1} em tamanho completo">
-                  <img src="${url}" alt="Foto ${i+1}" loading="lazy" />
-                </a>`).join("")}
-            </div>
-          </div>`
-        : "";
+      const fotosPaths = Array.isArray(lead.fotos_paths) ? lead.fotos_paths :
+                         Array.isArray(lead.fotos_urls)  ? lead.fotos_urls  : []; // fallback legado
+
+      let fotosSection = "";
+      if (fotosPaths.length > 0) {
+        // Busca Signed URLs temporárias (15 min) via function autenticada
+        try {
+          const token = await getFreshToken();
+          const res = await fetch("/.netlify/functions/get-foto-urls", {
+            method: "POST",
+            headers: { "content-type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify({ paths: fotosPaths }),
+          });
+          if (res.ok) {
+            const { urls } = await res.json();
+            fotosSection = `<div class="detail-section">
+              <div class="detail-section__title">Fotos de referência</div>
+              <p class="privacy-note" style="margin-bottom:var(--space-3)">Links temporários — expiram em 15 minutos por segurança.</p>
+              <div class="fotos-grid">
+                ${(urls as string[]).map((url, i) => `
+                  <a href="${url}" target="_blank" rel="noopener" class="foto-thumb" aria-label="Abrir foto ${i+1} em tamanho completo">
+                    <img src="${url}" alt="Foto ${i+1}" loading="lazy" />
+                  </a>`).join("")}
+              </div>
+            </div>`;
+          } else {
+            fotosSection = `<div class="detail-section"><div class="detail-section__title">Fotos de referência</div><p class="privacy-note">Não foi possível carregar as fotos agora. Tente reabrir a ficha.</p></div>`;
+          }
+        } catch {
+          fotosSection = `<div class="detail-section"><div class="detail-section__title">Fotos de referência</div><p class="privacy-note">Erro ao gerar links das fotos.</p></div>`;
+        }
+      }
 
       document.getElementById("detail-content").innerHTML=
         section("Identificação", secIdentificacao) +
@@ -1216,8 +1236,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
     
     // Export CSV
     document.getElementById("btn-csv")?.addEventListener("click",()=>{
-      const headers=["Data","Nome","Email","CPF","Nascimento","Altura","Peso","Objetivo","Atividade","Tempo","Frequencia","Disponibilidade","Personal","Competicao","Coach BB","Medico","TRT","Cardiaca","Diabetes","Cronica","Lesao","Dieta","Refeicoes","Suplementos","Agua","Status","Fotos (URLs)"];
-      const rows=leads.map(l=>[l.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"",l.nome??"",l.email??"",l.cpf??"",l.data_nascimento??"",l.altura??"",l.peso??"",l.objetivo??"",l.atividade_fisica??"",l.tempo_atividade??"",l.frequencia_semanal??"",l.disponibilidade_diaria??"",l.personal_trainer??"",`${l.competicao??""}${l.competicao_detalhe?` - ${l.competicao_detalhe}`:""}`,l.conhece_coach??"",l.medico_esporte??"",`${l.trt??""}${l.trt_detalhe?` - ${l.trt_detalhe}`:""}`,l.condicao_cardiaca??"",l.diabetes??"",l.doenca_cronica??"",`${l.lesao??""}${l.lesao_detalhe?` - ${l.lesao_detalhe}`:""}`,l.dieta??"",l.refeicoes_dia??"",`${l.suplementos??""}${l.suplementos_detalhe?` - ${l.suplementos_detalhe}`:""}`,l.agua_litros??"",l.status??"",(l.fotos_urls??[]).join(" | ")]);
+      const headers=["Data","Nome","Email","CPF","Nascimento","Altura","Peso","Objetivo","Atividade","Tempo","Frequencia","Disponibilidade","Personal","Competicao","Coach BB","Medico","TRT","Cardiaca","Diabetes","Cronica","Lesao","Dieta","Refeicoes","Suplementos","Agua","Status","Fotos (paths)"];
+      const rows=leads.map(l=>[l.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"",l.nome??"",l.email??"",l.cpf??"",l.data_nascimento??"",l.altura??"",l.peso??"",l.objetivo??"",l.atividade_fisica??"",l.tempo_atividade??"",l.frequencia_semanal??"",l.disponibilidade_diaria??"",l.personal_trainer??"",`${l.competicao??""}${l.competicao_detalhe?` - ${l.competicao_detalhe}`:""}`,l.conhece_coach??"",l.medico_esporte??"",`${l.trt??""}${l.trt_detalhe?` - ${l.trt_detalhe}`:""}`,l.condicao_cardiaca??"",l.diabetes??"",l.doenca_cronica??"",`${l.lesao??""}${l.lesao_detalhe?` - ${l.lesao_detalhe}`:""}`,l.dieta??"",l.refeicoes_dia??"",`${l.suplementos??""}${l.suplementos_detalhe?` - ${l.suplementos_detalhe}`:""}`,l.agua_litros??"",l.status??"",(l.fotos_paths??l.fotos_urls??[]).join(" | ")]);
       const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
       const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
       const url=URL.createObjectURL(blob);

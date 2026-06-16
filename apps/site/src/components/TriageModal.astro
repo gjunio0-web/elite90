@@ -6,16 +6,6 @@ interface Props { t: Translations; locale?: Locale; }
 const { t, locale = "pt-br" } = Astro.props;
 const f = t.form;
 const isEn = locale === "en";
-
-// Config pública do Firebase — exposta ao browser via define:vars
-const fbConfig = {
-  apiKey:            import.meta.env.PUBLIC_FIREBASE_API_KEY,
-  authDomain:        import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId:         import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket:     import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId:             import.meta.env.PUBLIC_FIREBASE_APP_ID,
-};
 ---
 
 <div class="modal-overlay" id="triage-modal" role="dialog" aria-modal="true"
@@ -563,15 +553,7 @@ const fbConfig = {
   </div>
 </div>
 
-<!-- Injeta fbConfig no window sem interferir no bundling do script principal -->
-<script is:inline define:vars={{ fbConfig }}>
-  window.__fbConfig = fbConfig;
-</script>
-
 <script>
-// Tipagem para config Firebase injetada via script inline (define:vars)
-declare global { interface Window { __fbConfig: Record<string, string>; } }
-
 // ============================================================
 // FONTE UNICA DE VERDADE: FIELD_RULES
 // Cada entrada define: inputId, errorId, mensagens PT/EN,
@@ -1271,44 +1253,28 @@ formEl?.addEventListener("submit", async e => {
       }
     });
 
-    // Upload de fotos para Firebase Storage (se houver)
+    // Upload de fotos — converte para base64 e envia junto ao payload.
+    // O upload real para o Firebase Storage é feito server-side em submit-lead
+    // via Firebase Admin SDK, evitando CORS e restrições de bucket client-side.
     if (compressedFiles.length > 0) {
       submitBtn.textContent = isEnPage
-        ? `Uploading photos (0/${compressedFiles.length})...`
-        : `Enviando fotos (0/${compressedFiles.length})...`;
+        ? `Preparing photos (0/${compressedFiles.length})...`
+        : `Preparando fotos (0/${compressedFiles.length})...`;
 
-      // Importação dinâmica do Firebase Storage Client SDK
-      const { initializeApp, getApps } = await import(
-        "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"
-      );
-      const { getStorage, ref, uploadBytes, getDownloadURL } = await import(
-        "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js"
-      );
-
-      // Reutilizar app existente ou inicializar (fbConfig injetado via window.__fbConfig)
-      const app = getApps().length ? getApps()[0] : initializeApp(window.__fbConfig);
-      // Passa o bucket explicitamente para evitar fallback automático para .appspot.com
-      const bucketUrl = `gs://${window.__fbConfig.storageBucket}`;
-      const storage = getStorage(app, bucketUrl);
-
-      // ID temporário para organizar as fotos no Storage antes de ter o docId do Firestore
-      const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      const fotosUrls: string[] = [];
-
+      const fotosB64: string[] = [];
       for (let i = 0; i < compressedFiles.length; i++) {
-        const file = compressedFiles[i];
         submitBtn.textContent = isEnPage
-          ? `Uploading photos (${i + 1}/${compressedFiles.length})...`
-          : `Enviando fotos (${i + 1}/${compressedFiles.length})...`;
-
-        const storageRef = ref(storage, `leads/${uploadId}/foto-${i + 1}.webp`);
-        await uploadBytes(storageRef, file, { contentType: "image/webp" });
-        const url = await getDownloadURL(storageRef);
-        fotosUrls.push(url);
+          ? `Preparing photos (${i + 1}/${compressedFiles.length})...`
+          : `Preparando fotos (${i + 1}/${compressedFiles.length})...`;
+        const b64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string).split(",")[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(compressedFiles[i]);
+        });
+        fotosB64.push(b64);
       }
-
-      fields.fotos_urls   = fotosUrls;
-      fields.fotos_upload_id = uploadId; // permite vincular ao docId depois, se necessário
+      fields.fotos_b64 = fotosB64;
     }
 
     submitBtn.textContent = isEnPage ? "Sending..." : "Enviando...";

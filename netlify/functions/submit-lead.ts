@@ -4,6 +4,7 @@
 
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
 
 function getDb(): FirebaseFirestore.Firestore {
   if (!getApps().length) {
@@ -39,9 +40,38 @@ function getDb(): FirebaseFirestore.Firestore {
       throw new Error("Erro na inicialização do Firebase: Objeto de credenciais ou private_key ausente.");
     }
 
-    initializeApp({ credential: cert(serviceAccount) });
+    initializeApp({
+      credential: cert(serviceAccount),
+      storageBucket: process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? "elite90-c716b.firebasestorage.app",
+    });
   }
   return getFirestore();
+}
+
+// Upload de fotos base64 para Firebase Storage via Admin SDK (sem CORS, sem restrições de bucket)
+// Fotos salvas como privadas — acesso via Signed URL gerada no painel admin sob demanda.
+async function uploadFotos(fotosB64: string[], uploadId: string): Promise<string[]> {
+  const bucket = getStorage().bucket();
+  const paths: string[] = [];
+
+  for (let i = 0; i < fotosB64.length; i++) {
+    const b64 = fotosB64[i];
+    const buffer = Buffer.from(b64, "base64");
+    const filePath = `leads/${uploadId}/foto-${i + 1}.webp`;
+    const file = bucket.file(filePath);
+
+    await file.save(buffer, {
+      metadata: { contentType: "image/webp" },
+      // Sem predefinedAcl: arquivo permanece privado.
+      // Acesso controlado via Signed URL gerada pelo painel admin.
+    });
+
+    // Salva o path do Storage, não uma URL pública.
+    // A URL de acesso é gerada sob demanda em fichas.astro com expiração.
+    paths.push(filePath);
+  }
+
+  return paths;
 }
 
 function buildEmail(nome: string, objetivo: string): string {
@@ -139,6 +169,7 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       consentimento_saude = "",
       fotos_urls = [],
       fotos_upload_id = "",
+      fotos_b64 = [],
     } = fields;
 
     // Barreira síncrona primária contra dados vazios ou corrompidos
@@ -153,6 +184,19 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     const objetivoFinal = objetivo === "Outro" || objetivo === "Other"
       ? objetivo_outro
       : objetivo;
+
+    // Upload de fotos para Firebase Storage via Admin SDK (server-side, sem CORS)
+    const uploadId = fotos_upload_id || `${Date.now()}-srv`;
+    let fotosUrlsFinal: string[] = Array.isArray(fotos_urls) ? fotos_urls : [];
+    if (Array.isArray(fotos_b64) && fotos_b64.length > 0) {
+      try {
+        fotosUrlsFinal = await uploadFotos(fotos_b64, uploadId);
+      } catch (uploadErr: any) {
+        console.error("Erro no upload de fotos:", uploadErr?.message ?? uploadErr);
+        // Não bloqueia o envio da ficha — fotos ficam vazias
+        fotosUrlsFinal = [];
+      }
+    }
 
     // Escrita atômica e definitiva na coleção de destino do Firebase Firestore
     const db = getDb();
@@ -191,8 +235,8 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       avaliacao_enviada:   false,
       consentimento_saude:           consentimento_saude === "on" || consentimento_saude === "true",
       consentimento_saude_timestamp: FieldValue.serverTimestamp(),
-      fotos_urls:          Array.isArray(fotos_urls) ? fotos_urls : [],
-      fotos_upload_id:     fotos_upload_id || "",
+      fotos_paths:         fotosUrlsFinal,  // paths no Storage, acesso via Signed URL
+      fotos_upload_id:     uploadId,
     });
 
     // Disparo assíncrono e isolado de e-mail através da API do Resend (Global Fetch)
