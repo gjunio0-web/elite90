@@ -1095,10 +1095,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               Ver ficha
             </button>
-            <button class="btn-card-action" onclick="window.__openEval('${lead.id}')">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-              Avaliar
-            </button>
+            ${lead.status === "avaliacao_enviada"
+              ? `<button class="btn-card-action" style="color: var(--c-lime); border-color: var(--c-lime);" data-lead-id="${lead.id}" onclick="window.__viewSentEval('${lead.id}')">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  Avaliação
+                 </button>`
+              : `<button class="btn-card-action" data-lead-id="${lead.id}" onclick="window.__openEval('${lead.id}')">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  Avaliar
+                 </button>`
+            }
           </div>
         </div>`;
       }).join("");
@@ -1430,20 +1436,56 @@ import AdminHeader from '../../components/AdminHeader.astro';
         if (!container) {
           container = document.createElement("div");
           container.id = "toast-container";
-          container.style.position = "fixed"; container.style.bottom = "24px"; container.style.right = "24px";
-          container.style.zIndex = "9999"; container.style.display = "flex"; container.style.flexDirection = "column"; container.style.gap = "12px";
+          // Layout responsivo: centraliza no mobile, joga na direita no desktop
+          container.style.position = "fixed";
+          container.style.bottom = "24px";
+          container.style.left = "50%";
+          container.style.transform = "translateX(-50%)";
+          container.style.width = "calc(100% - 32px)";
+          container.style.maxWidth = "480px";
+          container.style.zIndex = "9999";
+          container.style.display = "flex";
+          container.style.flexDirection = "column";
+          container.style.gap = "12px";
+          
           if (!document.getElementById("ts-anim")) {
             const st = document.createElement("style"); st.id = "ts-anim";
-            st.innerHTML = `@keyframes sIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes sOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }`;
+            st.innerHTML = `
+              @keyframes sIn { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } 
+              @keyframes sOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(40px); opacity: 0; } }
+              @media (min-width: 768px) {
+                #toast-container { left: auto; right: 24px; transform: none; width: auto; }
+              }
+            `;
             document.head.appendChild(st);
           }
           document.body.appendChild(container);
         }
+
         const toast = document.createElement("div");
-        toast.style.background = "#0A0A0A"; toast.style.border = "1px solid var(--c-lime)"; toast.style.padding = "16px 24px"; toast.style.color = "#FFFFFF";
-        toast.style.fontFamily = "var(--font-body)"; toast.style.fontSize = "0.85rem"; toast.style.textTransform = "uppercase"; toast.style.letterSpacing = "0.05em";
-        toast.style.boxShadow = "0 8px 32px rgba(0,0,0,0.9)"; toast.style.animation = "sIn 0.3s ease-out forwards";
-        toast.innerHTML = `<div style="display: flex; align-items: center; gap: 12px;"><span style="color: var(--c-lime); font-weight: bold;">[✓]</span><span>Planejamento estratégico salvo e enviado por e-mail ao atleta!</span></div>`;
+        toast.style.background = "#0A0A0A";
+        toast.style.border = "1px solid var(--c-lime)";
+        toast.style.borderRadius = "var(--radius-card, 4px)";
+        toast.style.padding = "16px 20px";
+        toast.style.color = "#FFFFFF";
+        // Alinhamento tipográfico inegociável ao Design System
+        toast.style.fontFamily = "var(--font-label), 'Bebas Neue', sans-serif";
+        toast.style.fontSize = "0.9rem";
+        toast.style.fontWeight = "700";
+        toast.style.textTransform = "uppercase";
+        toast.style.letterSpacing = "0.08em";
+        toast.style.boxShadow = "0 10px 40px rgba(0,0,0,0.9)";
+        toast.style.animation = "sIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards";
+        
+        toast.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="color: var(--c-lime); font-size: 1.1rem;">[✓]</span>
+            <span style="line-height: 1.2;">Planejamento estratégico salvo e enviado por e-mail ao atleta!</span>
+          </div>
+        `;
+        
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.animation = "sOut 0.25s ease-in forwards"; setTimeout(() => toast.remove(), 250); }, 4500);
         container.appendChild(toast);
         setTimeout(() => { toast.style.animation = "sOut 0.3s ease-in forwards"; setTimeout(() => toast.remove(), 300); }, 4000);
 
