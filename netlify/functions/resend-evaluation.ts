@@ -31,9 +31,8 @@ function getDb() {
   return getFirestore();
 }
 
-function buildResendEmail(nome: string, token: string): string {
+function buildResendEmail(nome: string, token: string, siteUrl: string): string {
   const firstName = nome.split(" ")[0];
-  const siteUrl = process.env.SITE_URL ?? "https://coachruiz.com.br";
   const pageUrl = `${siteUrl}/avaliacao/${token}`;
 
   return `
@@ -133,6 +132,8 @@ export const handler = async (event: any) => {
       return { statusCode: 500, body: "RESEND_API_KEY não configurada" };
     }
 
+    const siteUrl = `${event.headers["x-forwarded-proto"] ?? "https"}://${event.headers["host"]}`;
+
     const mailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -143,7 +144,7 @@ export const handler = async (event: any) => {
         from: "Elite 90 Testes <onboarding@resend.dev>",
         to: [avaliacao.email],
         subject: `${avaliacao.nome.split(" ")[0]}, segue o acesso à sua avaliação — Elite 90`,
-        html: buildResendEmail(avaliacao.nome, avaliacao.token),
+        html: buildResendEmail(avaliacao.nome, avaliacao.token, siteUrl),
       }),
     });
 

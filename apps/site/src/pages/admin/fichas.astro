@@ -904,7 +904,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       </div>
 
       <div class="eval-actions" style="margin-top:24px; flex-direction:column;">
-        <button class="btn-sm btn-primary" id="btn-send-eval" style="width:100%">Enviar avaliação ao atleta</button>
+        <button class="btn-sm btn-primary" id="btn-send-eval" style="width:100%" disabled>Enviar avaliação ao atleta</button>
         <button class="btn-sm btn-outline" id="btn-cancel-eval" style="width:100%">Cancelar</button>
       </div>
     </div>
@@ -1434,12 +1434,27 @@ import AdminHeader from '../../components/AdminHeader.astro';
       s5:"05 - Alinhamento Operacional"
     };
 
+    function updateSendBtnState() {
+      const hasContent = ["s1","s2","s3","s4","s5"].some(k => {
+        const el = document.getElementById(`eval-${k}`);
+        return el && el.value.trim().length > 0;
+      });
+      const btn = document.getElementById("btn-send-eval");
+      if (btn) btn.disabled = !hasContent;
+    }
+
+    // Habilita o botão ao digitar em qualquer seção
+    ["s1","s2","s3","s4","s5"].forEach(k => {
+      document.getElementById(`eval-${k}`)?.addEventListener("input", updateSendBtnState);
+    });
+
     window.__openEval=function(id){
       currentLeadId=id;
       const lead=leads.find(l=>l.id===id);
       document.getElementById("eval-name").textContent=lead?.nome??"";
       ["s1","s2","s3","s4","s5","notes"].forEach(k=>{document.getElementById(`eval-${k}`).value="";});
       document.getElementById("eval-status").textContent="";
+      updateSendBtnState();
       document.getElementById("eval-drawer").hidden=false;
     };
     document.getElementById("eval-close")?.addEventListener("click",()=>{document.getElementById("eval-drawer").hidden=true;});
@@ -1469,6 +1484,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         
         // Preenche os campos textareas com o mapa aninhado correto
         taIds.forEach(k=>{document.getElementById(`eval-${k}`).value=secoesRecebidas[k]??"";});
+        updateSendBtnState();
         
         // Validação Full Stack: Verifica flag do backend ou ausência de qualquer bloco essencial
         const possuiSecaoIncompleta = taIds.some(k => !secoesRecebidas[k] || secoesRecebidas[k].trim() === "");
@@ -1709,11 +1725,27 @@ import AdminHeader from '../../components/AdminHeader.astro';
     document.getElementById("btn-copy-eval-link")?.addEventListener("click", async () => {
       if (!currentViewEval?.token) return;
       const url = `${window.location.origin}/avaliacao/${currentViewEval.token}`;
+
+      let copied = false;
       try {
         await navigator.clipboard.writeText(url);
-        await updateDoc(doc(db, "avaliacoes", currentViewEval.id), { lastLinkCopiedAt: serverTimestamp() });
-        showToast("Link copiado. Compartilhe apenas com o atleta — este link dá acesso direto à avaliação.", "warning");
+        copied = true;
       } catch {
+        // Fallback para mobile browsers que bloqueiam a Clipboard API
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try { document.execCommand("copy"); copied = true; } catch {}
+        document.body.removeChild(ta);
+      }
+
+      if (copied) {
+        updateDoc(doc(db, "avaliacoes", currentViewEval.id), { lastLinkCopiedAt: serverTimestamp() }).catch(() => {});
+        showToast("Link copiado. Compartilhe apenas com o atleta — este link dá acesso direto à avaliação.", "warning");
+      } else {
         showToast("Não foi possível copiar o link. Tente novamente.", "warning");
       }
     });

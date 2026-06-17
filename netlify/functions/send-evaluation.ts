@@ -47,10 +47,10 @@ function getDb() {
 function buildEvaluationEmail(
   nome: string,
   token: string,
-  sections: Record<string, string>
+  sections: Record<string, string>,
+  siteUrl: string
 ): string {
   const firstName = nome.split(" ")[0];
-  const siteUrl = process.env.SITE_URL ?? "https://coachruiz.com.br";
   const pageUrl = `${siteUrl}/avaliacao/${token}`;
 
   return `
@@ -178,6 +178,8 @@ export const handler = async (event: any) => {
       updatedAt: FieldValue.serverTimestamp(),
     });
 
+    const siteUrl = `${event.headers["x-forwarded-proto"] ?? "https"}://${event.headers["host"]}`;
+
     // Send email via Resend
     const resendKey = process.env.RESEND_API_KEY;
     if (!resendKey) {
@@ -193,7 +195,7 @@ export const handler = async (event: any) => {
           from: "Elite 90 Testes <onboarding@resend.dev>",
           to: [lead.email],
           subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - Elite 90`,
-          html: buildEvaluationEmail(lead.nome, token, sections),
+          html: buildEvaluationEmail(lead.nome, token, sections, siteUrl),
         }),
       });
       
