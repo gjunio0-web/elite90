@@ -187,7 +187,7 @@ export const handler = async (event: any) => {
           Authorization: `Bearer ${resendKey}`,
         },
         body: JSON.stringify({
-          from: "Coach Ruiz <contato@coachruiz.com.br>",
+          from: "Elite 90 Testes <onboarding@resend.dev>",
           to: [lead.email],
           subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - Elite 90`,
           html: buildEvaluationEmail(lead.nome, token, sections),

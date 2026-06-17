@@ -686,38 +686,53 @@ import AdminHeader from '../../components/AdminHeader.astro';
       right: var(--space-4);
       width: 44px;
       height: 44px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.60);
+      border: 1px solid rgba(255,255,255,0.30);
       border-radius: 50%;
       color: var(--c-white);
-      font-size: 1.2rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background var(--transition-base), border-color var(--transition-base);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 2px 14px rgba(0,0,0,0.70);
+      transition: background var(--transition-base), border-color var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
     }
-    .lightbox-close:hover { background: rgba(166,195,0,0.1); border-color: var(--c-lime); color: var(--c-lime); }
+    .lightbox-close:hover {
+      background: rgba(166,195,0,0.18);
+      border-color: var(--c-lime);
+      color: var(--c-lime);
+      box-shadow: 0 0 18px rgba(166,195,0,0.30);
+    }
     .lightbox-nav {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
       width: 52px;
       height: 52px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.60);
+      border: 1px solid rgba(255,255,255,0.30);
       border-radius: 50%;
       color: var(--c-white);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background var(--transition-base), border-color var(--transition-base);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 2px 14px rgba(0,0,0,0.70);
+      transition: background var(--transition-base), border-color var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
     }
-    .lightbox-nav:hover { background: rgba(166,195,0,0.1); border-color: var(--c-lime); color: var(--c-lime); }
+    .lightbox-nav:hover {
+      background: rgba(166,195,0,0.18);
+      border-color: var(--c-lime);
+      color: var(--c-lime);
+      box-shadow: 0 0 18px rgba(166,195,0,0.30);
+    }
     .lightbox-nav--prev { left: var(--space-4); }
     .lightbox-nav--next { right: var(--space-4); }
-    .lightbox-nav:disabled { opacity: 0.25; cursor: not-allowed; }
+    .lightbox-nav:disabled { opacity: 0.30; cursor: not-allowed; box-shadow: none; }
     .lightbox-counter {
       position: absolute;
       bottom: var(--space-4);
@@ -727,10 +742,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
       font-size: var(--fs-label);
       font-weight: 700;
       letter-spacing: 0.1em;
-      color: var(--c-textsub);
-      background: rgba(0,0,0,0.5);
-      padding: 6px 14px;
+      color: var(--c-white);
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      padding: 6px 16px;
       border-radius: var(--radius-pill);
+      border: 1px solid rgba(255,255,255,0.15);
     }
     @media (max-width: 600px) {
       .lightbox-nav { width: 44px; height: 44px; }
@@ -933,10 +951,22 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
   <!-- Lightbox de fotos com navegação -->
   <div class="lightbox-overlay" id="lightbox-overlay" hidden>
-    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Fechar">&#x2715;</button>
-    <button type="button" class="lightbox-nav lightbox-nav--prev" id="lightbox-prev" aria-label="Foto anterior">&#x2039;</button>
+    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Fechar">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <button type="button" class="lightbox-nav lightbox-nav--prev" id="lightbox-prev" aria-label="Foto anterior">
+      <svg width="10" height="18" viewBox="0 0 10 18" fill="none" aria-hidden="true">
+        <path d="M9 1L1 9L9 17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <img class="lightbox-img" id="lightbox-img" src="" alt="" />
-    <button type="button" class="lightbox-nav lightbox-nav--next" id="lightbox-next" aria-label="Próxima foto">&#x203A;</button>
+    <button type="button" class="lightbox-nav lightbox-nav--next" id="lightbox-next" aria-label="Próxima foto">
+      <svg width="10" height="18" viewBox="0 0 10 18" fill="none" aria-hidden="true">
+        <path d="M1 1L9 9L1 17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <span class="lightbox-counter" id="lightbox-counter"></span>
   </div>
 
