@@ -36,7 +36,7 @@ function getDb() {
 
     initializeApp({
       credential: cert(serviceAccount as any),
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+      storageBucket: process.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
     });
   }
   return getFirestore();
