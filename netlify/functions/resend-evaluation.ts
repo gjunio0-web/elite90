@@ -66,7 +66,7 @@ function buildResendEmail(nome: string, token: string, siteUrl: string): string 
   <h1>${firstName}, segue o acesso à sua avaliação.</h1>
 
   <p>
-    Conforme solicitado, estamos reenviando o link de acesso às suas
+    Conforme solicitado, reenviamos o link de acesso às suas
     <span class="highlight">Diretrizes de Preparação e Planejamento Estratégico do Físico</span>.
   </p>
 
