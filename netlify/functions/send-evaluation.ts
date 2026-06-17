@@ -133,7 +133,8 @@ export const handler = async (event: any) => {
   const idToken = authHeader.replace("Bearer ", "").trim();
   if (!idToken) return { statusCode: 401, body: "Unauthorized" };
   try {
-    await getAuth(getApps()[0]).verifyIdToken(idToken);
+    const decoded = await getAuth(getApps()[0]).verifyIdToken(idToken);
+    if (!decoded.admin) return { statusCode: 403, body: "Acesso não autorizado" };
   } catch {
     return { statusCode: 401, body: "Invalid token" };
   }

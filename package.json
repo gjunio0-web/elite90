@@ -14,6 +14,8 @@
     "packages/*"
   ],
   "dependencies": {
-    "firebase-admin": "^12.0.0"
+    "@astrojs/netlify": "7.0.13",
+    "astro": "6.4.8",
+    "firebase-admin": "^14.0.0"
   }
 }
