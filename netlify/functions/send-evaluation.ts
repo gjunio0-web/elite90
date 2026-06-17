@@ -177,8 +177,10 @@ export const handler = async (event: any) => {
 
     // Send email via Resend
     const resendKey = process.env.RESEND_API_KEY;
-    if (resendKey) {
-      await fetch("https://api.resend.com/emails", {
+    if (!resendKey) {
+      console.warn("send-evaluation: RESEND_API_KEY ausente no ambiente. Disparo abortado.");
+    } else {
+      const mailRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -191,6 +193,12 @@ export const handler = async (event: any) => {
           html: buildEvaluationEmail(lead.nome, token, sections),
         }),
       });
+      
+      // BLOQUEIO DA FALHA SILENCIOSA: Joga erro se a API recusar o e-mail
+      if (!mailRes.ok) {
+        const errorData = await mailRes.text();
+        throw new Error(`Falha na API do Resend (${mailRes.status}): ${errorData}`);
+      }
     }
 
     return {
