@@ -155,6 +155,7 @@ export const handler = async (event: any) => {
     const token = randomBytes(16).toString("hex");
 
     // Save evaluation to Firestore
+    const ninetyDaysFromNow = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
     await db.collection("avaliacoes").add({
       leadId,
       nome: lead.nome,
@@ -162,9 +163,11 @@ export const handler = async (event: any) => {
       token,
       sections,
       coachNotes: coachNotes ?? "",
-      content_s1: sections.s1 ?? "", // indexed for future Gemini context
+      content_s1: sections.s1 ?? "",
       createdAt: FieldValue.serverTimestamp(),
       sentAt: FieldValue.serverTimestamp(),
+      expiresAt: ninetyDaysFromNow,
+      resentCount: 0,
     });
 
     // Update lead status

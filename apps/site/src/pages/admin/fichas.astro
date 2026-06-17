@@ -949,9 +949,36 @@ import AdminHeader from '../../components/AdminHeader.astro';
         </button>
       </div>
       <p class="eval-status" id="view-eval-date" style="color: var(--c-textsub); font-family: var(--font-label); font-size: 0.75rem; margin-bottom: 16px;"></p>
-      
+
+      <div id="view-eval-actions" hidden style="display:flex; flex-direction:column; gap:var(--space-2); margin-bottom:var(--space-5);">
+        <button class="btn-sm btn-outline" id="btn-copy-eval-link" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copiar link da avaliação
+        </button>
+        <button class="btn-sm btn-outline" id="btn-resend-eval" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Reenviar email ao atleta
+        </button>
+      </div>
+
       <div id="view-eval-body">
         <!-- Injetado dinamicamente via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmação de reenvio -->
+  <div class="confirm-overlay" id="resend-overlay" hidden>
+    <div class="confirm-box">
+      <h3 class="confirm-title">Reenviar <span>acesso à avaliação</span></h3>
+      <p class="confirm-summary">
+        <strong id="resend-name"></strong> receberá um novo e-mail com o link de acesso à avaliação já enviada.
+        O e-mail indicará que é um reenvio — sem criar expectativa de novo conteúdo.
+        Esta ação será registrada no histórico.
+      </p>
+      <div class="confirm-actions">
+        <button class="btn-sm btn-outline" id="resend-modal-cancel">Cancelar</button>
+        <button class="btn-sm btn-primary" id="resend-modal-confirm">Confirmar reenvio</button>
       </div>
     </div>
   </div>
@@ -991,6 +1018,39 @@ import AdminHeader from '../../components/AdminHeader.astro';
     const db=getFirestore(app);
 
     let leads=[], currentLeadId=null, currentDetailLeadId=null;
+    let currentViewEval = null; // { id, token, nome, email }
+
+    function showToast(message, type = "success") {
+      let container = document.getElementById("toast-container");
+      if (!container) {
+        container = document.createElement("div");
+        container.id = "toast-container";
+        container.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:12px;width:calc(100% - 48px);max-width:480px;";
+        const st = document.createElement("style");
+        st.textContent = `
+          @keyframes sIn  { from { transform:translateY(40px);opacity:0 } to { transform:translateY(0);opacity:1 } }
+          @keyframes sOut { from { transform:translateY(0);opacity:1  } to { transform:translateY(40px);opacity:0 } }
+          @media(min-width:768px){ #toast-container{ left:auto;right:24px;transform:none;width:auto;min-width:380px; } }
+        `;
+        document.head.appendChild(st);
+        document.body.appendChild(container);
+      }
+      const isWarning = type === "warning";
+      const accentColor = isWarning ? "#E67E22" : "var(--c-lime)";
+      const icon = isWarning ? "⚠" : "✓";
+      const toast = document.createElement("div");
+      toast.style.cssText = `box-sizing:border-box;width:100%;background:#0A0A0A;border:1px solid ${accentColor};padding:20px 24px;display:flex;justify-content:space-between;align-items:flex-start;box-shadow:0 10px 40px rgba(0,0,0,0.9);animation:sIn 0.3s cubic-bezier(0.16,1,0.3,1) forwards;border-radius:4px;`;
+      toast.innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:14px;flex:1;">
+          <span style="color:${accentColor};font-size:1rem;font-family:var(--font-label,sans-serif);line-height:1.2;">[${icon}]</span>
+          <span style="color:#FFF;font-family:var(--font-label,sans-serif);font-size:0.85rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;line-height:1.5;">${message}</span>
+        </div>
+        <button onclick="this.closest('div[style]').style.animation='sOut 0.3s ease-in forwards';setTimeout(()=>this.closest('div[style]')?.remove(),300)"
+          style="background:none;border:none;color:#555;cursor:pointer;font-size:1.1rem;padding:0 0 0 16px;flex-shrink:0;">✕</button>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => { if(toast.parentElement){ toast.style.animation="sOut 0.3s ease-in forwards"; setTimeout(()=>toast.remove(),300); } }, 6000);
+    }
 
     // Obtém sempre um token fresco (o SDK renova automaticamente se expirado).
     // NUNCA armazenar o idToken em variável — tokens Firebase expiram em 1h.
@@ -1589,7 +1649,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
         });
 
         const atual = todasdolead[0];
-        
+        currentViewEval = { id: atual.id, token: atual.token, nome: atual.nome ?? lead.nome, email: atual.email ?? lead.email };
+        document.getElementById("view-eval-actions").hidden = false;
+
         let dataEnvio = "--";
         if (atual.createdAt) {
           if (typeof atual.createdAt.toDate === "function") {
@@ -1635,8 +1697,66 @@ import AdminHeader from '../../components/AdminHeader.astro';
       }
     };
 
-    document.getElementById("view-eval-close")?.addEventListener("click", () => { document.getElementById("view-eval-drawer").hidden = true; });
-    document.getElementById("view-eval-drawer")?.addEventListener("click", e => { if (e.target === document.getElementById("view-eval-drawer")) document.getElementById("view-eval-drawer").hidden = true; });
+    function closeViewEvalDrawer() {
+      document.getElementById("view-eval-drawer").hidden = true;
+      document.getElementById("view-eval-actions").hidden = true;
+      currentViewEval = null;
+    }
+    document.getElementById("view-eval-close")?.addEventListener("click", closeViewEvalDrawer);
+    document.getElementById("view-eval-drawer")?.addEventListener("click", e => { if (e.target === document.getElementById("view-eval-drawer")) closeViewEvalDrawer(); });
+
+    // ── COPIAR LINK ─────────────────────────────────────────────────────────
+    document.getElementById("btn-copy-eval-link")?.addEventListener("click", async () => {
+      if (!currentViewEval?.token) return;
+      const url = `${window.location.origin}/avaliacao/${currentViewEval.token}`;
+      try {
+        await navigator.clipboard.writeText(url);
+        await updateDoc(doc(db, "avaliacoes", currentViewEval.id), { lastLinkCopiedAt: serverTimestamp() });
+        showToast("Link copiado. Compartilhe apenas com o atleta — este link dá acesso direto à avaliação.", "warning");
+      } catch {
+        showToast("Não foi possível copiar o link. Tente novamente.", "warning");
+      }
+    });
+
+    // ── REENVIAR EMAIL ───────────────────────────────────────────────────────
+    document.getElementById("btn-resend-eval")?.addEventListener("click", () => {
+      if (!currentViewEval) return;
+      document.getElementById("resend-name").textContent = currentViewEval.nome?.split(" ")[0] ?? currentViewEval.nome ?? "";
+      document.getElementById("resend-overlay").hidden = false;
+    });
+
+    document.getElementById("resend-modal-cancel")?.addEventListener("click", () => {
+      document.getElementById("resend-overlay").hidden = true;
+    });
+    document.getElementById("resend-overlay")?.addEventListener("click", e => {
+      if (e.target === document.getElementById("resend-overlay")) document.getElementById("resend-overlay").hidden = true;
+    });
+
+    document.getElementById("resend-modal-confirm")?.addEventListener("click", async () => {
+      if (!currentViewEval) return;
+      const btn = document.getElementById("resend-modal-confirm");
+      btn.disabled = true;
+      btn.textContent = "Reenviando...";
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const res = await fetch("/.netlify/functions/resend-evaluation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+          body: JSON.stringify({ evalId: currentViewEval.id }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error ?? `Erro ${res.status}`);
+        }
+        document.getElementById("resend-overlay").hidden = true;
+        showToast(`E-mail reenviado para ${currentViewEval.nome?.split(" ")[0] ?? "o atleta"} com sucesso.`);
+      } catch (err) {
+        showToast(`Falha no reenvio: ${err.message}`, "warning");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Confirmar reenvio";
+      }
+    });
   
   </script>
 

@@ -19,6 +19,7 @@ const { token } = Astro.params;
 
 let avaliacao = null;
 let notFound  = false;
+let isExpired = false;
 
 try {
   const db = getDb();
@@ -31,6 +32,12 @@ try {
     notFound = true;
   } else {
     avaliacao = snap.docs[0].data();
+    if (avaliacao.expiresAt) {
+      const exp: Date = avaliacao.expiresAt.toDate
+        ? avaliacao.expiresAt.toDate()
+        : new Date(avaliacao.expiresAt._seconds * 1000);
+      if (exp < new Date()) isExpired = true;
+    }
   }
 } catch (e) {
   notFound = true;
@@ -125,11 +132,20 @@ const sections = [
 </head>
 <body>
 
-  {notFound ? (
+  {(notFound || isExpired) ? (
     <main>
       <div class="not-found">
-        <h2>Avaliação não encontrada</h2>
-        <p>O link pode ter expirado ou estar incorreto.</p>
+        {isExpired ? (
+          <>
+            <h2>Link expirado</h2>
+            <p>Este link de acesso expirou após 90 dias. Entre em contato com o Coach Ruiz para solicitar um novo acesso.</p>
+          </>
+        ) : (
+          <>
+            <h2>Avaliação não encontrada</h2>
+            <p>O link pode estar incorreto. Verifique o e-mail recebido ou entre em contato com o Coach Ruiz.</p>
+          </>
+        )}
       </div>
     </main>
   ) : (
