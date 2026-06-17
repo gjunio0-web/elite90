@@ -8,6 +8,7 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+  external_node_modules = ["firebase-admin"]
 
 [functions."purge-rejected-leads"]
   schedule = "0 3 * * *"
