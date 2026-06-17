@@ -266,7 +266,7 @@ import '../../styles/global.css';
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup }
+    import { getAuth, signOut, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const cfg = {
@@ -288,9 +288,26 @@ import '../../styles/global.css';
       "auth/invalid-credential": "E-mail ou senha incorretos.",
     };
 
-    // Redireciona se já autenticado
-    auth.onAuthStateChanged(user => {
-      if (user) window.location.href = "/admin";
+    async function verificarAdminEAcessar(errorEl) {
+      try {
+        const tokenResult = await auth.currentUser.getIdTokenResult(true);
+        if (tokenResult.claims.admin) {
+          window.location.href = "/admin";
+        } else {
+          await signOut(auth);
+          if (errorEl) errorEl.textContent = "Acesso não autorizado para esta conta.";
+        }
+      } catch {
+        await signOut(auth);
+        if (errorEl) errorEl.textContent = "Erro ao verificar permissões. Tente novamente.";
+      }
+    }
+
+    // Redireciona se já autenticado e autorizado
+    auth.onAuthStateChanged(async user => {
+      if (!user) return;
+      const tokenResult = await user.getIdTokenResult(true).catch(() => null);
+      if (tokenResult?.claims.admin) window.location.href = "/admin";
     });
 
     // Login com e-mail/senha
@@ -309,9 +326,10 @@ import '../../styles/global.css';
           document.getElementById("l-email").value,
           document.getElementById("l-password").value
         );
-        window.location.href = "/admin";
+        await verificarAdminEAcessar(loginErr);
       } catch (err) {
         loginErr.textContent = ERROR_MESSAGES[err.code] ?? "Erro ao autenticar.";
+      } finally {
         loginBtn.disabled = false;
         loginBtn.textContent = "Entrar";
       }
@@ -329,10 +347,11 @@ import '../../styles/global.css';
       googleErr.textContent = "";
       try {
         await signInWithPopup(auth, provider);
-        window.location.href = "/admin";
+        await verificarAdminEAcessar(googleErr);
       } catch (err) {
         console.error("Erro na autenticação Google:", err);
         googleErr.textContent = "Erro ao autenticar com o Google.";
+      } finally {
         googleBtn.disabled = false;
       }
     });
