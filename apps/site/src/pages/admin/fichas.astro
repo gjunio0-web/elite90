@@ -400,7 +400,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       height: 100%;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: var(--space-6);
+      padding: 0 var(--space-6) var(--space-6);
       border-left: var(--border-lime);
       box-shadow: -10px 0 40px rgba(0,0,0,0.9);
       scrollbar-width: thin;
@@ -408,12 +408,17 @@ import AdminHeader from '../../components/AdminHeader.astro';
     }
     .drawer-panel::-webkit-scrollbar { width: 6px; }
     .drawer-panel::-webkit-scrollbar-thumb { background: var(--c-lime); border-radius: 3px; }
-    
+
     .drawer-hdr {
       display: flex; justify-content: space-between; align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--c-black);
+      padding-top: var(--space-6);
+      padding-bottom: var(--space-4);
       margin-bottom: var(--space-6);
       border-bottom: 1px solid rgba(255,255,255,0.05);
-      padding-bottom: var(--space-4);
     }
     .drawer-title {
       font-family: var(--font-display);
@@ -438,7 +443,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .drawer-close:hover { color: var(--c-lime); }
 
     @media (max-width: 760px) {
-      .drawer-panel { width: 100vw; padding: var(--space-4); }
+      .drawer-panel { width: 100vw; padding: 0 var(--space-4) var(--space-4); }
+      .drawer-hdr { padding-top: var(--space-4); }
     }
 
     /* TABELA DE DETALHES DA FICHA DO ATLETA — SEÇÕES */
@@ -730,8 +736,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
       color: var(--c-lime);
       box-shadow: 0 0 18px rgba(166,195,0,0.30);
     }
-    .lightbox-nav--prev { left: var(--space-4); }
-    .lightbox-nav--next { right: var(--space-4); }
+    .lightbox-frame {
+      position: relative;
+      width: fit-content;
+      max-width: 90vw;
+    }
+    .lightbox-nav--prev { left: -26px; }
+    .lightbox-nav--next { right: -26px; }
     .lightbox-nav:disabled { opacity: 0.30; cursor: not-allowed; box-shadow: none; }
     .lightbox-counter {
       position: absolute;
@@ -749,11 +760,6 @@ import AdminHeader from '../../components/AdminHeader.astro';
       padding: 6px 16px;
       border-radius: var(--radius-pill);
       border: 1px solid rgba(255,255,255,0.15);
-    }
-    @media (max-width: 600px) {
-      .lightbox-nav { width: 44px; height: 44px; }
-      .lightbox-nav--prev { left: var(--space-2); }
-      .lightbox-nav--next { right: var(--space-2); }
     }
 
     /* ZONA DE PRIVACIDADE / LGPD */
@@ -899,6 +905,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
       <div class="eval-actions" style="margin-top:24px">
         <button class="btn-sm btn-primary" id="btn-send-eval">Enviar avaliação ao atleta</button>
+        <button class="btn-sm btn-outline" id="btn-cancel-eval" style="margin-left:auto">Cancelar</button>
       </div>
     </div>
   </div>
@@ -956,17 +963,19 @@ import AdminHeader from '../../components/AdminHeader.astro';
         <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
-    <button type="button" class="lightbox-nav lightbox-nav--prev" id="lightbox-prev" aria-label="Foto anterior">
-      <svg width="10" height="18" viewBox="0 0 10 18" fill="none" aria-hidden="true">
-        <path d="M9 1L1 9L9 17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-    <img class="lightbox-img" id="lightbox-img" src="" alt="" />
-    <button type="button" class="lightbox-nav lightbox-nav--next" id="lightbox-next" aria-label="Próxima foto">
-      <svg width="10" height="18" viewBox="0 0 10 18" fill="none" aria-hidden="true">
-        <path d="M1 1L9 9L1 17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+    <div class="lightbox-frame">
+      <button type="button" class="lightbox-nav lightbox-nav--prev" id="lightbox-prev" aria-label="Foto anterior">
+        <svg width="10" height="18" viewBox="0 0 10 18" fill="none" aria-hidden="true">
+          <path d="M9 1L1 9L9 17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <img class="lightbox-img" id="lightbox-img" src="" alt="" />
+      <button type="button" class="lightbox-nav lightbox-nav--next" id="lightbox-next" aria-label="Próxima foto">
+        <svg width="10" height="18" viewBox="0 0 10 18" fill="none" aria-hidden="true">
+          <path d="M1 1L9 9L1 17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
     <span class="lightbox-counter" id="lightbox-counter"></span>
   </div>
 
@@ -1374,6 +1383,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       document.getElementById("eval-drawer").hidden=false;
     };
     document.getElementById("eval-close")?.addEventListener("click",()=>{document.getElementById("eval-drawer").hidden=true;});
+    document.getElementById("btn-cancel-eval")?.addEventListener("click",()=>{document.getElementById("eval-drawer").hidden=true;});
     document.getElementById("eval-drawer")?.addEventListener("click",e=>{if(e.target===document.getElementById("eval-drawer"))document.getElementById("eval-drawer").hidden=true;});
 
     document.getElementById("btn-gen-ai")?.addEventListener("click",async()=>{
