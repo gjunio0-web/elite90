@@ -5,6 +5,7 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
 
 function getDb() {
   if (!getApps().length) {
@@ -33,9 +34,29 @@ function getDb() {
       throw new Error("Credenciais do Firebase ausentes ou incompletas.");
     }
 
-    initializeApp({ credential: cert(serviceAccount as any) });
+    initializeApp({
+      credential: cert(serviceAccount as any),
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    });
   }
   return getFirestore();
+}
+
+async function downloadPhotosAsBase64(
+  paths: string[]
+): Promise<Array<{ mimeType: string; data: string }>> {
+  if (!paths?.length) return [];
+  const bucket = getStorage().bucket();
+  const results: Array<{ mimeType: string; data: string }> = [];
+  for (const path of paths) {
+    try {
+      const [buffer] = await bucket.file(path).download();
+      results.push({ mimeType: "image/webp", data: buffer.toString("base64") });
+    } catch (e) {
+      console.warn(`[generate-evaluation] Falha ao baixar foto ${path}:`, e);
+    }
+  }
+  return results;
 }
 
 const REFERENCE_STRUCTURE = `
@@ -69,7 +90,7 @@ Evitar motivacional genérico. Usar terminologia específica (BF, AEJ, TRT, bulk
 O coach fala como estrategista biológico, não como personal trainer.
 `;
 
-function buildPrompt(lead: Record<string, any>, previousDocs: string[]): string {
+function buildPrompt(lead: Record<string, any>, previousDocs: string[], hasPhotos: boolean = false): string {
   const prevContext = previousDocs.length > 0
     ? `\n\nDOCUMENTOS ANTERIORES DO COACH (para calibrar o estilo):\n${previousDocs.slice(0, 3).join("\n---\n")}`
     : "";
@@ -109,6 +130,7 @@ INSTRUÇÕES DE PREENCHIMENTO CRÍTICAS:
 - Use exclusivamente a linguagem técnica e a terminologia do fisiculturismo de alto nível.
 - Onde os dados do atleta forem insuficientes para estruturar uma conduta, sinalize com [COMPLETAR] para que o coach revise manualmente depois.
 - IMPORTANTE: Forneça apenas o texto corrido correspondente a cada seção. Não inclua títulos, não use blocos de código Markdown (\`\`\`) e não tente estruturar chaves ou sintaxe JSON manualmente.
+${hasPhotos ? `- As fotos do atleta estão incluídas nesta chamada como dados de imagem. Utilize-as para fundamentar a seção 01 (Diagnóstico Estético e Análise de Proporções): avalie qualidade epidérmica, percentual de gordura estimado visualmente, simetria muscular, densidade do tronco e marcadores visuais de resposta hormonal. Para as demais seções, baseie-se exclusivamente nos dados textuais acima.` : ""}
 `;
 }
 
@@ -197,7 +219,14 @@ export const handler = async (event: any) => {
       .orderBy("createdAt", "desc")
       .limit(3)
       .get();
-    const previousDocs = prevSnap.docs.map(d => d.data().content_s1 ?? "");
+    const previousDocs = prevSnap.docs.map((d: any) => d.data().content_s1 ?? "");
+
+    // Download athlete photos for visual diagnosis (S1)
+    const fotos = await downloadPhotosAsBase64(lead.fotos_paths ?? []);
+    const parts: any[] = [
+      { text: buildPrompt(lead, previousDocs, fotos.length > 0) },
+      ...fotos.map(f => ({ inlineData: f })),
+    ];
 
     // Call Gemini 2.5 Flash
     const geminiKey = process.env.GOOGLE_GEMINI_KEY;
@@ -223,9 +252,7 @@ export const handler = async (event: any) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{
-            parts: [{ text: buildPrompt(lead, previousDocs) }]
-          }],
+          contents: [{ parts }],
           generationConfig: {
             temperature: 0.4,
             maxOutputTokens: 4096,
