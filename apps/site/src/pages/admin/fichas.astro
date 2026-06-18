@@ -250,6 +250,20 @@ import AdminHeader from '../../components/AdminHeader.astro';
       border-bottom: 1px solid rgba(255,255,255,0.08);
       background: transparent;
     }
+    .th-sortable {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      transition: color var(--transition-base);
+    }
+    .th-sortable:hover { color: var(--c-white); }
+    .th-sortable::after {
+      content: " ↕";
+      color: rgba(166,195,0,0.25);
+      font-size: 0.6rem;
+    }
+    .th-sortable.sort-asc::after  { content: " ↑"; color: var(--c-lime); }
+    .th-sortable.sort-desc::after { content: " ↓"; color: var(--c-lime); }
     
     .td {
       padding: 1.25rem var(--space-4);
@@ -834,12 +848,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
       <table>
         <thead>
           <tr>
-            <th>Data</th><th>Nome</th><th>E-mail</th><th>Objetivo</th>
+            <th class="th-sortable" data-sort="data">Data</th>
+            <th class="th-sortable" data-sort="nome">Nome</th>
+            <th class="th-sortable" data-sort="score">Score</th>
+            <th>E-mail</th><th>Objetivo</th>
             <th>Status</th><th>Ações</th>
           </tr>
         </thead>
         <tbody id="leads-tbody">
-          <tr><td class="td" colspan="6" style="text-align:center;color:var(--c-textsub)">Carregando...</td></tr>
+          <tr><td class="td" colspan="7" style="text-align:center;color:var(--c-textsub)">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1019,6 +1036,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     let leads=[], currentLeadId=null, currentDetailLeadId=null;
     let currentViewEval = null; // { id, token, nome, email }
+    let sortField = "data", sortDir = "desc";
 
     function showToast(message, type = "success") {
       let container = document.getElementById("toast-container");
@@ -1092,7 +1110,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         renderStats(); renderTable();
       } catch (err) {
         console.error("Erro sistêmico ao carregar fichas:", err);
-        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="6" style="text-align:center;color:var(--c-status-alert);font-weight:700;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede. Verifique as regras do Firestore.</td></tr>`;
+        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="7" style="text-align:center;color:var(--c-status-alert);font-weight:700;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede. Verifique as regras do Firestore.</td></tr>`;
         document.getElementById("leads-cards").innerHTML=`<div class="lead-card" style="color:var(--c-status-alert);font-weight:700;text-align:center;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede.</div>`;
       }
     }
@@ -1101,6 +1119,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const skelRow=`<tr class="skel-row">
         <td class="td"><span class="skel skel-line skel-line--sm"></span></td>
         <td class="td"><span class="skel skel-line"></span></td>
+        <td class="td"><span class="skel skel-line skel-line--sm"></span></td>
         <td class="td"><span class="skel skel-line"></span></td>
         <td class="td"><span class="skel skel-line"></span></td>
         <td class="td"><span class="skel skel-line skel-line--sm"></span></td>
@@ -1142,20 +1161,73 @@ import AdminHeader from '../../components/AdminHeader.astro';
       </select>`;
     }
 
+    const FLAG_META = {
+      CARDIO:         { label:"C", title:"Condição cardíaca — exige liberação médica", color:"#E74C3C" },
+      SAUDE:          { label:"S", title:"Condição de saúde — revisar com equipe médica", color:"#E67E22" },
+      LESAO:          { label:"L", title:"Lesão declarada — protocolo requer adaptação", color:"#E6C200" },
+      TRT_SEM_MEDICO: { label:"T", title:"TRT sem médico — risco clínico", color:"#E74C3C" },
+    };
+
+    function scoreColor(s){
+      if(s >= 80) return "var(--c-lime)";
+      if(s >= 60) return "#E6C200";
+      if(s >= 40) return "#E67E22";
+      return "var(--c-textsub)";
+    }
+
+    function scoreBadge(lead){
+      const s = lead.score;
+      if(s === undefined || s === null){
+        return `<span style="color:rgba(255,255,255,0.2);font-family:var(--font-label);font-size:0.65rem;font-weight:700;letter-spacing:.1em;">--</span>`;
+      }
+      const color = scoreColor(s);
+      const flags = (lead.score_flags ?? []).filter(f => f !== "RISCO_MULTIPLO");
+      const flagHtml = flags.map(f => {
+        const m = FLAG_META[f];
+        if(!m) return "";
+        return `<span title="${m.title}" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;font-family:var(--font-label);font-size:0.55rem;font-weight:700;color:${m.color};border:1px solid ${m.color};border-radius:2px;flex-shrink:0;">${m.label}</span>`;
+      }).join("");
+      return `<span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;"><span style="font-family:var(--font-label);font-size:0.65rem;font-weight:700;letter-spacing:.08em;color:${color};border:1px solid ${color};padding:3px 8px;border-radius:2px;">${s}</span>${flagHtml}</span>`;
+    }
+
+    function updateSortHeaders(){
+      document.querySelectorAll(".th-sortable").forEach(th=>{
+        th.classList.remove("sort-asc","sort-desc");
+        if(th.dataset.sort===sortField) th.classList.add(sortDir==="asc"?"sort-asc":"sort-desc");
+      });
+    }
+
     function renderTable(){
+      updateSortHeaders();
       const filter=document.getElementById("status-filter").value;
       const search=document.getElementById("search-input").value.trim().toLowerCase();
-      let filtered=filter?leads.filter(l=>l.status===filter):leads;
+      let filtered=filter?leads.filter(l=>l.status===filter):[...leads];
       if(search){
         filtered=filtered.filter(l=>
           (l.nome??"").toLowerCase().includes(search) ||
           (l.email??"").toLowerCase().includes(search)
         );
       }
+
+      filtered.sort((a,b)=>{
+        if(sortField==="nome"){
+          const na=(a.nome??"").toLowerCase(), nb=(b.nome??"").toLowerCase();
+          return sortDir==="asc"?na.localeCompare(nb,"pt-BR"):nb.localeCompare(na,"pt-BR");
+        }
+        if(sortField==="score"){
+          const sa=a.score??-1, sb=b.score??-1;
+          return sortDir==="asc"?sa-sb:sb-sa;
+        }
+        // data (default)
+        const ta=a.createdAt?.toDate?.()?.getTime()??0;
+        const tb=b.createdAt?.toDate?.()?.getTime()??0;
+        return sortDir==="asc"?ta-tb:tb-ta;
+      });
+
       document.getElementById("leads-count").textContent=`${filtered.length} ficha${filtered.length!==1?"s":""}`;
 
       if(!filtered.length){
-        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="6" style="text-align:center;color:var(--c-textsub)">Nenhuma ficha encontrada.</td></tr>`;
+        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="7" style="text-align:center;color:var(--c-textsub)">Nenhuma ficha encontrada.</td></tr>`;
         document.getElementById("leads-cards").innerHTML=`<div class="lead-card" style="text-align:center;color:var(--c-textsub)">Nenhuma ficha encontrada.</div>`;
         return;
       }
@@ -1176,6 +1248,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         return `<tr>
           <td class="td">${date}</td>
           <td class="td td--name">${lead.nome??""}</td>
+          <td class="td">${scoreBadge(lead)}</td>
           <td class="td">${lead.email??""}</td>
           <td class="td td--goal">${(lead.objetivo??"").slice(0,50)}</td>
           <td class="td">${statusControl(lead)}</td>
@@ -1197,6 +1270,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
             <span class="lead-card__name">${lead.nome??""}</span>
             <span class="lead-card__date">${date}</span>
           </div>
+          <div style="margin-bottom:var(--space-2)">${scoreBadge(lead)}</div>
           <div class="lead-card__row">${lead.email??""}</div>
           <div class="lead-card__goal">${(lead.objetivo??"").slice(0,80)}</div>
           <div class="lead-card__status">
@@ -1394,7 +1468,34 @@ import AdminHeader from '../../components/AdminHeader.astro';
         }
       }
 
+      // Seção de Score de Triagem
+      const hasScore = lead.score !== undefined && lead.score !== null;
+      const sc = lead.score;
+      const scColor = hasScore ? scoreColor(sc) : "var(--c-textsub)";
+      const prioLabels = { alta:"Alta", media:"Média", baixa:"Baixa", fora_do_perfil:"Fora do perfil" };
+      const flagsArr = (lead.score_flags ?? []).filter(f => f !== "RISCO_MULTIPLO");
+      const flagBadges = flagsArr.map(f => {
+        const m = FLAG_META[f];
+        if(!m) return "";
+        return `<span title="${m.title}" style="display:inline-flex;align-items:center;gap:5px;font-family:var(--font-label);font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${m.color};border:1px solid ${m.color};padding:3px 8px;border-radius:2px;">${m.label} · ${m.title}</span>`;
+      }).join(" ");
+
+      const scoreRowsHtml = hasScore ? [
+        `<tr><th class="detail-th">Score final</th><td class="detail-td"><span style="font-family:var(--font-display);font-size:1.6rem;color:${scColor};letter-spacing:.03em;">${sc}</span><span style="font-family:var(--font-label);font-size:0.65rem;color:var(--c-textsub);margin-left:6px;">/ 100</span></td></tr>`,
+        `<tr><th class="detail-th">Prioridade</th><td class="detail-td" style="color:${scColor};font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${prioLabels[lead.prioridade] ?? "--"}</td></tr>`,
+        `<tr><th class="detail-th">Composição</th><td class="detail-td" style="color:var(--c-textsub);">Base determinística: ${lead.score_base ?? "--"} pts · Ajuste IA: ${lead.score_ajuste_ia >= 0 ? "+" : ""}${lead.score_ajuste_ia ?? "--"} pts</td></tr>`,
+        flagsArr.length ? `<tr><th class="detail-th">Flags</th><td class="detail-td" style="display:flex;flex-wrap:wrap;gap:6px;padding-top:1rem;">${flagBadges}</td></tr>` : "",
+        lead.score_justificativa ? `<tr><th class="detail-th">IA diz</th><td class="detail-td" style="color:var(--c-textsub);font-style:italic;">${lead.score_justificativa}</td></tr>` : "",
+      ].join("") : `<tr><td class="detail-td" colspan="2" style="color:var(--c-textsub);">Score ainda não calculado — clique em Recalcular para gerar agora.</td></tr>`;
+
+      const scoreSection = `<div class="detail-section">
+        <div class="detail-section__title">Score de Triagem</div>
+        <table class="detail-table"><tbody>${scoreRowsHtml}</tbody></table>
+        <button class="btn-sm btn-outline" id="btn-recalcular-score" data-lead-id="${id}" style="margin-top:var(--space-3);width:100%;">Recalcular score</button>
+      </div>`;
+
       document.getElementById("detail-content").innerHTML=
+        scoreSection +
         section("Identificação", secIdentificacao) +
         section("Perfil Físico", secPerfil) +
         section("Objetivo & Treino", secObjetivo) +
@@ -1408,6 +1509,44 @@ import AdminHeader from '../../components/AdminHeader.astro';
     
     document.getElementById("detail-close")?.addEventListener("click",()=>{document.getElementById("detail-drawer").hidden=true;});
     document.getElementById("detail-drawer")?.addEventListener("click",e=>{if(e.target===document.getElementById("detail-drawer"))document.getElementById("detail-drawer").hidden=true;});
+
+    // Recalcular score (delegated)
+    document.getElementById("detail-content")?.addEventListener("click", async e => {
+      const btn = e.target.closest("#btn-recalcular-score");
+      if(!btn) return;
+      const leadId = btn.dataset.leadId;
+      if(!leadId) return;
+      const origText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Recalculando…";
+      try {
+        const token = await getFreshToken();
+        const res = await fetch("/.netlify/functions/generate-triage-score", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify({ leadId }),
+        });
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        leads = leads.map(l => l.id === leadId ? {
+          ...l,
+          score:               data.score,
+          score_base:          data.score_base,
+          score_ajuste_ia:     data.score_ajuste_ia,
+          prioridade:          data.prioridade,
+          score_flags:         data.flags,
+          score_justificativa: data.justificativa,
+        } : l);
+        renderStats(); renderTable();
+        window.__openDetail(leadId);
+        showToast("Score recalculado com sucesso.");
+      } catch(e) {
+        showToast("Erro ao recalcular score.", "warning");
+        console.error("[recalcularScore]", e);
+        btn.disabled = false;
+        btn.textContent = origText;
+      }
+    });
 
     // Delete lead — opens confirmation modal (delegated, since button is injected via innerHTML)
     document.getElementById("detail-content")?.addEventListener("click",e=>{
@@ -1650,6 +1789,18 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     document.getElementById("status-filter")?.addEventListener("change",renderTable);
     document.getElementById("search-input")?.addEventListener("input",renderTable);
+    document.querySelectorAll(".th-sortable").forEach(th=>{
+      th.addEventListener("click",()=>{
+        const field=th.dataset.sort;
+        if(sortField===field){
+          sortDir=sortDir==="asc"?"desc":"asc";
+        } else {
+          sortField=field;
+          sortDir=field==="nome"?"asc":"desc";
+        }
+        renderTable();
+      });
+    });
     document.getElementById("btn-refresh")?.addEventListener("click",loadLeads);
   
   // Abre a gaveta para leitura da avaliação enviada diretamente do Firestore

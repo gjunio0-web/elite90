@@ -264,6 +264,21 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       }).catch(e => console.error("Erro na API do Resend (não-fatal):", e));
     }
 
+    // Disparo assíncrono do score de triagem — não bloqueia a resposta ao candidato.
+    // A função generate-triage-score autentica via X-Function-Secret (comunicação interna).
+    const siteUrl        = process.env.URL ?? "http://localhost:8888";
+    const functionSecret = process.env.FUNCTION_SECRET ?? "";
+    if (functionSecret) {
+      globalThis.fetch(`${siteUrl}/.netlify/functions/generate-triage-score`, {
+        method: "POST",
+        headers: {
+          "Content-Type":    "application/json",
+          "X-Function-Secret": functionSecret,
+        },
+        body: JSON.stringify({ leadId: docRef.id }),
+      }).catch(e => console.warn("[submit-lead] Score de triagem assíncrono falhou (não-fatal):", e));
+    }
+
     return {
       statusCode: 200,
       body: JSON.stringify({ success: true, id: docRef.id }),
