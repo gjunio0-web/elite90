@@ -7,7 +7,7 @@
 
 [functions]
   directory = "netlify/functions"
-  node_bundler = "nft"
+  node_bundler = "esbuild"
 
 [functions."purge-rejected-leads"]
   schedule = "0 3 * * *"

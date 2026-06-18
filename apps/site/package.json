@@ -12,6 +12,6 @@
     "@fontsource/montserrat": "*",
     "@fontsource/raleway": "*",
     "astro": "^6.4.8",
-    "firebase-admin": "^14.0.0"
+    "firebase-admin": "^12.0.0"
   }
 }
