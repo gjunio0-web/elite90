@@ -237,7 +237,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .table-wrap::-webkit-scrollbar-track { background: transparent; }
     .table-wrap::-webkit-scrollbar-thumb { background: rgba(166,195,0,0.3); border-radius: 2px; }
     
-    table { width: 100%; border-collapse: collapse; min-width: 1000px; text-align: left; }
+    table { width: 100%; border-collapse: collapse; min-width: 1120px; text-align: left; }
     
     th {
       font-family: var(--font-label);
@@ -1486,7 +1486,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         `<tr><th class="detail-th">Composição</th><td class="detail-td" style="color:var(--c-textsub);">Base determinística: ${lead.score_base ?? "--"} pts · Ajuste IA: ${lead.score_ajuste_ia >= 0 ? "+" : ""}${lead.score_ajuste_ia ?? "--"} pts</td></tr>`,
         flagsArr.length ? `<tr><th class="detail-th">Flags</th><td class="detail-td" style="display:flex;flex-wrap:wrap;gap:6px;padding-top:1rem;">${flagBadges}</td></tr>` : "",
         lead.score_justificativa ? `<tr><th class="detail-th">IA diz</th><td class="detail-td" style="color:var(--c-textsub);font-style:italic;">${lead.score_justificativa}</td></tr>` : "",
-      ].join("") : `<tr><td class="detail-td" colspan="2" style="color:var(--c-textsub);">Score ainda não calculado — clique em Recalcular para gerar agora.</td></tr>`;
+      ].join("") : `<tr><td class="detail-td" colspan="2" style="color:var(--c-textsub);white-space:normal;overflow-wrap:break-word;word-break:break-word;max-width:0;width:100%;">Score ainda não calculado — clique em Recalcular para gerar agora.</td></tr>`;
 
       const scoreSection = `<div class="detail-section">
         <div class="detail-section__title">Score de Triagem</div>
