@@ -28,13 +28,15 @@
 <p>Campos pré-preenchidos. Selecione as fotos e clique em Enviar para testar o pipeline completo.</p>
 
 <table>
-  <tr><td>nome</td><td>Debug Upload #4</td></tr>
   <tr><td>email</td><td>gjunio0@gmail.com</td></tr>
   <tr><td>peso / altura</td><td>100 kg / 1.8 m</td></tr>
   <tr><td>objetivo</td><td>Ganho de massa muscular</td></tr>
   <tr><td>competição</td><td>SIM — Men's Physique, 2024</td></tr>
   <tr><td>trt</td><td>SIM — Deca, dura e trembolona</td></tr>
 </table>
+
+<label>Nome do candidato</label>
+<input type="text" id="nome" placeholder="Ex: Gonçalo Marques Moreira Jr" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#ccc;padding:8px 10px;font-size:13px;font-family:monospace;margin-bottom:20px;box-sizing:border-box;">
 
 <label>Fotos (até 5 imagens)</label>
 <input type="file" id="fotos" accept="image/*" multiple>
@@ -45,7 +47,6 @@
 
 <script>
   const PAYLOAD = {
-    nome:                  "Debug Upload #4",
     email:                 "gjunio0@gmail.com",
     cpf:                   "213.327.288-71",
     data_nascimento:       "08/04/1978",
@@ -103,8 +104,10 @@
     const btn    = document.getElementById("btn");
     const status = document.getElementById("status");
     const pre    = document.getElementById("resultado");
+    const nome   = document.getElementById("nome").value.trim();
     const files  = Array.from(document.getElementById("fotos").files).slice(0, 5);
 
+    if (!nome)        { status.textContent = "⚠ Informe o nome do candidato."; return; }
     if (!files.length) { status.textContent = "⚠ Selecione ao menos uma foto."; return; }
 
     btn.disabled = true;
@@ -123,7 +126,7 @@
       const res = await fetch("/.netlify/functions/submit-lead", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ ...PAYLOAD, fotos_b64, fotos_upload_id: `debug-${Date.now()}` }),
+        body:    JSON.stringify({ ...PAYLOAD, nome, fotos_b64, fotos_upload_id: `debug-${Date.now()}` }),
       });
       const txt = await res.text();
       pre.textContent = `HTTP ${res.status}\n\n${txt}`;
