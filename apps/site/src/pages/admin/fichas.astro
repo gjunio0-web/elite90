@@ -234,6 +234,49 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .status-sel--recusado   { color: var(--c-status-rejected); background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23C0392B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
     .status-sel--avaliacao_enviada { color: var(--c-lime); background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23A6C300' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 
+    /* DROPDOWN DE STATUS CUSTOMIZADO (substitui <select> nativo nos cards mobile) */
+    .status-dropdown-menu {
+      position: fixed;
+      z-index: 500;
+      background: var(--c-darkbg);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-card);
+      list-style: none;
+      padding: 4px 0;
+      min-width: 180px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.85);
+      overflow: hidden;
+    }
+    .status-dropdown-menu li button {
+      width: 100%;
+      padding: 12px 16px;
+      text-align: left;
+      background: transparent;
+      border: none;
+      font-family: var(--font-label);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background var(--transition-base);
+    }
+    .status-dropdown-menu li button::before {
+      content: "";
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+    .status-dropdown-menu li button:hover { background: rgba(255,255,255,0.06); }
+    .status-dropdown-menu li button[data-value="novo"]       { color: var(--c-status-new); }
+    .status-dropdown-menu li button[data-value="em_analise"] { color: var(--c-status-progress); }
+    .status-dropdown-menu li button[data-value="aprovado"]   { color: var(--c-status-approved); }
+    .status-dropdown-menu li button[data-value="recusado"]   { color: var(--c-status-rejected); }
+
     /* TABELA DE LEADS (NOIR EDITORIAL) */
     .table-wrap {
       flex: 1;
@@ -1173,6 +1216,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
       </select>`;
     }
 
+    function statusControlCard(lead){
+      if(lead.status==="avaliacao_enviada"){
+        return `<span class="status-badge status-badge--avaliacao_enviada">Avaliação enviada</span>`;
+      }
+      return `<button type="button" class="status-sel status-sel--${lead.status} status-dropdown-trigger" data-id="${lead.id}" style="width:100%;text-align:left;">${STATUS_LABEL[lead.status]??lead.status}</button>`;
+    }
+
     const FLAG_META = {
       CARDIO:         { label:"C", title:"Condição cardíaca — exige liberação médica", color:"#E74C3C" },
       SAUDE:          { label:"S", title:"Condição de saúde — revisar com equipe médica", color:"#E67E22" },
@@ -1285,7 +1335,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <div class="lead-card__row">${lead.email??""}</div>
           <div class="lead-card__goal">${(lead.objetivo??"").slice(0,80)}</div>
           <div class="lead-card__status">
-            ${statusControl(lead)}
+            ${statusControlCard(lead)}
           </div>
           <div class="lead-card__actions">
             <button class="btn-card-action" onclick="window.__openDetail('${lead.id}')">
@@ -1796,6 +1846,46 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
       const url=URL.createObjectURL(blob);
       const a=document.createElement("a");a.href=url;a.download=`elite90-leads-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url);
+    });
+
+    // ── CUSTOM STATUS DROPDOWN (cards mobile) ────────────────────────────────
+    const __sdMenu = document.createElement("ul");
+    __sdMenu.className = "status-dropdown-menu";
+    __sdMenu.hidden = true;
+    __sdMenu.innerHTML = `
+      <li><button type="button" data-value="novo">Novo</button></li>
+      <li><button type="button" data-value="em_analise">Em análise</button></li>
+      <li><button type="button" data-value="aprovado">Aprovado</button></li>
+      <li><button type="button" data-value="recusado">Recusado</button></li>
+    `;
+    document.body.appendChild(__sdMenu);
+    let __sdActiveId = null;
+
+    document.addEventListener("click", e => {
+      const trigger = e.target.closest(".status-dropdown-trigger");
+      if (trigger) {
+        const isOpen = !__sdMenu.hidden && __sdActiveId === trigger.dataset.id;
+        if (isOpen) { __sdMenu.hidden = true; __sdActiveId = null; return; }
+        __sdActiveId = trigger.dataset.id;
+        const r = trigger.getBoundingClientRect();
+        __sdMenu.style.left = `${r.left}px`;
+        __sdMenu.style.minWidth = `${r.width}px`;
+        __sdMenu.style.top = "-9999px";
+        __sdMenu.hidden = false;
+        const menuH = __sdMenu.offsetHeight;
+        __sdMenu.style.top = (window.innerHeight - r.bottom) > menuH
+          ? `${r.bottom + 4}px`
+          : `${r.top - menuH - 4}px`;
+        return;
+      }
+      const opt = e.target.closest(".status-dropdown-menu li button");
+      if (opt && __sdActiveId) {
+        const id = __sdActiveId;
+        __sdMenu.hidden = true; __sdActiveId = null;
+        window.__updStatus({ dataset: { id }, value: opt.dataset.value });
+        return;
+      }
+      if (!__sdMenu.hidden) { __sdMenu.hidden = true; __sdActiveId = null; }
     });
 
     document.getElementById("status-filter")?.addEventListener("change",renderTable);
