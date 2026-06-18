@@ -275,7 +275,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .status-dropdown-menu li button[data-value="novo"]       { color: var(--c-status-new); }
     .status-dropdown-menu li button[data-value="em_analise"] { color: var(--c-status-progress); }
     .status-dropdown-menu li button[data-value="aprovado"]   { color: var(--c-status-approved); }
-    .status-dropdown-menu li button[data-value="recusado"]   { color: var(--c-status-rejected); }
+    .status-dropdown-menu li button[data-value="recusado"]        { color: var(--c-status-rejected); }
+    .status-dropdown-menu li button[data-value="avaliacao_enviada"] { color: var(--c-lime); }
+    .status-dropdown-menu li button[data-value=""]             { color: var(--c-textsub); }
+    #filter-dropdown-btn { display: none; }
 
     /* TABELA DE LEADS (NOIR EDITORIAL) */
     .table-wrap {
@@ -387,6 +390,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
       .table-wrap { display: none; }
       .leads-cards { display: block; }
       main { height: auto; display: block; overflow: visible; padding: var(--space-5) var(--space-3); }
+      #status-filter { display: none; }
+      #filter-dropdown-btn { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
       .page-title { font-size: 2.25rem; }
       .stats-row { gap: var(--space-2); }
       .stat-card { min-width: 0; flex: 1 1 calc(50% - var(--space-2)); padding: var(--space-3) var(--space-4); }
@@ -895,6 +900,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <option value="recusado">Recusado</option>
           <option value="avaliacao_enviada">Avaliação enviada</option>
         </select>
+        <button type="button" id="filter-dropdown-btn" class="filter-select">
+          <span id="filter-dropdown-label">Todos os status</span>
+          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
       <span class="leads-count" id="leads-count"></span>
     </div>
@@ -1848,45 +1857,88 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const a=document.createElement("a");a.href=url;a.download=`elite90-leads-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url);
     });
 
-    // ── CUSTOM STATUS DROPDOWN (cards mobile) ────────────────────────────────
-    const __sdMenu = document.createElement("ul");
-    __sdMenu.className = "status-dropdown-menu";
-    __sdMenu.hidden = true;
-    __sdMenu.innerHTML = `
-      <li><button type="button" data-value="novo">Novo</button></li>
-      <li><button type="button" data-value="em_analise">Em análise</button></li>
-      <li><button type="button" data-value="aprovado">Aprovado</button></li>
-      <li><button type="button" data-value="recusado">Recusado</button></li>
-    `;
-    document.body.appendChild(__sdMenu);
+    // ── CUSTOM DROPDOWNS (mobile) ─────────────────────────────────────────────
+    function __createMenu(items) {
+      const ul = document.createElement("ul");
+      ul.className = "status-dropdown-menu";
+      ul.hidden = true;
+      ul.innerHTML = items.map(({value, label}) =>
+        `<li><button type="button" data-value="${value}">${label}</button></li>`
+      ).join("");
+      document.body.appendChild(ul);
+      return ul;
+    }
+
+    function __positionMenu(menu, trigger) {
+      const r = trigger.getBoundingClientRect();
+      menu.style.left = `${r.left}px`;
+      menu.style.minWidth = `${r.width}px`;
+      menu.style.top = "-9999px";
+      menu.hidden = false;
+      const menuH = menu.offsetHeight;
+      menu.style.top = (window.innerHeight - r.bottom) > menuH
+        ? `${r.bottom + 4}px`
+        : `${r.top - menuH - 4}px`;
+    }
+
+    const __sdMenu = __createMenu([
+      {value:"novo",             label:"Novo"},
+      {value:"em_analise",       label:"Em análise"},
+      {value:"aprovado",         label:"Aprovado"},
+      {value:"recusado",         label:"Recusado"},
+    ]);
     let __sdActiveId = null;
+
+    const FILTER_LABELS = {...STATUS_LABEL, "":"Todos os status"};
+    const __filterMenu = __createMenu([
+      {value:"",                  label:"Todos os status"},
+      {value:"novo",              label:"Novo"},
+      {value:"em_analise",        label:"Em análise"},
+      {value:"aprovado",          label:"Aprovado"},
+      {value:"recusado",          label:"Recusado"},
+      {value:"avaliacao_enviada", label:"Avaliação enviada"},
+    ]);
+
+    function __closeAll() {
+      __sdMenu.hidden = true; __sdActiveId = null;
+      __filterMenu.hidden = true;
+    }
 
     document.addEventListener("click", e => {
       const trigger = e.target.closest(".status-dropdown-trigger");
       if (trigger) {
         const isOpen = !__sdMenu.hidden && __sdActiveId === trigger.dataset.id;
-        if (isOpen) { __sdMenu.hidden = true; __sdActiveId = null; return; }
-        __sdActiveId = trigger.dataset.id;
-        const r = trigger.getBoundingClientRect();
-        __sdMenu.style.left = `${r.left}px`;
-        __sdMenu.style.minWidth = `${r.width}px`;
-        __sdMenu.style.top = "-9999px";
-        __sdMenu.hidden = false;
-        const menuH = __sdMenu.offsetHeight;
-        __sdMenu.style.top = (window.innerHeight - r.bottom) > menuH
-          ? `${r.bottom + 4}px`
-          : `${r.top - menuH - 4}px`;
+        __closeAll();
+        if (!isOpen) { __sdActiveId = trigger.dataset.id; __positionMenu(__sdMenu, trigger); }
         return;
       }
-      const opt = e.target.closest(".status-dropdown-menu li button");
-      if (opt && __sdActiveId) {
-        const id = __sdActiveId;
-        __sdMenu.hidden = true; __sdActiveId = null;
-        window.__updStatus({ dataset: { id }, value: opt.dataset.value });
+      if (__sdMenu.contains(e.target)) {
+        const opt = e.target.closest("button[data-value]");
+        if (opt && __sdActiveId) { const id = __sdActiveId; __closeAll(); window.__updStatus({ dataset: { id }, value: opt.dataset.value }); }
         return;
       }
-      if (!__sdMenu.hidden) { __sdMenu.hidden = true; __sdActiveId = null; }
+      if (__filterMenu.contains(e.target)) {
+        const opt = e.target.closest("button[data-value]");
+        if (opt) {
+          const val = opt.dataset.value;
+          document.getElementById("filter-dropdown-label").textContent = FILTER_LABELS[val] ?? "Todos os status";
+          document.getElementById("status-filter").value = val;
+          __closeAll();
+          renderTable();
+        }
+        return;
+      }
+      __closeAll();
     });
+
+    document.getElementById("filter-dropdown-btn")?.addEventListener("click", e => {
+      e.stopPropagation();
+      const isOpen = !__filterMenu.hidden;
+      __closeAll();
+      if (!isOpen) __positionMenu(__filterMenu, e.currentTarget);
+    });
+
+    window.addEventListener("scroll", __closeAll, { passive: true });
 
     document.getElementById("status-filter")?.addEventListener("change",renderTable);
     document.getElementById("search-input")?.addEventListener("input",renderTable);
