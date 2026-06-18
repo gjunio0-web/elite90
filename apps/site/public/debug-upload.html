@@ -129,19 +129,23 @@
         body:    JSON.stringify({ ...PAYLOAD, nome, fotos_b64, fotos_upload_id: `debug-${Date.now()}` }),
       });
       const txt = await res.text();
-      pre.textContent = `HTTP ${res.status}\n\n${txt}`;
       pre.hidden = false;
       if (res.ok) {
         status.className = "ok";
         status.textContent = "✓ Sucesso — verifique fotos_paths no Firestore.";
+        pre.style.borderLeftColor = "#A6C300";
+        pre.textContent = `HTTP ${res.status}\n\n${txt}`;
       } else {
         status.className = "err";
-        status.textContent = "✗ Função retornou erro.";
+        status.textContent = `✗ Erro HTTP ${res.status}`;
+        pre.style.borderLeftColor = "#ff5555";
+        pre.textContent = txt;
       }
     } catch (e) {
       status.className = "err";
-      status.textContent = "✗ Falha de rede: " + e.message;
-      pre.textContent = e.stack ?? e.message;
+      status.textContent = "✗ Exceção JavaScript";
+      pre.style.borderLeftColor = "#ff5555";
+      pre.textContent = (e.stack ?? e.message ?? String(e));
       pre.hidden = false;
     }
 
