@@ -852,7 +852,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
             <th class="th-sortable" data-sort="nome">Nome</th>
             <th class="th-sortable" data-sort="score">Score</th>
             <th>E-mail</th><th>Objetivo</th>
-            <th>Status</th><th>Ações</th>
+            <th>Status</th><th style="width:1%;white-space:nowrap;">Ações</th>
           </tr>
         </thead>
         <tbody id="leads-tbody">
@@ -1486,7 +1486,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         `<tr><th class="detail-th">Composição</th><td class="detail-td" style="color:var(--c-textsub);">Base determinística: ${lead.score_base ?? "--"} pts · Ajuste IA: ${lead.score_ajuste_ia >= 0 ? "+" : ""}${lead.score_ajuste_ia ?? "--"} pts</td></tr>`,
         flagsArr.length ? `<tr><th class="detail-th">Flags</th><td class="detail-td" style="display:flex;flex-wrap:wrap;gap:6px;padding-top:1rem;">${flagBadges}</td></tr>` : "",
         lead.score_justificativa ? `<tr><th class="detail-th">IA diz</th><td class="detail-td" style="color:var(--c-textsub);font-style:italic;">${lead.score_justificativa}</td></tr>` : "",
-      ].join("") : `<tr><td class="detail-td" colspan="2" style="color:var(--c-textsub);white-space:normal;overflow-wrap:break-word;word-break:break-word;max-width:0;width:100%;">Score ainda não calculado — clique em Recalcular para gerar agora.</td></tr>`;
+      ].join("") : `<tr><td class="detail-td" colspan="2" style="color:var(--c-textsub);white-space:normal;overflow-wrap:break-word;word-break:break-word;">Score ainda não calculado — clique em Recalcular para gerar agora.</td></tr>`;
 
       const scoreSection = `<div class="detail-section">
         <div class="detail-section__title">Score de Triagem</div>
