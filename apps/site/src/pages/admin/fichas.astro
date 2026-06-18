@@ -275,7 +275,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
       transition: background var(--transition-base);
     }
     .td--name { font-weight: 700; color: var(--c-white); font-size: 0.9rem; letter-spacing: 0.02em; }
-    .td--goal { color: var(--c-textbody); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.75rem; }
+    .td--goal    { color: var(--c-textbody); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.75rem; }
+    .td--actions { white-space: nowrap; min-width: 260px; }
 
     tbody tr:nth-child(even) .td { background: rgba(255,255,255,0.012); }
     tr:hover .td { background: rgba(166, 195, 0, 0.04); }
@@ -1252,7 +1253,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <td class="td">${lead.email??""}</td>
           <td class="td td--goal">${(lead.objetivo??"").slice(0,50)}</td>
           <td class="td">${statusControl(lead)}</td>
-          <td class="td" style="white-space: nowrap;">
+          <td class="td td--actions">
             <button class="btn-action-link" onclick="window.__openDetail('${lead.id}')">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
               Ver ficha
@@ -1486,7 +1487,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         `<tr><th class="detail-th">Composição</th><td class="detail-td" style="color:var(--c-textsub);">Base determinística: ${lead.score_base ?? "--"} pts · Ajuste IA: ${lead.score_ajuste_ia >= 0 ? "+" : ""}${lead.score_ajuste_ia ?? "--"} pts</td></tr>`,
         flagsArr.length ? `<tr><th class="detail-th">Flags</th><td class="detail-td" style="display:flex;flex-wrap:wrap;gap:6px;padding-top:1rem;">${flagBadges}</td></tr>` : "",
         lead.score_justificativa ? `<tr><th class="detail-th">IA diz</th><td class="detail-td" style="color:var(--c-textsub);font-style:italic;">${lead.score_justificativa}</td></tr>` : "",
-      ].join("") : `<tr><td class="detail-td" colspan="2" style="color:var(--c-textsub);white-space:normal;overflow-wrap:break-word;word-break:break-word;">Score ainda não calculado — clique em Recalcular para gerar agora.</td></tr>`;
+      ].join("") : `<tr><th class="detail-th">Status</th><td class="detail-td" style="color:var(--c-textsub);">Não calculado — clique em Recalcular abaixo.</td></tr>`;
 
       const scoreSection = `<div class="detail-section">
         <div class="detail-section__title">Score de Triagem</div>
