@@ -64,7 +64,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
     }
     
     /* LAYOUT PRINCIPAL */
-    main { max-width: 1200px; margin: 0 auto; padding: var(--space-6) var(--space-5); }
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-5) var(--space-4);
+      height: calc(100vh - 64px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
     
     .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--space-6); gap: var(--space-4); flex-wrap: wrap; }
     .page-title-block .page-eyebrow {
@@ -228,7 +236,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     /* TABELA DE LEADS (NOIR EDITORIAL) */
     .table-wrap {
-      overflow-x: auto;
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
       scrollbar-width: thin;
       scrollbar-color: var(--c-lime) transparent;
       margin-top: var(--space-5);
@@ -237,7 +247,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .table-wrap::-webkit-scrollbar-track { background: transparent; }
     .table-wrap::-webkit-scrollbar-thumb { background: rgba(166,195,0,0.3); border-radius: 2px; }
     
-    table { width: 100%; border-collapse: collapse; min-width: 1120px; text-align: left; }
+    table { width: 100%; border-collapse: collapse; min-width: 960px; text-align: left; }
     
     th {
       font-family: var(--font-label);
@@ -332,8 +342,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     @media (max-width: 760px) {
       .table-wrap { display: none; }
-      .leads-cards { display: block; }
-      main { padding: var(--space-5) var(--space-3); }
+      .leads-cards { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; }
+      main { padding: var(--space-5) var(--space-3) var(--space-4); }
       .page-title { font-size: 2.25rem; }
       .stats-row { gap: var(--space-2); }
       .stat-card { min-width: 0; flex: 1 1 calc(50% - var(--space-2)); padding: var(--space-3) var(--space-4); }
@@ -389,7 +399,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     /* STATUS BAR INFERIOR */
     .status-bar {
-      margin-top: var(--space-6);
+      flex-shrink: 0;
+      margin-top: var(--space-4);
       background: var(--c-darkbg);
       border: 1px solid rgba(255,255,255,0.05);
       border-radius: var(--radius-card);
@@ -852,14 +863,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
             <th class="th-sortable" data-sort="data">Data</th>
             <th class="th-sortable" data-sort="nome">Nome</th>
             <th class="th-sortable" data-sort="score">Score</th>
-            <th>E-mail</th>
             <th>Objetivo</th>
             <th>Status</th>
             <th>Ações</th>
           </tr>
         </thead>
         <tbody id="leads-tbody">
-          <tr><td class="td" colspan="7" style="text-align:center;color:var(--c-textsub)">Carregando...</td></tr>
+          <tr><td class="td" colspan="6" style="text-align:center;color:var(--c-textsub)">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1113,7 +1123,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         renderStats(); renderTable();
       } catch (err) {
         console.error("Erro sistêmico ao carregar fichas:", err);
-        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="7" style="text-align:center;color:var(--c-status-alert);font-weight:700;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede. Verifique as regras do Firestore.</td></tr>`;
+        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="6" style="text-align:center;color:var(--c-status-alert);font-weight:700;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede. Verifique as regras do Firestore.</td></tr>`;
         document.getElementById("leads-cards").innerHTML=`<div class="lead-card" style="color:var(--c-status-alert);font-weight:700;text-align:center;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede.</div>`;
       }
     }
@@ -1123,7 +1133,6 @@ import AdminHeader from '../../components/AdminHeader.astro';
         <td class="td"><span class="skel skel-line skel-line--sm"></span></td>
         <td class="td"><span class="skel skel-line"></span></td>
         <td class="td"><span class="skel skel-line skel-line--sm"></span></td>
-        <td class="td"><span class="skel skel-line"></span></td>
         <td class="td"><span class="skel skel-line"></span></td>
         <td class="td"><span class="skel skel-line skel-line--sm"></span></td>
         <td class="td"><span class="skel skel-line skel-line--sm"></span></td>
@@ -1230,7 +1239,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       document.getElementById("leads-count").textContent=`${filtered.length} ficha${filtered.length!==1?"s":""}`;
 
       if(!filtered.length){
-        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="7" style="text-align:center;color:var(--c-textsub)">Nenhuma ficha encontrada.</td></tr>`;
+        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="6" style="text-align:center;color:var(--c-textsub)">Nenhuma ficha encontrada.</td></tr>`;
         document.getElementById("leads-cards").innerHTML=`<div class="lead-card" style="text-align:center;color:var(--c-textsub)">Nenhuma ficha encontrada.</div>`;
         return;
       }
@@ -1252,7 +1261,6 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <td class="td">${date}</td>
           <td class="td td--name">${lead.nome??""}</td>
           <td class="td">${scoreBadge(lead)}</td>
-          <td class="td">${lead.email??""}</td>
           <td class="td td--goal">${(lead.objetivo??"").slice(0,50)}</td>
           <td class="td">${statusControl(lead)}</td>
           <td class="td td--actions">
