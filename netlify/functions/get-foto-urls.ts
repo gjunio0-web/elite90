@@ -68,14 +68,7 @@ export const handler = async (event: any) => {
 
     const signedUrls = await Promise.all(
       paths.map(async (filePath: string) => {
-        let storagePath = filePath;
-        if (filePath.startsWith("https://")) {
-          try {
-            const match = new URL(filePath).pathname.match(/\/o\/(.+)/);
-            if (match) storagePath = decodeURIComponent(match[1]);
-          } catch {}
-        }
-        const [url] = await bucket.file(storagePath).getSignedUrl({
+        const [url] = await bucket.file(filePath).getSignedUrl({
           action: "read",
           expires: expiry,
         });
