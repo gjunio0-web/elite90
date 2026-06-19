@@ -68,7 +68,16 @@ export const handler = async (event: any) => {
 
     const signedUrls = await Promise.all(
       paths.map(async (filePath: string) => {
-        const [url] = await bucket.file(filePath).getSignedUrl({
+        // Normaliza: se vier URL completa do Firebase Storage (dados legacy/seed),
+        // extrai só o path do Storage. Paths puros passam direto.
+        let storagePath = filePath;
+        if (filePath.startsWith("https://")) {
+          try {
+            const match = new URL(filePath).pathname.match(/\/o\/(.+)/);
+            if (match) storagePath = decodeURIComponent(match[1]);
+          } catch {}
+        }
+        const [url] = await bucket.file(storagePath).getSignedUrl({
           action: "read",
           expires: expiry,
         });
