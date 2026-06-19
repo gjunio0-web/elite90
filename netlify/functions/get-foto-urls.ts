@@ -66,10 +66,10 @@ export const handler = async (event: any) => {
     const bucket = getStorage().bucket(bucketName);
     const expiry = Date.now() + SIGNED_URL_EXPIRY_MS;
 
+    const debugInfo: { input: string; storagePath: string; signedUrl?: string; error?: string }[] = [];
+
     const signedUrls = await Promise.all(
       paths.map(async (filePath: string) => {
-        // Normaliza: se vier URL completa do Firebase Storage (dados legacy/seed),
-        // extrai só o path do Storage. Paths puros passam direto.
         let storagePath = filePath;
         if (filePath.startsWith("https://")) {
           try {
@@ -77,17 +77,23 @@ export const handler = async (event: any) => {
             if (match) storagePath = decodeURIComponent(match[1]);
           } catch {}
         }
-        const [url] = await bucket.file(storagePath).getSignedUrl({
-          action: "read",
-          expires: expiry,
-        });
-        return url;
+        try {
+          const [url] = await bucket.file(storagePath).getSignedUrl({
+            action: "read",
+            expires: expiry,
+          });
+          debugInfo.push({ input: filePath, storagePath, signedUrl: url });
+          return url;
+        } catch (signErr: any) {
+          debugInfo.push({ input: filePath, storagePath, error: signErr?.message ?? String(signErr) });
+          return null;
+        }
       })
     );
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ urls: signedUrls, expiresAt: expiry }),
+      body: JSON.stringify({ urls: signedUrls, expiresAt: expiry, _debug: debugInfo }),
     };
   } catch (err: any) {
     console.error("get-foto-urls error:", err);

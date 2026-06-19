@@ -1509,41 +1509,32 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
       let fotosSection = "";
       if (fotosPaths.length > 0) {
-        const buildFotosGrid = (urls) => `<div class="detail-section">
-          <div class="detail-section__title">Fotos de referência</div>
-          <p class="privacy-note" style="margin-bottom:var(--space-3)">Links temporários — expiram em 15 minutos por segurança.</p>
-          <div class="fotos-grid">
-            ${urls.map((url, i) => `
-              <button type="button" class="foto-thumb" onclick="window.__openLightbox(${i})" aria-label="Ampliar foto ${i+1}">
-                <img src="${url}" alt="Foto ${i+1}" loading="lazy" />
-              </button>`).join("")}
-          </div>
-        </div>`;
-
-        if (fotosPaths.every(p => p.startsWith("https://"))) {
-          // fotos_paths já contém URLs completas com token (seed / dados legado).
-          // Não é necessário gerar Signed URL — usar diretamente.
-          window.__currentFotoUrls = fotosPaths;
-          fotosSection = buildFotosGrid(fotosPaths);
-        } else {
-          // fotos_paths contém paths do Storage (dados reais) → gerar Signed URLs via function.
-          try {
-            const token = await getFreshToken();
-            const res = await fetch("/.netlify/functions/get-foto-urls", {
-              method: "POST",
-              headers: { "content-type": "application/json", "Authorization": `Bearer ${token}` },
-              body: JSON.stringify({ paths: fotosPaths }),
-            });
-            if (res.ok) {
-              const { urls } = await res.json();
-              window.__currentFotoUrls = urls;
-              fotosSection = buildFotosGrid(urls);
-            } else {
-              fotosSection = `<div class="detail-section"><div class="detail-section__title">Fotos de referência</div><p class="privacy-note">Não foi possível carregar as fotos agora. Tente reabrir a ficha.</p></div>`;
-            }
-          } catch {
-            fotosSection = `<div class="detail-section"><div class="detail-section__title">Fotos de referência</div><p class="privacy-note">Erro ao gerar links das fotos.</p></div>`;
+        // Busca Signed URLs temporárias (15 min) via function autenticada
+        try {
+          const token = await getFreshToken();
+          const res = await fetch("/.netlify/functions/get-foto-urls", {
+            method: "POST",
+            headers: { "content-type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify({ paths: fotosPaths }),
+          });
+          if (res.ok) {
+            const { urls } = await res.json();
+            window.__currentFotoUrls = urls; // usado pelo lightbox para navegação
+            fotosSection = `<div class="detail-section">
+              <div class="detail-section__title">Fotos de referência</div>
+              <p class="privacy-note" style="margin-bottom:var(--space-3)">Links temporários — expiram em 15 minutos por segurança.</p>
+              <div class="fotos-grid">
+                ${urls.map((url, i) => `
+                  <button type="button" class="foto-thumb" onclick="window.__openLightbox(${i})" aria-label="Ampliar foto ${i+1}">
+                    <img src="${url}" alt="Foto ${i+1}" loading="lazy" />
+                  </button>`).join("")}
+              </div>
+            </div>`;
+          } else {
+            fotosSection = `<div class="detail-section"><div class="detail-section__title">Fotos de referência</div><p class="privacy-note">Não foi possível carregar as fotos agora. Tente reabrir a ficha.</p></div>`;
           }
+        } catch {
+          fotosSection = `<div class="detail-section"><div class="detail-section__title">Fotos de referência</div><p class="privacy-note">Erro ao gerar links das fotos.</p></div>`;
         }
       }
 
