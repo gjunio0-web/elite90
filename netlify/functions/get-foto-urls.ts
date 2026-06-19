@@ -66,8 +66,6 @@ export const handler = async (event: any) => {
     const bucket = getStorage().bucket(bucketName);
     const expiry = Date.now() + SIGNED_URL_EXPIRY_MS;
 
-    const debugInfo: { input: string; storagePath: string; signedUrl?: string; error?: string }[] = [];
-
     const signedUrls = await Promise.all(
       paths.map(async (filePath: string) => {
         let storagePath = filePath;
@@ -77,23 +75,17 @@ export const handler = async (event: any) => {
             if (match) storagePath = decodeURIComponent(match[1]);
           } catch {}
         }
-        try {
-          const [url] = await bucket.file(storagePath).getSignedUrl({
-            action: "read",
-            expires: expiry,
-          });
-          debugInfo.push({ input: filePath, storagePath, signedUrl: url });
-          return url;
-        } catch (signErr: any) {
-          debugInfo.push({ input: filePath, storagePath, error: signErr?.message ?? String(signErr) });
-          return null;
-        }
+        const [url] = await bucket.file(storagePath).getSignedUrl({
+          action: "read",
+          expires: expiry,
+        });
+        return url;
       })
     );
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ urls: signedUrls, expiresAt: expiry, _debug: debugInfo }),
+      body: JSON.stringify({ urls: signedUrls, expiresAt: expiry }),
     };
   } catch (err: any) {
     console.error("get-foto-urls error:", err);

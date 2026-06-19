@@ -16,7 +16,6 @@ const db = admin.firestore();
 
 function createConfluentLead(index: number) {
   const timestamp = admin.firestore.Timestamp.now();
-  const setNumber = (index % 3) + 1;
   const profile = (index % 3 === 0) ? 'high' : (index % 3 === 1) ? 'medium' : 'low';
 
   return {
@@ -48,9 +47,9 @@ function createConfluentLead(index: number) {
     status: "novo",
     createdAt: timestamp,
     fotos_paths: [
-      `test_seed/${profile}/candidato_${setNumber}_frente.webp`,
-      `test_seed/${profile}/candidato_${setNumber}_lado.webp`,
-      `test_seed/${profile}/candidato_${setNumber}_costas.webp`,
+      `test_seed/${profile}/candidato_${profile === 'high' ? 3 : 1}_frente.webp`,
+      `test_seed/${profile}/candidato_${profile === 'high' ? 3 : 1}_lado.webp`,
+      `test_seed/${profile}/candidato_${profile === 'high' ? 3 : 1}_costas.webp`,
     ],
     fotos_upload_id: faker.string.uuid(),
     avaliacao_enviada: false
