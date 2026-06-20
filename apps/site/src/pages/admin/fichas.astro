@@ -534,7 +534,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
       padding-bottom: var(--space-2);
       border-bottom: 1px solid rgba(166, 195, 0, 0.15);
     }
-    .detail-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .detail-table { width: 100%; }
+    .detail-row {
+      display: flex; align-items: flex-start;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
     .detail-th {
       font-family: var(--font-label);
       font-size: 0.65rem;
@@ -543,18 +547,17 @@ import AdminHeader from '../../components/AdminHeader.astro';
       letter-spacing: 0.15em;
       color: var(--c-textsub);
       padding: 1rem 0;
-      vertical-align: top;
-      width: 220px;
-      border-bottom: 1px solid rgba(255,255,255,0.02);
+      flex-shrink: 0;
+      width: 200px;
     }
     .detail-td {
       font-family: var(--font-body);
       font-size: 0.85rem;
       color: var(--c-white);
       padding: 1rem 0 1rem var(--space-4);
-      border-bottom: 1px solid rgba(255,255,255,0.02);
       line-height: 1.8;
-      white-space: normal;
+      flex: 1;
+      min-width: 0;
       overflow-wrap: anywhere;
       word-break: break-word;
     }
@@ -571,12 +574,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
     }
 
     @media (max-width: 760px) {
-      .detail-table, .detail-table tbody, .detail-table tr { display: block; }
-      .detail-th, .detail-td {
-        display: block; width: 100%; padding: 0.4rem 0; border-bottom: none;
-      }
-      .detail-th { color: var(--c-textsub); padding-top: 0.75rem; }
-      .detail-td { padding-bottom: 0.6rem; }
+      .detail-row { flex-direction: column; }
+      .detail-th { width: 100%; padding: 0.75rem 0 0; }
+      .detail-td { padding: 0.2rem 0 0.6rem; }
     }
 
     /* FORMULARIO DE AVALIACAO (EVAL) */
@@ -1398,7 +1398,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const v = value || "--";
       const alertCls = alertFlag ? " detail-row--alert" : "";
       const tag = alertFlag ? `<span class="detail-alert-tag">Atenção</span>` : "";
-      return `<tr class="detail-row${alertCls}"><th class="detail-th" style="width:200px;">${label}</th><td class="detail-td" style="word-break:break-word;overflow-wrap:anywhere;">${v}${tag}</td></tr>`;
+      return `<div class="detail-row${alertCls}"><div class="detail-th">${label}</div><div class="detail-td">${v}${tag}</div></div>`;
     }
 
     // ── LIGHTBOX DE FOTOS ──────────────────────────────────────────────
@@ -1492,7 +1492,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
       const section=(title, rows)=>`<div class="detail-section">
         <div class="detail-section__title">${title}</div>
-        <table class="detail-table" style="table-layout:fixed;width:100%;"><tbody>${rows.join("")}</tbody></table>
+        <div class="detail-table">${rows.join("")}</div>
       </div>`;
 
       const privacySection=`<div class="detail-section detail-section--danger">
@@ -1551,18 +1551,17 @@ import AdminHeader from '../../components/AdminHeader.astro';
         return `<span title="${m.title}" style="display:inline-flex;align-items:center;gap:5px;font-family:var(--font-label);font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${m.color};border:1px solid ${m.color};padding:3px 8px;border-radius:2px;">${m.label} · ${m.title}</span>`;
       }).join(" ");
 
-      const tdWrap = "word-break:break-word;overflow-wrap:anywhere;";
       const scoreRowsHtml = hasScore ? [
-        `<tr><th class="detail-th" style="width:200px;">Score final</th><td class="detail-td" style="${tdWrap}"><span style="font-family:var(--font-display);font-size:1.6rem;color:${scColor};letter-spacing:.03em;">${sc}</span><span style="font-family:var(--font-label);font-size:0.65rem;color:var(--c-textsub);margin-left:6px;">/ 100</span></td></tr>`,
-        `<tr><th class="detail-th" style="width:200px;">Prioridade</th><td class="detail-td" style="${tdWrap}color:${scColor};font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${prioLabels[lead.prioridade] ?? "--"}</td></tr>`,
-        `<tr><th class="detail-th" style="width:200px;">Composição</th><td class="detail-td" style="${tdWrap}color:var(--c-textsub);">Base determinística: ${lead.score_base ?? "--"} pts · Ajuste IA: ${lead.score_ajuste_ia >= 0 ? "+" : ""}${lead.score_ajuste_ia ?? "--"} pts</td></tr>`,
-        flagsArr.length ? `<tr><th class="detail-th" style="width:200px;">Flags</th><td class="detail-td" style="display:flex;flex-wrap:wrap;gap:6px;padding-top:1rem;">${flagBadges}</td></tr>` : "",
-        lead.score_justificativa ? `<tr><th class="detail-th" style="width:200px;">IA diz</th><td class="detail-td" style="${tdWrap}color:var(--c-textsub);font-style:italic;">${lead.score_justificativa}</td></tr>` : "",
-      ].join("") : `<tr><th class="detail-th" style="width:200px;">Status</th><td class="detail-td" style="${tdWrap}color:var(--c-textsub);">Não calculado — clique em Recalcular abaixo.</td></tr>`;
+        `<div class="detail-row"><div class="detail-th">Score final</div><div class="detail-td"><span style="font-family:var(--font-display);font-size:1.6rem;color:${scColor};letter-spacing:.03em;">${sc}</span><span style="font-family:var(--font-label);font-size:0.65rem;color:var(--c-textsub);margin-left:6px;">/ 100</span></div></div>`,
+        `<div class="detail-row"><div class="detail-th">Prioridade</div><div class="detail-td" style="color:${scColor};font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${prioLabels[lead.prioridade] ?? "--"}</div></div>`,
+        `<div class="detail-row"><div class="detail-th">Composição</div><div class="detail-td" style="color:var(--c-textsub);">Base determinística: ${lead.score_base ?? "--"} pts · Ajuste IA: ${lead.score_ajuste_ia >= 0 ? "+" : ""}${lead.score_ajuste_ia ?? "--"} pts</div></div>`,
+        flagsArr.length ? `<div class="detail-row"><div class="detail-th">Flags</div><div class="detail-td" style="display:flex;flex-wrap:wrap;gap:6px;padding-top:1rem;">${flagBadges}</div></div>` : "",
+        lead.score_justificativa ? `<div class="detail-row"><div class="detail-th">IA diz</div><div class="detail-td" style="color:var(--c-textsub);font-style:italic;">${lead.score_justificativa}</div></div>` : "",
+      ].join("") : `<div class="detail-row"><div class="detail-th">Status</div><div class="detail-td" style="color:var(--c-textsub);">Não calculado — clique em Recalcular abaixo.</div></div>`;
 
       const scoreSection = `<div class="detail-section">
         <div class="detail-section__title">Score de Triagem</div>
-        <table class="detail-table" style="table-layout:fixed;width:100%;"><tbody>${scoreRowsHtml}</tbody></table>
+        <div class="detail-table">${scoreRowsHtml}</div>
         <button class="btn-sm btn-outline" id="btn-recalcular-score" data-lead-id="${id}" style="margin-top:var(--space-3);width:100%;">Recalcular score</button>
       </div>`;
 
