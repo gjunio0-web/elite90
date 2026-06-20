@@ -264,19 +264,23 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       }).catch(e => console.error("Erro na API do Resend (não-fatal):", e));
     }
 
-    // Disparo assíncrono do score de triagem — não bloqueia a resposta ao candidato.
-    // Sempre disparado. generate-triage-score aceita X-Function-Secret vazio quando
-    // FUNCTION_SECRET não está configurada no ambiente (fallback para "internal-call").
+    // Calcula o score de triagem antes de responder ao candidato.
+    // Aguardado para garantir execução em ambiente serverless (fire-and-forget
+    // é cancelado pelo Lambda antes de concluir quando o handler retorna).
     const siteUrl        = process.env.URL ?? "http://localhost:8888";
     const functionSecret = process.env.FUNCTION_SECRET ?? "";
-    globalThis.fetch(`${siteUrl}/.netlify/functions/generate-triage-score`, {
-      method: "POST",
-      headers: {
-        "Content-Type":      "application/json",
-        "X-Function-Secret": functionSecret || "internal-call",
-      },
-      body: JSON.stringify({ leadId: docRef.id }),
-    }).catch(e => console.warn("[submit-lead] Score de triagem assíncrono falhou (não-fatal):", e));
+    try {
+      await globalThis.fetch(`${siteUrl}/.netlify/functions/generate-triage-score`, {
+        method: "POST",
+        headers: {
+          "Content-Type":      "application/json",
+          "X-Function-Secret": functionSecret || "internal-call",
+        },
+        body: JSON.stringify({ leadId: docRef.id }),
+      });
+    } catch (e) {
+      console.warn("[submit-lead] Score de triagem falhou (não-fatal):", e);
+    }
 
     return {
       statusCode: 200,
