@@ -1164,7 +1164,7 @@ document.querySelectorAll<HTMLElement>(
 // CONDICIONAIS: ouvintes de mudanca
 // ============================================================
 // Radios que disparam condicionais
-["competicao","trt","lesao","suplementos","objetivo"].forEach(name => {
+["competicao","trt","condicao_cardiaca","doenca_cronica","lesao","suplementos","objetivo"].forEach(name => {
   document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
     r.addEventListener("change", updateConditionals);
   });
