@@ -555,7 +555,6 @@ import AdminHeader from '../../components/AdminHeader.astro';
       border-bottom: 1px solid rgba(255,255,255,0.02);
       line-height: 1.8;
       white-space: normal;
-      overflow: hidden;
       overflow-wrap: anywhere;
       word-break: break-word;
     }
@@ -1399,7 +1398,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const v = value || "--";
       const alertCls = alertFlag ? " detail-row--alert" : "";
       const tag = alertFlag ? `<span class="detail-alert-tag">Atenção</span>` : "";
-      return `<tr class="detail-row${alertCls}"><th class="detail-th">${label}</th><td class="detail-td">${v}${tag}</td></tr>`;
+      return `<tr class="detail-row${alertCls}"><th class="detail-th" style="width:200px;">${label}</th><td class="detail-td" style="word-break:break-word;overflow-wrap:anywhere;">${v}${tag}</td></tr>`;
     }
 
     // ── LIGHTBOX DE FOTOS ──────────────────────────────────────────────
@@ -1493,7 +1492,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
       const section=(title, rows)=>`<div class="detail-section">
         <div class="detail-section__title">${title}</div>
-        <table class="detail-table"><tbody>${rows.join("")}</tbody></table>
+        <table class="detail-table" style="table-layout:fixed;width:100%;"><tbody>${rows.join("")}</tbody></table>
       </div>`;
 
       const privacySection=`<div class="detail-section detail-section--danger">
@@ -1552,17 +1551,18 @@ import AdminHeader from '../../components/AdminHeader.astro';
         return `<span title="${m.title}" style="display:inline-flex;align-items:center;gap:5px;font-family:var(--font-label);font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${m.color};border:1px solid ${m.color};padding:3px 8px;border-radius:2px;">${m.label} · ${m.title}</span>`;
       }).join(" ");
 
+      const tdWrap = "word-break:break-word;overflow-wrap:anywhere;";
       const scoreRowsHtml = hasScore ? [
-        `<tr><th class="detail-th">Score final</th><td class="detail-td"><span style="font-family:var(--font-display);font-size:1.6rem;color:${scColor};letter-spacing:.03em;">${sc}</span><span style="font-family:var(--font-label);font-size:0.65rem;color:var(--c-textsub);margin-left:6px;">/ 100</span></td></tr>`,
-        `<tr><th class="detail-th">Prioridade</th><td class="detail-td" style="color:${scColor};font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${prioLabels[lead.prioridade] ?? "--"}</td></tr>`,
-        `<tr><th class="detail-th">Composição</th><td class="detail-td" style="color:var(--c-textsub);">Base determinística: ${lead.score_base ?? "--"} pts · Ajuste IA: ${lead.score_ajuste_ia >= 0 ? "+" : ""}${lead.score_ajuste_ia ?? "--"} pts</td></tr>`,
-        flagsArr.length ? `<tr><th class="detail-th">Flags</th><td class="detail-td" style="display:flex;flex-wrap:wrap;gap:6px;padding-top:1rem;">${flagBadges}</td></tr>` : "",
-        lead.score_justificativa ? `<tr><th class="detail-th">IA diz</th><td class="detail-td" style="color:var(--c-textsub);font-style:italic;">${lead.score_justificativa}</td></tr>` : "",
-      ].join("") : `<tr><th class="detail-th">Status</th><td class="detail-td" style="color:var(--c-textsub);">Não calculado — clique em Recalcular abaixo.</td></tr>`;
+        `<tr><th class="detail-th" style="width:200px;">Score final</th><td class="detail-td" style="${tdWrap}"><span style="font-family:var(--font-display);font-size:1.6rem;color:${scColor};letter-spacing:.03em;">${sc}</span><span style="font-family:var(--font-label);font-size:0.65rem;color:var(--c-textsub);margin-left:6px;">/ 100</span></td></tr>`,
+        `<tr><th class="detail-th" style="width:200px;">Prioridade</th><td class="detail-td" style="${tdWrap}color:${scColor};font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${prioLabels[lead.prioridade] ?? "--"}</td></tr>`,
+        `<tr><th class="detail-th" style="width:200px;">Composição</th><td class="detail-td" style="${tdWrap}color:var(--c-textsub);">Base determinística: ${lead.score_base ?? "--"} pts · Ajuste IA: ${lead.score_ajuste_ia >= 0 ? "+" : ""}${lead.score_ajuste_ia ?? "--"} pts</td></tr>`,
+        flagsArr.length ? `<tr><th class="detail-th" style="width:200px;">Flags</th><td class="detail-td" style="display:flex;flex-wrap:wrap;gap:6px;padding-top:1rem;">${flagBadges}</td></tr>` : "",
+        lead.score_justificativa ? `<tr><th class="detail-th" style="width:200px;">IA diz</th><td class="detail-td" style="${tdWrap}color:var(--c-textsub);font-style:italic;">${lead.score_justificativa}</td></tr>` : "",
+      ].join("") : `<tr><th class="detail-th" style="width:200px;">Status</th><td class="detail-td" style="${tdWrap}color:var(--c-textsub);">Não calculado — clique em Recalcular abaixo.</td></tr>`;
 
       const scoreSection = `<div class="detail-section">
         <div class="detail-section__title">Score de Triagem</div>
-        <table class="detail-table"><tbody>${scoreRowsHtml}</tbody></table>
+        <table class="detail-table" style="table-layout:fixed;width:100%;"><tbody>${scoreRowsHtml}</tbody></table>
         <button class="btn-sm btn-outline" id="btn-recalcular-score" data-lead-id="${id}" style="margin-top:var(--space-3);width:100%;">Recalcular score</button>
       </div>`;
 
