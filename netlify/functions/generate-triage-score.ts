@@ -290,7 +290,10 @@ export const handler = async (event: any) => {
   // Autenticação dupla: secret interno (submit-lead) ou token Firebase admin (painel)
   const functionSecret = process.env.FUNCTION_SECRET ?? "";
   const callerSecret   = event.headers["x-function-secret"] ?? "";
-  const isInternalCall = functionSecret.length > 0 && callerSecret === functionSecret;
+  // Aceita chamada interna se: segredo confere (quando configurado) OU
+  // FUNCTION_SECRET não está configurada e o caller enviou qualquer header não vazio.
+  const isInternalCall = callerSecret.length > 0 &&
+                         (functionSecret.length === 0 || callerSecret === functionSecret);
 
   if (!isInternalCall) {
     const authHeader = event.headers["authorization"] ?? "";

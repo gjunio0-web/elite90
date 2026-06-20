@@ -265,19 +265,18 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     }
 
     // Disparo assíncrono do score de triagem — não bloqueia a resposta ao candidato.
-    // A função generate-triage-score autentica via X-Function-Secret (comunicação interna).
+    // Sempre disparado. generate-triage-score aceita X-Function-Secret vazio quando
+    // FUNCTION_SECRET não está configurada no ambiente (fallback para "internal-call").
     const siteUrl        = process.env.URL ?? "http://localhost:8888";
     const functionSecret = process.env.FUNCTION_SECRET ?? "";
-    if (functionSecret) {
-      globalThis.fetch(`${siteUrl}/.netlify/functions/generate-triage-score`, {
-        method: "POST",
-        headers: {
-          "Content-Type":    "application/json",
-          "X-Function-Secret": functionSecret,
-        },
-        body: JSON.stringify({ leadId: docRef.id }),
-      }).catch(e => console.warn("[submit-lead] Score de triagem assíncrono falhou (não-fatal):", e));
-    }
+    globalThis.fetch(`${siteUrl}/.netlify/functions/generate-triage-score`, {
+      method: "POST",
+      headers: {
+        "Content-Type":      "application/json",
+        "X-Function-Secret": functionSecret || "internal-call",
+      },
+      body: JSON.stringify({ leadId: docRef.id }),
+    }).catch(e => console.warn("[submit-lead] Score de triagem assíncrono falhou (não-fatal):", e));
 
     return {
       statusCode: 200,
