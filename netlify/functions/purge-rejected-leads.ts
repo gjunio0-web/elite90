@@ -11,6 +11,7 @@
 import { schedule } from "@netlify/functions";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
 
 const RETENTION_DAYS = 90;
 
@@ -41,7 +42,10 @@ function getDb() {
       throw new Error("Credenciais do Firebase ausentes ou incompletas.");
     }
 
-    initializeApp({ credential: cert(serviceAccount as any) });
+    initializeApp({
+      credential: cert(serviceAccount as any),
+      storageBucket: process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? "elite90-c716b.firebasestorage.app",
+    });
   }
   return getFirestore();
 }
@@ -74,6 +78,22 @@ const handlerFn = async () => {
 
       if (referenceTs.toMillis() <= cutoffTs.toMillis()) {
         try {
+          const fotosPaths: string[] = Array.isArray(data.fotos_paths) ? data.fotos_paths : [];
+          if (fotosPaths.length > 0) {
+            const bucketName = process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? "elite90-c716b.firebasestorage.app";
+            const bucket = getStorage().bucket(bucketName);
+            await Promise.all(
+              fotosPaths.map(async (filePath: string) => {
+                try {
+                  await bucket.file(filePath).delete();
+                } catch (e: any) {
+                  if (e.code !== 404 && e.code !== 204) {
+                    errors.push(`storage:${filePath}: ${e.message}`);
+                  }
+                }
+              })
+            );
+          }
           await docSnap.ref.delete();
           deleted++;
         } catch (e: any) {

@@ -5,6 +5,7 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
+import { calcularScoreBase, ajusteIA, classificarPrioridade } from "./_scoring";
 
 function getDb(): FirebaseFirestore.Firestore {
   if (!getApps().length) {
@@ -264,22 +265,32 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       }).catch(e => console.error("Erro na API do Resend (não-fatal):", e));
     }
 
-    // Calcula o score de triagem antes de responder ao candidato.
-    // Aguardado para garantir execução em ambiente serverless (fire-and-forget
-    // é cancelado pelo Lambda antes de concluir quando o handler retorna).
-    const siteUrl        = process.env.URL ?? "http://localhost:8888";
-    const functionSecret = process.env.FUNCTION_SECRET ?? "";
+    // Calcula o score de triagem inline — evita o HTTP hop entre funções Lambda,
+    // que é cancelado pelo runtime antes de concluir quando o handler retorna.
+    const leadParaScore: Record<string, any> = {
+      data_nascimento, objetivo: objetivoFinal, objetivo_outro,
+      atividade_fisica, tempo_atividade, frequencia_semanal, disponibilidade_diaria,
+      personal_trainer, competicao, competicao_detalhe, conhece_coach,
+      medico_esporte, trt, trt_detalhe, condicao_cardiaca, diabetes,
+      doenca_cronica, lesao, lesao_detalhe, dieta, refeicoes_dia,
+      suplementos, suplementos_detalhe, agua_litros,
+    };
     try {
-      await globalThis.fetch(`${siteUrl}/.netlify/functions/generate-triage-score`, {
-        method: "POST",
-        headers: {
-          "Content-Type":      "application/json",
-          "X-Function-Secret": functionSecret || "internal-call",
-        },
-        body: JSON.stringify({ leadId: docRef.id }),
+      const { base, flags }           = calcularScoreBase(leadParaScore);
+      const { ajuste, justificativa } = await ajusteIA(leadParaScore);
+      const scoreFinal  = Math.max(0, Math.min(100, base + ajuste));
+      const prioridade  = classificarPrioridade(scoreFinal);
+      await db.collection("leads").doc(docRef.id).update({
+        score:               scoreFinal,
+        score_base:          base,
+        score_ajuste_ia:     ajuste,
+        prioridade,
+        score_flags:         flags,
+        score_justificativa: justificativa,
+        score_gerado_em:     FieldValue.serverTimestamp(),
       });
-    } catch (e) {
-      console.warn("[submit-lead] Score de triagem falhou (não-fatal):", e);
+    } catch (scoreErr: any) {
+      console.warn("[submit-lead] Score de triagem falhou (não-fatal):", scoreErr.message);
     }
 
     return {
