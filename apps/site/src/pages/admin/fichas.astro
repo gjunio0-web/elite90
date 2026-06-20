@@ -1477,9 +1477,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const secSaude=[
         detailRow("Médico do Esporte", lead.medico_esporte),
         detailRow("Uso de TRT", (lead.trt||"") + (lead.trt_detalhe ? ` - ${lead.trt_detalhe}` : ""), isAlert(lead.trt)),
-        detailRow("Condição Cardíaca", lead.condicao_cardiaca, isAlert(lead.condicao_cardiaca)),
+        detailRow("Condição Cardíaca", (lead.condicao_cardiaca||"") + (lead.condicao_cardiaca_detalhe ? ` - ${lead.condicao_cardiaca_detalhe}` : ""), isAlert(lead.condicao_cardiaca)),
         detailRow("Diabetes", lead.diabetes, isAlert(lead.diabetes)),
-        detailRow("Doença Crônica", lead.doenca_cronica, isAlert(lead.doenca_cronica)),
+        detailRow("Doença Crônica", (lead.doenca_cronica||"") + (lead.doenca_cronica_detalhe ? ` - ${lead.doenca_cronica_detalhe}` : ""), isAlert(lead.doenca_cronica)),
         detailRow("Lesão Prévia", (lead.lesao||"") + (lead.lesao_detalhe ? ` - ${lead.lesao_detalhe}` : ""), isAlert(lead.lesao)),
       ];
 

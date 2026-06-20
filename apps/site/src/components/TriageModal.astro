@@ -357,16 +357,28 @@ const isEn = locale === "en";
           <div class="form-stack">
 
             <div class="field">
-              <label class="field__label" for="f-cardiac">
+              <span class="field__label">
                 11. {isEn
                   ? "Do you have any cardiac condition? (hypertension, arrhythmia, pacemaker, angina, etc.)"
                   : "Possui alguma condição cardíaca? (hipertensão, arritmia, uso de marcapasso, angina, etc.)"}
                 <span class="field__req">*</span>
-              </label>
-              <textarea class="field__input field__textarea" id="f-cardiac"
-                name="condicao_cardiaca" rows="2" autocomplete="off"
-                placeholder={isEn ? "None / describe if applicable" : "Nenhuma / descreva se houver"}></textarea>
+              </span>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="condicao_cardiaca" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
+                <label class="radio-label"><input type="radio" name="condicao_cardiaca" value="NÃO" /> {isEn ? "NO" : "NÃO"}</label>
+              </div>
               <p class="field__error" id="f-cardiac-error" hidden></p>
+              <fieldset class="field field--cond" id="cond-cardiac"
+                data-cond-name="condicao_cardiaca"
+                data-cond-value="SIM"
+                data-cond-optional="true"
+                hidden aria-hidden="true">
+                <label class="field__label" for="f-cardiac-detail">
+                  {isEn ? "Which condition? Is it controlled?" : "Qual condição? Está controlada?"}
+                </label>
+                <textarea class="field__input field__textarea" id="f-cardiac-detail"
+                  name="condicao_cardiaca_detalhe" rows="2" autocomplete="off"></textarea>
+              </fieldset>
             </div>
 
             <div class="field">
@@ -382,16 +394,28 @@ const isEn = locale === "en";
             </div>
 
             <div class="field">
-              <label class="field__label" for="f-chronic">
+              <span class="field__label">
                 13. {isEn
                   ? "Do you have any pre-existing or chronic disease?"
                   : "Tem alguma doença pré-existente ou crônica?"}
                 <span class="field__req">*</span>
-              </label>
-              <textarea class="field__input field__textarea" id="f-chronic"
-                name="doenca_cronica" rows="2" autocomplete="off"
-                placeholder={isEn ? "None / describe if applicable" : "Nenhuma / descreva se houver"}></textarea>
+              </span>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="doenca_cronica" value="SIM" /> {isEn ? "YES" : "SIM"}</label>
+                <label class="radio-label"><input type="radio" name="doenca_cronica" value="NÃO" /> {isEn ? "NO" : "NÃO"}</label>
+              </div>
               <p class="field__error" id="f-chronic-error" hidden></p>
+              <fieldset class="field field--cond" id="cond-chronic"
+                data-cond-name="doenca_cronica"
+                data-cond-value="SIM"
+                data-cond-optional="true"
+                hidden aria-hidden="true">
+                <label class="field__label" for="f-chronic-detail">
+                  {isEn ? "Which disease? Is it controlled?" : "Qual doença? Está controlada?"}
+                </label>
+                <textarea class="field__input field__textarea" id="f-chronic-detail"
+                  name="doenca_cronica_detalhe" rows="2" autocomplete="off"></textarea>
+              </fieldset>
             </div>
 
             <div class="field">
@@ -731,10 +755,12 @@ const FIELD_RULES: Array<{
     validate: v => v.trim().length > 0,
   },
   {
-    key: "condicao_cardiaca", inputId: "f-cardiac", errorId: "f-cardiac-error",
-    msgPt: "Preencha o campo de condição cardíaca (Q11).",
-    msgEn: "Fill in the cardiac condition field (Q11).",
-    validate: v => v.trim().length > 0,
+    key: "condicao_cardiaca", inputId: "f-cardiac-error", errorId: "f-cardiac-error",
+    msgPt: "Responda a questão 11.",
+    msgEn: "Answer question 11.",
+    isGroup: true,
+    groupSel: 'input[name="condicao_cardiaca"]:checked',
+    validate: () => !!document.querySelector('input[name="condicao_cardiaca"]:checked'),
   },
   {
     key: "diabetes", inputId: "f-diabetes-error", errorId: "f-diabetes-error",
@@ -745,10 +771,12 @@ const FIELD_RULES: Array<{
     validate: () => !!document.querySelector('input[name="diabetes"]:checked'),
   },
   {
-    key: "doenca_cronica", inputId: "f-chronic", errorId: "f-chronic-error",
-    msgPt: "Preencha o campo de doença crônica (Q13).",
-    msgEn: "Fill in the chronic disease field (Q13).",
-    validate: v => v.trim().length > 0,
+    key: "doenca_cronica", inputId: "f-chronic-error", errorId: "f-chronic-error",
+    msgPt: "Responda a questão 13.",
+    msgEn: "Answer question 13.",
+    isGroup: true,
+    groupSel: 'input[name="doenca_cronica"]:checked',
+    validate: () => !!document.querySelector('input[name="doenca_cronica"]:checked'),
   },
   {
     key: "lesao", inputId: "f-lesao-error", errorId: "f-lesao-error",

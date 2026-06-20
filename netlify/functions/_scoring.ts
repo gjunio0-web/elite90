@@ -26,11 +26,6 @@ export function isAfirmativo(v: any): boolean {
   return ["sim", "SIM", "Sim", "yes", "YES"].includes(String(v ?? "").trim());
 }
 
-export function indicaCondicao(v: any): boolean {
-  const s = String(v ?? "").trim().toLowerCase();
-  return s !== "" && s !== "nenhuma" && s !== "não" && s !== "nao" && s !== "no";
-}
-
 // ── Dimensão 1 — Alinhamento Demográfico (0–15 pts) ──────────────────────────
 
 export function d1_demografico(lead: Record<string, any>): number {
@@ -109,9 +104,9 @@ export function d5_motivacao(lead: Record<string, any>): number {
 export function d6_riscos(lead: Record<string, any>): { desconto: number; flags: string[] } {
   let desconto = 0;
   const flags: string[] = [];
-  if (indicaCondicao(lead.condicao_cardiaca)) { desconto += 8; flags.push("CARDIO"); }
-  if (isAfirmativo(lead.diabetes))            { desconto += 5; if (!flags.includes("SAUDE")) flags.push("SAUDE"); }
-  if (indicaCondicao(lead.doenca_cronica))    { desconto += 5; if (!flags.includes("SAUDE")) flags.push("SAUDE"); }
+  if (isAfirmativo(lead.condicao_cardiaca)) { desconto += 8; flags.push("CARDIO"); }
+  if (isAfirmativo(lead.diabetes))          { desconto += 5; if (!flags.includes("SAUDE")) flags.push("SAUDE"); }
+  if (isAfirmativo(lead.doenca_cronica))    { desconto += 5; if (!flags.includes("SAUDE")) flags.push("SAUDE"); }
   if (isAfirmativo(lead.lesao))               { desconto += 3; flags.push("LESAO"); }
   if (isAfirmativo(lead.trt) && !isAfirmativo(lead.medico_esporte)) {
     desconto += 5;

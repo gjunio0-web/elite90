@@ -40,9 +40,9 @@ function createConfluentLead(index: number) {
     personal_trainer:       'NÃO',
     trt:                    'SIM',
     lesao:                  pick(['NÃO', 'NÃO', 'NÃO', 'SIM']),
-    condicao_cardiaca:      'Nenhuma',
+    condicao_cardiaca:      'NÃO',
     diabetes:               'NÃO',
-    doenca_cronica:         'Nenhuma',
+    doenca_cronica:         'NÃO',
   } : profile === 'medium' ? {
     data_nascimento:        '20/07/1983',
     objetivo:               pick(['Ganho de massa muscular', 'Ganho de massa muscular', 'Definição e perda de gordura']),
@@ -60,9 +60,9 @@ function createConfluentLead(index: number) {
     personal_trainer:       pick(['NÃO', 'SIM']),
     trt:                    'NÃO',
     lesao:                  pick(['NÃO', 'SIM', 'SIM']),
-    condicao_cardiaca:      'Nenhuma',
+    condicao_cardiaca:      'NÃO',
     diabetes:               'NÃO',
-    doenca_cronica:         'Nenhuma',
+    doenca_cronica:         'NÃO',
   } : {
     data_nascimento:        pick(['05/11/2000', '20/03/1996', '22/08/1990', '10/06/1984']),
     objetivo:               pick(['Saúde e qualidade de vida', 'Saúde e qualidade de vida', 'Definição e perda de gordura', 'Performance e longevidade']),
@@ -80,9 +80,9 @@ function createConfluentLead(index: number) {
     personal_trainer:       pick(['NÃO', 'SIM']),
     trt:                    'NÃO',
     lesao:                  pick(['NÃO', 'SIM', 'SIM']),
-    condicao_cardiaca:      pick(['Nenhuma', 'Nenhuma', 'Hipertensão controlada']),
+    condicao_cardiaca:      pick(['NÃO', 'NÃO', 'SIM']),
     diabetes:               pick(['NÃO', 'NÃO', 'SIM']),
-    doenca_cronica:         'Nenhuma',
+    doenca_cronica:         'NÃO',
   };
 
   return {
