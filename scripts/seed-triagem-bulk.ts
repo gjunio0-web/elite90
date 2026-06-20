@@ -17,85 +17,82 @@ const db = admin.firestore();
 function createConfluentLead(index: number) {
   const timestamp = admin.firestore.Timestamp.now();
   const profile = (index % 3 === 0) ? 'high' : (index % 3 === 1) ? 'medium' : 'low';
+  const pick = <T>(arr: T[]): T => faker.helpers.arrayElement(arr);
 
-  // Campos específicos por perfil — projetados para scores bem distintos:
-  //   high   → 90 pts → prioridade "alta"   (D1:15 D2:20 D3:20 D4:20 D5:15 D6:0)
-  //   medium → 64 pts → prioridade "média"  (D1:15 D2:16 D3:16 D4:13 D5:7  D6:-3)
-  //   low    → 44 pts → prioridade "baixa"  (D1:15 D2:12 D3:11 D4:7  D5:2  D6:-3)
-  const pd = {
-    high: {
-      data_nascimento:     "15/03/1978",
-      objetivo:            "Preparação para competição",
-      atividade_fisica:    "Musculação",
-      tempo_atividade:     "8",
-      frequencia_semanal:  "5",
-      dieta:               "Sim, com acompanhamento profissional",
-      suplementos:         "SIM",
-      disponibilidade_diaria: "2",
-      refeicoes_dia:       "6",
-      agua_litros:         "4",
-      competicao:          "SIM",
-      conhece_coach:       "SIM",
-      medico_esporte:      "SIM",
-      personal_trainer:    "NÃO",
-      trt:                 "SIM",
-      lesao:               "NÃO",
-      condicao_cardiaca:   "Nenhuma",
-      diabetes:            "NÃO",
-      doenca_cronica:      "Nenhuma",
-    },
-    medium: {
-      data_nascimento:     "20/07/1983",
-      objetivo:            "Ganho de massa muscular",
-      atividade_fisica:    "Musculação",
-      tempo_atividade:     "3",
-      frequencia_semanal:  "4",
-      dieta:               "Sim, faço dieta própria",
-      suplementos:         "SIM",
-      disponibilidade_diaria: "1.5",
-      refeicoes_dia:       "4",
-      agua_litros:         "2.5",
-      competicao:          "NÃO",
-      conhece_coach:       "SIM",
-      medico_esporte:      "NÃO",
-      personal_trainer:    "SIM",
-      trt:                 "NÃO",
-      lesao:               "SIM",
-      condicao_cardiaca:   "Nenhuma",
-      diabetes:            "NÃO",
-      doenca_cronica:      "Nenhuma",
-    },
-    low: {
-      data_nascimento:     "10/06/1984",
-      objetivo:            "Definição e perda de gordura",
-      atividade_fisica:    "Musculação",
-      tempo_atividade:     "1",
-      frequencia_semanal:  "3",
-      dieta:               "Não sigo dieta específica",
-      suplementos:         "NÃO",
-      disponibilidade_diaria: "1.5",
-      refeicoes_dia:       "4",
-      agua_litros:         "2.5",
-      competicao:          "NÃO",
-      conhece_coach:       "NÃO",
-      medico_esporte:      "NÃO",
-      personal_trainer:    "SIM",
-      trt:                 "NÃO",
-      lesao:               "SIM",
-      condicao_cardiaca:   "Nenhuma",
-      diabetes:            "NÃO",
-      doenca_cronica:      "Nenhuma",
-    },
-  }[profile];
+  // Campos aleatorizados por perfil para gerar dispersão real de scores:
+  //   high   → score 76–90 → "alta"
+  //   medium → score 45–78 → "média" (maioria)
+  //   low    → score  0–52 → "fora_do_perfil" / "baixa"
+  const pd = profile === 'high' ? {
+    data_nascimento:        '15/03/1978',
+    objetivo:               'Preparação para competição',
+    atividade_fisica:       'Musculação',
+    tempo_atividade:        pick(['4', '5', '6', '8', '10']),
+    frequencia_semanal:     pick(['3', '4', '4', '5', '5']),
+    dieta:                  pick(['Sim, com acompanhamento profissional', 'Sim, com acompanhamento profissional', 'Sim, faço dieta própria']),
+    suplementos:            'SIM',
+    disponibilidade_diaria: pick(['1.5', '2', '2']),
+    refeicoes_dia:          pick(['5', '5', '6']),
+    agua_litros:            pick(['2.5', '3', '4', '4']),
+    competicao:             'SIM',
+    conhece_coach:          'SIM',
+    medico_esporte:         'SIM',
+    personal_trainer:       'NÃO',
+    trt:                    'SIM',
+    lesao:                  pick(['NÃO', 'NÃO', 'NÃO', 'SIM']),
+    condicao_cardiaca:      'Nenhuma',
+    diabetes:               'NÃO',
+    doenca_cronica:         'Nenhuma',
+  } : profile === 'medium' ? {
+    data_nascimento:        '20/07/1983',
+    objetivo:               pick(['Ganho de massa muscular', 'Ganho de massa muscular', 'Definição e perda de gordura']),
+    atividade_fisica:       'Musculação',
+    tempo_atividade:        pick(['2', '3', '4', '5']),
+    frequencia_semanal:     pick(['3', '3', '4', '4']),
+    dieta:                  pick(['Não sigo dieta específica', 'Sim, faço dieta própria', 'Sim, faço dieta própria', 'Sim, com acompanhamento profissional']),
+    suplementos:            pick(['NÃO', 'SIM', 'SIM']),
+    disponibilidade_diaria: pick(['1', '1.5', '1.5']),
+    refeicoes_dia:          pick(['3', '4', '4', '5']),
+    agua_litros:            pick(['2', '2.5', '3']),
+    competicao:             'NÃO',
+    conhece_coach:          'SIM',
+    medico_esporte:         pick(['NÃO', 'NÃO', 'SIM']),
+    personal_trainer:       pick(['NÃO', 'SIM']),
+    trt:                    'NÃO',
+    lesao:                  pick(['NÃO', 'SIM', 'SIM']),
+    condicao_cardiaca:      'Nenhuma',
+    diabetes:               'NÃO',
+    doenca_cronica:         'Nenhuma',
+  } : {
+    data_nascimento:        pick(['05/11/2000', '20/03/1996', '22/08/1990', '10/06/1984']),
+    objetivo:               pick(['Saúde e qualidade de vida', 'Saúde e qualidade de vida', 'Definição e perda de gordura', 'Performance e longevidade']),
+    atividade_fisica:       pick(['Caminhada', 'Natação', 'Corrida']),
+    tempo_atividade:        pick(['0.5', '1', '1', '2']),
+    frequencia_semanal:     pick(['1', '2', '3']),
+    dieta:                  pick(['Não sigo dieta específica', 'Não sigo dieta específica', 'Sim, faço dieta própria']),
+    suplementos:            'NÃO',
+    disponibilidade_diaria: pick(['0.5', '1', '1.5']),
+    refeicoes_dia:          pick(['3', '3', '4']),
+    agua_litros:            pick(['1', '1.5', '2', '2.5']),
+    competicao:             'NÃO',
+    conhece_coach:          pick(['NÃO', 'NÃO', 'SIM']),
+    medico_esporte:         'NÃO',
+    personal_trainer:       pick(['NÃO', 'SIM']),
+    trt:                    'NÃO',
+    lesao:                  pick(['NÃO', 'SIM', 'SIM']),
+    condicao_cardiaca:      pick(['Nenhuma', 'Nenhuma', 'Hipertensão controlada']),
+    diabetes:               pick(['NÃO', 'NÃO', 'SIM']),
+    doenca_cronica:         'Nenhuma',
+  };
 
   return {
     nome: `${faker.person.firstName('male')} ${faker.person.lastName()} (MOCK #${String(index + 1).padStart(2, '0')})`,
     email: faker.internet.email().toLowerCase(),
     cpf: faker.helpers.replaceSymbols('###.###.###-##'),
-    altura: "1.80",
-    peso: "85.0",
-    consentimento_saude: "true",
-    status: "novo",
+    altura: '1.80',
+    peso: '85.0',
+    consentimento_saude: 'true',
+    status: 'novo',
     createdAt: timestamp,
     avaliacao_enviada: false,
     fotos_upload_id: faker.string.uuid(),
@@ -115,7 +112,7 @@ async function runSeed() {
     batch.set(docRef, createConfluentLead(i));
   }
   await batch.commit();
-  console.log("✅ 90 fichas injetadas. Scores esperados: high≈90 | medium≈64 | low≈44.");
+  console.log("✅ 90 fichas injetadas. Scores esperados: high 76–90 | medium 45–78 | low 0–52.");
 }
 
 runSeed().catch(console.error);
