@@ -87,7 +87,7 @@ function createConfluentLead(index: number) {
 
   return {
     nome: `${faker.person.firstName('male')} ${faker.person.lastName()} (MOCK #${String(index + 1).padStart(2, '0')})`,
-    email: faker.internet.email().toLowerCase(),
+    email: 'gjunio0@gmail.com',
     cpf: faker.helpers.replaceSymbols('###.###.###-##'),
     altura: '1.80',
     peso: '85.0',
