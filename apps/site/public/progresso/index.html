@@ -306,9 +306,21 @@
 
   .map-cell.map-pend::after{content:"";position:absolute;bottom:2px;right:2px;width:6px;height:6px;
     border-radius:50%;background:var(--st-construcao);z-index:3;box-shadow:0 0 0 1px var(--noir)}
+
+  .back-bar{position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:8px;
+    padding:10px 20px;background:rgba(13,13,13,.92);backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border);
+    color:var(--textsub);text-decoration:none;font-family:var(--font-label);
+    font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:color .15s}
+  .back-bar:hover{color:var(--white)}
+  .back-bar svg{flex:none}
 </style>
 </head>
 <body>
+<a class="back-bar" href="/">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+  Coach Ruiz
+</a>
 <div class="wrap">
 
   <div class="eyebrow">Elite 90 · Relatório de Progresso</div>
