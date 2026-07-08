@@ -277,7 +277,7 @@ export const en: Translations = {
     },
     submit: "Request evaluation",
     submitting: "Sending...",
-    success: "Request received. You will hear back within 48 hours.",
+    success: "Request received. You will hear back within 48 business hours.",
     error: "An error occurred. Please try again.",
     privacy: "Your data is confidential and will not be shared.",
   },

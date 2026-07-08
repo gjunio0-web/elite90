@@ -326,7 +326,7 @@ export const pt = {
     submit: "Solicitar avaliação",
     submitting: "Enviando...",
     success:
-      "Solicitação recebida. Você receberá um retorno em até 48 horas.",
+      "Solicitação recebida. Você receberá um retorno em até 48 horas úteis.",
     error: "Ocorreu um erro. Tente novamente.",
     privacy: "Seus dados são confidenciais e não serão compartilhados.",
   },

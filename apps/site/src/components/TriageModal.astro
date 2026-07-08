@@ -30,8 +30,8 @@ const isEn = locale === "en";
         </h3>
         <p class="form-success__message">
           {isEn
-            ? "Your application is under review. You will be contacted within 48 hours."
-            : "Sua solicitação está em análise. Em até 48 horas você receberá um contato."}
+            ? "Your application is under review. You will be contacted within 48 business hours."
+            : "Sua solicitação está em análise. Em até 48 horas úteis você receberá um contato."}
         </p>
         <p class="form-success__sub">
           {isEn
@@ -182,8 +182,8 @@ const isEn = locale === "en";
               </span>
               <div class="radio-group radio-group--vertical" id="activity-group">
                 {(isEn
-                  ? ["Weight training","CrossFit","Running","Swimming","Martial arts","Cycling","None"]
-                  : ["Musculação","CrossFit","Corrida","Natação","Artes marciais","Ciclismo","Nenhuma"]
+                  ? ["Weight training","CrossFit","Running","Swimming","Martial arts","Cycling","Triathlon","Racket sports","None"]
+                  : ["Musculação","CrossFit","Corrida","Natação","Artes marciais","Ciclismo","Triathlon","Esportes de Raquete","Nenhuma"]
                 ).map((opt) => (
                   <label class="radio-label">
                     <input type="checkbox" name="atividade_fisica" value={opt}

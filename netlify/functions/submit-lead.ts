@@ -120,7 +120,7 @@ function buildEmail(nome: string, objetivo: string): string {
   <div class="steps">
     <p><strong style="color:#fff;">O que acontece agora:</strong></p>
     <p>- Sua ficha está em análise.</p>
-    <p>- Em até 48 horas você receberá um contato para agendar a entrevista de aprovação.</p>
+    <p>- Em até 48 horas úteis você receberá um contato para agendar a entrevista de aprovação.</p>
     <p>- A entrevista é por vídeo e dura aproximadamente 30 minutos.</p>
   </div>
   <p class="scarcity">Vagas limitadas por ciclo. Aprovação sujeita à triagem.</p>
