@@ -12,7 +12,7 @@ const { t } = Astro.props;
   <div class="site-footer__divider" role="presentation"></div>
   <div class="container site-footer__inner">
     <p class="site-footer__copy" id="admin-ignite" style="user-select: none;">{t.footer.copyright}</p>
-    <p class="site-footer__credit">{t.footer.credit}</p>
+    <p class="site-footer__credit">{t.footer.credit} <a href="/progresso/" class="site-footer__status-dot" aria-hidden="true" tabindex="-1">·</a></p>
   </div>
 </footer>
 
@@ -60,6 +60,12 @@ const { t } = Astro.props;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: rgba(153, 153, 153, 0.5);
+  }
+
+  .site-footer__status-dot {
+    opacity: 0.15;
+    color: inherit;
+    text-decoration: none;
   }
 </style>
 

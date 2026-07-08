@@ -9,6 +9,13 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+[edge_functions]
+  directory = "netlify/edge-functions"
+
+[[edge_functions]]
+  function = "progresso-guard"
+  path = "/progresso*"
+
 [functions."purge-rejected-leads"]
   schedule = "0 3 * * *"
 

@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Elite 90 · Relatório de Progresso</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Raleway:wght@600;700&family=Montserrat:wght@400;500;600&display=swap');
+  :root{
+    --noir:#0D0D0D; --surface:#161616; --surface-2:#1C1C1C; --border:#2A2A2A; --border-strong:#3A3A3A;
+    --lime:#A6C300; --lime-12:rgba(166,195,0,.12); --lime-50:rgba(166,195,0,.5);
+    --olive:#556600;
+    --textsub:#8C8C8C; --textbody:#C7C7C7; --white:#F2F2F2;
+    --st-naocomecou:#6B6B6B; --st-construcao:#D69A3E; --st-pronto:#A6C300;
+    --font-display:'Bebas Neue',sans-serif; --font-label:'Raleway',sans-serif; --font-body:'Montserrat',sans-serif;
+    --radius-card:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--noir);color:var(--white);font-family:var(--font-body);
+       -webkit-font-smoothing:antialiased;line-height:1.5}
+  html{scrollbar-width:thin;scrollbar-color:var(--border-strong) var(--noir)}
+  ::-webkit-scrollbar{width:12px;height:12px}
+  ::-webkit-scrollbar-track{background:var(--noir)}
+  ::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:6px;
+    border:3px solid var(--noir);transition:background .15s}
+  ::-webkit-scrollbar-thumb:hover{background:var(--olive)}
+  ::-webkit-scrollbar-thumb:active{background:var(--lime)}
+  ::-webkit-scrollbar-corner{background:var(--noir)}
+  .wrap{max-width:1000px;margin:0 auto;padding:clamp(20px,4vw,48px)}
+
+  .eyebrow{font-family:var(--font-label);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+           color:var(--lime);font-weight:700}
+  .mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;
+        border-bottom:2px solid var(--white);padding-bottom:18px;margin:6px 0}
+  h1{font-family:var(--font-display);font-size:clamp(30px,5vw,46px);line-height:1;letter-spacing:.01em;
+     margin:8px 0 0;font-weight:400}
+  .mast .meta{font-family:var(--font-label);font-size:12px;color:var(--textsub);text-align:right;line-height:1.9}
+  .mast .meta b{color:var(--white)}
+  .lede{color:var(--textsub);max-width:70ch;margin:18px 0 30px;font-size:14px}
+
+  .hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);
+        padding:clamp(18px,3vw,26px);margin-bottom:16px}
+  .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:22px}
+  .count{font-family:var(--font-display);letter-spacing:.02em;font-size:clamp(44px,8vw,64px);line-height:.9}
+  .count .done{color:var(--white)}
+  .count .of{color:var(--textsub);font-size:.5em}
+  .count-pct{color:var(--lime);font-size:.5em;margin-left:14px;letter-spacing:.02em}
+  .count-label{font-family:var(--font-label);font-size:13px;color:var(--white);font-weight:600;margin-top:10px}
+  .count-sub{font-size:12.5px;color:var(--textsub);margin-top:3px}
+  .segbar{display:flex;gap:2px;margin-top:0;height:16px}
+  .seg{height:16px;background:var(--border)}
+  .tally{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px;border-top:1px solid var(--border);padding-top:14px}
+  .tally .t{display:flex;align-items:center;gap:8px;font-family:var(--font-label);font-size:12px;
+            color:var(--textsub);font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+  .dot{width:11px;height:11px;border-radius:50%;flex:none}
+  .tally .t b{font-family:var(--font-body);color:var(--white);text-transform:none;letter-spacing:0}
+
+  .legend{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-card);
+           padding:clamp(16px,3vw,22px);margin-bottom:34px}
+  .legend h2{font-family:var(--font-label);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+             color:var(--textsub);margin:0 0 14px;font-weight:700}
+  .legend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .pct-note{background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--lime);
+            border-radius:var(--radius-card);padding:clamp(16px,3vw,22px);margin-bottom:34px}
+  .pct-note h2{font-family:var(--font-label);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+               color:var(--textsub);margin:0 0 12px;font-weight:700}
+  .pct-note p{font-size:13.5px;color:var(--textbody);line-height:1.6;margin:0 0 10px;max-width:75ch}
+  .pct-note p:last-child{margin-bottom:0}
+  .pct-note b{color:var(--white)}
+
+  /* Itens da validação do Coach — borda reflete o status do item; oliva é fallback */
+  .feat.coach{border-left:3px solid var(--olive)}
+  .area-coach-mark{font-family:var(--font-label);font-size:10px;font-weight:700;color:var(--white);
+    background:var(--olive);min-width:17px;height:17px;padding:0 5px;border-radius:9px;flex:none;
+    display:inline-flex;align-items:center;justify-content:center;line-height:1}
+  .area-ia-mark{font-family:var(--font-label);font-size:10px;font-weight:700;letter-spacing:.04em;
+    color:var(--noir);background:var(--lime);padding:2px 7px;border-radius:5px;flex:none;line-height:1.4}
+  .origin-badge{font-family:var(--font-label);font-size:10px;font-weight:700;letter-spacing:.03em;
+    color:var(--white);background:var(--olive);padding:2px 8px;border-radius:5px;flex:none;white-space:nowrap}
+  .coach-divider{display:flex;align-items:center;gap:10px;margin:18px 0 10px}
+  .coach-divider span{font-family:var(--font-label);font-size:10px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--white);background:var(--olive);padding:3px 9px;border-radius:5px;flex:none}
+  .coach-divider::after{content:"";flex:1;height:1px;background:var(--olive);opacity:.4}
+  .coach-tally{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;
+    padding-top:12px;border-top:1px dashed var(--olive);font-size:12.5px;color:var(--textsub)}
+  .ct-label{font-family:var(--font-label);font-size:10px;font-weight:700;letter-spacing:.03em;
+    color:var(--white);background:var(--olive);padding:3px 9px;border-radius:5px;flex:none}
+  .ct-txt b{color:var(--white);font-weight:600}
+  .legend-note{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:12px;
+    border-top:1px solid var(--border);font-size:12.5px;color:var(--textsub);flex-wrap:wrap}
+  .legend-item{display:flex;gap:11px;align-items:flex-start}
+  .legend-item .dot{margin-top:4px}
+  .legend-item .li-name{font-weight:600;font-size:13.5px;color:var(--white)}
+  .legend-item .li-desc{font-size:12px;color:var(--textsub);margin-top:2px;line-height:1.45}
+
+  .area{margin-bottom:20px}
+  .area-head{width:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;
+             gap:12px;flex-wrap:wrap;padding:8px 0;text-align:left;color:inherit;font-family:inherit}
+  .area-head:hover .area-title{color:var(--lime)}
+  .area-title{font-family:var(--font-display);font-size:clamp(22px,3.5vw,30px);font-weight:400;
+              letter-spacing:.01em;color:var(--white);transition:color .15s}
+  .area-pct{font-family:var(--font-label);font-size:13px;font-weight:700;color:var(--textsub);margin-left:auto}
+  .chev{flex:none;color:var(--textsub);font-size:13px;line-height:1;transition:transform .3s ease}
+  .area-head[aria-expanded="true"] .chev{transform:rotate(180deg)}
+  .area-rule{height:2px;background:linear-gradient(90deg,var(--lime),transparent);border:none;margin:6px 0 0}
+  .area-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s ease}
+  .area-head[aria-expanded="true"] + .area-rule + .area-body{grid-template-rows:1fr}
+  .area-body-inner{overflow:hidden;min-height:0}
+  .area-sub{font-family:var(--font-label);font-size:12px;color:var(--textsub);margin:14px 0 16px;font-weight:600}
+
+  .feat{background:var(--surface);border:1px solid var(--border);border-radius:11px;
+        padding:15px 17px;margin-bottom:10px;display:flex;gap:16px;align-items:flex-start;
+        flex-wrap:wrap;transition:border-color .15s}
+  .feat:hover{border-color:var(--border-strong)}
+  .feat-main{flex:1;min-width:240px}
+  .feat-name{font-weight:600;font-size:15px;color:var(--white);display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .feat-code{font-family:var(--font-label);font-size:10px;font-weight:700;color:var(--textsub);
+             background:var(--surface-2);border:1px solid var(--border);padding:2px 6px;border-radius:5px;
+             letter-spacing:.03em}
+  .feat-desc{font-size:13px;color:var(--textbody);line-height:1.5;margin-top:5px}
+  .feat-status{display:flex;flex-direction:column;align-items:flex-end;gap:7px;min-width:150px}
+  .status-chip{font-family:var(--font-label);font-size:11px;font-weight:700;letter-spacing:.03em;
+               padding:4px 10px;border-radius:6px;white-space:nowrap;border:1px solid}
+  .prog{display:flex;gap:3px;align-items:center}
+  .prog .p{width:22px;height:5px;border-radius:2px;background:var(--border)}
+
+  .foot{margin-top:20px;background:var(--surface-2);border:1px solid var(--border);
+        border-radius:var(--radius-card);padding:clamp(18px,3vw,24px)}
+  .foot h2{font-family:var(--font-label);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+           color:var(--textsub);margin:0 0 12px;font-weight:700}
+  .foot p{font-size:13.5px;color:var(--textbody);line-height:1.6;margin:0 0 10px;max-width:75ch}
+  .foot p:last-child{margin-bottom:0}
+  .foot b{color:var(--lime)}
+  .stamp{font-family:var(--font-label);font-size:11px;color:var(--textsub);margin-top:26px;
+         text-align:center;padding-top:20px;border-top:1px solid var(--border)}
+
+  @media (max-width:560px){
+    .feat-status{align-items:flex-start;min-width:0;flex-basis:100%}
+    .prog{order:2}
+  }
+
+  .ia-badge{font-family:var(--font-label);font-size:10px;font-weight:700;letter-spacing:.04em;
+    color:var(--noir);background:var(--lime);border:none;border-radius:5px;padding:2px 7px;
+    cursor:pointer;flex:none;line-height:1.4;transition:transform .1s}
+  .ia-badge:active{transform:scale(.94)}
+  .ia-badge[aria-expanded="true"]{box-shadow:0 0 0 2px rgba(166,195,0,.35)}
+  .ia-detail{margin-top:8px;padding:10px 12px;background:rgba(166,195,0,.08);
+    border:1px solid rgba(166,195,0,.3);border-radius:8px;font-size:12.5px;color:var(--textbody);line-height:1.5}
+  .ia-detail[hidden]{display:none}
+  .ia-detail b{color:var(--lime)}
+  .ia-detail .ia-st{display:inline-block;margin-left:6px;font-family:var(--font-label);font-size:10px;
+    font-weight:700;padding:1px 7px;border-radius:4px;letter-spacing:.03em}
+  .ia-st.pronto{color:var(--st-pronto);background:rgba(166,195,0,.15)}
+  .ia-st.naocomecou{color:var(--st-naocomecou);background:rgba(107,107,107,.15)}
+
+  .ia-section{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--lime);
+    border-radius:var(--radius-card);padding:clamp(18px,3vw,26px);margin-bottom:16px}
+  .ia-section h2{font-family:var(--font-display);font-size:clamp(20px,3.5vw,28px);font-weight:400;
+    letter-spacing:.01em;color:var(--white);margin:0 0 6px}
+  .ia-section .ia-lede{font-size:13.5px;color:var(--textsub);margin:0 0 18px;max-width:72ch;line-height:1.55}
+  .ia-row{display:flex;gap:14px;align-items:flex-start;padding:13px 0;border-top:1px solid var(--border)}
+  .ia-row:first-of-type{border-top:none}
+  .ia-row-main{flex:1;min-width:0}
+  .ia-row-name{font-weight:600;font-size:14px;color:var(--white)}
+  .ia-row-o{font-size:12.5px;color:var(--textbody);line-height:1.5;margin-top:3px}
+  .ia-row-st{flex:none;font-family:var(--font-label);font-size:10.5px;font-weight:700;letter-spacing:.03em;
+    padding:3px 9px;border-radius:5px;white-space:nowrap}
+
+  /* Mapa completo do projeto (gaveta) */
+  .map-open-btn{font-family:var(--font-label);font-size:12.5px;font-weight:700;color:var(--noir);
+    background:var(--lime);border:none;border-radius:9px;padding:11px 18px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;margin-top:16px;transition:transform .1s,filter .15s}
+  .map-open-btn:hover{filter:brightness(1.08)}
+  .map-open-btn:active{transform:scale(.97)}
+  .map-open-icon{width:15px;height:15px;flex:none}
+
+  .map-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.82);backdrop-filter:blur(4px);
+    display:flex;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .3s ease}
+  .map-overlay.open{opacity:1;pointer-events:auto}
+  .map-drawer{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--lime);
+    overflow:hidden;display:flex;flex-direction:column;width:min(620px,94vw);height:100%;
+    transform:translateX(100%);transition:transform .3s ease;touch-action:pan-y}
+  .map-overlay.open .map-drawer{transform:translateX(0)}
+  .map-drawer.map-dragging{transition:none}
+  .map-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;
+    border-bottom:1px solid var(--border);flex:none}
+  .map-dt{font-family:var(--font-label);font-size:12px;font-weight:700;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--lime)}
+  .map-prop{font-size:12px;color:var(--textsub);margin-top:2px}
+  .map-x{width:28px;height:28px;border:1px solid var(--border-strong);border-radius:8px;color:var(--textsub);
+    background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;
+    flex:none;transition:.15s}
+  .map-x:hover{border-color:var(--lime);color:var(--lime)}
+  .map-legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 20px;border-bottom:1px solid var(--border);
+    font-family:var(--font-label);font-size:10.5px;font-weight:600;color:var(--textsub);text-transform:uppercase;
+    letter-spacing:.02em;flex:none}
+  .map-legend span{display:flex;align-items:center;gap:5px}
+  .map-sw{width:11px;height:11px;border-radius:3px;flex:none}
+  .map-ia-sym{color:var(--lime);font-weight:700}
+  .map-sw-coach{background:transparent!important;border:2px dashed var(--olive);width:11px;height:11px}
+  .map-coach-note{font-size:11.5px;color:var(--textsub);line-height:1.5;padding:10px 20px;
+    border-bottom:1px solid var(--border);flex:none;background:rgba(85,102,0,.06)}
+  .map-coach-note b{color:var(--white)}
+  .map-drawer-body{flex:1;overflow-y:auto;padding:16px 20px}
+
+  .map-area{margin-bottom:14px;border:1px solid var(--border);border-radius:11px;padding:11px 12px;background:rgba(255,255,255,.012)}
+  .map-area-h{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+  .map-area-h .map-an{font-family:var(--font-label);font-size:12px;font-weight:700;color:var(--white);
+    text-transform:uppercase;letter-spacing:.03em}
+  .map-area-h .map-ap{font-family:var(--font-label);font-size:10px;color:var(--textsub);margin-left:auto}
+
+  .map-toplevel{margin-bottom:14px;border:1.5px solid var(--lime);border-radius:12px;padding:12px 13px;background:rgba(166,195,0,.03)}
+  .map-toplevel-h{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(166,195,0,.3)}
+  .map-toplevel-h .map-tn{font-family:var(--font-display);font-size:16px;font-weight:400;letter-spacing:.02em;color:var(--lime)}
+  .map-toplevel-h .map-tp{font-family:var(--font-label);font-size:10px;color:var(--textsub);margin-left:auto}
+  .map-toplevel .map-area{margin-bottom:9px}
+  .map-toplevel .map-area:last-child{margin-bottom:0}
+
+  .map-code-tag{font-family:var(--font-label);font-size:9.5px;font-weight:700;color:var(--textsub);
+    background:var(--surface-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;
+    text-transform:none;letter-spacing:.01em;flex:none}
+  .map-area-h .map-code-tag{background:var(--noir)}
+
+  .map-cells{display:flex;flex-wrap:wrap;gap:5px}
+  .map-cell{width:28px;height:28px;border-radius:5px;background:var(--border);position:relative;overflow:hidden;cursor:pointer}
+  .map-cell .map-fill{position:absolute;left:0;right:0;bottom:0}
+  .map-cell .map-iad{position:absolute;top:2px;right:3px;font-size:8px;line-height:1;color:var(--white);z-index:2;text-shadow:0 0 2px #000}
+  .map-cell.map-sel{outline:2px solid var(--white);outline-offset:1px}
+  .map-cell.map-coach{border:2px dashed var(--olive);background:transparent}
+  .map-cell.map-coach .map-fill{bottom:2px;left:2px;right:2px;border-radius:2px}
+  .map-cell.map-coach .map-corner{position:absolute;top:-1px;left:-1px;width:9px;height:9px;
+    background:var(--olive);border-radius:0 0 4px 0;z-index:2}
+
+  .map-subgroup{border:1px dashed var(--border-strong);border-radius:9px;padding:9px 10px;margin-top:7px;background:var(--surface-2)}
+  .map-sg-h{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+  .map-sg-h .map-sgi{color:var(--textsub);font-size:11px;flex:none}
+  .map-sg-h .map-sgn{font-family:var(--font-label);font-size:10.5px;font-weight:700;color:var(--textbody);letter-spacing:.02em}
+  .map-sg-h .map-sgc{font-size:10px;color:var(--textsub)}
+  .map-sg-h .map-sgp{font-family:var(--font-label);font-size:10px;color:var(--textsub);margin-left:auto}
+  .map-sg-note{font-size:10.5px;color:var(--textsub);font-style:italic;margin:-4px 0 8px}
+
+  /* Rodapé da gaveta */
+  .map-detail{flex:none;border-top:1px solid var(--border);padding:12px 20px;min-height:58px;
+    display:flex;align-items:stretch;gap:8px;background:rgba(28,28,28,.82);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    max-height:40vh;overflow-y:auto;flex-direction:column}
+  .map-detail .map-drow{display:flex;align-items:center;gap:10px}
+  .map-detail .map-dcode{font-family:var(--font-label);font-size:10px;font-weight:700;color:var(--textsub);
+    background:var(--noir);border:1px solid var(--border);padding:2px 6px;border-radius:5px;flex:none}
+  .map-detail .map-dpath{font-size:10px;color:var(--textsub);display:block;margin-bottom:2px}
+  .map-detail .map-dwrap{min-width:0}
+  .map-detail .map-dname{font-size:13px;color:var(--white);font-weight:500}
+  .map-detail .map-dpct{font-family:var(--font-display);font-size:20px;margin-left:auto;flex:none}
+  .map-detail .map-dia{font-family:var(--font-label);font-size:9px;font-weight:700;color:var(--noir);
+    background:var(--lime);padding:1px 6px;border-radius:4px;flex:none}
+  .map-detail .map-dcoach{font-family:var(--font-label);font-size:9px;font-weight:700;color:var(--white);
+    background:var(--olive);padding:1px 6px;border-radius:4px;flex:none}
+  .map-detail .map-ddesc{font-size:12px;color:var(--textbody);line-height:1.55;
+    display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+  .map-detail .map-dpend{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--textbody);
+    line-height:1.5;padding:8px 10px;background:rgba(214,154,62,.1);border:1px solid rgba(214,154,62,.32);border-radius:7px}
+  .map-detail .map-dpend b{color:var(--st-construcao)}
+  .map-detail .map-dpend svg{width:13px;height:13px;flex:none;color:var(--st-construcao);margin-top:1px}
+  .map-detail-empty{flex-direction:row;align-items:center}
+  .map-detail-empty .map-dname{color:var(--textsub);font-style:italic}
+
+  /* Pendências com o Coach */
+  .hero-pend{margin-left:auto}
+  .hero-pend-btn{font-family:var(--font-label);font-size:12px;font-weight:700;letter-spacing:.02em;
+    color:var(--st-construcao);background:rgba(214,154,62,.1);border:1px solid rgba(214,154,62,.45);
+    border-radius:9px;padding:8px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+    transition:.15s;text-transform:uppercase}
+  .hero-pend-btn:hover{background:rgba(214,154,62,.16)}
+  .hero-pend-btn b{font-family:var(--font-body)}
+  .hero-pend-btn svg{width:14px;height:14px;flex:none}
+
+  .homework{background:linear-gradient(180deg,rgba(214,154,62,.09),rgba(214,154,62,.03));
+    border:1px solid rgba(214,154,62,.4);border-left:3px solid var(--st-construcao);
+    border-radius:var(--radius-card);padding:clamp(16px,3vw,22px);margin-bottom:16px}
+  .hw-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+  .hw-head svg{width:20px;height:20px;flex:none;color:var(--st-construcao);margin-top:1px}
+  .hw-title{font-family:var(--font-display);font-size:22px;letter-spacing:.02em;color:var(--st-construcao);line-height:1}
+  .hw-sub{font-size:12.5px;color:var(--textbody);margin-top:4px;max-width:70ch}
+  .hw-count{margin-left:auto;font-family:var(--font-display);font-size:32px;line-height:.9;color:var(--st-construcao);flex:none}
+  .hw-list{display:flex;flex-direction:column;gap:8px}
+  .hw-row{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;cursor:pointer;
+    background:rgba(0,0,0,.22);border:1px solid rgba(214,154,62,.22);border-radius:10px;padding:11px 13px;
+    transition:.15s;font-family:var(--font-body)}
+  .hw-row:hover{border-color:rgba(214,154,62,.55);background:rgba(0,0,0,.34)}
+  .hw-code{font-family:var(--font-label);font-size:10px;font-weight:700;color:var(--st-construcao);
+    background:rgba(214,154,62,.12);border:1px solid rgba(214,154,62,.3);padding:2px 6px;border-radius:5px;flex:none;margin-top:1px}
+  .hw-wrap{min-width:0;flex:1}
+  .hw-name{display:block;font-size:13.5px;font-weight:600;color:var(--white)}
+  .hw-ask{display:block;font-size:12.5px;color:var(--textbody);margin-top:2px;line-height:1.5}
+  .hw-arrow{color:var(--st-construcao);font-size:15px;flex:none;margin-top:1px}
+
+  .feat-pend{display:flex;align-items:flex-start;gap:8px;margin-top:9px;padding:9px 11px;
+    background:rgba(214,154,62,.08);border:1px solid rgba(214,154,62,.32);border-radius:8px;
+    font-size:12.5px;color:var(--textbody);line-height:1.5}
+  .feat-pend svg{width:14px;height:14px;flex:none;color:var(--st-construcao);margin-top:1px}
+  .feat-pend b{color:var(--st-construcao)}
+  .feat-flash{animation:featFlash 1.6s ease}
+  @keyframes featFlash{0%,100%{box-shadow:0 0 0 0 rgba(214,154,62,0)}
+    18%{box-shadow:0 0 0 2px rgba(214,154,62,.6)}}
+
+  .map-cell.map-pend::after{content:"";position:absolute;bottom:2px;right:2px;width:6px;height:6px;
+    border-radius:50%;background:var(--st-construcao);z-index:3;box-shadow:0 0 0 1px var(--noir)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Elite 90 · Relatório de Progresso</div>
+  <div class="mast">
+    <h1>Onde o projeto está</h1>
+    <div class="meta">
+      Preparado para <b>Coach Fernando Ruiz</b><br>
+      Atualizado em <b id="today"></b><br>
+      Visão de <b>produto</b> · <b id="feat-count"></b> funcionalidades
+    </div>
+  </div>
+
+  <p class="lede">
+    Este relatório mostra, em linguagem simples, o que já está pronto no seu projeto,
+    o que está em construção agora e o que ainda vai começar. Cada funcionalidade
+    aparece pela área do produto onde você vai usá-la — da página que capta novos
+    interessados até o aplicativo dos seus atletas.
+  </p>
+
+  <div class="hero">
+    <div class="hero-top">
+      <div>
+        <div class="count"><span class="done" id="c-andamento"></span><span class="of" id="c-total"></span><span class="count-pct" id="c-pct-and"></span></div>
+        <div class="count-label">funcionalidades já em andamento</div>
+        <div class="count-sub" id="c-sub"></div>
+      </div>
+      <div class="hero-pend" id="hero-pend"></div>
+    </div>
+    <div class="segbar" id="segbar"></div>
+    <div class="tally" id="tally"></div>
+    <div class="coach-tally" id="coach-tally"></div>
+    <button class="map-open-btn" id="openMapBtn"><svg class="map-open-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9"/><path d="M12 12v3"/></svg> Ver mapa completo do projeto</button>
+  </div>
+
+  <div id="homework"></div>
+
+  <div class="legend">
+    <h2>Como ler o status</h2>
+    <div class="legend-grid">
+      <div class="legend-item">
+        <span class="dot" style="background:var(--st-pronto)"></span>
+        <div><div class="li-name">Pronto</div>
+          <div class="li-desc">Funcionalidade construída e conferida, funcionando de ponta a ponta.</div></div>
+      </div>
+      <div class="legend-item">
+        <span class="dot" style="background:var(--st-construcao)"></span>
+        <div><div class="li-name">Em construção</div>
+          <div class="li-desc">Já começou e está avançando; parte já funciona, parte ainda falta.</div></div>
+      </div>
+      <div class="legend-item">
+        <span class="dot" style="background:var(--st-naocomecou)"></span>
+        <div><div class="li-name">Não começou</div>
+          <div class="li-desc">Planejada para uma etapa mais adiante do cronograma.</div></div>
+      </div>
+    </div>
+    <div class="legend-note">
+      <span class="origin-badge">Da sua validação</span>
+      <span>marca itens que surgiram da sua validação — ajustes ou novas funcionalidades — contados à parte do plano original.</span>
+    </div>
+  </div>
+
+  <div class="pct-note">
+    <h2>Sobre os percentuais</h2>
+    <p>Cada funcionalidade recebe um percentual que indica <b>o quanto dela já está construída</b> — de 0% (não começou) a 100% (pronta e conferida). Uma funcionalidade em construção fica entre esses extremos, conforme o que já foi feito.</p>
+    <p>O percentual que aparece ao lado de cada área é a <b>média dos percentuais das funcionalidades daquela área</b>. Por exemplo, uma área com uma tela pronta (100%) e outra pela metade (50%) aparece com 75%.</p>
+  </div>
+
+  <div id="areas"></div>
+
+  <div class="foot">
+    <h2>Por trás das telas</h2>
+    <p id="infra-line"></p>
+    <p style="color:var(--textsub);font-size:12.5px">
+      Essas são as automações que trabalham nos bastidores — geração de textos com
+      inteligência artificial, envio de e-mails, processamento de pagamento e criação
+      automática de contas. Elas não têm tela própria: aparecem funcionando dentro das
+      telas listadas acima. As que ainda faltam dependem das telas correspondentes
+      serem construídas primeiro.
+    </p>
+  </div>
+
+  <div class="stamp" id="stamp"></div>
+
+</div>
+
+<div class="map-overlay" id="mapOverlay">
+  <div class="map-drawer">
+    <div class="map-drawer-head">
+      <div><div class="map-dt">Mapa do projeto</div><div class="map-prop">Hierarquia completa · área &#8250; tela &#8250; aba</div></div>
+      <button class="map-x" id="closeMapBtn" aria-label="Fechar">&#10005;</button>
+    </div>
+    <div class="map-legend">
+      <span><span class="map-sw" style="background:var(--st-naocomecou)"></span>não começou</span>
+      <span><span class="map-sw" style="background:var(--st-construcao)"></span>em construção</span>
+      <span><span class="map-sw" style="background:var(--st-pronto)"></span>pronto</span>
+      <span><span class="map-ia-sym">&#10022;</span> IA</span>
+      <span><span class="map-sw map-sw-coach"></span>da sua validação</span>
+    </div>
+    <div class="map-coach-note">Itens com contorno tracejado vieram da sua validação (ajustes ou funcionalidades novas) — não fazem parte do catálogo planejado original e por isso <b>não entram no percentual</b> de conclusão da área.</div>
+    <div class="map-drawer-body" id="mapBody"></div>
+    <div class="map-detail map-detail-empty" id="mapDetail"><span class="map-dname">Toque em um item para ver os detalhes</span></div>
+  </div>
+</div>
+
+<script>
+const AREAS = [
+  { area:"Página de Captação", sub:"O que o público vê antes de entrar no programa", items:[
+    { code:"LP-01", name:"Página principal do site", pct:100,
+      desc:"A primeira página que um possível atleta vê, com vídeo, promessas do programa e botões para começar a triagem." },
+    { code:"LP-02", name:"Formulário de novos leads", pct:100,
+      desc:"Quando alguém se interessa pelo programa, esse formulário coleta os dados e já organiza tudo automaticamente para você revisar." },
+    { code:"LP-03", name:"Resultado da avaliação", pct:100,
+      desc:"A página que mostra ao interessado o resultado da avaliação inicial, já pronta para ele ler assim que a triagem é concluída." },
+    { code:"V-01", name:"Novas alternativas para perguntas do formulário", pct:100, origem:"coach", tipo:"nova",
+      desc:"Acrescentar novas opções de respostas em perguntas do formulário de novos leads — incluindo as modalidades Triathlon e Esportes de Raquete." },
+    { code:"V-02", name:"Ajustes em textos da página inicial", pct:100, origem:"coach", tipo:"ajuste",
+      desc:"Revisão de texto da página principal, conforme sua orientação." },
+    { code:"V-03", name:"Ajuste no aviso de retorno da ficha", pct:100, origem:"coach", tipo:"ajuste",
+      desc:"Prazo informado na confirmação da ficha atualizado de \"48 horas\" para \"48 horas úteis\", para não criar expectativa em fins de semana e feriados." },
+    { code:"V-04", name:"Nova seção Nossa Equipe", pct:0, origem:"coach", tipo:"nova",
+      desc:"Uma nova subseção da página principal, com os profissionais parceiros — foto, biografia e autoridade de cada um — para mostrar o time multidisciplinar que sustenta o programa.",
+      pendencia:"Enviar foto em boa resolução e uma biografia curta de cada profissional, e definir o cardiologista da equipe." },
+    { code:"V-05", name:"Atualização da seção de Parceiros", pct:0, origem:"coach", tipo:"ajuste",
+      desc:"Atualizar a área de parceiros com as marcas indicadas e preparar o registro de cliques, para que as recomendações gerem receita mensurável.",
+      pendencia:"Fechar os parceiros (Chefe Whey e Oficial Farma) e enviar logo, link e material de cada um." },
+    { code:"V-06", name:"Nova seção de Conteúdos", pct:0, origem:"coach", tipo:"nova",
+      desc:"Uma nova subseção da página principal reunindo podcast, vídeos e artigos num só lugar, a partir do primeiro episódio previsto. Os mesmos conteúdos vão alimentar as recomendações personalizadas dentro do aplicativo dos atletas." },
+    { code:"V-07", name:"Novos casos na seção de Resultados", pct:0, origem:"coach", tipo:"ajuste",
+      desc:"Acrescentar novos casos de transformação à seção de resultados e padronizar o visual dos cards, no padrão do comparativo de bioimpedância.",
+      pendencia:"Enviar as fotos antes/depois e os números de cada novo caso — e confirmar o peso final do Luiz Fernando (110,6 kg ou 110,9 kg)." },
+    { code:"V-08", name:"Novos depoimentos", pct:0, origem:"coach", tipo:"ajuste",
+      desc:"Acrescentar novos depoimentos à seção correspondente — mostrando não só a transformação física, mas a mudança de rotina, saúde, disciplina e qualidade de vida.",
+      pendencia:"Reunir os depoimentos das pessoas indicadas, em texto ou vídeo." },
+  ]},
+  { area:"Meu Painel · Acesso", sub:"A porta de entrada do seu painel de controle", items:[
+    { code:"ADM-01", name:"Entrada no painel", pct:100,
+      desc:"A tela de login que dá acesso a todo o seu painel de controle." },
+    { code:"ADM-02", name:"Painel inicial", pct:80,
+      desc:"A tela principal que reúne o acesso à triagem, ao acompanhamento dos atletas, aos resultados financeiros e à gestão da sua equipe e parceiros. Falta só um resumo ao vivo mostrando o que está pendente em cada área." },
+  ]},
+  { area:"Meu Painel · Triagem de Novos Atletas", sub:"Onde você avalia e aprova quem quer entrar", items:[
+    { code:"ADM-03", name:"Lista de interessados", pct:100,
+      ia:{ o:"Calcula sozinha a nota de prioridade de cada novo interessado e já organiza a fila para você, da maior para a menor prioridade.", status:"pronto" },
+      desc:"A lista de todas as pessoas que preencheram o formulário, já organizada por prioridade e pronta para você revisar." },
+    { code:"ADM-04", name:"Ficha completa do interessado", pct:100,
+      desc:"Ao abrir um interessado na lista, você vê todos os dados, fotos e histórico de saúde dele em detalhe." },
+    { code:"ADM-05", name:"Avaliação gerada e envio", pct:100,
+      ia:{ o:"Escreve o rascunho da avaliação inicial a partir da ficha do interessado, para você revisar, ajustar e enviar.", status:"pronto" },
+      desc:"A ferramenta que ajuda a gerar a avaliação inicial e enviá-la por e-mail ao interessado, com poucos cliques." },
+    { code:"V-09", name:"Papel da IA explícito na triagem", pct:0, origem:"coach", tipo:"ajuste",
+      desc:"Deixar visível, na tela de triagem, como a nota de prioridade é formada — a parte calculada por critérios fixos e a parte avaliada pela inteligência artificial —, para dar total transparência ao processo." },
+  ]},
+  { area:"Meu Painel · Acompanhamento dos Meus Atletas", sub:"O centro do seu trabalho com cada atleta ativo", items:[
+    { code:"ADM-09", name:"Lista dos meus atletas", pct:35,
+      desc:"A lista de todos os atletas ativos, com um aviso visual de quem já enviou o check-in da semana e quem ainda está pendente." },
+    { code:"ADM-10.1", name:"Visão geral do atleta", pct:30,
+      desc:"A tela com o resumo do progresso de cada atleta e os gráficos de evolução. Falta a parte em que você aprova as fotos de evolução enviadas por ele." },
+    { code:"ADM-10.2", name:"Check-in semanal", pct:50,
+      desc:"A tela onde você acompanha as métricas e fotos que o atleta enviou na semana e pode responder a ele diretamente." },
+    { code:"ADM-10.3", name:"Acompanhamento semanal com IA", pct:50,
+      ia:{ o:"Vai gerar o diagnóstico semanal de cada atleta e sugerir ajustes de treino e de dieta, a partir do check-in e do histórico.", status:"naocomecou" },
+      desc:"A tela onde você revisa o progresso de cada atleta já existe e funciona. Falta ligar a inteligência artificial que vai gerar o diagnóstico automático a cada semana." },
+    { code:"ADM-10.4", name:"Montagem de treinos", pct:48,
+      desc:"O construtor de planos de treino está pronto e testado. Ainda será construída a colaboração com a equipe — permitir que um profissional sugira ajustes, que você aprove ou recuse cada sugestão, e que fique registrado quem editou cada plano. Essa colaboração é parametrizada no módulo Minha Equipe e Parcerias." },
+    { code:"ADM-10.5", name:"Montagem de planos nutricionais", pct:50,
+      desc:"Ferramenta para montar o cardápio do atleta com cálculo automático de calorias e macronutrientes. Ainda será construída a colaboração com a equipe — permitir que um profissional sugira ajustes, que você aprove ou recuse cada sugestão, e que fique registrado quem editou cada plano. Essa colaboração é parametrizada no módulo Minha Equipe e Parcerias." },
+    { code:"ADM-10.6", name:"Avaliação física detalhada", pct:45,
+      desc:"Tela para exibir as medidas corporais do atleta (perímetros e dobras) registradas em cada avaliação." },
+  ]},
+  { area:"Meu Painel · Financeiro e Resultados", sub:"A saúde do seu negócio em números", items:[
+    { code:"ADM-M3.1", name:"Financeiro", pct:0,
+      desc:"Um resumo com a receita mensal, quantos atletas têm pagado em dia e quais contratos estão pendentes." },
+    { code:"ADM-M3.2", name:"Indicadores de resultado", pct:0,
+      desc:"Um painel com a evolução da receita e o desempenho geral do programa ao longo do tempo." },
+    { code:"ADM-M3.3", name:"Biblioteca de conteúdo", pct:0,
+      desc:"Onde você vai cadastrar artigos e vídeos para recomendar aos atletas, de acordo com o momento de cada um." },
+    { code:"ADM-M3.4", name:"Cobrança de novos atletas", pct:0,
+      desc:"Ferramenta para gerar um link de pagamento personalizado para um novo atleta fechar com você." },
+  ]},
+  { area:"Meu Painel · Minha Equipe e Parcerias", sub:"Onde você gere quem colabora com você e recebe trabalho delegado", items:[
+    { code:"ADM-13", name:"Gestão da equipe e parceiros", pct:0,
+      desc:"Tela para você cadastrar e gerenciar os profissionais e parceiros que colaboram com você — hoje preparadores e nutricionistas que ajudam a montar os planos; no futuro, parceiros que recebem outros tipos de trabalho, como o repasse de novos interessados." },
+    { code:"ADM-14", name:"Regras de atribuição", pct:0,
+      desc:"Onde você define quem cuida de quê: um profissional padrão por especialidade e exceções para atletas específicos." },
+    { code:"ADM-15", name:"Acompanhamento das delegações", pct:0,
+      desc:"Um painel para você acompanhar tudo o que foi delegado — o que está pendente de aprovação, o que já foi aprovado ou recusado, e como está a carga de cada profissional." },
+  ]},
+  { area:"Meu Painel · Avisos", sub:"Como o sistema chama sua atenção", items:[
+    { code:"ADM-12", name:"Avisos e notificações", pct:8,
+      desc:"Um sino de notificações que vai avisá-lo sempre que algo precisar da sua atenção, como um atleta escalado pelo chat de dúvidas." },
+  ]},
+  { area:"App dos Meus Atletas", sub:"O aplicativo que cada atleta usa no dia a dia", items:[
+    { code:"PRT-01", name:"Entrada no aplicativo", pct:0,
+      desc:"A tela de login que dá acesso ao aplicativo de cada atleta." },
+    { code:"PRT-02", name:"Navegação do aplicativo", pct:0,
+      desc:"A estrutura de menu que leva o atleta entre as telas do aplicativo." },
+    { code:"PRT-03", name:"Painel de progresso do atleta", pct:0,
+      desc:"Uma tela com o gráfico de peso e medidas do atleta, para ele acompanhar a própria evolução." },
+    { code:"PRT-04", name:"Registro de peso", pct:0,
+      desc:"Onde o atleta registra o peso da semana, podendo até fotografar a balança em vez de digitar." },
+    { code:"PRT-05", name:"Envio do check-in semanal", pct:0,
+      desc:"Onde o atleta envia as métricas, fotos e sensações da semana para você revisar." },
+    { code:"PRT-06", name:"App de treino do atleta", pct:0,
+      desc:"A tela onde o atleta acompanha o treino do dia e registra a carga usada em cada série." },
+    { code:"PRT-07", name:"Relatório semanal do atleta", pct:0,
+      desc:"A tela onde o atleta vê o diagnóstico e os ajustes gerados a partir do acompanhamento semanal." },
+    { code:"PRT-08", name:"Envio de fotos de evolução", pct:0,
+      desc:"Onde o atleta envia as fotos de progresso a cada marco do programa." },
+    { code:"PRT-09", name:"Galeria de antes e depois", pct:0,
+      desc:"Uma linha do tempo com as fotos de evolução do atleta, lado a lado." },
+    { code:"PRT-10", name:"Plano nutricional do atleta", pct:0,
+      desc:"A tela onde o atleta vê o plano nutricional montado." },
+    { code:"PRT-11", name:"Chat de dúvidas 24 horas", pct:0,
+      ia:{ o:"Vai responder às dúvidas do atleta sobre o protocolo a qualquer hora e, quando o caso for delicado, avisar você.", status:"naocomecou" },
+      desc:"Um assistente disponível o tempo todo para tirar dúvidas do atleta sobre o protocolo, sem precisar acioná-lo a toda hora." },
+    { code:"PRT-12", name:"Conteúdo recomendado", pct:0,
+      ia:{ o:"Vai escolher os artigos e vídeos mais relevantes para o momento de cada atleta.", status:"naocomecou" },
+      desc:"Sugestões de artigos e vídeos relevantes para o momento de cada atleta, selecionadas por IA." },
+    { code:"PRT-13", name:"Agenda de horários", pct:0,
+      desc:"Onde o atleta marca um horário disponível na sua agenda diretamente pelo aplicativo." },
+    { code:"PRT-14", name:"Comunidade dos atletas", pct:0,
+      desc:"Um espaço onde você pode postar conteúdo para todos os atletas verem e interagirem." },
+  ]},
+  { area:"Pagamento", sub:"Como um novo atleta fecha e entra no programa", items:[
+    { code:"CHK-01", name:"Pagamento e assinatura", pct:0,
+      desc:"A tela onde o atleta fecha a assinatura do programa, com pagamento por cartão ou Pix." },
+    { code:"CHK-02", name:"Boas-vindas automáticas", pct:0,
+      desc:"Depois que o atleta paga, o sistema cria a conta dele e envia um e-mail de boas-vindas automaticamente, sem precisar de nada manual da sua parte." },
+  ]},
+];
+
+const INFRA = { pronto:3, total:9 };
+
+function statusOf(pct){
+  if(pct>=100) return { key:"pronto",     label:"Pronto",        color:"var(--st-pronto)",     rgb:"166,195,0" };
+  if(pct<=0)   return { key:"naocomecou", label:"Não começou",   color:"var(--st-naocomecou)", rgb:"107,107,107" };
+  return             { key:"construcao",  label:"Em construção", color:"var(--st-construcao)", rgb:"214,154,62" };
+}
+function progressDots(pct, color){
+  const filled = pct<=0 ? 0 : Math.max(1, Math.ceil(pct/20));
+  return '<span class="prog" aria-hidden="true">' +
+    Array.from({length:5},(_,i)=>`<span class="p" style="background:${i<filled?color:'var(--border)'}"></span>`).join('') +
+    '</span>';
+}
+
+const allItems = AREAS.flatMap(a=>a.items);
+const planItems  = allItems.filter(i=>i.origem!=='coach');
+const coachItems = allItems.filter(i=>i.origem==='coach');
+const total = planItems.length;
+const nPronto = planItems.filter(i=>i.pct>=100).length;
+const nConstr = planItems.filter(i=>i.pct>0 && i.pct<100).length;
+const nNao    = planItems.filter(i=>i.pct<=0).length;
+const nAndamento = nPronto + nConstr;
+
+document.getElementById('today').textContent = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+document.getElementById('feat-count').textContent = total;
+document.getElementById('c-andamento').textContent = nAndamento;
+document.getElementById('c-total').textContent = '/' + total;
+document.getElementById('c-pct-and').textContent = Math.round(nAndamento/total*100) + '%';
+document.getElementById('c-sub').textContent = `${nPronto} prontas e ${nConstr} em construção`;
+
+const segbar = document.getElementById('segbar');
+const segs = [
+  ['pronto', nPronto, 'var(--st-pronto)'],
+  ['construcao', nConstr, 'var(--st-construcao)'],
+  ['naocomecou', nNao, 'var(--st-naocomecou)'],
+].filter(([,n])=>n>0);
+segs.forEach(([k,n,c],idx)=>{ const s=document.createElement('span'); s.className='seg';
+  s.style.flex=n; s.style.background=c;
+  if(idx===0) s.style.borderRadius='4px 0 0 4px';
+  if(idx===segs.length-1) s.style.borderRadius=(idx===0?'4px':'0 4px 4px 0');
+  segbar.appendChild(s); });
+
+document.getElementById('tally').innerHTML =
+  `<span class="t"><span class="dot" style="background:var(--st-pronto)"></span>Prontas <b>${nPronto}</b></span>`+
+  `<span class="t"><span class="dot" style="background:var(--st-construcao)"></span>Em construção <b>${nConstr}</b></span>`+
+  `<span class="t"><span class="dot" style="background:var(--st-naocomecou)"></span>Não começaram <b>${nNao}</b></span>`;
+
+const coachTally = document.getElementById('coach-tally');
+if(coachItems.length){
+  const cPronto = coachItems.filter(i=>i.pct>=100).length;
+  const cPend = coachItems.length - cPronto;
+  coachTally.innerHTML =
+    `<span class="ct-label">Da sua validação</span>`+
+    `<span class="ct-txt"><b>${coachItems.length}</b> ${coachItems.length===1?'item':'itens'} à parte do plano — `+
+    `${cPronto} ${cPronto===1?'pronto':'prontos'} · ${cPend} pendente${cPend===1?'':'s'}</span>`;
+} else {
+  coachTally.style.display='none';
+}
+
+const areasEl = document.getElementById('areas');
+function renderFeat(it){
+  const st = statusOf(it.pct);
+  const isCoach = it.origem==='coach';
+  const originBadge = isCoach
+    ? `<span class="origin-badge" style="color:${st.color};background:rgba(${st.rgb},.13);border:1px solid rgba(${st.rgb},.4)">Da sua validação · ${it.tipo==='nova'?'nova':'ajuste'}</span>` : '';
+  return `<div class="feat${isCoach?' coach':''}" id="feat-${it.code}" data-code="${it.code}"${isCoach?` style="border-left-color:${st.color}"`:''}>
+      <div class="feat-main">
+        <div class="feat-name"><span class="feat-code">${it.code}</span>${it.name}${originBadge}${it.ia?`<button class="ia-badge" aria-expanded="false" data-ia="${it.code}">&#10022; IA</button>`:''}</div>
+        <div class="feat-desc">${it.desc}</div>
+        ${it.pendencia?`<div class="feat-pend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span><b>Aguardando você:</b> ${it.pendencia}</span></div>`:''}
+        ${it.ia?`<div class="ia-detail" data-ia-detail="${it.code}" hidden><b>Inteligência artificial:</b> ${it.ia.o}<span class="ia-st ${it.ia.status}">${it.ia.status==='pronto'?'Pronto':'Não começou'}</span></div>`:''}
+      </div>
+      <div class="feat-status">
+        <span class="status-chip" style="color:${st.color};background:rgba(${st.rgb},.13);border-color:rgba(${st.rgb},.4)">${st.label} · ${it.pct}%</span>
+        ${progressDots(it.pct, st.color)}
+      </div>
+    </div>`;
+}
+AREAS.forEach(a=>{
+  const plan  = a.items.filter(i=>i.origem!=='coach');
+  const coach = a.items.filter(i=>i.origem==='coach');
+  const hasIA = a.items.some(i=>i.ia);
+  const avg = plan.length ? Math.round(plan.reduce((s,i)=>s+i.pct,0)/plan.length) : 0;
+  const sec = document.createElement('section');
+  sec.className = 'area';
+  const featsPlan = plan.map(renderFeat).join('');
+  const featsCoach = coach.length
+    ? `<div class="coach-divider"><span>Da sua validação</span></div>` + coach.map(renderFeat).join('')
+    : '';
+  sec.innerHTML = `
+    <button class="area-head" aria-expanded="false">
+      <span class="area-title">${a.area}</span>
+      ${hasIA?`<span class="area-ia-mark" title="Este bloco tem funcionalidades com inteligência artificial">&#10022; IA</span>`:''}
+      ${coach.length?`<span class="area-coach-mark" title="${coach.length} ${coach.length===1?'item da sua validação':'itens da sua validação'}">${coach.length}</span>`:''}
+      <span class="area-pct">${avg}% concluído</span>
+      <span class="chev" aria-hidden="true">&#x25BC;</span>
+    </button>
+    <hr class="area-rule">
+    <div class="area-body">
+      <div class="area-body-inner">
+        <div class="area-sub">${a.sub}</div>
+        ${featsPlan}${featsCoach}
+      </div>
+    </div>`;
+  areasEl.appendChild(sec);
+});
+
+document.getElementById('areas').addEventListener('click', (e)=>{
+  const badge = e.target.closest('.ia-badge');
+  if(badge){
+    const code = badge.dataset.ia;
+    const detail = document.querySelector(`.ia-detail[data-ia-detail="${code}"]`);
+    const open = badge.getAttribute('aria-expanded')==='true';
+    badge.setAttribute('aria-expanded', String(!open));
+    if(detail) detail.hidden = open;
+    return;
+  }
+  const head = e.target.closest('.area-head');
+  if(head){
+    const open = head.getAttribute('aria-expanded')==='true';
+    head.setAttribute('aria-expanded', String(!open));
+  }
+});
+
+(function renderPendencias(){
+  const pend = coachItems.filter(i=>i.pendencia);
+  const CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+
+  const hp = document.getElementById('hero-pend');
+  if(pend.length){
+    hp.innerHTML = '<button class="hero-pend-btn" type="button">'+CLOCK+'<b>'+pend.length+'</b> '+(pend.length===1?'pendência com você':'pendências com você')+'</button>';
+    hp.querySelector('button').addEventListener('click', function(){
+      document.getElementById('homework').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  } else { hp.style.display='none'; }
+
+  const el = document.getElementById('homework');
+  if(!pend.length){ el.style.display='none'; return; }
+  const rows = pend.map(function(i){ return ''+
+    '<button class="hw-row" type="button" data-target="feat-'+i.code+'">'+
+      '<span class="hw-code">'+i.code+'</span>'+
+      '<span class="hw-wrap"><span class="hw-name">'+i.name+'</span><span class="hw-ask">'+i.pendencia+'</span></span>'+
+      '<span class="hw-arrow" aria-hidden="true">&#8594;</span>'+
+    '</button>'; }).join('');
+  el.className = 'homework';
+  el.innerHTML =
+    '<div class="hw-head">'+CLOCK+
+      '<div><div class="hw-title">Dever de casa — pendências com você</div>'+
+      '<div class="hw-sub">'+pend.length+' '+(pend.length===1?'item depende':'itens dependem')+' de material seu para avançar. Toque em cada um para ver onde fica no relatório.</div></div>'+
+      '<span class="hw-count">'+pend.length+'</span>'+
+    '</div>'+
+    '<div class="hw-list">'+rows+'</div>';
+
+  el.addEventListener('click', function(e){
+    const row = e.target.closest('.hw-row'); if(!row) return;
+    const feat = document.getElementById(row.dataset.target); if(!feat) return;
+    const area = feat.closest('.area');
+    if(area){ const h = area.querySelector('.area-head'); if(h) h.setAttribute('aria-expanded','true'); }
+    setTimeout(function(){
+      feat.scrollIntoView({behavior:'smooth', block:'center'});
+      feat.classList.remove('feat-flash'); void feat.offsetWidth; feat.classList.add('feat-flash');
+      setTimeout(function(){ feat.classList.remove('feat-flash'); }, 1700);
+    }, 360);
+  });
+})();
+
+(function renderIaSection(){
+  const iaItems = allItems.filter(i=>i.ia);
+  const nPronta = iaItems.filter(i=>i.ia.status==='pronto').length;
+  const rows = iaItems.map(i=>{
+    const isP = i.ia.status==='pronto';
+    const stColor = isP ? 'var(--st-pronto)' : 'var(--st-naocomecou)';
+    const stRgb = isP ? '166,195,0' : '107,107,107';
+    return `<div class="ia-row">
+      <div class="ia-row-main">
+        <div class="ia-row-name">${i.name}</div>
+        <div class="ia-row-o">${i.ia.o}</div>
+      </div>
+      <span class="ia-row-st" style="color:${stColor};background:rgba(${stRgb},.15)">${isP?'Pronto':'Não começou'}</span>
+    </div>`;
+  }).join('');
+  const sec = document.createElement('div');
+  sec.className = 'ia-section';
+  sec.innerHTML = `
+    <h2>&#10022; Inteligência Artificial no seu produto</h2>
+    <p class="ia-lede">Seu produto usa inteligência artificial em <b>${iaItems.length} pontos</b>. Destas aplicações de IA,
+      <b>${nPronta} já estão prontas</b> (na triagem de novos interessados) e ${iaItems.length-nPronta} entram
+      conforme as telas correspondentes forem construídas. Toque no selo <b>&#10022; IA</b> em qualquer funcionalidade
+      acima para ver o que a inteligência artificial faz ali.</p>
+    ${rows}`;
+  const foot = document.querySelector('.foot');
+  foot.parentNode.insertBefore(sec, foot);
+})();
+
+document.getElementById('infra-line').innerHTML =
+  `Das <b>${INFRA.total}</b> automações que funcionam nos bastidores, <b>${INFRA.pronto} já estão prontas</b> `+
+  `— as que sustentam a triagem de novos atletas (organização dos leads, geração da avaliação por IA e `+
+  `cálculo de prioridade). As outras ${INFRA.total-INFRA.pronto} serão implantadas conforme as telas que dependem delas forem construídas.`;
+
+document.getElementById('stamp').textContent =
+  `Elite 90 · Relatório gerado para acompanhamento do projeto · ${total} funcionalidades de produto + ${INFRA.total} automações de bastidor`;
+
+// Mapa completo do projeto
+function map_dottedFamily(codes){
+  if(!codes.length) return null;
+  const fam = codes[0].split('.')[0];
+  return codes.every(c=>c.split('.')[0]===fam) ? fam : null;
+}
+function map_familyLabel(codes){
+  const parsed = codes.map(c=>{ const m=c.match(/^([A-Za-z]+-?)(\d+)/); return m?{prefix:m[1],num:parseInt(m[2],10),str:m[2]}:null; }).filter(Boolean);
+  if(!parsed.length) return codes[0]||'';
+  const prefix = parsed[0].prefix;
+  const nums = parsed.map(p=>p.num);
+  const min = Math.min(...nums), max = Math.max(...nums);
+  const strOf = n => { const f=parsed.find(p=>p.num===n); return f?f.str:String(n); };
+  return min===max ? `${prefix}${strOf(min)}` : `${prefix}${strOf(min)}–${strOf(max)}`;
+}
+function map_tagFor(codes){ return map_dottedFamily(codes) || map_familyLabel(codes); }
+function map_groupCode(children){ return map_tagFor(children.map(c=>c.code)); }
+function map_leaves(items){ return items.flatMap(i=>i.children?i.children:[i]); }
+function map_avg(arr){ const p=arr.filter(i=>i.origem!=='coach'); return p.length?Math.round(p.reduce((s,i)=>s+i.pct,0)/p.length):0; }
+
+function buildMapTree(){
+  const admPrefix = "Meu Painel · ";
+  const top = [];
+  const admGroups = [];
+  AREAS.forEach(a=>{
+    if(a.area.startsWith(admPrefix)){
+      let items = a.items;
+      if(/Acompanhamento dos Meus Atletas/.test(a.area)){
+        const drawerItems = items.filter(i=>/^ADM-10\.\d+$/.test(i.code));
+        const other = items.filter(i=>!/^ADM-10\.\d+$/.test(i.code));
+        items = other.concat(drawerItems.length ? [{group:"Drawer do Atleta",
+          note:"aberto ao clicar num atleta da lista · 6ª aba (Avaliação física) existe no mock, mas não consta na arquitetura v2.1 documentada",
+          children:drawerItems}] : []);
+      }
+      admGroups.push({short:a.area.replace(admPrefix,""), items});
+    } else {
+      top.push({type:"flat", short:a.area, items:a.items});
+    }
+  });
+  const firstAdmIdx = AREAS.findIndex(a=>a.area.startsWith(admPrefix));
+  const beforeCount = AREAS.slice(0, firstAdmIdx).filter(a=>!a.area.startsWith(admPrefix)).length;
+  top.splice(beforeCount, 0, {type:"admin", short:"Painel Admin", tagFixed:"ADM", groups:admGroups});
+  return top;
+}
+
+function map_cellEl(it, path){
+  const st = statusOf(it.pct);
+  const isCoach = it.origem==='coach';
+  const c=document.createElement('div'); c.className='map-cell'+(isCoach?' map-coach':'')+(it.pendencia?' map-pend':'');
+  c.title=it.name+' · '+it.pct+'%'+(isCoach?' · Da sua validação':'')+(it.pendencia?' · Aguardando você':'');
+  c.innerHTML=(isCoach?'<span class="map-corner"></span>':'')+'<span class="map-fill" style="height:'+it.pct+'%;background:'+st.color+'"></span>'+(it.ia?'<span class="map-iad">&#10022;</span>':'');
+  c.addEventListener('click', function(){
+    document.querySelectorAll('.map-cell.map-sel').forEach(function(x){x.classList.remove('map-sel');});
+    c.classList.add('map-sel');
+    const CLOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+    const d=document.getElementById('mapDetail'); d.classList.remove('map-detail-empty');
+    d.innerHTML='<div class="map-drow"><span class="map-dcode">'+it.code+'</span><div class="map-dwrap"><span class="map-dpath">'+path+'</span><span class="map-dname">'+it.name+'</span></div>'+
+      (isCoach?'<span class="map-dcoach">Da sua validação</span>':'')+
+      (it.ia?'<span class="map-dia">&#10022; IA</span>':'')+
+      '<span class="map-dpct" style="color:'+st.color+'">'+it.pct+'%</span></div>'+
+      (it.desc?'<div class="map-ddesc">'+it.desc+'</div>':'')+
+      (it.pendencia?'<div class="map-dpend">'+CLOCK+'<span><b>Aguardando você:</b> '+it.pendencia+'</span></div>':'');
+  });
+  return c;
+}
+
+function map_buildAreaEl(a, pathPrefix, opts){
+  const topLevel = !!(opts && opts.topLevel);
+  const area=document.createElement('div'); area.className = 'map-area'+(topLevel?' map-toplevel':'');
+  const path = pathPrefix ? pathPrefix+' › '+a.short : a.short;
+  const areaCodes = a.items.map(function(i){ return i.children ? map_groupCode(i.children) : i.code; });
+  const tag = map_tagFor(areaCodes), avg = map_avg(map_leaves(a.items));
+  area.innerHTML = topLevel
+    ? '<div class="map-toplevel-h"><span class="map-tn">'+a.short+'</span><span class="map-code-tag">'+tag+'</span><span class="map-tp">'+avg+'%</span></div>'
+    : '<div class="map-area-h"><span class="map-an">'+a.short+'</span><span class="map-code-tag">'+tag+'</span><span class="map-ap">'+avg+'%</span></div>';
+  const directLeaves=a.items.filter(function(i){return !i.children;});
+  if(directLeaves.length){
+    const cells=document.createElement('div'); cells.className='map-cells';
+    directLeaves.forEach(function(it){cells.appendChild(map_cellEl(it, path));});
+    area.appendChild(cells);
+  }
+  a.items.filter(function(i){return i.children;}).forEach(function(g){
+    const sg=document.createElement('div'); sg.className='map-subgroup';
+    sg.innerHTML='<div class="map-sg-h"><span class="map-sgi">&#10549;</span><span class="map-sgn">'+g.group+'</span><span class="map-code-tag">'+map_groupCode(g.children)+'</span><span class="map-sgc">· '+g.children.length+' abas</span><span class="map-sgp">'+map_avg(g.children)+'%</span></div>'+
+      (g.note?'<div class="map-sg-note">'+g.note+'</div>':'');
+    const cells=document.createElement('div'); cells.className='map-cells';
+    g.children.forEach(function(it){cells.appendChild(map_cellEl(it, path+' › '+g.group));});
+    sg.appendChild(cells);
+    area.appendChild(sg);
+  });
+  return area;
+}
+
+const mapBody=document.getElementById('mapBody');
+buildMapTree().forEach(function(t){
+  if(t.type==='admin'){
+    const prod=document.createElement('div'); prod.className='map-toplevel';
+    const allLeaves = t.groups.flatMap(function(g){ return map_leaves(g.items); });
+    prod.innerHTML='<div class="map-toplevel-h"><span class="map-tn">'+t.short+'</span><span class="map-code-tag">'+t.tagFixed+'</span><span class="map-tp">'+map_avg(allLeaves)+'%</span></div>';
+    t.groups.forEach(function(g){ prod.appendChild(map_buildAreaEl(g, t.short)); });
+    mapBody.appendChild(prod);
+  } else {
+    mapBody.appendChild(map_buildAreaEl(t, null, {topLevel:true}));
+  }
+});
+
+const mapOverlay = document.getElementById('mapOverlay');
+function openMap(){ mapOverlay.classList.add('open'); }
+function closeMap(){ mapOverlay.classList.remove('open'); }
+document.getElementById('openMapBtn').addEventListener('click', openMap);
+document.getElementById('closeMapBtn').addEventListener('click', closeMap);
+mapOverlay.addEventListener('click', function(e){ if(e.target===mapOverlay) closeMap(); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape' && mapOverlay.classList.contains('open')) closeMap(); });
+
+(function enableSwipeToClose(){
+  const drawerEl = document.querySelector('.map-drawer');
+  const CLOSE_THRESHOLD = 90;
+  let startX=0, startY=0, dragging=false, decided=false, currentX=0;
+  function onMove(e){
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if(!decided){
+      if(Math.abs(dx) > 8 || Math.abs(dy) > 8){
+        decided = true;
+        dragging = dx > 0 && Math.abs(dx) > Math.abs(dy);
+        if(dragging){ drawerEl.classList.add('map-dragging'); mapOverlay.style.transition = 'none'; }
+      }
+    }
+    if(dragging){
+      currentX = Math.max(0, dx);
+      drawerEl.style.transform = 'translateX('+currentX+'px)';
+      const dw = drawerEl.offsetWidth || 1;
+      mapOverlay.style.opacity = String(Math.max(0, 1 - currentX/dw));
+      e.preventDefault();
+    }
+  }
+  function onUp(){
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', onUp);
+    if(dragging){
+      drawerEl.classList.remove('map-dragging');
+      drawerEl.style.transform = '';
+      mapOverlay.style.transition = '';
+      mapOverlay.style.opacity = '';
+      if(currentX > CLOSE_THRESHOLD) closeMap();
+    }
+    dragging=false; decided=false; currentX=0;
+  }
+  drawerEl.addEventListener('pointerdown', function(e){
+    if(!mapOverlay.classList.contains('open')) return;
+    startX=e.clientX; startY=e.clientY; dragging=false; decided=false; currentX=0;
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
+  });
+})();
+</script>
+</body>
+</html>
