@@ -17,8 +17,8 @@ export const pt = {
     subheadline:
       "Você recebe em detalhes seu treino, sua dieta, direcionamento de suplementação e todo suporte necessário para garantir sua evolução completa em 90 dias.",
     socialProof: {
-      athletes: "[NÚMERO] alunos transformados",
-      experience: "[NÚMERO]+ anos de experiência em bodybuilding profissional",
+      athletes: "+1.000 vidas transformadas",
+      experience: "Mais de 10 anos formando físicos de alto nível e desenvolvendo executivos de alta performance.",
       title: "#1 Campeão Brasileiro Masters Brasil · Classic Physique",
     },
     cta: "Disputar uma vaga",
@@ -63,7 +63,7 @@ export const pt = {
     paragraphs: [
       "Fernando Ruiz, mais conhecido como Coach Ruiz, é atleta profissional de fisiculturismo Classic Physique e Campeão Brasileiro Masters Brasil - título conquistado no palco, não em teoria. Mais de uma década dentro do bodybuilding de alto nível, vivendo cada protocolo na própria biologia.",
       "Seu método não é treinamento funcional disfarçado de fisiculturismo. É engenharia biológica aplicada: ciência do treinamento, equilíbrio hormonal monitorado por médico endocrinologista, nutrição prescrita por nutricionista esportivo e inteligência emocional para sustentar a disciplina na agenda de quem não tem tempo a perder. Ruiz não é seu personal trainer. É o estrategista da sua biologia.",
-      "[NÚMERO] alunos transformados. Empresários, executivos, juízes, atletas. Homens de 35 a 55 anos que não vieram buscar motivação - vieram buscar um sistema.",
+      "+1.000 vidas transformadas. Empresários, executivos, juízes, atletas. Homens de 35 a 55 anos que não vieram buscar motivação - vieram buscar um sistema.",
     ],
   },
 
@@ -204,6 +204,13 @@ export const pt = {
         metric: '"Minha vida se divide entre A/F e P/F"',
         image: "/images/testimonials/depoente-michel.webp",
         text: 'Desde o primeiro contato, senti muita confiança e a sensação de que estava falando com alguém que amava e dominava o assunto. O método de atuação dele não é só na parte física, mas também na sua mente, no seu lifestyle, numa nova forma de enxergar a vida. Hoje me sinto um verdadeiro atleta de alta performance. Costumo dizer que a minha vida se divide entre: A/F e P/F (antes do Fernando e pós Fernando).',
+      },
+      {
+        name: "Flavio César",
+        role: "Engenheiro Civil",
+        metric: "Mais de 10 anos de parceria",
+        image: "/images/testimonials/depoente-placeholder.webp",
+        text: "Conheço o Fernando Ruiz há mais de 10 anos. De lá para cá, acumulei ganhos e também conquistei os resultados que ele estipula como meta. Fernando é atencioso, criterioso. Faz um trabalho de Coach certeiro por estar sempre antenado e pesquisar constantemente o que há de mais moderno e adequado ao meu biotipo, para manter o ganho de massa magra e a redução de gordura. Desde que começamos o tratamento venho acumulando resultados incríveis, motivo pelo qual nossa parceria se estende por tantos anos. Obrigado, Fernando!",
       },
     ],
   },

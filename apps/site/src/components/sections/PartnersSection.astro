@@ -23,6 +23,7 @@ const partnerUrls: Record<string, string> = {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={partner.name}
+          onclick={`if(typeof window !== "undefined" && window.fbq) window.fbq("trackCustom", "PartnerClick", {partner: "${partner.name}"});`}
         >
           <div class="partner-item__logo-wrap">
             <img
