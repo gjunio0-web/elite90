@@ -1,143 +1,144 @@
 ---
 import BeforeAfterSlider from "../BeforeAfterSlider.astro";
 import type { Translations } from "../../i18n/pt";
+import type { Locale } from "../../i18n/utils";
 
-interface Props { t: Translations; }
-const { t } = Astro.props;
+interface Props { t: Translations; locale: Locale; }
+const { t, locale } = Astro.props;
+
+// ── Copy for cases still awaiting confirmed photos/data (1-4) and the
+// real, Coach-confirmed narratives added for cases 5-10. stat/statDesc for
+// 5-10 are our draft, not yet approved by him (hence pending:true).
+const copyByLocale = {
+  "pt-br": {
+    placeholderName: "Atleta [INICIAIS]",
+    placeholderMeta: "[CARGO] · [PERIODO]",
+    placeholderStat: "[NÚMERO]",
+    placeholderNote: "[Aguardando confirmação de qual foto corresponde a qual caso — ver V-07]",
+    cases: [
+      {
+        name: "Gonçalo Marques",
+        meta: "Bunker Digital",
+        stat: "+19 kg",
+        statDesc: "de massa magra, construindo ano após ano um físico que virou título de campeão de categoria.",
+        story: "O Gonçalo é a prova de que consistência vence talento quando o talento não trabalha. Ano após ano, foi construindo um físico cada vez mais sólido até subir no palco e conquistar o título de campeão da sua categoria. Um projeto de longo prazo, feito com disciplina e paixão pelo esporte.",
+      },
+      {
+        name: "Luiz Fernando Mello",
+        meta: "Mercado financeiro",
+        stat: "-27,1 kg",
+        statDesc: "eliminando gordura com o máximo de massa magra preservada e sem extremismos.",
+        story: "Muito além dos números na balança, o Luiz reconstruiu sua relação com o próprio corpo. Eliminou gordura preservando ao máximo a massa magra e adotou um estilo de vida que hoje faz parte da sua rotina, sem extremismos.",
+      },
+      {
+        name: "Dr. Guilherme Fernandes",
+        meta: "Médico",
+        stat: "-7 kg",
+        statDesc: "de gordura, trocando massa gorda por massa magra num físico de atleta.",
+        story: "Nem toda transformação aparece na balança. No caso do Guilherme, a grande mudança foi na composição corporal: menos gordura, mais massa magra e um físico completamente diferente. Um médico, atleta e campeão brasileiro de hipismo que levou para o próprio corpo a mesma excelência que busca na profissão.",
+      },
+      {
+        name: "Clayton Sainz",
+        meta: "Empresário T.I.",
+        stat: "-14 kg",
+        statDesc: "de gordura, de ex-obeso a um físico pronto para a cirurgia reparadora.",
+        story: "O Clayton chegou decidido a mudar de vida. Como ex-obeso, cada etapa do processo foi construída com estratégia para preservar e desenvolver massa magra enquanto reduzia gordura. O resultado foi um físico preparado para a cirurgia reparadora e, principalmente, uma nova qualidade de vida.",
+      },
+      {
+        name: "Nikola Milenkovic",
+        meta: "Professor de francês",
+        stat: "-16 kg",
+        statDesc: "construindo um físico mais denso, funcional e saudável.",
+        story: "Direto da França, o Nikola confiou no processo e fez exatamente o que precisava ser feito. Reduziu gordura, fortaleceu o corpo e construiu um físico mais denso, funcional e saudável. Uma transformação que foi muito além da estética.",
+      },
+      {
+        name: "Vinicius Guimarães",
+        meta: "Empresário",
+        stat: "-5 kg",
+        statDesc: "de gordura com ganho expressivo de massa magra, buscando densidade e força além do número na balança.",
+        story: "O Vinicius entendeu que evolução não é apenas perder peso. Primeiro construímos massa muscular, depois refinamos o físico. O peso voltou praticamente ao ponto de partida, mas o corpo era outro: mais denso, mais atlético e muito mais forte.",
+      },
+    ],
+  },
+  en: {
+    placeholderName: "Athlete [INITIALS]",
+    placeholderMeta: "[ROLE] · [PERIOD]",
+    placeholderStat: "[NUMBER]",
+    placeholderNote: "[Awaiting confirmation of which photo matches which case — see V-07]",
+    cases: [
+      {
+        name: "Gonçalo Marques",
+        meta: "Bunker Digital",
+        stat: "+19 kg",
+        statDesc: "of lean mass, building year after year a physique that became his category's championship title.",
+        story: "Gonçalo is proof that consistency beats talent when talent doesn't put in the work. Year after year, he built an increasingly solid physique until he stepped on stage and won his category's championship title. A long-term project, built with discipline and a passion for the sport.",
+      },
+      {
+        name: "Luiz Fernando Mello",
+        meta: "Financial market",
+        stat: "-27.1 kg",
+        statDesc: "eliminating fat while preserving as much lean mass as possible, without extremes.",
+        story: "Far beyond the numbers on the scale, Luiz rebuilt his relationship with his own body. He eliminated fat while preserving as much lean mass as possible and adopted a lifestyle that is now part of his routine, without extremes.",
+      },
+      {
+        name: "Dr. Guilherme Fernandes",
+        meta: "Physician",
+        stat: "-7 kg",
+        statDesc: "of fat, trading fat mass for lean mass in an athlete's physique.",
+        story: "Not every transformation shows up on the scale. In Guilherme's case, the big change was in body composition: less fat, more lean mass, and a completely different physique. A physician, athlete and Brazilian equestrian champion who brought the same excellence he pursues in his profession to his own body.",
+      },
+      {
+        name: "Clayton Sainz",
+        meta: "IT Entrepreneur",
+        stat: "-14 kg",
+        statDesc: "of fat, from formerly obese to a physique ready for reconstructive surgery.",
+        story: "Clayton arrived determined to change his life. As a formerly obese man, every stage of the process was strategically built to preserve and develop lean mass while reducing fat. The result was a physique ready for reconstructive surgery and, above all, a new quality of life.",
+      },
+      {
+        name: "Nikola Milenkovic",
+        meta: "French teacher",
+        stat: "-16 kg",
+        statDesc: "building a denser, more functional and healthier physique.",
+        story: "Straight from France, Nikola trusted the process and did exactly what needed to be done. He reduced fat, strengthened his body and built a denser, more functional and healthier physique. A transformation that went far beyond aesthetics.",
+      },
+      {
+        name: "Vinicius Guimarães",
+        meta: "Entrepreneur",
+        stat: "-5 kg",
+        statDesc: "of fat with a significant gain in lean mass, chasing density and strength beyond the number on the scale.",
+        story: "Vinicius understood that progress isn't just about losing weight. First we built muscle mass, then we refined the physique. The weight went back to almost the starting point, but the body was a different one: denser, more athletic and much stronger.",
+      },
+    ],
+  },
+} as const;
+
+const c = copyByLocale[locale];
 
 const results = [
-  {
-    n: 1,
-    beforeSrc: `/images/results/resultado-01-antes.webp`,
-    afterSrc:  `/images/results/resultado-01-depois.webp`,
-    name:      "Atleta [INICIAIS]",
-    meta:      "[CARGO] · [PERIODO]",
-    stat:      "[NÚMERO]",
-    statDesc:  "[Aguardando confirmação de qual foto corresponde a qual caso — ver V-07]",
-    story:     "[Aguardando confirmação de qual foto corresponde a qual caso — ver V-07]",
+  ...[1, 2, 3, 4].map(n => ({
+    n,
+    beforeSrc: `/images/results/resultado-0${n}-antes.webp`,
+    afterSrc:  `/images/results/resultado-0${n}-depois.webp`,
+    name:      c.placeholderName,
+    meta:      c.placeholderMeta,
+    stat:      c.placeholderStat,
+    statDesc:  c.placeholderNote,
+    story:     c.placeholderNote,
     beforeLabel: t.results.beforeLabel,
     afterLabel:  t.results.afterLabel,
-  },
-  {
-    n: 2,
-    beforeSrc: `/images/results/resultado-02-antes.webp`,
-    afterSrc:  `/images/results/resultado-02-depois.webp`,
-    name:      "Atleta [INICIAIS]",
-    meta:      "[CARGO] · [PERIODO]",
-    stat:      "[NÚMERO]",
-    statDesc:  "[Aguardando confirmação de qual foto corresponde a qual caso — ver V-07]",
-    story:     "[Aguardando confirmação de qual foto corresponde a qual caso — ver V-07]",
-    beforeLabel: t.results.beforeLabel,
-    afterLabel:  t.results.afterLabel,
-  },
-  {
-    n: 3,
-    beforeSrc: `/images/results/resultado-03-antes.webp`,
-    afterSrc:  `/images/results/resultado-03-depois.webp`,
-    name:      "Atleta [INICIAIS]",
-    meta:      "[CARGO] · [PERIODO]",
-    stat:      "[NÚMERO]",
-    statDesc:  "[Aguardando confirmação de qual foto corresponde a qual caso — ver V-07]",
-    story:     "[Aguardando confirmação de qual foto corresponde a qual caso — ver V-07]",
-    beforeLabel: t.results.beforeLabel,
-    afterLabel:  t.results.afterLabel,
-  },
-  {
-    n: 4,
-    beforeSrc: `/images/results/resultado-04-antes.webp`,
-    afterSrc:  `/images/results/resultado-04-depois.webp`,
-    name:      "Atleta [INICIAIS]",
-    meta:      "[CARGO] · [PERIODO]",
-    stat:      "[NÚMERO]",
-    statDesc:  "[Aguardando confirmação de qual foto corresponde a qual caso — ver V-07]",
-    story:     "[Aguardando confirmação de qual foto corresponde a qual caso — ver V-07]",
-    beforeLabel: t.results.beforeLabel,
-    afterLabel:  t.results.afterLabel,
-  },
-
-  // ── Casos novos indicados pelo Coach — narrativa real e confirmada;
-  // stat/statDesc são rascunho nosso, ainda não aprovado por ele (por isso pending:true).
-  // Fotos reais enviadas pelo Coach não estão disponíveis de forma verificável nesta sessão
-  // (existem uploads sem nome que não é possível associar com segurança a cada pessoa) —
-  // usando placeholder genuíno e identificado até a associação correta ser confirmada.
-  {
-    n: 5,
+  })),
+  // Real photos from the Coach for these cases aren't verifiably available yet
+  // (unlabeled uploads that can't be safely matched to each person), so they
+  // use a genuine, clearly-marked placeholder until the correct pairing is confirmed.
+  ...c.cases.map((item, i) => ({
+    n: i + 5,
     beforeSrc: `/images/results/placeholder-novo-caso-antes.webp`,
     afterSrc:  `/images/results/placeholder-novo-caso-depois.webp`,
-    name:      "Gonçalo Marques",
-    meta:      "Bunker digital",
-    stat:      "+19 kg",
-    statDesc:  "de massa magra, construindo ano após ano um físico que virou título de campeão de categoria.",
-    story:     "O Gonçalo é a prova de que consistência vence talento quando o talento não trabalha. Ano após ano, foi construindo um físico cada vez mais sólido até subir no palco e conquistar o título de campeão da sua categoria. Um projeto de longo prazo, feito com disciplina e paixão pelo esporte.",
+    ...item,
     beforeLabel: t.results.beforeLabel,
     afterLabel:  t.results.afterLabel,
     pending: true,
-  },
-  {
-    n: 6,
-    beforeSrc: `/images/results/placeholder-novo-caso-antes.webp`,
-    afterSrc:  `/images/results/placeholder-novo-caso-depois.webp`,
-    name:      "Luiz Fernando Mello",
-    meta:      "Mercado financeiro",
-    stat:      "-27,1 kg",
-    statDesc:  "eliminando gordura com o máximo de massa magra preservada e sem extremismos.",
-    story:     "Muito além dos números na balança, o Luiz reconstruiu sua relação com o próprio corpo. Eliminou gordura preservando ao máximo a massa magra e adotou um estilo de vida que hoje faz parte da sua rotina, sem extremismos.",
-    beforeLabel: t.results.beforeLabel,
-    afterLabel:  t.results.afterLabel,
-    pending: true,
-  },
-  {
-    n: 7,
-    beforeSrc: `/images/results/placeholder-novo-caso-antes.webp`,
-    afterSrc:  `/images/results/placeholder-novo-caso-depois.webp`,
-    name:      "Dr. Guilherme Fernandes",
-    meta:      "Médico",
-    stat:      "-7 kg",
-    statDesc:  "de gordura, trocando massa gorda por massa magra num físico de atleta.",
-    story:     "Nem toda transformação aparece na balança. No caso do Guilherme, a grande mudança foi na composição corporal: menos gordura, mais massa magra e um físico completamente diferente. Um médico, atleta e campeão brasileiro de hipismo que levou para o próprio corpo a mesma excelência que busca na profissão.",
-    beforeLabel: t.results.beforeLabel,
-    afterLabel:  t.results.afterLabel,
-    pending: true,
-  },
-  {
-    n: 8,
-    beforeSrc: `/images/results/placeholder-novo-caso-antes.webp`,
-    afterSrc:  `/images/results/placeholder-novo-caso-depois.webp`,
-    name:      "Clayton Sainz",
-    meta:      "Empresário T.I.",
-    stat:      "-14 kg",
-    statDesc:  "de gordura, de ex-obeso a um físico pronto para a cirurgia reparadora.",
-    story:     "O Clayton chegou decidido a mudar de vida. Como ex-obeso, cada etapa do processo foi construída com estratégia para preservar e desenvolver massa magra enquanto reduzia gordura. O resultado foi um físico preparado para a cirurgia reparadora e, principalmente, uma nova qualidade de vida.",
-    beforeLabel: t.results.beforeLabel,
-    afterLabel:  t.results.afterLabel,
-    pending: true,
-  },
-  {
-    n: 9,
-    beforeSrc: `/images/results/placeholder-novo-caso-antes.webp`,
-    afterSrc:  `/images/results/placeholder-novo-caso-depois.webp`,
-    name:      "Nikola Milenkovic",
-    meta:      "Professor de francês",
-    stat:      "-16 kg",
-    statDesc:  "construindo um físico mais denso, funcional e saudável.",
-    story:     "Direto da França, o Nikola confiou no processo e fez exatamente o que precisava ser feito. Reduziu gordura, fortaleceu o corpo e construiu um físico mais denso, funcional e saudável. Uma transformação que foi muito além da estética.",
-    beforeLabel: t.results.beforeLabel,
-    afterLabel:  t.results.afterLabel,
-    pending: true,
-  },
-  {
-    n: 10,
-    beforeSrc: `/images/results/placeholder-novo-caso-antes.webp`,
-    afterSrc:  `/images/results/placeholder-novo-caso-depois.webp`,
-    name:      "Vinicius Guimarães",
-    meta:      "Empresário",
-    stat:      "-5 kg",
-    statDesc:  "de gordura com ganho expressivo de massa magra, buscando densidade e força além do número na balança.",
-    story:     "O Vinicius entendeu que evolução não é apenas perder peso. Primeiro construímos massa muscular, depois refinamos o físico. O peso voltou praticamente ao ponto de partida, mas o corpo era outro: mais denso, mais atlético e muito mais forte.",
-    beforeLabel: t.results.beforeLabel,
-    afterLabel:  t.results.afterLabel,
-    pending: true,
-  },
+  })),
 ];
 ---
 

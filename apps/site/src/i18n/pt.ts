@@ -117,6 +117,8 @@ export const pt = {
     afterLabel: "Depois",
     readMore: "Ver mais",
     readLess: "Ver menos",
+    pendingLabel: "Conteúdo novo, ainda não revisado por você",
+    pendingTooltip: "Conteúdo novo — ainda não revisado por você.",
   },
 
   // PROCESSO
@@ -338,6 +340,9 @@ export const pt = {
         link: "#",
       },
     ],
+    prevAriaLabel: "Ver especialista anterior",
+    nextAriaLabel: "Ver próximo especialista",
+    linkAriaLabel: "Link de",
   },
 
   // NAVEGAÇÃO

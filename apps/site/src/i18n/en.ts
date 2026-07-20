@@ -17,8 +17,8 @@ export const en: Translations = {
     subheadline:
       "You receive a detailed training plan, diet, supplementation guidance and all the support necessary to ensure your complete evolution in 90 days.",
     socialProof: {
-      athletes: "[NUMBER] athletes transformed",
-      experience: "[NUMBER]+ years of professional bodybuilding experience",
+      athletes: "1,000+ lives transformed",
+      experience: "Over 10 years building elite physiques and developing high-performance executives.",
       title: "#1 Brazilian Champion Masters Brasil · Classic Physique",
     },
     cta: "Compete for a spot",
@@ -60,7 +60,7 @@ export const en: Translations = {
     paragraphs: [
       "Fernando Ruiz, better known as Coach Ruiz, is a professional Classic Physique bodybuilding athlete and Brazilian Masters Brasil Champion - a title won on stage, not in theory. Over a decade inside high-level bodybuilding, living every protocol in his own biology.",
       "His method is not functional training disguised as bodybuilding. It is applied biological engineering: training science, hormonal balance monitored by an endocrinologist, nutrition prescribed by a sports nutritionist and emotional intelligence to sustain discipline in the agenda of those who have no time to waste. Ruiz is not your personal trainer. He is the strategist of your biology.",
-      "[NUMBER] athletes transformed. Entrepreneurs, executives, judges, athletes. Men aged 35 to 55 who came not seeking motivation - they came seeking a system.",
+      "1,000+ lives transformed. Entrepreneurs, executives, judges, athletes. Men aged 35 to 55 who came not seeking motivation - they came seeking a system.",
     ],
   },
 
@@ -111,6 +111,8 @@ export const en: Translations = {
     afterLabel: "After",
     readMore: "Read more",
     readLess: "Read less",
+    pendingLabel: "New content, not yet reviewed by you",
+    pendingTooltip: "New content — not yet reviewed by you.",
   },
 
   process: {
@@ -165,6 +167,13 @@ export const en: Translations = {
         metric: '"My life is divided between B/F and A/F"',
         image: "/images/testimonials/depoente-michel.webp",
         text: 'From the very first contact, I felt great confidence and the feeling that I was talking to someone who loved and mastered the subject. His method is not only about the physical, but also about your mind, your lifestyle, a new way of looking at life. Today I feel like a true high-performance athlete. I often say that my life is divided between: B/F and A/F (before Fernando and after Fernando).',
+      },
+      {
+        name: "Flavio César",
+        role: "Civil Engineer",
+        metric: "Over 10 years of partnership",
+        image: "/images/testimonials/depoente-placeholder.webp",
+        text: "I've known Fernando Ruiz for over 10 years. Since then, I've accumulated gains and also achieved the results he sets as a goal. Fernando is attentive and thorough. He does spot-on coaching work by always staying up to date and constantly researching what's most modern and suited to my biotype, to maintain lean mass gains and fat reduction. Since we started the treatment, I've been racking up incredible results, which is why our partnership has lasted so many years. Thank you, Fernando!",
       },
     ],
   },
@@ -234,6 +243,61 @@ export const en: Translations = {
     subtext: "Limited spots per cycle. Approval subject to screening.",
   },
 
+  team: {
+    eyebrow: "Clinical & Performance Team",
+    title: "Our",
+    titleAccent: "Team",
+    intro: "Specialists who support your 90-day journey with you: from medical evaluation to body composition, from the nutrition plan to strength training. Every front has a dedicated expert, personally vetted by Coach Fernando Ruiz.",
+    items: [
+      {
+        name: "Dr. Rodrigo Castro",
+        role: "Physician",
+        credential: "CRM/SP 141828",
+        badges: ["Endocrinology & Metabolism"],
+        bio: "Over 10 years of experience in hormonal disorders, diabetes and metabolic health. Body composition assessment integrated with nutritional follow-up, focused on sustainable results.",
+        stat: "10+",
+        statLabel: "Years in practice",
+        image: "/images/team/dr-rodrigo-castro.webp",
+        link: "#",
+      },
+      {
+        name: "Dr. Guilherme Fernandes",
+        role: "Orthopedist",
+        credential: "CRM 234.267 · RQE 35.274",
+        badges: ["Spine Specialist", "Regenerative Medicine"],
+        bio: "A graduate of PUCRS, focused on pain treatment and image-guided minimally invasive procedures. Co-founder of OrtotraumaClin, with practices in São Paulo and Porto Alegre.",
+        stat: "SP·POA",
+        statLabel: "Locations",
+        image: "/images/team/dr-guilherme-fernandes.webp",
+        link: "#",
+      },
+      {
+        name: "Alisson Neri",
+        role: "Nutritionist · Pharmacist",
+        credential: "CRN 41499",
+        badges: ["Functional Integrative Clinical Nutrition", "Compounding Pharmacy"],
+        bio: "Dual background in Nutrition and Pharmacy applied to biological individuality. Over 11 years of experience with athletes, focused on performance, metabolic health and longevity.",
+        stat: "3,000+",
+        statLabel: "Patients treated",
+        image: "/images/team/alisson-neri.webp",
+        link: "#",
+      },
+      {
+        name: "Jerffeson Diógenes",
+        role: "Personal Trainer",
+        credential: "CREF 122761",
+        badges: ["Hypertrophy", "Fat Loss"],
+        bio: "Bachelor's degree in Physical Education from Unip and IFBB bodybuilding athlete. Individualized strength and muscle definition training, with attention to cardiac, obese and diabetic profiles.",
+        stat: "IFBB",
+        statLabel: "Certified athlete",
+        image: "/images/team/placeholder-jd.webp",
+        link: "#",
+      },
+    ],
+    prevAriaLabel: "View previous specialist",
+    nextAriaLabel: "View next specialist",
+    linkAriaLabel: "Link for",
+  },
 
   nav: {
     schedule: "Program",
@@ -241,6 +305,7 @@ export const en: Translations = {
     method: "Method",
     results: "Results",
     process: "How it works",
+    team: "Our Team",
     testimonials: "Testimonials",
     partners: "Partners",
     faq: "FAQ",
