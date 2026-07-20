@@ -1,17 +1,19 @@
 ---
 // --- ELITE 90 · Language Switcher
 import type { Locale } from "../i18n/utils";
+import type { Translations } from "../i18n/pt";
 import { localeLabels, localePath } from "../i18n/utils";
 
 interface Props {
   currentLocale: Locale;
+  t: Translations;
 }
 
-const { currentLocale } = Astro.props;
+const { currentLocale, t } = Astro.props;
 const otherLocale: Locale = currentLocale === "pt-br" ? "en" : "pt-br";
 ---
 
-<div role="navigation" class="lang-switcher" aria-label="Seleção de idioma">
+<div role="navigation" class="lang-switcher" aria-label={t.nav.langSwitcherAriaLabel}>
   <span class="lang-switcher__current" aria-current="true">
     {localeLabels[currentLocale]}
   </span>

@@ -4,7 +4,7 @@ interface Props { t: Translations; }
 const { t } = Astro.props;
 ---
 
-<section class="section cta-final" id="triagem" style="scroll-margin-top:80px" aria-label="CTA final">
+<section class="section cta-final" id="triagem" style="scroll-margin-top:80px" aria-label={t.ctaFinal.ariaLabel}>
   <div class="container cta-final__inner">
     <p class="section__eyebrow">{t.ctaFinal.eyebrow}</p>
     <button class="btn-cta cta-final__btn" type="button" aria-haspopup="dialog">

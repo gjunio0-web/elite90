@@ -17,7 +17,7 @@ const isEn = locale === "en";
         <p class="modal-eyebrow">{t.ctaFinal.eyebrow}</p>
         <h2 class="modal-title" id="modal-title">{f.title}</h2>
       </div>
-      <button class="modal-close" id="modal-close" type="button" aria-label="Fechar">&#x2715;</button>
+      <button class="modal-close" id="modal-close" type="button" aria-label={f.closeAriaLabel}>&#x2715;</button>
     </div>
 
     <div class="modal-body" id="modal-body">

@@ -251,6 +251,7 @@ export const en: Translations = {
   },
 
   ctaFinal: {
+    ariaLabel: "Final CTA",
     eyebrow: "Next step",
     cta: "I want the consequences. Request my spot.",
     subtext: "Limited spots per cycle. Approval subject to screening.",
@@ -314,6 +315,10 @@ export const en: Translations = {
   },
 
   nav: {
+    logoAriaLabel: "Coach Ruiz - Top of page",
+    mainNavAriaLabel: "Main navigation",
+    mobileNavAriaLabel: "Mobile menu",
+    langSwitcherAriaLabel: "Language selection",
     schedule: "Program",
     coach: "Coach",
     method: "Method",
@@ -336,6 +341,7 @@ export const en: Translations = {
   },
 
   form: {
+    closeAriaLabel: "Close",
     title: "Request my spot",
     fields: {
       name: "Your name",

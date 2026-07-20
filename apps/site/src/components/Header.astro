@@ -25,7 +25,7 @@ const navLinks = [
   <div class="site-header__inner container">
 
     <!-- Logo -->
-    <a href="#" class="site-header__logo" id="logo-home-link" aria-label="Coach Ruiz - Topo da página">
+    <a href="#" class="site-header__logo" id="logo-home-link" aria-label={n.logoAriaLabel}>
       <img
         src="/images/brand/logo-header.webp"
         srcset="/images/brand/logo-header.webp 1x, /images/brand/logo-header@2x.webp 2x"
@@ -37,7 +37,7 @@ const navLinks = [
     </a>
 
     <!-- Desktop nav -->
-    <nav class="site-header__nav" id="site-nav" aria-label="Navegacao principal" style="position: relative; display: flex; align-items: center; overflow: hidden; max-height: 100%;">
+    <nav class="site-header__nav" id="site-nav" aria-label={n.mainNavAriaLabel} style="position: relative; display: flex; align-items: center; overflow: hidden; max-height: 100%;">
       
       <div class="nav-flex-wrapper" id="nav-flex-wrapper" style="display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); width: 100%; max-height: 35px; overflow: hidden;">
         {navLinks.map(link => (
@@ -72,7 +72,7 @@ const navLinks = [
 
     <!-- Right: lang + CTA + hamburger -->
     <div class="site-header__right">
-      <LanguageSwitcher currentLocale={locale} />
+      <LanguageSwitcher currentLocale={locale} t={t} />
       <button class="btn-cta site-header__cta" id="header-cta-btn" type="button" aria-haspopup="dialog">
         {n.applyCta}
       </button>
@@ -95,13 +95,13 @@ const navLinks = [
 <!-- Mobile drawer (no CTA button inside) -->
 <div class="mobile-drawer" id="mobile-drawer" role="dialog" aria-modal="true" aria-label={n.menu} hidden>
   <div class="mobile-drawer__overlay" id="drawer-overlay"></div>
-  <nav class="mobile-drawer__panel" aria-label="Menu mobile">
+  <nav class="mobile-drawer__panel" aria-label={n.mobileNavAriaLabel}>
     <button class="mobile-drawer__close" id="drawer-close" type="button" aria-label={n.close}>&#x2715;</button>
     {navLinks.map(link => (
       <a href={link.href} class="mobile-drawer__link" data-drawer-link>{link.label}</a>
     ))}
     <div class="mobile-drawer__lang">
-      <LanguageSwitcher currentLocale={locale} />
+      <LanguageSwitcher currentLocale={locale} t={t} />
     </div>
   </nav>
 </div>

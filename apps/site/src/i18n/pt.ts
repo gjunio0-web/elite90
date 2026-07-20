@@ -296,6 +296,7 @@ export const pt = {
 
   // CTA FINAL
   ctaFinal: {
+    ariaLabel: "CTA final",
     eyebrow: "Próximo passo",
     cta: "Quero as consequências. Solicitar minha vaga.",
     subtext: "Vagas limitadas por ciclo. Aprovação sujeita à triagem.",
@@ -361,6 +362,10 @@ export const pt = {
 
   // NAVEGAÇÃO
   nav: {
+    logoAriaLabel: "Coach Ruiz - Topo da página",
+    mainNavAriaLabel: "Navegacao principal",
+    mobileNavAriaLabel: "Menu mobile",
+    langSwitcherAriaLabel: "Seleção de idioma",
     schedule: "Programa",
     coach: "Coach",
     method: "Método",
@@ -385,6 +390,7 @@ export const pt = {
 
   // FORMULÁRIO DE TRIAGEM
   form: {
+    closeAriaLabel: "Fechar",
     title: "Solicitar minha vaga",
     fields: {
       name: "Seu nome",
