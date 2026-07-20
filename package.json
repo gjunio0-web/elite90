@@ -7,6 +7,7 @@
     "lint": "turbo lint"
   },
   "devDependencies": {
+    "sharp": "^0.35.3",
     "turbo": "^2.0.0"
   },
   "workspaces": [

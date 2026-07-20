@@ -284,6 +284,59 @@ export const pt = {
     subtext: "Vagas limitadas por ciclo. Aprovação sujeita à triagem.",
   },
 
+  // NOSSA EQUIPE
+  team: {
+    eyebrow: "Corpo Clínico & Performance",
+    title: "Nossa",
+    titleAccent: "Equipe",
+    intro: "Especialistas que apoiam a jornada de 90 dias com você: da avaliação médica à composição corporal, do plano nutricional ao treino de força. Cada frente tem um responsável dedicado e validado por Coach Fernando Ruiz.",
+    items: [
+      {
+        name: "Dr. Rodrigo Castro",
+        role: "Médico",
+        credential: "CRM/SP 141828",
+        badges: ["Endocrinologia e Metabolismo"],
+        bio: "Mais de 10 anos de experiência em distúrbios hormonais, diabetes e saúde metabólica. Avaliação de composição corporal integrada ao acompanhamento nutricional, com foco em resultados sustentáveis.",
+        stat: "10+",
+        statLabel: "Anos de atuação",
+        image: "/images/team/dr-rodrigo-castro.avif",
+        link: "#",
+      },
+      {
+        name: "Dr. Guilherme Fernandes",
+        role: "Ortopedista",
+        credential: "CRM 234.267 · RQE 35.274",
+        badges: ["Especialista em Coluna", "Medicina Regenerativa"],
+        bio: "Formado pela PUCRS, com foco em tratamento da dor e procedimentos minimamente invasivos guiados por imagem. Cofundador da OrtotraumaClin, com atendimento em São Paulo e Porto Alegre.",
+        stat: "SP·POA",
+        statLabel: "Atendimento",
+        image: "/images/team/dr-guilherme-fernandes.png",
+        link: "#",
+      },
+      {
+        name: "Alisson Neri",
+        role: "Nutricionista · Farmacêutico",
+        credential: "CRN 41499",
+        badges: ["Nutrição Clínica Integrativa Funcional", "Farmácia Magistral"],
+        bio: "Dupla formação em Nutrição e Farmácia aplicada à individualidade biológica. Mais de 11 anos de experiência com esportistas e foco em performance, saúde metabólica e longevidade.",
+        stat: "3.000+",
+        statLabel: "Pacientes atendidos",
+        image: "/images/team/alisson-neri.jpeg",
+        link: "#",
+      },
+      {
+        name: "Jerffeson Diógenes",
+        role: "Personal Trainer",
+        credential: "CREF 122761",
+        badges: ["Hipertrofia", "Emagrecimento"],
+        bio: "Bacharel em Educação Física pela Unip e atleta de Fisiculturismo (IFBB). Treinos individualizados de fortalecimento e definição muscular, com atenção a perfis cardíacos, obesos e diabéticos.",
+        stat: "IFBB",
+        statLabel: "Atleta credenciado",
+        image: "/images/team/placeholder-jd.webp",
+        link: "#",
+      },
+    ],
+  },
 
   // NAVEGAÇÃO
   nav: {
@@ -292,6 +345,7 @@ export const pt = {
     method: "Método",
     results: "Resultados",
     process: "Como funciona",
+    team: "Nossa Equipe",
     testimonials: "Depoimentos",
     partners: "Parceiros",
     faq: "FAQ",

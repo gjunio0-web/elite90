@@ -1,16 +1,24 @@
 ---
+import type { Translations } from "../i18n/pt";
+
 interface ResultItem {
   n: number;
   beforeSrc: string;
   afterSrc: string;
   name: string;
   meta: string;
+  stat: string;
+  statDesc: string;
+  story: string;
   beforeLabel: string;
   afterLabel: string;
 }
 
-interface Props { items: ResultItem[]; }
-const { items } = Astro.props;
+interface Props {
+  items: ResultItem[];
+  t?: Translations;
+}
+const { items, t } = Astro.props;
 ---
 
 <script type="module" src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
@@ -59,10 +67,56 @@ const { items } = Astro.props;
       <div class="result-card__caption">
         <p class="result-card__name">{item.name}</p>
         <p class="result-card__meta">{item.meta}</p>
+
+        <div class="result-card__stat-wrap">
+          <p class="result-card__stat">{item.stat}</p>
+          <p class="result-card__stat-desc">{item.statDesc}</p>
+        </div>
+
+        <div class="result-card__story-wrap">
+          <p class="result-card__story" data-full={item.story}>
+            {item.story.slice(0, 150)}<span class="result-card__ellipsis">...</span>
+          </p>
+          <button
+            class="result-card__toggle"
+            aria-expanded="false"
+            type="button"
+            data-read-more={t?.results.readMore ?? "Ver mais"}
+            data-read-less={t?.results.readLess ?? "Ver menos"}
+          >
+            {t?.results.readMore ?? "Ver mais"}
+          </button>
+        </div>
       </div>
     </div>
   ))}
 </div>
+
+<script>
+  document.querySelectorAll(".result-card__toggle").forEach(btn => {
+    const b = btn as HTMLButtonElement;
+    const wrap = b.closest(".result-card__story-wrap");
+    const storyEl = wrap?.querySelector(".result-card__story") as HTMLElement | null;
+    const ellipsis = storyEl?.querySelector(".result-card__ellipsis") as HTMLElement | null;
+    if (!storyEl || !ellipsis) return;
+    const fullText = storyEl.dataset.full ?? "";
+    const shortText = storyEl.childNodes[0]?.textContent ?? "";
+    b.addEventListener("click", () => {
+      const expanded = b.getAttribute("aria-expanded") === "true";
+      if (expanded) {
+        if (storyEl.childNodes[0]) storyEl.childNodes[0].textContent = shortText;
+        ellipsis.hidden = false;
+        b.setAttribute("aria-expanded", "false");
+        b.textContent = b.dataset.readMore ?? "";
+      } else {
+        if (storyEl.childNodes[0]) storyEl.childNodes[0].textContent = fullText;
+        ellipsis.hidden = true;
+        b.setAttribute("aria-expanded", "true");
+        b.textContent = b.dataset.readLess ?? "";
+      }
+    });
+  });
+</script>
 
 <style>
   .results-grid {
@@ -154,7 +208,12 @@ const { items } = Astro.props;
     overflow: hidden; /* Corta qualquer transbordo acidental */
   }
 
-  .result-card__caption { padding-inline: var(--space-1); }
+  .result-card__caption {
+    padding-inline: var(--space-1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
 
   .result-card__name {
     font-family: var(--font-display);
@@ -166,6 +225,64 @@ const { items } = Astro.props;
   .result-card__meta {
     font-size: var(--fs-body-sm);
     color: var(--c-textsub);
-    margin-top: var(--space-1);
+  }
+
+  .result-card__stat-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3);
+    background-color: rgba(166, 195, 0, 0.08);
+    border: 1px solid rgba(166, 195, 0, 0.2);
+    border-radius: var(--radius-card);
+  }
+
+  .result-card__stat {
+    font-family: var(--font-display);
+    font-size: var(--fs-display-sm);
+    color: var(--c-lime);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .result-card__stat-desc {
+    font-size: var(--fs-body-sm);
+    color: var(--c-textbody);
+    line-height: 1.5;
+  }
+
+  .result-card__story-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .result-card__story {
+    font-size: var(--fs-body-sm);
+    color: var(--c-textsub);
+    line-height: 1.6;
+  }
+
+  .result-card__ellipsis {
+    display: inline;
+  }
+
+  .result-card__toggle {
+    font-family: var(--font-label);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--c-lime);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    align-self: flex-start;
+    transition: opacity var(--transition-base);
+  }
+
+  .result-card__toggle:hover {
+    opacity: 0.8;
   }
 </style>
