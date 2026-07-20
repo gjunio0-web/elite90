@@ -62,4 +62,10 @@
   --c-status-rejected: #C0392B;
   --c-status-sent:     #4A90D9;
   --c-status-alert:    #E67E22;
+
+  /* SELO DE CONTEÚDO PENDENTE (uso público, fora do Admin) —
+     reaproveita o mesmo hex de --c-status-alert/--c-status-new, por decisão
+     confirmada em sessão: marca conteúdo criado/modificado pela equipe que
+     o Coach ainda não revisou. */
+  --c-pending: #E67E22;
 }

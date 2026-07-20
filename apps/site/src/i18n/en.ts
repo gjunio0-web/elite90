@@ -109,6 +109,8 @@ export const en: Translations = {
     titleAccent: "achieved through the Elite 90 Program",
     beforeLabel: "Before",
     afterLabel: "After",
+    readMore: "Read more",
+    readLess: "Read less",
   },
 
   process: {

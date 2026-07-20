@@ -115,6 +115,8 @@ export const pt = {
     titleAccent: "obtidos através do Programa Elite 90",
     beforeLabel: "Antes",
     afterLabel: "Depois",
+    readMore: "Ver mais",
+    readLess: "Ver menos",
   },
 
   // PROCESSO

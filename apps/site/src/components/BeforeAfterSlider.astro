@@ -12,6 +12,8 @@ interface ResultItem {
   story: string;
   beforeLabel: string;
   afterLabel: string;
+  /** true = conteúdo criado/modificado pela equipe, ainda não revisado pelo Coach */
+  pending?: boolean;
 }
 
 interface Props {
@@ -27,6 +29,12 @@ const { items, t } = Astro.props;
 <div class="results-grid">
   {items.map(item => (
     <div class="result-card">
+      {item.pending && (
+        <span class="result-card__pending-mark" tabindex="0" aria-label="Conteúdo novo, ainda não revisado por você">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          <span class="result-card__pending-tip">Conteúdo novo — ainda não revisado por você.</span>
+        </span>
+      )}
       <div class="result-card__slider-wrap">
         <img-comparison-slider class="result-card__slider" tabindex="0">
           <figure slot="first" class="result-card__fig">
@@ -127,9 +135,32 @@ const { items, t } = Astro.props;
   }
 
   .result-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+  }
+
+  .result-card__pending-mark {
+    position: absolute; top: -1px; right: -1px; z-index: 5;
+    width: 26px; height: 26px;
+    background: var(--c-pending);
+    border-radius: 0 4px 0 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: help;
+  }
+  .result-card__pending-mark svg { width: 13px; height: 13px; stroke: var(--c-black); }
+  .result-card__pending-mark:hover .result-card__pending-tip,
+  .result-card__pending-mark:focus-visible .result-card__pending-tip {
+    opacity: 1; transform: translateY(0); pointer-events: auto;
+  }
+  .result-card__pending-tip {
+    position: absolute; top: 32px; right: 0;
+    background: var(--c-black); border: 1px solid var(--c-pending);
+    color: var(--c-white); font-family: var(--font-label); font-size: 11px; font-weight: 600;
+    padding: 8px 11px; border-radius: 4px; width: 200px; line-height: 1.5;
+    opacity: 0; transform: translateY(-4px); transition: opacity .15s, transform .15s;
+    pointer-events: none;
   }
 
   .result-card__slider-wrap {
