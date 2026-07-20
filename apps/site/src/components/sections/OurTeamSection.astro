@@ -28,7 +28,7 @@ const { t } = Astro.props;
                 src={member.image}
                 alt={member.name}
                 width="240"
-                height="240"
+                height="320"
                 loading="lazy"
               />
             </div>
@@ -115,7 +115,7 @@ const { t } = Astro.props;
 
   .team-card__photo {
     width: 100%;
-    aspect-ratio: 1;
+    aspect-ratio: 3 / 4;
     border-radius: var(--radius-card);
     background: var(--c-black);
     overflow: hidden;
@@ -127,6 +127,7 @@ const { t } = Astro.props;
   .team-card__photo img {
     width: 100%;
     height: 100%;
+    object-position: center top;
     object-fit: cover;
   }
 
