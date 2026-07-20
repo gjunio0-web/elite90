@@ -410,17 +410,26 @@ const navLinks = [
   const closeBtn   = document.getElementById("drawer-close") as HTMLButtonElement;
   const drawerLinks = document.querySelectorAll("[data-drawer-link]");
 
+  // Must match the transition duration set on .mobile-drawer__overlay/.mobile-drawer__panel below
+  const DRAWER_TRANSITION_MS = 320;
+  const prefersReducedMotion = () =>
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   function openDrawer() {
     drawer.hidden = false;
+    void drawer.offsetHeight; // force reflow so the enter transition runs from its closed state
+    drawer.classList.add("is-open");
     hamburger.setAttribute("aria-expanded", "true");
     document.body.style.overflow = "hidden";
     closeBtn.focus();
   }
   function closeDrawer() {
-    drawer.hidden = true;
+    drawer.classList.remove("is-open");
     hamburger.setAttribute("aria-expanded", "false");
     document.body.style.overflow = "";
     hamburger.focus();
+    // Keep the panel in the DOM/painted until the exit transition finishes, then remove it
+    window.setTimeout(() => { drawer.hidden = true; }, prefersReducedMotion() ? 0 : DRAWER_TRANSITION_MS);
   }
 
   hamburger.addEventListener("click", openDrawer);
@@ -615,7 +624,10 @@ const navLinks = [
     position: absolute; inset: 0;
     background: rgba(0,0,0,0.75);
     backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 320ms ease;
   }
+  .mobile-drawer.is-open .mobile-drawer__overlay { opacity: 1; }
 
   .mobile-drawer__panel {
     position: relative;
@@ -630,7 +642,10 @@ const navLinks = [
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--c-lime) var(--c-darkbg);
+    transform: translateX(100%);
+    transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
   }
+  .mobile-drawer.is-open .mobile-drawer__panel { transform: translateX(0); }
 
   .mobile-drawer__close {
     align-self: flex-end;
@@ -694,6 +709,8 @@ const navLinks = [
   @media (prefers-reduced-motion: reduce) {
     .site-header,
     .site-header__logo-img,
-    .site-header__more-icon { transition: none; }
+    .site-header__more-icon,
+    .mobile-drawer__overlay,
+    .mobile-drawer__panel { transition: none; }
   }
 </style>
