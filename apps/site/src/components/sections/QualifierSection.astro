@@ -3,7 +3,7 @@ import type { Translations } from "../../i18n/pt";
 interface Props { t: Translations; }
 const { t } = Astro.props;
 ---
-<section class="section qualifier" id="qualificador" style="scroll-margin-top:80px" aria-label="Qualificador de audiencia">
+<section class="section qualifier" id="qualificador" style="scroll-margin-top:80px" aria-label={t.qualifier.ariaLabel}>
   <div class="container container--text qualifier__inner">
     <h2 class="qualifier__headline">{t.qualifier.headline}</h2>
     <p class="qualifier__body">{t.qualifier.body}</p>

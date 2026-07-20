@@ -3,7 +3,7 @@ import type { Translations } from "../../i18n/pt";
 interface Props { t: Translations; }
 const { t } = Astro.props;
 ---
-<section class="section coach" id="coach" style="scroll-margin-top:80px" aria-label="Sobre o coach">
+<section class="section coach" id="coach" style="scroll-margin-top:80px" aria-label={t.coach.ariaLabel}>
   <div class="container coach__inner">
     <div class="coach__image-col">
       <div class="coach__photo-wrap">

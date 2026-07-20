@@ -7,7 +7,7 @@ const { t } = Astro.props;
 ---
 
 <HeroVideo>
-  <section class="hero section" aria-label="Hero">
+  <section class="hero section" aria-label={t.hero.ariaLabel}>
     <div class="container hero__inner">
 
       <div class="hero__logo-wrap">
@@ -27,7 +27,7 @@ const { t } = Astro.props;
         <h1 class="hero__headline">{t.hero.headline}</h1>
         <p class="hero__sub">{t.hero.subheadline}</p>
 
-        <ul class="hero__proof" aria-label="Prova social">
+        <ul class="hero__proof" aria-label={t.hero.socialProofAriaLabel}>
           <li class="hero__proof-item">
             <span class="hero__proof-icon" aria-hidden="true">*</span>
             {t.hero.socialProof.athletes}

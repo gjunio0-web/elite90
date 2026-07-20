@@ -3,7 +3,7 @@ import type { Translations } from "../../i18n/pt";
 interface Props { t: Translations; }
 const { t } = Astro.props;
 ---
-<section class="section objection" id="objection" style="scroll-margin-top:80px" aria-label="Apos os 40">
+<section class="section objection" id="objection" style="scroll-margin-top:80px" aria-label={t.objection.ariaLabel}>
   <div class="container container--text objection__inner">
     <p class="section__eyebrow">{t.objection.eyebrow}</p>
     <h2 class="objection__question">{t.objection.question}</h2>

@@ -3,7 +3,7 @@ import type { Translations } from "../../i18n/pt";
 interface Props { t: Translations; }
 const { t } = Astro.props;
 ---
-<section class="section pillars" id="pilares" style="scroll-margin-top:80px" aria-label="Pilares do programa">
+<section class="section pillars" id="pilares" style="scroll-margin-top:80px" aria-label={t.pillars.ariaLabel}>
   <div class="container">
     <p class="section__eyebrow">{t.pillars.eyebrow}</p>
     <h2 class="section__title">{t.pillars.title}</h2>
@@ -15,7 +15,7 @@ const { t } = Astro.props;
           <h3 class="pillar-card__title">{pillar.title}</h3>
           <p class="pillar-card__body">{pillar.body}</p>
           <p class="pillar-card__result">
-            <span aria-label="Resultado:">-&gt;</span>{pillar.result}
+            <span aria-label={t.pillars.resultAriaLabel}>-&gt;</span>{pillar.result}
           </p>
         </article>
       ))}

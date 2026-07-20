@@ -12,6 +12,8 @@ export const en: Translations = {
   },
 
   hero: {
+    ariaLabel: "Hero",
+    socialProofAriaLabel: "Social proof",
     eyebrow: "Individual Consulting Program · Limited Spots",
     headline: "Build an athlete's body in 90 days",
     subheadline:
@@ -27,12 +29,14 @@ export const en: Translations = {
   },
 
   qualifier: {
+    ariaLabel: "Audience qualifier",
     headline: "This program is not for everyone.",
     body: "It is for the man between 35 and 55 who already trains, already knows what discipline is, but has not yet harvested the physique that his effort deserves. For those with an executive agenda, who refuse generic protocols and understand that real results require science - not motivation.",
     cta: "If this describes you, keep reading.",
   },
 
   schedule: {
+    ariaLabel: "Schedule",
     eyebrow: "The program",
     title: "Elite 90 Program Schedule",
     phases: [
@@ -55,6 +59,7 @@ export const en: Translations = {
   },
 
   coach: {
+    ariaLabel: "About the coach",
     eyebrow: "About your coach",
     title: "Fernando Ruiz",
     paragraphs: [
@@ -65,6 +70,8 @@ export const en: Translations = {
   },
 
   pillars: {
+    ariaLabel: "Program pillars",
+    resultAriaLabel: "Result:",
     eyebrow: "The method",
     title: "Elite 90 Program Pillars",
     intro:
@@ -94,6 +101,7 @@ export const en: Translations = {
   },
 
   objection: {
+    ariaLabel: "After 40",
     eyebrow: "After 40",
     question: "After 40, is it still possible to have an athlete's physique?",
     paragraphs: [
@@ -104,6 +112,7 @@ export const en: Translations = {
   },
 
   results: {
+    ariaLabel: "Real results",
     eyebrow: "Real proof",
     title: "Real Results",
     titleAccent: "achieved through the Elite 90 Program",
@@ -116,6 +125,7 @@ export const en: Translations = {
   },
 
   process: {
+    ariaLabel: "How it works",
     eyebrow: "How it works",
     title: "Step by step to join the Elite 90 Program",
     steps: [
@@ -131,6 +141,7 @@ export const en: Translations = {
   },
 
   motivational: {
+    ariaLabel: "Motivational",
     lines: [
       "Change your life, conquer your dreams.",
       "Regular people can get there too, as long as they have passed the screening and are committed.",
@@ -141,6 +152,7 @@ export const en: Translations = {
   },
 
   testimonials: {
+    ariaLabel: "Testimonials",
     eyebrow: "What our",
     titleAccent: "athletes",
     titleSuffix: "are saying",
@@ -179,6 +191,7 @@ export const en: Translations = {
   },
 
   partners: {
+    ariaLabel: "Partners",
     eyebrow: "Ecosystem",
     title: "Brand partnerships",
     items: [
@@ -244,6 +257,7 @@ export const en: Translations = {
   },
 
   team: {
+    ariaLabel: "Our Team",
     eyebrow: "Clinical & Performance Team",
     title: "Our",
     titleAccent: "Team",

@@ -12,6 +12,8 @@ export const pt = {
 
   // HERO
   hero: {
+    ariaLabel: "Hero",
+    socialProofAriaLabel: "Prova social",
     eyebrow: "Programa de Consultoria Individual · Vagas Limitadas",
     headline: "Construa um corpo de atleta em 90 dias",
     subheadline:
@@ -28,6 +30,7 @@ export const pt = {
 
   // QUALIFICADOR
   qualifier: {
+    ariaLabel: "Qualificador de audiencia",
     headline: "Este programa não é para todo mundo.",
     body: "É para o homem de 35 a 55 anos que já treina, já sabe o que é disciplina, mas ainda não colheu o físico que seu esforço merece. Para quem tem agenda executiva, recusa protocolo genérico e entende que resultado real exige ciência - não motivação.",
     cta: "Se isso descreve você, continue.",
@@ -35,6 +38,7 @@ export const pt = {
 
   // CRONOGRAMA
   schedule: {
+    ariaLabel: "Cronograma",
     eyebrow: "O programa",
     title: "Cronograma do Programa Elite 90",
     phases: [
@@ -58,6 +62,7 @@ export const pt = {
 
   // COACH
   coach: {
+    ariaLabel: "Sobre o coach",
     eyebrow: "Sobre seu coach",
     title: "Fernando Ruiz",
     paragraphs: [
@@ -69,6 +74,8 @@ export const pt = {
 
   // PILARES
   pillars: {
+    ariaLabel: "Pilares do programa",
+    resultAriaLabel: "Resultado:",
     eyebrow: "O método",
     title: "Pilares do Programa Elite 90",
     intro:
@@ -99,6 +106,7 @@ export const pt = {
 
   // OBJEÇÃO
   objection: {
+    ariaLabel: "Apos os 40",
     eyebrow: "Após os 40",
     question: "Após os 40, ainda é possível ter um físico de atleta?",
     paragraphs: [
@@ -110,6 +118,7 @@ export const pt = {
 
   // RESULTADOS
   results: {
+    ariaLabel: "Resultados reais",
     eyebrow: "Prova real",
     title: "Resultados Reais",
     titleAccent: "obtidos através do Programa Elite 90",
@@ -123,6 +132,7 @@ export const pt = {
 
   // PROCESSO
   process: {
+    ariaLabel: "Como funciona",
     eyebrow: "Como funciona",
     title: "Passo a passo para participar do Programa Elite 90",
     steps: [
@@ -171,6 +181,7 @@ export const pt = {
 
   // MOTIVACIONAL + CTA MEIO
   motivational: {
+    ariaLabel: "Motivacional",
     lines: [
       "Mude sua vida, conquiste seus sonhos.",
       "Pessoas normais também podem chegar lá, desde que tenham passado pela triagem e estejam comprometidas.",
@@ -182,6 +193,7 @@ export const pt = {
 
   // DEPOIMENTOS
   testimonials: {
+    ariaLabel: "Depoimentos",
     eyebrow: "O que os",
     titleAccent: "atletas",
     titleSuffix: "estão dizendo",
@@ -221,6 +233,7 @@ export const pt = {
 
   // PARCEIROS
   partners: {
+    ariaLabel: "Parceiros",
     eyebrow: "Ecossistema",
     title: "Parcerias com marcas",
     items: [
@@ -290,6 +303,7 @@ export const pt = {
 
   // NOSSA EQUIPE
   team: {
+    ariaLabel: "Nossa Equipe",
     eyebrow: "Corpo Clínico & Performance",
     title: "Nossa",
     titleAccent: "Equipe",

@@ -4,7 +4,7 @@ interface Props { t: Translations; }
 const { t } = Astro.props;
 ---
 
-<section class="section motivational" aria-label="Motivacional">
+<section class="section motivational" aria-label={t.motivational.ariaLabel}>
   <div class="container container--text motivational__inner">
     {t.motivational.lines.map(line => <p class="motivational__line">{line}</p>)}
     <button class="btn-cta motivational__cta" type="button" aria-haspopup="dialog">

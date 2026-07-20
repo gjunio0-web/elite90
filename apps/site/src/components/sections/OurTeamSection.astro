@@ -4,7 +4,7 @@ interface Props { t: Translations; }
 const { t } = Astro.props;
 ---
 
-<section class="section team" id="nossa-equipe" style="scroll-margin-top:80px" aria-label="Nossa Equipe">
+<section class="section team" id="nossa-equipe" style="scroll-margin-top:80px" aria-label={t.team.ariaLabel}>
   <div class="container">
     <p class="section__eyebrow">{t.team.eyebrow}</p>
     <h2 class="section__title">

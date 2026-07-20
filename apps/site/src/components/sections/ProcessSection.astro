@@ -6,7 +6,7 @@ interface Props { t: Translations; }
 const { t } = Astro.props;
 ---
 
-<section class="section process" id="processo" style="scroll-margin-top:80px" aria-label="Como funciona">
+<section class="section process" id="processo" style="scroll-margin-top:80px" aria-label={t.process.ariaLabel}>
   <div class="container">
     <p class="section__eyebrow">{t.process.eyebrow}</p>
     <h2 class="section__title">{t.process.title}</h2>

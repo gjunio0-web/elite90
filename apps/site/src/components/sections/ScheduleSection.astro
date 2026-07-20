@@ -3,7 +3,7 @@ import type { Translations } from "../../i18n/pt";
 interface Props { t: Translations; }
 const { t } = Astro.props;
 ---
-<section class="section schedule" id="cronograma" style="scroll-margin-top:80px" aria-label="Cronograma">
+<section class="section schedule" id="cronograma" style="scroll-margin-top:80px" aria-label={t.schedule.ariaLabel}>
   <div class="container">
     <p class="section__eyebrow">{t.schedule.eyebrow}</p>
     <h2 class="section__title">{t.schedule.title}</h2>
