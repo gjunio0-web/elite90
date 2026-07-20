@@ -130,7 +130,7 @@ export const pt = {
       {
         who: "Ruiz",
         title: "Análise da ficha",
-        body: "Aprovados recebem contato em 48h.",
+        body: "Aprovados recebem contato em até 48 horas úteis.",
       },
       {
         who: "Você + Ruiz",

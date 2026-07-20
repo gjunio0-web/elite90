@@ -116,7 +116,7 @@ export const en: Translations = {
     title: "Step by step to join the Elite 90 Program",
     steps: [
       { who: "You", title: "Online application form", body: "3 questions, 2 minutes." },
-      { who: "Ruiz", title: "Form review", body: "Approved candidates are contacted within 48h." },
+      { who: "Ruiz", title: "Form review", body: "Approved candidates are contacted within 48 business hours." },
       { who: "You + Ruiz", title: "Approval interview by video", body: "" },
       { who: "You", title: "Clinical screening form", body: "Basis for the endocrinologist." },
       { who: "Ruiz", title: "Laboratory exam guide", body: "Sent via PDF." },
