@@ -301,7 +301,7 @@ export const pt = {
         bio: "Mais de 10 anos de experiência em distúrbios hormonais, diabetes e saúde metabólica. Avaliação de composição corporal integrada ao acompanhamento nutricional, com foco em resultados sustentáveis.",
         stat: "10+",
         statLabel: "Anos de atuação",
-        image: "/images/team/dr-rodrigo-castro.avif",
+        image: "/images/team/dr-rodrigo-castro.webp",
         link: "#",
       },
       {
@@ -312,7 +312,7 @@ export const pt = {
         bio: "Formado pela PUCRS, com foco em tratamento da dor e procedimentos minimamente invasivos guiados por imagem. Cofundador da OrtotraumaClin, com atendimento em São Paulo e Porto Alegre.",
         stat: "SP·POA",
         statLabel: "Atendimento",
-        image: "/images/team/dr-guilherme-fernandes.png",
+        image: "/images/team/dr-guilherme-fernandes.webp",
         link: "#",
       },
       {
@@ -323,7 +323,7 @@ export const pt = {
         bio: "Dupla formação em Nutrição e Farmácia aplicada à individualidade biológica. Mais de 11 anos de experiência com esportistas e foco em performance, saúde metabólica e longevidade.",
         stat: "3.000+",
         statLabel: "Pacientes atendidos",
-        image: "/images/team/alisson-neri.jpeg",
+        image: "/images/team/alisson-neri.webp",
         link: "#",
       },
       {
