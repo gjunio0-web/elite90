@@ -273,7 +273,7 @@ export const en: Translations = {
         stat: "10+",
         statLabel: "Years in practice",
         image: "/images/team/dr-rodrigo-castro.webp",
-        link: "#",
+        link: "https://www.drrodrigocastro.com.br/",
       },
       {
         name: "Dr. Guilherme Fernandes",
@@ -284,7 +284,7 @@ export const en: Translations = {
         stat: "SP·POA",
         statLabel: "Locations",
         image: "/images/team/dr-guilherme-fernandes.webp",
-        link: "#",
+        link: "https://www.drguilhermefernandes.com.br/dr-guilherme-fernandes/",
       },
       {
         name: "Alisson Neri",
@@ -295,7 +295,7 @@ export const en: Translations = {
         stat: "3,000+",
         statLabel: "Patients treated",
         image: "/images/team/alisson-neri.webp",
-        link: "#",
+        link: "https://alissonnutri.com.br/",
       },
       {
         name: "Jerffeson Diógenes",
@@ -306,7 +306,7 @@ export const en: Translations = {
         stat: "IFBB",
         statLabel: "Certified athlete",
         image: "/images/team/placeholder-jd.webp",
-        link: "#",
+        link: "https://www.treinar.me/jerffesonpersonal",
       },
     ],
     prevAriaLabel: "View previous specialist",

@@ -26,9 +26,11 @@ const { items, t } = Astro.props;
 <script type="module" src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
 
-<div class="results-grid">
-  {items.map(item => (
-    <div class="result-card">
+<div class="results-carousel">
+  <button class="results-nav results-nav--prev" type="button" aria-label="Grupo anterior de resultados">‹</button>
+  <div class="results-grid">
+  {items.map((item, idx) => (
+    <div class="result-card" data-page={Math.floor(idx / 4)}>
       {item.pending && (
         <span class="result-card__pending-mark" tabindex="0" aria-label={t?.results.pendingLabel ?? "Conteúdo novo, ainda não revisado por você"}>
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
@@ -98,7 +100,10 @@ const { items, t } = Astro.props;
       </div>
     </div>
   ))}
+  </div>
+  <button class="results-nav results-nav--next" type="button" aria-label="Próximo grupo de resultados">›</button>
 </div>
+<div class="results-dots" role="tablist" aria-label="Grupos de resultados"></div>
 
 <script>
   document.querySelectorAll(".result-card__toggle").forEach(btn => {
@@ -124,6 +129,57 @@ const { items, t } = Astro.props;
       }
     });
   });
+
+  // ── Paginação em grupos de 4 (carrossel) ──
+  // Não recria nem move os cards: só alterna qual data-page fica visível.
+  // Cada card mantém seu próprio <img-comparison-slider> e listener de "Ver mais"
+  // intactos, montados uma única vez no carregamento da página.
+  (function setupResultsPagination() {
+    const grid = document.querySelector(".results-grid");
+    const carousel = document.querySelector(".results-carousel");
+    const dotsWrap = document.querySelector(".results-dots");
+    if (!grid || !carousel || !dotsWrap) return;
+
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>(".result-card"));
+    if (cards.length === 0) return;
+
+    const pageCount = Math.max(...cards.map(c => Number(c.dataset.page ?? "0"))) + 1;
+    if (pageCount <= 1) return; // 4 ou menos casos: nada para paginar, grade simples basta
+
+    const prevBtn = carousel.querySelector<HTMLButtonElement>(".results-nav--prev");
+    const nextBtn = carousel.querySelector<HTMLButtonElement>(".results-nav--next");
+    let current = 0;
+
+    for (let i = 0; i < pageCount; i++) {
+      const dot = document.createElement("button");
+      dot.className = "results-dot";
+      dot.type = "button";
+      dot.setAttribute("role", "tab");
+      dot.setAttribute("aria-label", `Grupo ${i + 1} de ${pageCount}`);
+      dot.addEventListener("click", () => goTo(i));
+      dotsWrap.appendChild(dot);
+    }
+    const dots = Array.from(dotsWrap.querySelectorAll<HTMLButtonElement>(".results-dot"));
+
+    function render() {
+      cards.forEach(card => {
+        const page = Number(card.dataset.page ?? "0");
+        card.style.display = page === current ? "flex" : "none";
+      });
+      dots.forEach((dot, i) => dot.setAttribute("aria-current", String(i === current)));
+      if (prevBtn) prevBtn.disabled = current === 0;
+      if (nextBtn) nextBtn.disabled = current === pageCount - 1;
+    }
+
+    function goTo(page: number) {
+      current = Math.max(0, Math.min(pageCount - 1, page));
+      render();
+    }
+
+    prevBtn?.addEventListener("click", () => goTo(current - 1));
+    nextBtn?.addEventListener("click", () => goTo(current + 1));
+    render();
+  })();
 </script>
 
 <style>
@@ -133,6 +189,37 @@ const { items, t } = Astro.props;
     gap: var(--space-5);
     margin-top: var(--space-6);
   }
+
+  /* ── Paginação em grupos de 4 (carrossel) ── */
+  .results-carousel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .results-carousel .results-grid {
+    flex: 1;
+    min-width: 0;
+  }
+  .results-grid .result-card { display: none; }
+  .results-grid .result-card[data-page="0"] { display: flex; }
+  .results-nav {
+    flex: none;
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1.5px solid var(--c-lime); background: var(--c-black); color: var(--c-lime);
+    font-size: 18px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .results-nav:hover { background: rgba(166,195,0,.1); }
+  .results-nav[disabled] { opacity: .3; cursor: default; pointer-events: none; }
+  .results-nav--prev { order: -1; }
+  .results-dots {
+    display: flex; justify-content: center; gap: 8px; margin-top: var(--space-5);
+  }
+  .results-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #3a3a3a;
+    border: none; cursor: pointer; padding: 0; transition: all .2s ease;
+  }
+  .results-dot[aria-current="true"] { background: var(--c-lime); width: 22px; border-radius: 4px; }
 
   .result-card {
     position: relative;

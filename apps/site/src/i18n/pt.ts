@@ -319,7 +319,7 @@ export const pt = {
         stat: "10+",
         statLabel: "Anos de atuação",
         image: "/images/team/dr-rodrigo-castro.webp",
-        link: "#",
+        link: "https://www.drrodrigocastro.com.br/",
       },
       {
         name: "Dr. Guilherme Fernandes",
@@ -330,7 +330,7 @@ export const pt = {
         stat: "SP·POA",
         statLabel: "Atendimento",
         image: "/images/team/dr-guilherme-fernandes.webp",
-        link: "#",
+        link: "https://www.drguilhermefernandes.com.br/dr-guilherme-fernandes/",
       },
       {
         name: "Alisson Neri",
@@ -341,7 +341,7 @@ export const pt = {
         stat: "3.000+",
         statLabel: "Pacientes atendidos",
         image: "/images/team/alisson-neri.webp",
-        link: "#",
+        link: "https://alissonnutri.com.br/",
       },
       {
         name: "Jerffeson Diógenes",
@@ -352,7 +352,7 @@ export const pt = {
         stat: "IFBB",
         statLabel: "Atleta credenciado",
         image: "/images/team/placeholder-jd.webp",
-        link: "#",
+        link: "https://www.treinar.me/jerffesonpersonal",
       },
     ],
     prevAriaLabel: "Ver especialista anterior",
