@@ -131,7 +131,7 @@ const originLabels: Record<string, string> = {
     </div>
 
     <p class="content__secondary">
-      <a href="#triagem">{c.notifyMe}</a>
+      <a href="#triagem" id="content-notify-link" aria-haspopup="dialog">{c.notifyMe}</a>
     </p>
   </div>
 </section>
@@ -517,4 +517,12 @@ const originLabels: Record<string, string> = {
 
     render();
   }
+
+  // ── Abre o modal de triagem (mesmo mecanismo do CTA de StickyCtaMobile.astro:
+  // dispara o evento global que TriageModal.astro já escuta) em vez de rolar
+  // até a âncora #triagem.
+  document.getElementById('content-notify-link')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.dispatchEvent(new CustomEvent('open-triage-modal'));
+  });
 </script>

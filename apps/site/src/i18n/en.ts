@@ -220,7 +220,7 @@ export const en: Translations = {
     },
     loadMore: "Load more content",
     showLess: "Show less",
-    notifyMe: "Notify me about new content",
+    notifyMe: "Join the Elite 90 Program to follow new content as it drops",
     prevAriaLabel: "Previous content",
     nextAriaLabel: "Next content",
     downloadCta: "Download",

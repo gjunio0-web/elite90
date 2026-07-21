@@ -262,7 +262,7 @@ export const pt = {
     },
     loadMore: "Carregar mais conteúdos",
     showLess: "Mostrar menos",
-    notifyMe: "Avise-me quando houver novos conteúdos",
+    notifyMe: "Seja parte do Programa Elite 90 e acompanhe os conteúdos novos por lá",
     prevAriaLabel: "Conteúdo anterior",
     nextAriaLabel: "Próximo conteúdo",
     downloadCta: "Baixar",
