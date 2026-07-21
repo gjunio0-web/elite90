@@ -115,6 +115,10 @@ const copyByLocale = {
 const c = copyByLocale[locale];
 
 const results = [
+  // Cases 1-4: the before/after photos are real (resultado-0X.webp is genuine
+  // photo content, not a placeholder graphic) -- only the identity/stat text
+  // is unconfirmed (bracket placeholders), so the badge belongs on the text,
+  // not the photo.
   ...[1, 2, 3, 4].map(n => ({
     n,
     beforeSrc: `/images/results/resultado-0${n}-antes.webp`,
@@ -128,9 +132,10 @@ const results = [
     afterLabel:  t.results.afterLabel,
     pending: true,
   })),
-  // Real photos from the Coach for these cases aren't verifiably available yet
-  // (unlabeled uploads that can't be safely matched to each person), so they
-  // use a genuine, clearly-marked placeholder until the correct pairing is confirmed.
+  // Cases 5-10: the opposite split -- name/story are real and Coach-confirmed,
+  // but the photo itself is a genuine placeholder graphic (real photos aren't
+  // verifiably matched to each person yet) and stat/statDesc are our draft,
+  // not yet Coach-approved. Both the photo and the text badge apply here.
   ...c.cases.map((item, i) => ({
     n: i + 5,
     beforeSrc: `/images/results/placeholder-novo-caso-antes.webp`,
@@ -139,6 +144,7 @@ const results = [
     beforeLabel: t.results.beforeLabel,
     afterLabel:  t.results.afterLabel,
     pending: true,
+    photoPending: true,
   })),
 ];
 ---
