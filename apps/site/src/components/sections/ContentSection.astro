@@ -349,9 +349,20 @@ const originLabels: Record<string, string> = {
     /* A pílula "Curadoria do Coach" (156px) é mais larga que o espaço
        disponível no toggle nesse breakpoint -- rolagem horizontal não
        resolve, pois o botão nunca cabe inteiro na janela visível.
-       Deixa o grupo de pílulas quebrar linha em vez de rolar. */
-    .content__origin-toggle { max-width: 100%; flex-wrap: wrap; }
-    .content__origin-toggle button { white-space: nowrap; }
+       Réplica exata da estrutura visual de .content__chip (chips
+       individuais lado a lado, mesma convenção do grupo "Tipo") em vez
+       do estilo de segmented-control-numa-pílula-só usado no desktop. */
+    .content__origin-toggle {
+      max-width: 100%; flex-wrap: wrap; background: none; border: none; padding: 0; gap: var(--space-3);
+    }
+    .content__origin-toggle button {
+      font-weight: 600; font-size: 0.72rem; text-transform: none; letter-spacing: 0.03em;
+      color: var(--c-textbody); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.14);
+      white-space: nowrap;
+    }
+    .content__origin-toggle button[aria-pressed="true"] {
+      background: rgba(166,195,0,0.14); border-color: var(--c-lime); color: var(--c-lime);
+    }
     .content__search-wrap { flex-basis: 100%; max-width: 100%; order: 99; }
   }
 
