@@ -236,7 +236,7 @@ export const en: Translations = {
         origin: "curated",
         tipo: "guia",
         state: "live",
-        href: "#",
+        href: "/downloads/guia-poses-mens-physique.pdf",
         pending: true,
       },
     ],
