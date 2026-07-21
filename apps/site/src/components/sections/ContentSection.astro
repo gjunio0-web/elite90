@@ -346,10 +346,12 @@ const originLabels: Record<string, string> = {
     .content__dots { display: flex; }
     .content__pagination { display: none !important; }
 
-    .content__filter-row:first-child { flex-wrap: nowrap; }
-    .content__origin-toggle { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .content__origin-toggle::-webkit-scrollbar { display: none; }
-    .content__origin-toggle button { white-space: nowrap; flex-shrink: 0; }
+    /* A pílula "Curadoria do Coach" (156px) é mais larga que o espaço
+       disponível no toggle nesse breakpoint -- rolagem horizontal não
+       resolve, pois o botão nunca cabe inteiro na janela visível.
+       Deixa o grupo de pílulas quebrar linha em vez de rolar. */
+    .content__origin-toggle { max-width: 100%; flex-wrap: wrap; }
+    .content__origin-toggle button { white-space: nowrap; }
     .content__search-wrap { flex-basis: 100%; max-width: 100%; order: 99; }
   }
 
