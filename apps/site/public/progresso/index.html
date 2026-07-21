@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
-<title>Elite 90 · Relatório de Progresso</title>
+<title>Elite 90 — Relatório de Progresso</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Raleway:wght@600;700&family=Montserrat:wght@400;500;600&display=swap');
   :root{
@@ -19,6 +19,7 @@
   *{box-sizing:border-box}
   body{margin:0;background:var(--noir);color:var(--white);font-family:var(--font-body);
        -webkit-font-smoothing:antialiased;line-height:1.5}
+  /* Barra de rolagem — Design System Elite 90 */
   html{scrollbar-width:thin;scrollbar-color:var(--border-strong) var(--noir)}
   ::-webkit-scrollbar{width:12px;height:12px}
   ::-webkit-scrollbar-track{background:var(--noir)}
@@ -39,6 +40,7 @@
   .mast .meta b{color:var(--white)}
   .lede{color:var(--textsub);max-width:70ch;margin:18px 0 30px;font-size:14px}
 
+  /* Resumo geral */
   .hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);
         padding:clamp(18px,3vw,26px);margin-bottom:16px}
   .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:22px}
@@ -56,6 +58,7 @@
   .dot{width:11px;height:11px;border-radius:50%;flex:none}
   .tally .t b{font-family:var(--font-body);color:var(--white);text-transform:none;letter-spacing:0}
 
+  /* Legenda dos estados */
   .legend{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-card);
            padding:clamp(16px,3vw,22px);margin-bottom:34px}
   .legend h2{font-family:var(--font-label);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
@@ -68,8 +71,9 @@
   .pct-note p{font-size:13.5px;color:var(--textbody);line-height:1.6;margin:0 0 10px;max-width:75ch}
   .pct-note p:last-child{margin-bottom:0}
   .pct-note b{color:var(--white)}
-
-  /* Itens da validação do Coach — borda reflete o status do item; oliva é fallback */
+  /* Itens vindos da validação do Coach — a borda esquerda reflete o status (cor
+     definida inline por item, em renderFeat); a identidade "Da sua validação"
+     fica no selo oliva. Oliva aqui é só fallback. */
   .feat.coach{border-left:3px solid var(--olive)}
   .area-coach-mark{font-family:var(--font-label);font-size:10px;font-weight:700;color:var(--white);
     background:var(--olive);min-width:17px;height:17px;padding:0 5px;border-radius:9px;flex:none;
@@ -94,6 +98,7 @@
   .legend-item .li-name{font-weight:600;font-size:13.5px;color:var(--white)}
   .legend-item .li-desc{font-size:12px;color:var(--textsub);margin-top:2px;line-height:1.45}
 
+  /* Seções por área do produto */
   .area{margin-bottom:20px}
   .area-head{width:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;
              gap:12px;flex-wrap:wrap;padding:8px 0;text-align:left;color:inherit;font-family:inherit}
@@ -109,12 +114,13 @@
   .area-body-inner{overflow:hidden;min-height:0}
   .area-sub{font-family:var(--font-label);font-size:12px;color:var(--textsub);margin:14px 0 16px;font-weight:600}
 
+  /* Cartão de funcionalidade */
   .feat{background:var(--surface);border:1px solid var(--border);border-radius:11px;
         padding:15px 17px;margin-bottom:10px;display:flex;gap:16px;align-items:flex-start;
         flex-wrap:wrap;transition:border-color .15s}
   .feat:hover{border-color:var(--border-strong)}
   .feat-main{flex:1;min-width:240px}
-  .feat-name{font-weight:600;font-size:15px;color:var(--white);display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .feat-name{font-weight:600;font-size:15px;color:var(--white);display:flex;align-items:center;gap:9px}
   .feat-code{font-family:var(--font-label);font-size:10px;font-weight:700;color:var(--textsub);
              background:var(--surface-2);border:1px solid var(--border);padding:2px 6px;border-radius:5px;
              letter-spacing:.03em}
@@ -125,6 +131,7 @@
   .prog{display:flex;gap:3px;align-items:center}
   .prog .p{width:22px;height:5px;border-radius:2px;background:var(--border)}
 
+  /* Rodapé — infraestrutura */
   .foot{margin-top:20px;background:var(--surface-2);border:1px solid var(--border);
         border-radius:var(--radius-card);padding:clamp(18px,3vw,24px)}
   .foot h2{font-family:var(--font-label);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
@@ -139,7 +146,7 @@
     .feat-status{align-items:flex-start;min-width:0;flex-basis:100%}
     .prog{order:2}
   }
-
+  /* ── Selo e detalhe de IA (tocável, mobile-first) ── */
   .ia-badge{font-family:var(--font-label);font-size:10px;font-weight:700;letter-spacing:.04em;
     color:var(--noir);background:var(--lime);border:none;border-radius:5px;padding:2px 7px;
     cursor:pointer;flex:none;line-height:1.4;transition:transform .1s}
@@ -154,6 +161,7 @@
   .ia-st.pronto{color:var(--st-pronto);background:rgba(166,195,0,.15)}
   .ia-st.naocomecou{color:var(--st-naocomecou);background:rgba(107,107,107,.15)}
 
+  /* ── Seção consolidada de IA ── */
   .ia-section{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--lime);
     border-radius:var(--radius-card);padding:clamp(18px,3vw,26px);margin-bottom:16px}
   .ia-section h2{font-family:var(--font-display);font-size:clamp(20px,3.5vw,28px);font-weight:400;
@@ -166,8 +174,7 @@
   .ia-row-o{font-size:12.5px;color:var(--textbody);line-height:1.5;margin-top:3px}
   .ia-row-st{flex:none;font-family:var(--font-label);font-size:10.5px;font-weight:700;letter-spacing:.03em;
     padding:3px 9px;border-radius:5px;white-space:nowrap}
-
-  /* Mapa completo do projeto (gaveta) */
+  /* ══════════════ Mapa completo do projeto (gaveta) ══════════════ */
   .map-open-btn{font-family:var(--font-label);font-size:12.5px;font-weight:700;color:var(--noir);
     background:var(--lime);border:none;border-radius:9px;padding:11px 18px;cursor:pointer;
     display:inline-flex;align-items:center;gap:8px;margin-top:16px;transition:transform .1s,filter .15s}
@@ -210,6 +217,8 @@
     text-transform:uppercase;letter-spacing:.03em}
   .map-area-h .map-ap{font-family:var(--font-label);font-size:10px;color:var(--textsub);margin-left:auto}
 
+  /* Nível 0 — mesma notação para todos os blocos de mesmo peso (Página de
+     Captação, Painel Admin, App dos Meus Atletas, Pagamento) */
   .map-toplevel{margin-bottom:14px;border:1.5px solid var(--lime);border-radius:12px;padding:12px 13px;background:rgba(166,195,0,.03)}
   .map-toplevel-h{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(166,195,0,.3)}
   .map-toplevel-h .map-tn{font-family:var(--font-display);font-size:16px;font-weight:400;letter-spacing:.02em;color:var(--lime)}
@@ -240,12 +249,8 @@
   .map-sg-h .map-sgp{font-family:var(--font-label);font-size:10px;color:var(--textsub);margin-left:auto}
   .map-sg-note{font-size:10.5px;color:var(--textsub);font-style:italic;margin:-4px 0 8px}
 
-  /* Rodapé da gaveta */
   .map-detail{flex:none;border-top:1px solid var(--border);padding:12px 20px;min-height:58px;
-    display:flex;align-items:stretch;gap:8px;background:rgba(28,28,28,.82);
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-    max-height:40vh;overflow-y:auto;flex-direction:column}
-  .map-detail .map-drow{display:flex;align-items:center;gap:10px}
+    display:flex;align-items:center;gap:10px;background:var(--surface-2)}
   .map-detail .map-dcode{font-family:var(--font-label);font-size:10px;font-weight:700;color:var(--textsub);
     background:var(--noir);border:1px solid var(--border);padding:2px 6px;border-radius:5px;flex:none}
   .map-detail .map-dpath{font-size:10px;color:var(--textsub);display:block;margin-bottom:2px}
@@ -256,16 +261,11 @@
     background:var(--lime);padding:1px 6px;border-radius:4px;flex:none}
   .map-detail .map-dcoach{font-family:var(--font-label);font-size:9px;font-weight:700;color:var(--white);
     background:var(--olive);padding:1px 6px;border-radius:4px;flex:none}
-  .map-detail .map-ddesc{font-size:12px;color:var(--textbody);line-height:1.55;
-    display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
-  .map-detail .map-dpend{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--textbody);
-    line-height:1.5;padding:8px 10px;background:rgba(214,154,62,.1);border:1px solid rgba(214,154,62,.32);border-radius:7px}
-  .map-detail .map-dpend b{color:var(--st-construcao)}
-  .map-detail .map-dpend svg{width:13px;height:13px;flex:none;color:var(--st-construcao);margin-top:1px}
-  .map-detail-empty{flex-direction:row;align-items:center}
   .map-detail-empty .map-dname{color:var(--textsub);font-style:italic}
 
-  /* Pendências com o Coach */
+  /* ══════════════ Pendências com o Coach (dever de casa) ══════════════ */
+
+  /* Contador no herói */
   .hero-pend{margin-left:auto}
   .hero-pend-btn{font-family:var(--font-label);font-size:12px;font-weight:700;letter-spacing:.02em;
     color:var(--st-construcao);background:rgba(214,154,62,.1);border:1px solid rgba(214,154,62,.45);
@@ -275,6 +275,7 @@
   .hero-pend-btn b{font-family:var(--font-body)}
   .hero-pend-btn svg{width:14px;height:14px;flex:none}
 
+  /* Painel dever de casa */
   .homework{background:linear-gradient(180deg,rgba(214,154,62,.09),rgba(214,154,62,.03));
     border:1px solid rgba(214,154,62,.4);border-left:3px solid var(--st-construcao);
     border-radius:var(--radius-card);padding:clamp(16px,3vw,22px);margin-bottom:16px}
@@ -295,6 +296,7 @@
   .hw-ask{display:block;font-size:12.5px;color:var(--textbody);margin-top:2px;line-height:1.5}
   .hw-arrow{color:var(--st-construcao);font-size:15px;flex:none;margin-top:1px}
 
+  /* Marcador inline no card do item */
   .feat-pend{display:flex;align-items:flex-start;gap:8px;margin-top:9px;padding:9px 11px;
     background:rgba(214,154,62,.08);border:1px solid rgba(214,154,62,.32);border-radius:8px;
     font-size:12.5px;color:var(--textbody);line-height:1.5}
@@ -304,23 +306,26 @@
   @keyframes featFlash{0%,100%{box-shadow:0 0 0 0 rgba(214,154,62,0)}
     18%{box-shadow:0 0 0 2px rgba(214,154,62,.6)}}
 
+  /* Realce no mapa (gaveta) */
   .map-cell.map-pend::after{content:"";position:absolute;bottom:2px;right:2px;width:6px;height:6px;
     border-radius:50%;background:var(--st-construcao);z-index:3;box-shadow:0 0 0 1px var(--noir)}
+  .map-legend .map-sw-pend{background:var(--st-construcao);border-radius:50%;width:9px;height:9px}
 
-  .back-bar{position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:8px;
-    padding:10px 20px;background:rgba(13,13,13,.92);backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border);
-    color:var(--textsub);text-decoration:none;font-family:var(--font-label);
-    font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:color .15s}
-  .back-bar:hover{color:var(--white)}
-  .back-bar svg{flex:none}
+  /* Rodapé da gaveta: dois níveis, descrição e translucidez */
+  .map-detail{flex-direction:column;align-items:stretch;gap:8px;
+    background:rgba(28,28,28,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    max-height:40vh;overflow-y:auto}
+  .map-detail .map-drow{display:flex;align-items:center;gap:10px}
+  .map-detail .map-ddesc{font-size:12px;color:var(--textbody);line-height:1.55;
+    display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+  .map-detail .map-dpend{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--textbody);
+    line-height:1.5;padding:8px 10px;background:rgba(214,154,62,.1);border:1px solid rgba(214,154,62,.32);border-radius:7px}
+  .map-detail .map-dpend b{color:var(--st-construcao)}
+  .map-detail .map-dpend svg{width:13px;height:13px;flex:none;color:var(--st-construcao);margin-top:1px}
+  .map-detail-empty{flex-direction:row;align-items:center}
 </style>
 </head>
 <body>
-<a class="back-bar" href="/">
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
-  Coach Ruiz
-</a>
 <div class="wrap">
 
   <div class="eyebrow">Elite 90 · Relatório de Progresso</div>
@@ -340,6 +345,7 @@
     interessados até o aplicativo dos seus atletas.
   </p>
 
+  <!-- Resumo geral -->
   <div class="hero">
     <div class="hero-top">
       <div>
@@ -355,8 +361,10 @@
     <button class="map-open-btn" id="openMapBtn"><svg class="map-open-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9"/><path d="M12 12v3"/></svg> Ver mapa completo do projeto</button>
   </div>
 
+  <!-- Dever de casa: pendências com o Coach -->
   <div id="homework"></div>
 
+  <!-- Legenda -->
   <div class="legend">
     <h2>Como ler o status</h2>
     <div class="legend-grid">
@@ -390,6 +398,7 @@
 
   <div id="areas"></div>
 
+  <!-- Rodapé: infraestrutura invisível -->
   <div class="foot">
     <h2>Por trás das telas</h2>
     <p id="infra-line"></p>
@@ -406,10 +415,11 @@
 
 </div>
 
+<!-- Mapa completo do projeto — gaveta (aberta sob demanda, ver botão no card de resumo) -->
 <div class="map-overlay" id="mapOverlay">
   <div class="map-drawer">
     <div class="map-drawer-head">
-      <div><div class="map-dt">Mapa do projeto</div><div class="map-prop">Hierarquia completa · área &#8250; tela &#8250; aba</div></div>
+      <div><div class="map-dt">Mapa do projeto</div><div class="map-prop">Hierarquia completa · área → tela → aba</div></div>
       <button class="map-x" id="closeMapBtn" aria-label="Fechar">&#10005;</button>
     </div>
     <div class="map-legend">
@@ -426,6 +436,8 @@
 </div>
 
 <script>
+// ── Dados (derivados do backlog interno; linguagem de produto) ──
+// status: "pronto" | "construcao" | "naocomecou"  — regra: 100%→pronto, 0%→naocomecou, entre→construcao
 const AREAS = [
   { area:"Página de Captação", sub:"O que o público vê antes de entrar no programa", items:[
     { code:"LP-01", name:"Página principal do site", pct:100,
@@ -435,25 +447,35 @@ const AREAS = [
     { code:"LP-03", name:"Resultado da avaliação", pct:100,
       desc:"A página que mostra ao interessado o resultado da avaliação inicial, já pronta para ele ler assim que a triagem é concluída." },
     { code:"V-01", name:"Novas alternativas para perguntas do formulário", pct:100, origem:"coach", tipo:"nova",
-      desc:"Acrescentar novas opções de respostas em perguntas do formulário de novos leads — incluindo as modalidades Triathlon e Esportes de Raquete." },
-    { code:"V-02", name:"Ajustes em textos da página inicial", pct:100, origem:"coach", tipo:"ajuste",
-      desc:"Revisão de texto da página principal, conforme sua orientação." },
+      desc:"As modalidades Triathlon e Esportes de Raquete que você pediu já estavam no formulário de novos leads — conferimos e você confirmou que estão certas assim.",
+      checklist:[{done:true}] },
+    { code:"V-02", name:"Ajustes em textos da página inicial", pct:50, origem:"coach", tipo:"ajuste",
+      desc:"Os textos que você definiu — \"+1.000 vidas transformadas\" e \"Mais de 10 anos formando físicos de alto nível e desenvolvendo executivos de alta performance\" — já substituem os textos temporários da página principal.",
+      pendencia:"Falta só um número: qual percentual dos seus alunos tem entre 35 e 55 anos, para completar um texto da página sobre o público do programa.",
+      checklist:[{done:true},{done:false}] },
     { code:"V-03", name:"Ajuste no aviso de retorno da ficha", pct:100, origem:"coach", tipo:"ajuste",
-      desc:"Prazo informado na confirmação da ficha atualizado de \"48 horas\" para \"48 horas úteis\", para não criar expectativa em fins de semana e feriados." },
-    { code:"V-04", name:"Nova seção Nossa Equipe", pct:0, origem:"coach", tipo:"nova",
-      desc:"Uma nova subseção da página principal, com os profissionais parceiros — foto, biografia e autoridade de cada um — para mostrar o time multidisciplinar que sustenta o programa.",
-      pendencia:"Enviar foto em boa resolução e uma biografia curta de cada profissional, e definir o cardiologista da equipe." },
-    { code:"V-05", name:"Atualização da seção de Parceiros", pct:0, origem:"coach", tipo:"ajuste",
-      desc:"Atualizar a área de parceiros com as marcas indicadas e preparar o registro de cliques, para que as recomendações gerem receita mensurável.",
-      pendencia:"Fechar os parceiros (Chefe Whey e Oficial Farma) e enviar logo, link e material de cada um." },
-    { code:"V-06", name:"Nova seção de Conteúdos", pct:0, origem:"coach", tipo:"nova",
-      desc:"Uma nova subseção da página principal reunindo podcast, vídeos e artigos num só lugar, a partir do primeiro episódio previsto. Os mesmos conteúdos vão alimentar as recomendações personalizadas dentro do aplicativo dos atletas." },
-    { code:"V-07", name:"Novos casos na seção de Resultados", pct:0, origem:"coach", tipo:"ajuste",
-      desc:"Acrescentar novos casos de transformação à seção de resultados e padronizar o visual dos cards, no padrão do comparativo de bioimpedância.",
-      pendencia:"Enviar as fotos antes/depois e os números de cada novo caso — e confirmar o peso final do Luiz Fernando (110,6 kg ou 110,9 kg)." },
-    { code:"V-08", name:"Novos depoimentos", pct:0, origem:"coach", tipo:"ajuste",
-      desc:"Acrescentar novos depoimentos à seção correspondente — mostrando não só a transformação física, mas a mudança de rotina, saúde, disciplina e qualidade de vida.",
-      pendencia:"Reunir os depoimentos das pessoas indicadas, em texto ou vídeo." },
+      desc:"O aviso da confirmação da ficha agora diz \"horas úteis\" nos três lugares do site onde esse prazo aparece — inclusive na versão em inglês.",
+      checklist:[{done:true}] },
+    { code:"V-04", name:"Nova seção Nossa Equipe", pct:50, origem:"coach", tipo:"nova",
+      desc:"A área já está no ar, com carrossel próprio no celular. Os 4 profissionais que atuam com você — Dr. Rodrigo Castro (Endocrinologia e Metabolismo), Dr. Guilherme Fernandes (Ortopedista), Alisson Neri (Nutricionista Esportivo/Farmacêutico) e Jerffeson Diógenes (Personal trainer) — já aparecem no menu do site, logo ao lado de \"Coach\", cada um com o link real do próprio site ou perfil.",
+      pendencia:"Falta só a foto de Jerffeson Diógenes (segue com uma imagem provisória) e a aprovação de cada profissional antes de publicar de vez.",
+      checklist:[{done:true},{done:true},{done:true},{done:false},{done:false}] },
+    { code:"V-05", name:"Atualização da seção de Parceiros", pct:50, origem:"coach", tipo:"ajuste",
+      desc:"A página já tem uma área de parceiros no ar, hoje com 4 marcas, e o rastreio de cliques já está ativo — cada clique num logo é registrado para medir o retorno de cada indicação. Falta atualizar com as novas parcerias que você está fechando.",
+      pendencia:"Chefe Whey (alinhar com Lucas Lucco) e a loja de roupas esportivas ainda em aberto. Oficial Farma é prioridade — aguardando a agenda do dono da farmácia.",
+      checklist:[{done:true},{done:true},{done:false}] },
+    { code:"V-06", name:"Nova seção de Conteúdos", pct:50, origem:"coach", tipo:"nova",
+      desc:"A área já está no ar, reunindo podcast, vídeos e artigos num só lugar, com busca e filtros. O guia de poses para Men's Physique já está publicado e disponível para download. O espaço está pronto para linkar ao seu canal do YouTube (Instagram pode entrar depois), e o mesmo conteúdo vai alimentar, mais adiante, as recomendações personalizadas dentro do aplicativo dos atletas.",
+      pendencia:"Você mencionou um podcast \"para um futuro próximo\", mas fora do guia de poses ainda não temos nenhum conteúdo seu pronto — nem episódio, nem vídeo, nem artigo, nem o link do seu canal do YouTube. Esse material é o que falta para a seção sair do papel de verdade.",
+      checklist:[{done:true},{done:true},{done:true},{done:false},{done:false}] },
+    { code:"V-07", name:"Novos casos na seção de Resultados", pct:50, origem:"coach", tipo:"ajuste",
+      desc:"A seção virou um carrossel: no computador, mostra quantos casos couberem na tela, com uma seta para ver a próxima fila; no celular, dá pra arrastar com o dedo além de usar as setas. Cada card mostra um número em destaque (por exemplo \"+17 kg\") e a história completa abre com um toque. Os 6 casos novos que você mandou já estão publicados, com o número e a história exatamente como você escreveu — só a foto de cada um ainda é um selo laranja provisório.",
+      pendencia:"As 4 fotos já publicadas ainda não têm nome nem história associados a elas — precisamos que você diga qual foto é de qual pessoa, para escrevermos o texto certo em cada uma. Também falta a foto de cada um dos 6 casos novos.",
+      checklist:[{done:true},{done:true},{done:false},{done:false}] },
+    { code:"V-08", name:"Novos depoimentos", pct:50, origem:"coach", tipo:"ajuste",
+      desc:"A seção já tem 4 depoimentos reais publicados, incluindo o do Flavio César (Engenheiro Civil) — o texto dele já está no ar. Os demais nomes que você indicou ainda estão sendo reunidos.",
+      pendencia:"Foto do Flavio César. Depoimentos de Jorge Coutinho, Lavoisier, Diego Garcia, Bruno A. Pereira e João Sampaio, em texto ou vídeo. Lucas Lucco fica guardado para mais pra frente.",
+      checklist:[{done:true},{done:false},{done:false}] },
   ]},
   { area:"Meu Painel · Acesso", sub:"A porta de entrada do seu painel de controle", items:[
     { code:"ADM-01", name:"Entrada no painel", pct:100,
@@ -470,8 +492,9 @@ const AREAS = [
     { code:"ADM-05", name:"Avaliação gerada e envio", pct:100,
       ia:{ o:"Escreve o rascunho da avaliação inicial a partir da ficha do interessado, para você revisar, ajustar e enviar.", status:"pronto" },
       desc:"A ferramenta que ajuda a gerar a avaliação inicial e enviá-la por e-mail ao interessado, com poucos cliques." },
-    { code:"V-09", name:"Papel da IA explícito na triagem", pct:0, origem:"coach", tipo:"ajuste",
-      desc:"Deixar visível, na tela de triagem, como a nota de prioridade é formada — a parte calculada por critérios fixos e a parte avaliada pela inteligência artificial —, para dar total transparência ao processo." },
+    { code:"V-09", name:"Papel da IA explícito na triagem", pct:100, origem:"coach", tipo:"ajuste",
+      desc:"Boa notícia: isso já existe. Ao abrir qualquer ficha na tela de triagem, você já vê a composição da nota — quanto veio de critérios fixos e quanto veio da avaliação da inteligência artificial —, junto com os alertas e a justificativa que a IA escreveu.",
+      checklist:[{done:true}] },
   ]},
   { area:"Meu Painel · Acompanhamento dos Meus Atletas", sub:"O centro do seu trabalho com cada atleta ativo", items:[
     { code:"ADM-09", name:"Lista dos meus atletas", pct:35,
@@ -550,14 +573,29 @@ const AREAS = [
     { code:"CHK-02", name:"Boas-vindas automáticas", pct:0,
       desc:"Depois que o atleta paga, o sistema cria a conta dele e envia um e-mail de boas-vindas automaticamente, sem precisar de nada manual da sua parte." },
   ]},
+
 ];
 
+// Itens com `checklist` têm o `pct` RECALCULADO a partir dele — o valor
+// hardcoded acima é só um fallback visual antes do JS rodar. Cada
+// sub-entrega pesa igual; % = round((concluídas/total × 100) / 10) × 10
+// (múltiplos de 10, para não sugerir uma precisão que o critério não tem).
+function pctFromChecklist(list){
+  const done = list.filter(c=>c.done).length;
+  return Math.round((done/list.length*100)/10)*10;
+}
+AREAS.forEach(a=>a.items.forEach(i=>{
+  if(i.checklist) i.pct = pctFromChecklist(i.checklist);
+}));
+
+// Infraestrutura invisível (bastidores) — contagem para o rodapé
 const INFRA = { pronto:3, total:9 };
 
+// ── Helpers de status ──
 function statusOf(pct){
-  if(pct>=100) return { key:"pronto",     label:"Pronto",        color:"var(--st-pronto)",     rgb:"166,195,0" };
-  if(pct<=0)   return { key:"naocomecou", label:"Não começou",   color:"var(--st-naocomecou)", rgb:"107,107,107" };
-  return             { key:"construcao",  label:"Em construção", color:"var(--st-construcao)", rgb:"214,154,62" };
+  if(pct>=100) return { key:"pronto",      label:"Pronto",        color:"var(--st-pronto)",     rgb:"166,195,0" };
+  if(pct<=0)   return { key:"naocomecou",  label:"Não começou",   color:"var(--st-naocomecou)", rgb:"107,107,107" };
+  return              { key:"construcao",  label:"Em construção", color:"var(--st-construcao)", rgb:"214,154,62" };
 }
 function progressDots(pct, color){
   const filled = pct<=0 ? 0 : Math.max(1, Math.ceil(pct/20));
@@ -566,7 +604,9 @@ function progressDots(pct, color){
     '</span>';
 }
 
+// ── Render ──
 const allItems = AREAS.flatMap(a=>a.items);
+// Itens do PLANO (arquitetura) vs itens vindos da VALIDAÇÃO DO COACH — contados à parte.
 const planItems  = allItems.filter(i=>i.origem!=='coach');
 const coachItems = allItems.filter(i=>i.origem==='coach');
 const total = planItems.length;
@@ -582,6 +622,7 @@ document.getElementById('c-total').textContent = '/' + total;
 document.getElementById('c-pct-and').textContent = Math.round(nAndamento/total*100) + '%';
 document.getElementById('c-sub').textContent = `${nPronto} prontas e ${nConstr} em construção`;
 
+// Barra — reflete o NÚMERO de funcionalidades planejadas em cada status
 const segbar = document.getElementById('segbar');
 const segs = [
   ['pronto', nPronto, 'var(--st-pronto)'],
@@ -594,11 +635,13 @@ segs.forEach(([k,n,c],idx)=>{ const s=document.createElement('span'); s.classNam
   if(idx===segs.length-1) s.style.borderRadius=(idx===0?'4px':'0 4px 4px 0');
   segbar.appendChild(s); });
 
+// Legenda: número de funcionalidades em cada status
 document.getElementById('tally').innerHTML =
   `<span class="t"><span class="dot" style="background:var(--st-pronto)"></span>Prontas <b>${nPronto}</b></span>`+
   `<span class="t"><span class="dot" style="background:var(--st-construcao)"></span>Em construção <b>${nConstr}</b></span>`+
   `<span class="t"><span class="dot" style="background:var(--st-naocomecou)"></span>Não começaram <b>${nNao}</b></span>`;
 
+// Mini-contagem à parte: itens vindos da sua validação (não entram no ${total} acima)
 const coachTally = document.getElementById('coach-tally');
 if(coachItems.length){
   const cPronto = coachItems.filter(i=>i.pct>=100).length;
@@ -611,6 +654,7 @@ if(coachItems.length){
   coachTally.style.display='none';
 }
 
+
 const areasEl = document.getElementById('areas');
 function renderFeat(it){
   const st = statusOf(it.pct);
@@ -619,7 +663,7 @@ function renderFeat(it){
     ? `<span class="origin-badge" style="color:${st.color};background:rgba(${st.rgb},.13);border:1px solid rgba(${st.rgb},.4)">Da sua validação · ${it.tipo==='nova'?'nova':'ajuste'}</span>` : '';
   return `<div class="feat${isCoach?' coach':''}" id="feat-${it.code}" data-code="${it.code}"${isCoach?` style="border-left-color:${st.color}"`:''}>
       <div class="feat-main">
-        <div class="feat-name"><span class="feat-code">${it.code}</span>${it.name}${originBadge}${it.ia?`<button class="ia-badge" aria-expanded="false" data-ia="${it.code}">&#10022; IA</button>`:''}</div>
+        <div class="feat-name"><span class="feat-code">${it.code}</span>${it.name}${originBadge}${it.ia?`<button class="ia-badge" aria-expanded="false" data-ia="${it.code}">✦ IA</button>`:''}</div>
         <div class="feat-desc">${it.desc}</div>
         ${it.pendencia?`<div class="feat-pend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span><b>Aguardando você:</b> ${it.pendencia}</span></div>`:''}
         ${it.ia?`<div class="ia-detail" data-ia-detail="${it.code}" hidden><b>Inteligência artificial:</b> ${it.ia.o}<span class="ia-st ${it.ia.status}">${it.ia.status==='pronto'?'Pronto':'Não começou'}</span></div>`:''}
@@ -634,6 +678,7 @@ AREAS.forEach(a=>{
   const plan  = a.items.filter(i=>i.origem!=='coach');
   const coach = a.items.filter(i=>i.origem==='coach');
   const hasIA = a.items.some(i=>i.ia);
+  // % da área: média só dos itens planejados (itens da validação contam à parte)
   const avg = plan.length ? Math.round(plan.reduce((s,i)=>s+i.pct,0)/plan.length) : 0;
   const sec = document.createElement('section');
   sec.className = 'area';
@@ -644,10 +689,10 @@ AREAS.forEach(a=>{
   sec.innerHTML = `
     <button class="area-head" aria-expanded="false">
       <span class="area-title">${a.area}</span>
-      ${hasIA?`<span class="area-ia-mark" title="Este bloco tem funcionalidades com inteligência artificial">&#10022; IA</span>`:''}
+      ${hasIA?`<span class="area-ia-mark" title="Este bloco tem funcionalidades com inteligência artificial">✦ IA</span>`:''}
       ${coach.length?`<span class="area-coach-mark" title="${coach.length} ${coach.length===1?'item da sua validação':'itens da sua validação'}">${coach.length}</span>`:''}
       <span class="area-pct">${avg}% concluído</span>
-      <span class="chev" aria-hidden="true">&#x25BC;</span>
+      <span class="chev" aria-hidden="true">▼</span>
     </button>
     <hr class="area-rule">
     <div class="area-body">
@@ -659,6 +704,7 @@ AREAS.forEach(a=>{
   areasEl.appendChild(sec);
 });
 
+// Interações delegadas em #areas: colapso de áreas + selo de IA tocável (mobile-first)
 document.getElementById('areas').addEventListener('click', (e)=>{
   const badge = e.target.closest('.ia-badge');
   if(badge){
@@ -676,10 +722,12 @@ document.getElementById('areas').addEventListener('click', (e)=>{
   }
 });
 
+// ── Pendências com o Coach (dever de casa) — Formas A + B + C ──
 (function renderPendencias(){
   const pend = coachItems.filter(i=>i.pendencia);
   const CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
 
+  // Forma C — contador no herói
   const hp = document.getElementById('hero-pend');
   if(pend.length){
     hp.innerHTML = '<button class="hero-pend-btn" type="button">'+CLOCK+'<b>'+pend.length+'</b> '+(pend.length===1?'pendência com você':'pendências com você')+'</button>';
@@ -688,6 +736,7 @@ document.getElementById('areas').addEventListener('click', (e)=>{
     });
   } else { hp.style.display='none'; }
 
+  // Forma A — painel dever de casa
   const el = document.getElementById('homework');
   if(!pend.length){ el.style.display='none'; return; }
   const rows = pend.map(function(i){ return ''+
@@ -705,6 +754,7 @@ document.getElementById('areas').addEventListener('click', (e)=>{
     '</div>'+
     '<div class="hw-list">'+rows+'</div>';
 
+  // Navegação: abre a área do item, rola até ele e o destaca
   el.addEventListener('click', function(e){
     const row = e.target.closest('.hw-row'); if(!row) return;
     const feat = document.getElementById(row.dataset.target); if(!feat) return;
@@ -718,6 +768,7 @@ document.getElementById('areas').addEventListener('click', (e)=>{
   });
 })();
 
+// Seção consolidada "Inteligência Artificial no seu produto"
 (function renderIaSection(){
   const iaItems = allItems.filter(i=>i.ia);
   const nPronta = iaItems.filter(i=>i.ia.status==='pronto').length;
@@ -736,10 +787,10 @@ document.getElementById('areas').addEventListener('click', (e)=>{
   const sec = document.createElement('div');
   sec.className = 'ia-section';
   sec.innerHTML = `
-    <h2>&#10022; Inteligência Artificial no seu produto</h2>
+    <h2>✦ Inteligência Artificial no seu produto</h2>
     <p class="ia-lede">Seu produto usa inteligência artificial em <b>${iaItems.length} pontos</b>. Destas aplicações de IA,
       <b>${nPronta} já estão prontas</b> (na triagem de novos interessados) e ${iaItems.length-nPronta} entram
-      conforme as telas correspondentes forem construídas. Toque no selo <b>&#10022; IA</b> em qualquer funcionalidade
+      conforme as telas correspondentes forem construídas. Toque no selo <b>✦ IA</b> em qualquer funcionalidade
       acima para ver o que a inteligência artificial faz ali.</p>
     ${rows}`;
   const foot = document.querySelector('.foot');
@@ -754,14 +805,19 @@ document.getElementById('infra-line').innerHTML =
 document.getElementById('stamp').textContent =
   `Elite 90 · Relatório gerado para acompanhamento do projeto · ${total} funcionalidades de produto + ${INFRA.total} automações de bastidor`;
 
-// Mapa completo do projeto
+// ══════════════ Mapa completo do projeto (gaveta) ══════════════
+// Construído inteiramente a partir do array AREAS já usado acima — nenhum
+// dado é duplicado. Se AREAS mudar, o mapa muda junto, sem risco de divergir.
+
+// Deriva a sigla a partir dos próprios códigos dos itens — nunca inventa
+// nomenclatura nova, só resume o que já existe nos dados.
 function map_dottedFamily(codes){
   if(!codes.length) return null;
   const fam = codes[0].split('.')[0];
   return codes.every(c=>c.split('.')[0]===fam) ? fam : null;
 }
 function map_familyLabel(codes){
-  const parsed = codes.map(c=>{ const m=c.match(/^([A-Za-z]+-?)(\d+)/); return m?{prefix:m[1],num:parseInt(m[2],10),str:m[2]}:null; }).filter(Boolean);
+  const parsed = codes.map(c=>{ const m=c.match(/^([A-Za-z]+-)(\d+)/); return m?{prefix:m[1],num:parseInt(m[2],10),str:m[2]}:null; }).filter(Boolean);
   if(!parsed.length) return codes[0]||'';
   const prefix = parsed[0].prefix;
   const nums = parsed.map(p=>p.num);
@@ -774,6 +830,10 @@ function map_groupCode(children){ return map_tagFor(children.map(c=>c.code)); }
 function map_leaves(items){ return items.flatMap(i=>i.children?i.children:[i]); }
 function map_avg(arr){ const p=arr.filter(i=>i.origem!=='coach'); return p.length?Math.round(p.reduce((s,i)=>s+i.pct,0)/p.length):0; }
 
+// Monta a árvore de exibição: as 6 áreas "Meu Painel · X" (ADM) ficam
+// subordinadas a um nó "Painel Admin"; as demais permanecem soltas no topo.
+// Dentro de "Acompanhamento dos Meus Atletas", as abas ADM-10.x viram um
+// sub-grupo "Drawer do Atleta" — mesma estrutura de 3 níveis do mock real.
 function buildMapTree(){
   const admPrefix = "Meu Painel · ";
   const top = [];
@@ -793,6 +853,7 @@ function buildMapTree(){
       top.push({type:"flat", short:a.area, items:a.items});
     }
   });
+  // Painel Admin entra na posição do primeiro módulo ADM encontrado, preservando a ordem geral do relatório
   const firstAdmIdx = AREAS.findIndex(a=>a.area.startsWith(admPrefix));
   const beforeCount = AREAS.slice(0, firstAdmIdx).filter(a=>!a.area.startsWith(admPrefix)).length;
   top.splice(beforeCount, 0, {type:"admin", short:"Painel Admin", tagFixed:"ADM", groups:admGroups});
@@ -860,6 +921,7 @@ buildMapTree().forEach(function(t){
   }
 });
 
+// Abrir/fechar: botão, X, clique fora, Esc
 const mapOverlay = document.getElementById('mapOverlay');
 function openMap(){ mapOverlay.classList.add('open'); }
 function closeMap(){ mapOverlay.classList.remove('open'); }
@@ -868,17 +930,24 @@ document.getElementById('closeMapBtn').addEventListener('click', closeMap);
 mapOverlay.addEventListener('click', function(e){ if(e.target===mapOverlay) closeMap(); });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape' && mapOverlay.classList.contains('open')) closeMap(); });
 
+// Fechar arrastando a gaveta para a direita (mouse e toque, via Pointer Events).
+// Só entra em ação quando o movimento é predominantemente horizontal e para a
+// direita — um deslize vertical continua rolando o conteúdo normalmente.
 (function enableSwipeToClose(){
   const drawerEl = document.querySelector('.map-drawer');
-  const CLOSE_THRESHOLD = 90;
+  const CLOSE_THRESHOLD = 90; // px arrastados para considerar "fechar"
   let startX=0, startY=0, dragging=false, decided=false, currentX=0;
+
   function onMove(e){
     const dx = e.clientX - startX, dy = e.clientY - startY;
     if(!decided){
       if(Math.abs(dx) > 8 || Math.abs(dy) > 8){
         decided = true;
         dragging = dx > 0 && Math.abs(dx) > Math.abs(dy);
-        if(dragging){ drawerEl.classList.add('map-dragging'); mapOverlay.style.transition = 'none'; }
+        if(dragging){
+          drawerEl.classList.add('map-dragging');
+          mapOverlay.style.transition = 'none';
+        }
       }
     }
     if(dragging){
