@@ -16,6 +16,7 @@ const navLinks = [
   { href: "#processo",    label: n.process },
   { href: "#nossa-equipe", label: n.team },
   { href: "#depoimentos", label: n.testimonials },
+  { href: "#conteudos",   label: n.content },
   { href: "#parceiros",   label: n.partners },
   { href: "#faq",         label: n.faq },
 ];
@@ -134,7 +135,7 @@ const navLinks = [
   // -- Active link highlight ----------------------------------------------------
   const navLinkEls = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
   const sectionIds = ["cronograma","coach","pilares","resultados",
-                      "processo","depoimentos","parceiros","faq","triagem"];
+                      "processo","depoimentos","conteudos","parceiros","faq","triagem"];
 
   const sectionObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
