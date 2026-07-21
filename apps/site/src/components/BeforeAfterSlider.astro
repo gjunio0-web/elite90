@@ -132,11 +132,13 @@ const { items, t } = Astro.props;
     });
   });
 
-  // ── Carrossel rotativo: número de cards por fila calculado pelo espaço
-  // disponível (não um valor fixo) — no mobile, o cálculo naturalmente
-  // resulta em 1 por vez. Desliza o trilho inteiro com animação; não
-  // esconde/mostra cards individualmente, então nenhum <img-comparison-slider>
-  // ou listener de "Ver mais" é recriado ao trocar de fila.
+  // ── Carrossel rotativo: no desktop, número de cards por fila calculado
+  // pelo espaço disponível, deslizando o trilho inteiro com transform+
+  // animação (inalterado, já validado). No mobile, a navegação passa a
+  // ser rolagem nativa por toque (scroll-snap) — mesmo mecanismo já usado
+  // em Nossa Equipe — para o usuário poder arrastar manualmente, não só
+  // clicar nas setas. Nenhum <img-comparison-slider> ou listener de
+  // "Ver mais" é recriado ao trocar de fila/página, nos dois modos.
   (function setupResultsCarousel() {
     const viewportEl = document.querySelector<HTMLElement>(".results-viewport");
     const trackEl = document.querySelector<HTMLElement>(".results-track");
@@ -144,9 +146,6 @@ const { items, t } = Astro.props;
     const dotsEl = document.querySelector<HTMLElement>(".results-dots");
     if (!viewportEl || !trackEl || !carouselEl || !dotsEl) return;
 
-    // Re-bind as non-null consts: TypeScript's control-flow narrowing from the
-    // guard above doesn't reliably persist inside the nested function
-    // declarations below, so these give every closure a provably-non-null type.
     const viewport: HTMLElement = viewportEl;
     const track: HTMLElement = trackEl;
     const carousel: HTMLElement = carouselEl;
@@ -157,6 +156,7 @@ const { items, t } = Astro.props;
 
     const prevBtn = carousel.querySelector<HTMLButtonElement>(".results-nav--prev");
     const nextBtn = carousel.querySelector<HTMLButtonElement>(".results-nav--next");
+    const mobileQuery = window.matchMedia("(max-width: 640px)");
     let current = 0;
     let perPage = 1;
     let pageCount = 1;
@@ -184,9 +184,7 @@ const { items, t } = Astro.props;
       }
     }
 
-    function render() {
-      const offset = current * viewport.clientWidth;
-      track.style.transform = `translateX(-${offset}px)`;
+    function updateChrome() {
       const dots = Array.from(dotsWrap.querySelectorAll<HTMLButtonElement>(".results-dot"));
       dots.forEach((dot, i) => dot.setAttribute("aria-current", String(i === current)));
       if (prevBtn) prevBtn.disabled = current === 0;
@@ -194,15 +192,55 @@ const { items, t } = Astro.props;
       carousel.classList.toggle("results-carousel--single-page", pageCount <= 1);
     }
 
+    // ── Modo desktop: desliza o trilho inteiro via transform (já validado) ──
+    function renderDesktop() {
+      const offset = current * viewport.clientWidth;
+      track.style.transform = `translateX(-${offset}px)`;
+      updateChrome();
+    }
+
+    // ── Modo mobile: a posição é ditada pelo scrollLeft nativo; aqui só
+    // sincronizamos dots/setas com o que o usuário já rolou (por toque ou
+    // clicando na seta, que também rola nativamente) ──
+    function stepWidthMobile() {
+      const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || "0");
+      return cards[0].getBoundingClientRect().width + gap;
+    }
+
+    function syncFromScroll() {
+      const step = stepWidthMobile();
+      current = step > 0 ? Math.round(viewport.scrollLeft / step) : 0;
+      current = Math.max(0, Math.min(pageCount - 1, current));
+      updateChrome();
+    }
+
     function goTo(page: number) {
       current = Math.max(0, Math.min(pageCount - 1, page));
-      render();
+      if (mobileQuery.matches) {
+        viewport.scrollTo({ left: current * stepWidthMobile(), behavior: "smooth" });
+        // updateChrome() roda via o listener de "scroll" (debounced) abaixo
+      } else {
+        renderDesktop();
+      }
     }
+
+    let scrollTimer: ReturnType<typeof setTimeout>;
+    viewport.addEventListener("scroll", () => {
+      if (!mobileQuery.matches) return;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(syncFromScroll, 100);
+    });
 
     function refresh() {
       computeLayout();
       buildDots();
-      render();
+      if (mobileQuery.matches) {
+        track.style.transform = ""; // a rolagem nativa governa a posição, não o transform
+        syncFromScroll();
+      } else {
+        viewport.scrollLeft = 0; // volta ao início ao trocar para o modo desktop
+        renderDesktop();
+      }
     }
 
     prevBtn?.addEventListener("click", () => goTo(current - 1));
@@ -267,12 +305,43 @@ const { items, t } = Astro.props;
     flex-direction: column;
     gap: var(--space-3);
   }
+
+  /* ── Mobile: troca o deslize por transform (JS) por rolagem nativa por
+     toque — mesmo padrão já usado em Nossa Equipe (.team__grid). Isso dá
+     ao usuário a opção de arrastar manualmente, não só as setas.
+     Setas passam a flutuar por cima da imagem (posição absoluta) em vez
+     de ocupar espaço ao lado, para não espremer a área útil do card. ── */
   @media (max-width: 640px) {
-    /* 176px overhead = container padding-inline (2×--space-5=64px) + the two
-       40px nav buttons + their two --space-3 (16px) gaps (112px). Must match
-       the .results-carousel/.container layout or the card overflows its
-       actual visible slot and gets clipped by .results-viewport's overflow:hidden. */
-    .result-card { flex-basis: min(340px, calc(100vw - 176px)); width: min(340px, calc(100vw - 176px)); }
+    .results-carousel {
+      position: relative;
+      gap: 0;
+    }
+    .results-viewport {
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      margin: 0 -20px;
+      padding: 0 20px 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .results-viewport::-webkit-scrollbar { display: none; }
+    .results-track {
+      transition: none; /* a posição passa a ser ditada pelo scrollLeft nativo, não por transform */
+    }
+    .result-card {
+      flex: 0 0 82%;
+      width: 82%;
+      scroll-snap-align: start;
+    }
+    .results-nav {
+      position: absolute;
+      top: 88px;
+      z-index: 3;
+      background: rgba(13,13,13,.7);
+      backdrop-filter: blur(2px);
+    }
+    .results-nav--prev { left: 4px; }
+    .results-nav--next { right: 4px; }
   }
 
   .result-card__pending-mark {
