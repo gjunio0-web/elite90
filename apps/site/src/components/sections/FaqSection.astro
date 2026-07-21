@@ -9,15 +9,17 @@ const { t } = Astro.props;
     <p class="section__eyebrow">{t.faq.eyebrow}</p>
     <h2 class="section__title">{t.faq.title}</h2>
     <dl class="faq__list">
-      {t.faq.items.map(item => (
+      {t.faq.items.map((item, idx) => (
         <div class="faq__item">
           <dt>
-            <button class="faq__btn" type="button" aria-expanded="false">
+            <button class="faq__btn" type="button" aria-expanded="false" aria-controls={`faq-answer-${idx}`}>
               {item.question}
               <span class="faq__icon" aria-hidden="true">+</span>
             </button>
           </dt>
-          <dd class="faq__answer" hidden><p>{item.answer}</p></dd>
+          <dd class="faq__answer" id={`faq-answer-${idx}`} inert>
+            <div class="faq__answer-inner"><p>{item.answer}</p></div>
+          </dd>
         </div>
       ))}
     </dl>
@@ -27,15 +29,19 @@ const { t } = Astro.props;
 <script>
   document.querySelectorAll(".faq__btn").forEach(btn => {
     const b = btn as HTMLButtonElement;
-    const item = b.closest(".faq__item");
+    const item = b.closest(".faq__item") as HTMLElement | null;
     const answer = item?.querySelector(".faq__answer") as HTMLElement | null;
     const icon = b.querySelector(".faq__icon") as HTMLElement | null;
-    if (!answer || !icon) return;
+    if (!item || !answer || !icon) return;
     b.addEventListener("click", () => {
-      const expanded = b.getAttribute("aria-expanded") === "true";
-      b.setAttribute("aria-expanded", String(!expanded));
-      answer.hidden = expanded;
-      icon.textContent = expanded ? "+" : "-";
+      const willExpand = b.getAttribute("aria-expanded") !== "true";
+      b.setAttribute("aria-expanded", String(willExpand));
+      item.classList.toggle("is-open", willExpand);
+      // "inert" (não "hidden") para permitir a transição de altura via CSS
+      // e ainda tirar o conteúdo recolhido da navegação por teclado/leitor de tela
+      if (willExpand) answer.removeAttribute("inert");
+      else answer.setAttribute("inert", "");
+      icon.textContent = willExpand ? "-" : "+";
     });
   });
 </script>
@@ -48,6 +54,18 @@ const { t } = Astro.props;
   .faq__btn:hover { color: var(--c-lime); }
   .faq__icon { font-family: var(--font-display); font-size: 1.5rem; color: var(--c-lime); flex-shrink: 0; transition: transform var(--transition-base); line-height: 1; }
   .faq__btn[aria-expanded="true"] .faq__icon { transform: rotate(45deg); }
-  .faq__answer { padding-bottom: var(--space-4); padding-right: 3rem; }
-  .faq__answer p { font-size: var(--fs-body-md); color: var(--c-textbody); line-height: 1.7; }
+
+  /* Animação de abrir/fechar: grid-template-rows 0fr -> 1fr anima a altura
+     sem precisar medir o conteúdo em JS (funciona com texto de qualquer
+     tamanho). A opacidade some/aparece um pouco mais rápido que a altura,
+     mesma proporção usada no drawer mobile do Header. */
+  .faq__answer {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 300ms ease, opacity 200ms ease;
+  }
+  .faq__item.is-open .faq__answer { grid-template-rows: 1fr; opacity: 1; }
+  .faq__answer-inner { overflow: hidden; min-height: 0; }
+  .faq__answer p { padding-bottom: var(--space-4); padding-right: 3rem; font-size: var(--fs-body-md); color: var(--c-textbody); line-height: 1.7; margin: 0; }
 </style>
