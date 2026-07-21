@@ -104,6 +104,9 @@ const originLabels: Record<string, string> = {
               ) : (
                 <span class="content-card__soon-label">{c.comingSoon}</span>
               )}
+              {item.demo && (
+                <p class="content-card__demo-tag">{c.demoTag}</p>
+              )}
             </article>
           );
         })}
@@ -279,6 +282,9 @@ const originLabels: Record<string, string> = {
     display: inline-flex; align-self: flex-start; margin-top: var(--space-2); font-family: var(--font-label);
     font-weight: 700; font-size: 0.7rem; letter-spacing: 0.03em; text-transform: uppercase; color: var(--c-textsub);
     border: 1.5px dashed rgba(255,255,255,0.2); border-radius: var(--radius-pill); padding: 9px 16px;
+  }
+  .content-card__demo-tag {
+    font-family: var(--font-label); font-size: 0.62rem; letter-spacing: 0.03em; color: #666; margin-top: var(--space-2);
   }
 
   /* ---------- Setas — réplica exata de .team__arrow (44px) ---------- */
