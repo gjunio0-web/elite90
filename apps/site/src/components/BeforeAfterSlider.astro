@@ -27,10 +27,11 @@ const { items, t } = Astro.props;
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
 
 <div class="results-carousel">
-  <button class="results-nav results-nav--prev" type="button" aria-label="Grupo anterior de resultados">‹</button>
-  <div class="results-grid">
-  {items.map((item, idx) => (
-    <div class="result-card" data-page={Math.floor(idx / 4)}>
+  <button class="results-nav results-nav--prev" type="button" aria-label="Fila anterior de resultados">‹</button>
+  <div class="results-viewport">
+  <div class="results-track">
+  {items.map((item) => (
+    <div class="result-card">
       {item.pending && (
         <span class="result-card__pending-mark" tabindex="0" aria-label={t?.results.pendingLabel ?? "Conteúdo novo, ainda não revisado por você"}>
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
@@ -101,9 +102,10 @@ const { items, t } = Astro.props;
     </div>
   ))}
   </div>
-  <button class="results-nav results-nav--next" type="button" aria-label="Próximo grupo de resultados">›</button>
+  </div>
+  <button class="results-nav results-nav--next" type="button" aria-label="Próxima fila de resultados">›</button>
 </div>
-<div class="results-dots" role="tablist" aria-label="Grupos de resultados"></div>
+<div class="results-dots" role="tablist" aria-label="Filas de resultados"></div>
 
 <script>
   document.querySelectorAll(".result-card__toggle").forEach(btn => {
@@ -130,45 +132,66 @@ const { items, t } = Astro.props;
     });
   });
 
-  // ── Paginação em grupos de 4 (carrossel) ──
-  // Não recria nem move os cards: só alterna qual data-page fica visível.
-  // Cada card mantém seu próprio <img-comparison-slider> e listener de "Ver mais"
-  // intactos, montados uma única vez no carregamento da página.
-  (function setupResultsPagination() {
-    const grid = document.querySelector(".results-grid");
-    const carousel = document.querySelector(".results-carousel");
-    const dotsWrap = document.querySelector(".results-dots");
-    if (!grid || !carousel || !dotsWrap) return;
+  // ── Carrossel rotativo: número de cards por fila calculado pelo espaço
+  // disponível (não um valor fixo) — no mobile, o cálculo naturalmente
+  // resulta em 1 por vez. Desliza o trilho inteiro com animação; não
+  // esconde/mostra cards individualmente, então nenhum <img-comparison-slider>
+  // ou listener de "Ver mais" é recriado ao trocar de fila.
+  (function setupResultsCarousel() {
+    const viewportEl = document.querySelector<HTMLElement>(".results-viewport");
+    const trackEl = document.querySelector<HTMLElement>(".results-track");
+    const carouselEl = document.querySelector<HTMLElement>(".results-carousel");
+    const dotsEl = document.querySelector<HTMLElement>(".results-dots");
+    if (!viewportEl || !trackEl || !carouselEl || !dotsEl) return;
 
-    const cards = Array.from(grid.querySelectorAll<HTMLElement>(".result-card"));
+    // Re-bind as non-null consts: TypeScript's control-flow narrowing from the
+    // guard above doesn't reliably persist inside the nested function
+    // declarations below, so these give every closure a provably-non-null type.
+    const viewport: HTMLElement = viewportEl;
+    const track: HTMLElement = trackEl;
+    const carousel: HTMLElement = carouselEl;
+    const dotsWrap: HTMLElement = dotsEl;
+
+    const cards = Array.from(track.querySelectorAll<HTMLElement>(".result-card"));
     if (cards.length === 0) return;
-
-    const pageCount = Math.max(...cards.map(c => Number(c.dataset.page ?? "0"))) + 1;
-    if (pageCount <= 1) return; // 4 ou menos casos: nada para paginar, grade simples basta
 
     const prevBtn = carousel.querySelector<HTMLButtonElement>(".results-nav--prev");
     const nextBtn = carousel.querySelector<HTMLButtonElement>(".results-nav--next");
     let current = 0;
+    let perPage = 1;
+    let pageCount = 1;
 
-    for (let i = 0; i < pageCount; i++) {
-      const dot = document.createElement("button");
-      dot.className = "results-dot";
-      dot.type = "button";
-      dot.setAttribute("role", "tab");
-      dot.setAttribute("aria-label", `Grupo ${i + 1} de ${pageCount}`);
-      dot.addEventListener("click", () => goTo(i));
-      dotsWrap.appendChild(dot);
+    function computeLayout() {
+      const cardWidth = cards[0].getBoundingClientRect().width;
+      const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || "0");
+      const viewportWidth = viewport.clientWidth;
+      perPage = Math.max(1, Math.floor((viewportWidth + gap) / (cardWidth + gap)));
+      pageCount = Math.max(1, Math.ceil(cards.length / perPage));
+      current = Math.min(current, pageCount - 1);
     }
-    const dots = Array.from(dotsWrap.querySelectorAll<HTMLButtonElement>(".results-dot"));
+
+    function buildDots() {
+      dotsWrap.innerHTML = "";
+      if (pageCount <= 1) return;
+      for (let i = 0; i < pageCount; i++) {
+        const dot = document.createElement("button");
+        dot.className = "results-dot";
+        dot.type = "button";
+        dot.setAttribute("role", "tab");
+        dot.setAttribute("aria-label", `Fila ${i + 1} de ${pageCount}`);
+        dot.addEventListener("click", () => goTo(i));
+        dotsWrap.appendChild(dot);
+      }
+    }
 
     function render() {
-      cards.forEach(card => {
-        const page = Number(card.dataset.page ?? "0");
-        card.style.display = page === current ? "flex" : "none";
-      });
+      const offset = current * viewport.clientWidth;
+      track.style.transform = `translateX(-${offset}px)`;
+      const dots = Array.from(dotsWrap.querySelectorAll<HTMLButtonElement>(".results-dot"));
       dots.forEach((dot, i) => dot.setAttribute("aria-current", String(i === current)));
       if (prevBtn) prevBtn.disabled = current === 0;
       if (nextBtn) nextBtn.disabled = current === pageCount - 1;
+      carousel.classList.toggle("results-carousel--single-page", pageCount <= 1);
     }
 
     function goTo(page: number) {
@@ -176,42 +199,57 @@ const { items, t } = Astro.props;
       render();
     }
 
+    function refresh() {
+      computeLayout();
+      buildDots();
+      render();
+    }
+
     prevBtn?.addEventListener("click", () => goTo(current - 1));
     nextBtn?.addEventListener("click", () => goTo(current + 1));
-    render();
+
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(refresh, 150);
+    });
+
+    refresh();
   })();
 </script>
 
 <style>
-  .results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: var(--space-5);
-    margin-top: var(--space-6);
-  }
-
-  /* ── Paginação em grupos de 4 (carrossel) ── */
+  /* ── Carrossel rotativo: trilho deslizante, largura de card própria.
+     JS mede a largura real e calcula quantos cabem por fila — no mobile,
+     isso resulta em 1 por vez naturalmente, sem regra especial. ── */
   .results-carousel {
     display: flex;
     align-items: center;
     gap: var(--space-3);
+    margin-top: var(--space-6);
   }
-  .results-carousel .results-grid {
+  .results-viewport {
     flex: 1;
     min-width: 0;
+    overflow: hidden;
   }
-  .results-grid .result-card { display: none; }
-  .results-grid .result-card[data-page="0"] { display: flex; }
+  .results-track {
+    display: flex;
+    gap: var(--space-5);
+    transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
   .results-nav {
     flex: none;
     width: 40px; height: 40px; border-radius: 50%;
     border: 1.5px solid var(--c-lime); background: var(--c-black); color: var(--c-lime);
     font-size: 18px; line-height: 1; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s ease;
   }
   .results-nav:hover { background: rgba(166,195,0,.1); }
   .results-nav[disabled] { opacity: .3; cursor: default; pointer-events: none; }
-  .results-nav--prev { order: -1; }
+  .results-carousel--single-page .results-nav { visibility: hidden; }
   .results-dots {
     display: flex; justify-content: center; gap: 8px; margin-top: var(--space-5);
   }
@@ -223,9 +261,18 @@ const { items, t } = Astro.props;
 
   .result-card {
     position: relative;
+    flex: 0 0 280px;
+    width: 280px;
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+  }
+  @media (max-width: 640px) {
+    /* 176px overhead = container padding-inline (2×--space-5=64px) + the two
+       40px nav buttons + their two --space-3 (16px) gaps (112px). Must match
+       the .results-carousel/.container layout or the card overflows its
+       actual visible slot and gets clipped by .results-viewport's overflow:hidden. */
+    .result-card { flex-basis: min(340px, calc(100vw - 176px)); width: min(340px, calc(100vw - 176px)); }
   }
 
   .result-card__pending-mark {
