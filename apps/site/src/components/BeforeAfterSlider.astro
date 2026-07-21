@@ -80,6 +80,12 @@ const { items, t } = Astro.props;
         <p class="result-card__meta">{item.meta}</p>
 
         <div class="result-card__stat-wrap">
+          {item.pending && (
+            <span class="result-card__pending-mark" tabindex="0" aria-label={t?.results.pendingLabel ?? "Conteúdo novo, ainda não revisado por você"}>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+              <span class="result-card__pending-tip">{t?.results.pendingTooltip ?? "Conteúdo novo — ainda não revisado por você."}</span>
+            </span>
+          )}
           <p class="result-card__stat">{item.stat}</p>
           <p class="result-card__stat-desc">{item.statDesc}</p>
         </div>
@@ -462,6 +468,7 @@ const { items, t } = Astro.props;
   }
 
   .result-card__stat-wrap {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
