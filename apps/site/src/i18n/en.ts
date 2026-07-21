@@ -158,6 +158,8 @@ export const en: Translations = {
     titleSuffix: "are saying",
     readMore: "Read more",
     readLess: "Read less",
+    pendingLabel: "New content, not yet reviewed by you",
+    pendingTooltip: "New content — not yet reviewed by you.",
     items: [
       {
         name: "Bruno Ferraz",
@@ -186,6 +188,7 @@ export const en: Translations = {
         metric: "Over 10 years of partnership",
         image: "/images/testimonials/depoente-placeholder.webp",
         text: "I've known Fernando Ruiz for over 10 years. Since then, I've accumulated gains and also achieved the results he sets as a goal. Fernando is attentive and thorough. He does spot-on coaching work by always staying up to date and constantly researching what's most modern and suited to my biotype, to maintain lean mass gains and fat reduction. Since we started the treatment, I've been racking up incredible results, which is why our partnership has lasted so many years. Thank you, Fernando!",
+        pending: true,
       },
     ],
   },
@@ -307,11 +310,14 @@ export const en: Translations = {
         statLabel: "Certified athlete",
         image: "/images/team/placeholder-jd.webp",
         link: "https://www.treinar.me/jerffesonpersonal",
+        pending: true,
       },
     ],
     prevAriaLabel: "View previous specialist",
     nextAriaLabel: "View next specialist",
     linkAriaLabel: "Link for",
+    pendingLabel: "New content, not yet reviewed by you",
+    pendingTooltip: "New content — not yet reviewed by you.",
   },
 
   nav: {

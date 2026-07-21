@@ -199,6 +199,8 @@ export const pt = {
     titleSuffix: "estão dizendo",
     readMore: "Ver mais",
     readLess: "Ver menos",
+    pendingLabel: "Conteúdo novo, ainda não revisado por você",
+    pendingTooltip: "Conteúdo novo — ainda não revisado por você.",
     items: [
       {
         name: "Bruno Ferraz",
@@ -227,6 +229,7 @@ export const pt = {
         metric: "Mais de 10 anos de parceria",
         image: "/images/testimonials/depoente-placeholder.webp",
         text: "Conheço o Fernando Ruiz há mais de 10 anos. De lá para cá, acumulei ganhos e também conquistei os resultados que ele estipula como meta. Fernando é atencioso, criterioso. Faz um trabalho de Coach certeiro por estar sempre antenado e pesquisar constantemente o que há de mais moderno e adequado ao meu biotipo, para manter o ganho de massa magra e a redução de gordura. Desde que começamos o tratamento venho acumulando resultados incríveis, motivo pelo qual nossa parceria se estende por tantos anos. Obrigado, Fernando!",
+        pending: true,
       },
     ],
   },
@@ -353,11 +356,14 @@ export const pt = {
         statLabel: "Atleta credenciado",
         image: "/images/team/placeholder-jd.webp",
         link: "https://www.treinar.me/jerffesonpersonal",
+        pending: true,
       },
     ],
     prevAriaLabel: "Ver especialista anterior",
     nextAriaLabel: "Ver próximo especialista",
     linkAriaLabel: "Link de",
+    pendingLabel: "Conteúdo novo, ainda não revisado por você",
+    pendingTooltip: "Conteúdo novo — ainda não revisado por você.",
   },
 
   // NAVEGAÇÃO
