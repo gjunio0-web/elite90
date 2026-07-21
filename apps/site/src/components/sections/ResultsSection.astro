@@ -6,9 +6,9 @@ import type { Locale } from "../../i18n/utils";
 interface Props { t: Translations; locale: Locale; }
 const { t, locale } = Astro.props;
 
-// ── Copy for cases still awaiting confirmed photos/data (1-4) and the
-// real, Coach-confirmed narratives added for cases 5-10. stat/statDesc for
-// 5-10 are our draft, not yet approved by him (hence pending:true).
+// ── Cases 1-4: real photos, text still unconfirmed placeholder.
+// Cases 5-10: real, Coach-confirmed text (name/stat/story), photo still a
+// genuine placeholder graphic pending the correct pairing.
 const copyByLocale = {
   "pt-br": {
     placeholderName: "Atleta [INICIAIS]",
@@ -132,10 +132,10 @@ const results = [
     afterLabel:  t.results.afterLabel,
     pending: true,
   })),
-  // Cases 5-10: the opposite split -- name/story are real and Coach-confirmed,
-  // but the photo itself is a genuine placeholder graphic (real photos aren't
-  // verifiably matched to each person yet) and stat/statDesc are our draft,
-  // not yet Coach-approved. Both the photo and the text badge apply here.
+  // Cases 5-10: the opposite split -- name/meta/stat/statDesc/story are all
+  // real and Coach-confirmed, but the photo itself is a genuine placeholder
+  // graphic (real photos aren't verifiably matched to each person yet). Only
+  // the photo badge applies here, not the text/stat badge.
   ...c.cases.map((item, i) => ({
     n: i + 5,
     beforeSrc: `/images/results/placeholder-novo-caso-antes.webp`,
@@ -143,7 +143,6 @@ const results = [
     ...item,
     beforeLabel: t.results.beforeLabel,
     afterLabel:  t.results.afterLabel,
-    pending: true,
     photoPending: true,
   })),
 ];
