@@ -376,7 +376,12 @@ const { t } = Astro.props;
 
     const goTo = (index: number) => {
       const clamped = Math.max(0, Math.min(cards.length - 1, index));
-      cards[clamped].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      const card = cards[clamped] as HTMLElement;
+      // scrollIntoView({block:'nearest'}) pode ajustar o eixo vertical da
+      // página quando o card não está totalmente visível. Rolagem só
+      // horizontal, mesmo padrão usado em Resultados (viewport.scrollTo).
+      const delta = card.getBoundingClientRect().left - grid.getBoundingClientRect().left;
+      grid.scrollTo({ left: grid.scrollLeft + delta, behavior: 'smooth' });
     };
 
     grid.addEventListener('scroll', () => window.requestAnimationFrame(updateUI));
