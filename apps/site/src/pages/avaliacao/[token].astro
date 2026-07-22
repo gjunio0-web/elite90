@@ -6,6 +6,14 @@ export const prerender = false;
 
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/raleway/800.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../../styles/tokens.css';
+import '../../styles/global.css';
 
 function getDb() {
   if (!getApps().length) {
@@ -61,76 +69,88 @@ const sections = [
   <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" href="/favicon.ico" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet" />
-
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{
-      background-color:#080808;
-      color:#EDEDED;
-      font-family:'Inter',sans-serif;
-      min-height:100vh;
-      padding-bottom:80px;
-      background-image:
-        radial-gradient(circle at 10% 15%, rgba(85,102,0,.12) 0%, transparent 50%),
-        radial-gradient(circle at 90% 85%, rgba(166,195,0,.06) 0%, transparent 60%);
+    body { padding-bottom: 64px; }
+    header {
+      position: sticky; top: 0; z-index: 5;
+      background: rgba(13,13,13,0.86);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(166,195,0,0.2);
     }
-    .premium-border{position:relative;}
-    .premium-border::after{
-      content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;
-      background:linear-gradient(to bottom right,rgba(166,195,0,.35),rgba(85,102,0,.05));
-      -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
-      -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+    .header-inner {
+      max-width: 880px; margin: 0 auto; height: 78px; padding: 0 20px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    header{
-      border-bottom:1px solid rgba(166,195,0,.2);
-      background:rgba(0,0,0,.8);
-      backdrop-filter:blur(12px);
-      position:sticky;top:0;z-index:50;
+    .logo-group { display: flex; align-items: center; gap: 14px; }
+    .logo-name {
+      font-family: var(--font-display); font-size: 26px; letter-spacing: 0.08em;
+      color: var(--c-lime); line-height: 1; text-transform: uppercase;
     }
-    .header-inner{
-      max-width:900px;margin:0 auto;padding:0 16px;
-      height:80px;display:flex;align-items:center;justify-content:space-between;
+    .logo-sub {
+      font-family: var(--font-label); font-weight: 700; font-size: 9px;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--c-textsub); margin-top: 3px;
     }
-    .logo-mark{display:flex;align-items:center;gap:16px;}
-    .logo-text h1{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.1em;color:#A6C300;line-height:1;}
-    .logo-text p{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#666;margin-top:2px;}
-    .badge{
-      padding:6px 16px;border-radius:999px;font-size:11px;font-family:'Montserrat',sans-serif;
-      font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-      background:rgba(85,102,0,.3);color:#A6C300;border:1px solid rgba(166,195,0,.2);
+    .badge {
+      font-family: var(--font-label); font-weight: 700; font-size: 11px;
+      letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 14px;
+      border-radius: var(--radius-pill); background: rgba(166,195,0,0.12);
+      color: var(--c-lime); border: 1px solid rgba(166,195,0,0.2); white-space: nowrap;
     }
-    main{max-width:900px;margin:0 auto;padding:48px 16px;}
-    .card{
-      background:#121212;border-radius:24px;
-      padding:48px;border:1px solid rgba(255,255,255,.05);
+    main { max-width: 880px; margin: 0 auto; padding: 48px 20px 0; }
+    .card {
+      position: relative; background: var(--c-darkbg); border-radius: var(--radius-card);
+      border: 1px solid rgba(166,195,0,0.2); padding: clamp(28px, 5vw, 52px); overflow: hidden;
+      margin-bottom: 32px;
     }
-    .doc-title{
-      font-family:'Bebas Neue',sans-serif;
-      font-size:clamp(2rem,5vw,3.5rem);
-      letter-spacing:.04em;color:#fff;line-height:1.1;margin-bottom:32px;
+    .card-eyebrow {
+      font-family: var(--font-label); font-weight: 700; font-size: 11px;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--c-lime); margin-bottom: 14px;
     }
-    .summary{
-      padding:24px;background:rgba(0,0,0,.4);
-      border-left:4px solid #A6C300;border-radius:0 12px 12px 0;
-      font-size:14px;color:#bbb;line-height:1.8;margin-bottom:48px;
+    .card-title {
+      font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3.25rem);
+      letter-spacing: 0.02em; color: var(--c-white); line-height: 1.04; text-transform: uppercase; margin: 0;
     }
-    .section{margin-bottom:48px;}
-    .section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
-    .section-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#A6C300;}
-    .section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.2rem,3vw,1.75rem);letter-spacing:.06em;color:#fff;text-transform:uppercase;}
-    .section-body{font-size:14px;line-height:1.9;color:#bbb;white-space:pre-wrap;}
-    .divider{height:1px;background:rgba(255,255,255,.06);margin:40px 0;}
-    .not-found{text-align:center;padding:80px 24px;}
-    .not-found h2{font-family:'Bebas Neue',sans-serif;font-size:3rem;color:#A6C300;margin-bottom:16px;}
-    .eval-footer{background-color:#080808;padding-bottom:40px;margin-top:48px;}
-    .eval-footer__divider{width:100%;height:1px;background:linear-gradient(to right,transparent,#A6C300 20%,#A6C300 80%,transparent);opacity:0.25;margin-bottom:24px;}
-    .eval-footer__inner{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;}
-    .eval-footer__copy{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#666;}
-    .eval-footer__credit{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(153,153,153,0.5);}
-    @media(max-width:600px){.card{padding:24px;border-radius:12px;}}
+    .summary {
+      border-left: 3px solid var(--c-lime); background: var(--c-black);
+      padding: 18px 22px; margin: 30px 0 44px;
+      font-family: var(--font-body); font-size: 14px; line-height: 1.8; color: var(--c-textbody);
+    }
+    .section { margin-bottom: 40px; }
+    .section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
+    .section-num { font-family: var(--font-display); font-size: 30px; color: var(--c-lime); line-height: 1; }
+    .section-title {
+      font-family: var(--font-label); font-weight: 800; font-size: clamp(1rem, 2.4vw, 1.3rem);
+      letter-spacing: 0.04em; color: var(--c-white); text-transform: uppercase; margin: 0;
+    }
+    .section-body {
+      font-family: var(--font-body); font-size: 14px; line-height: 1.9;
+      color: var(--c-textbody); margin: 0 0 0 2px; white-space: pre-wrap;
+    }
+    .divider { height: 1px; background: rgba(255,255,255,0.08); margin-top: 40px; }
+    .not-found { text-align: center; padding: 80px 24px; }
+    .not-found h2 {
+      font-family: var(--font-display); font-size: 3rem; color: var(--c-lime);
+      text-transform: uppercase; margin-bottom: 16px;
+    }
+    .not-found p { font-family: var(--font-body); font-size: 14px; color: var(--c-textbody); line-height: 1.7; }
+    .eval-footer { padding-bottom: 40px; margin-top: 16px; }
+    .eval-footer__divider {
+      width: 100%; height: 1px; margin-bottom: 24px; opacity: 0.25;
+      background: linear-gradient(to right, transparent, var(--c-lime) 20%, var(--c-lime) 80%, transparent);
+    }
+    .eval-footer__inner { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+    .eval-footer__copy {
+      font-family: var(--font-label); font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-textsub);
+    }
+    .eval-footer__credit {
+      font-family: var(--font-label); font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em; color: rgba(153,153,153,0.5);
+    }
+    @media (max-width: 600px) {
+      .card { padding: 24px; }
+      .header-inner { padding: 0 16px; }
+    }
   </style>
 </head>
 <body>
@@ -155,13 +175,13 @@ const sections = [
     <>
       <header>
         <div class="header-inner">
-          <div class="logo-mark">
-            <svg width="40" height="40" viewBox="0 0 100 100" fill="#A6C300" aria-hidden="true">
+          <div class="logo-group">
+            <svg width="38" height="38" viewBox="0 0 100 100" fill="currentColor" style="color:var(--c-lime)" aria-hidden="true">
               <path d="M50,15 C45,15 36,18 33,28 C30.5,36.3 32,46 36,52 L38,42 C38,42 42,43 50,43 C58,43 62,42 62,42 L64,52 C68,46 69.5,36.3 67,28 C64,18 55,15 50,15 Z M42,46 L40,78 L50,88 L60,78 L58,46 C54,49 46,49 42,46 Z"/>
             </svg>
-            <div class="logo-text">
-              <h1>COACH RUIZ</h1>
-              <p>Estrategista em Alta Performance</p>
+            <div>
+              <div class="logo-name">Coach Ruiz</div>
+              <div class="logo-sub">Estrategista em Alta Performance</div>
             </div>
           </div>
           <span class="badge">Classic Physique</span>
@@ -169,17 +189,14 @@ const sections = [
       </header>
 
       <main>
-        <article class="card premium-border">
-
-          <p class="doc-title">
-            DIRETRIZES DE PREPARAÇÃO<br/>E PLANEJAMENTO ESTRATÉGICO DO FÍSICO
-          </p>
+        <article class="card">
+          <div class="card-eyebrow">Documento oficial de preparação</div>
+          <h1 class="card-title">Diretrizes de preparação e planejamento estratégico do físico</h1>
 
           <div class="summary">
             Documento de planejamento estratégico individual preparado pelo Coach Ruiz
-            para <strong style="color:#fff;">{avaliacao.nome}</strong> com base na
-            ficha de triagem submetida. Este plano é confidencial e foi elaborado
-            exclusivamente para este atleta.
+            para <strong style="color:var(--c-white)">{avaliacao.nome}</strong> com base na
+            ficha de triagem submetida. Confidencial e elaborado exclusivamente para este atleta.
           </div>
 
           {sections.map((s, i) => (
@@ -190,13 +207,12 @@ const sections = [
                     <span class="section-num">{s.num}</span>
                     <h2 class="section-title">{s.title}</h2>
                   </div>
-                  <div class="section-body">{avaliacao.sections[s.key]}</div>
+                  <p class="section-body">{avaliacao.sections[s.key]}</p>
                 </section>
                 {i < sections.length - 1 && <div class="divider"></div>}
               </>
             ) : null
           ))}
-
         </article>
       </main>
 
