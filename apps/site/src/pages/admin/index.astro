@@ -22,10 +22,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     body { min-height: 100vh; }
 
     .dash-main {
-      /* 1360px cabe 4 cards de >=300px numa única linha (com o novo módulo
-         "Acompanhamento do Atleta"), evitando um 4º card órfão sozinho
-         numa segunda linha vazia. */
-      max-width: 1360px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: var(--space-7) var(--space-5);
     }
@@ -80,7 +77,6 @@ import AdminHeader from '../../components/AdminHeader.astro';
       flex-shrink: 0;
     }
     .mod-bar--blue  { background: linear-gradient(to right, #4A90D9, #2C5F8A); }
-    .mod-bar--amber { background: linear-gradient(to right, #E67E22, #A8570C); }
     .mod-bar--muted { background: rgba(255,255,255,0.06); }
 
     .mod-body {
@@ -99,8 +95,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       letter-spacing: 0.15em;
       color: var(--c-lime);
     }
-    .mod-eyebrow--blue  { color: #4A90D9; }
-    .mod-eyebrow--amber { color: var(--c-status-checkin); }
+    .mod-eyebrow--blue  { color: var(--c-status-progress); }
     .mod-eyebrow--muted { color: rgba(255,255,255,0.2); }
 
     .mod-title {
@@ -177,13 +172,6 @@ import AdminHeader from '../../components/AdminHeader.astro';
     }
     .status-text strong { color: var(--c-white); font-weight: 700; }
 
-    /* Faixa intermediária: 4 cards de >=300px não cabem numa única linha,
-       mas o auto-fill deixaria o 4º órfão numa segunda linha vazia.
-       Força 2×2, equilibrado, até a largura caber os 4 numa linha só. */
-    @media (max-width: 1335px) and (min-width: 601px) {
-      .modules { grid-template-columns: repeat(2, 1fr); }
-    }
-
     @media (max-width: 600px) {
       .dash-main { padding: var(--space-5) var(--space-3); }
       .dash-title { font-size: var(--fs-display-md); margin-bottom: var(--space-5); }
@@ -215,42 +203,28 @@ import AdminHeader from '../../components/AdminHeader.astro';
         </div>
       </a>
 
-      <!-- Módulo 2: Avaliação & Protocolo -->
-      <a class="mod-card" href="/admin/fichas">
+      <!-- Módulo 2: Acompanhamento do Atleta -->
+      <a class="mod-card" href="/admin/atletas">
         <div class="mod-bar mod-bar--blue"></div>
         <div class="mod-body">
-          <p class="mod-eyebrow mod-eyebrow--blue">Avaliação &amp; Protocolo</p>
-          <h2 class="mod-title">Avaliações</h2>
-          <p class="mod-sub">Documentos Enviados</p>
-          <p class="mod-desc">Acompanhe cada atleta do Elite90. Acesse check-ins semanais, treinos personalizados, plano nutricional e fotos evolutivas. Ainda, gere e envie relatórios de avaliação com suporte de IA.</p>
-        </div>
-        <div class="mod-footer">
-          <span class="mod-link" style="color:#4A90D9">Acessar via fichas <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
-        </div>
-      </a>
-
-      <!-- Módulo 3: Acompanhamento do Atleta -->
-      <a class="mod-card" href="/admin/atletas">
-        <div class="mod-bar mod-bar--amber"></div>
-        <div class="mod-body">
-          <p class="mod-eyebrow mod-eyebrow--amber">Acompanhamento do Atleta</p>
+          <p class="mod-eyebrow mod-eyebrow--blue">Acompanhamento do Atleta</p>
           <h2 class="mod-title">Ciclo de 90 Dias</h2>
           <p class="mod-sub">Treinos, Nutrição &amp; Evolução</p>
-          <p class="mod-desc">Acompanhe cada atleta no ciclo de 90 dias. Acesse check-ins semanais, treinos personalizados, plano nutricional, fotos evolutivas e relatórios gerados por IA.</p>
+          <p class="mod-desc">Acompanhe cada atleta do Elite90. Acesse check-ins semanais, treinos personalizados, plano nutricional e fotos evolutivas. Ainda, gere e envie relatórios de avaliação com a apoio de IA.</p>
         </div>
         <div class="mod-footer">
-          <span class="mod-link" style="color:var(--c-status-checkin)">Acessar atletas <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+          <span class="mod-link" style="color:var(--c-status-progress)">Acessar atletas <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
         </div>
       </a>
 
-      <!-- Módulo 4: Portal do Atleta (Sprint 2+) -->
+      <!-- Módulo 3: Gestão & Resultados (ainda não implementado) -->
       <div class="mod-card mod-card--disabled">
         <div class="mod-bar mod-bar--muted"></div>
         <div class="mod-body">
-          <p class="mod-eyebrow mod-eyebrow--muted">Portal do Atleta</p>
-          <h2 class="mod-title mod-title--muted">Atletas</h2>
-          <p class="mod-sub mod-sub--muted">Acesso e Dados</p>
-          <p class="mod-desc mod-desc--muted">Gerencie o acesso dos atletas ao portal, acompanhe progresso de treinos, peso e evolução fotográfica.</p>
+          <p class="mod-eyebrow mod-eyebrow--muted">Gestão &amp; Resultados</p>
+          <h2 class="mod-title mod-title--muted">Dashboard Executivo</h2>
+          <p class="mod-sub mod-sub--muted">Financeiro, BI &amp; Conteúdo</p>
+          <p class="mod-desc mod-desc--muted">Visualize KPIs de faturamento, taxas de conversão e churn. Gerencie pagamentos, conteúdo premium e comunidade VIP com dados em tempo real.</p>
         </div>
         <div class="mod-footer">
           <span class="mod-link mod-link--muted">Em desenvolvimento (Sprint 2+)</span>
