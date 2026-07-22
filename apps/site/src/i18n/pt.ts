@@ -240,7 +240,7 @@ export const pt = {
     eyebrow: "Conteúdos",
     title: "Curadoria do",
     titleAccent: "Coach Fernando",
-    intro: "Material produzido pelo Coach e seleções externas que ele considera relevantes para a jornada de você.",
+    intro: "Material produzido pelo Coach e seleções externas que ele considera relevantes para a sua jornada.",
     filters: {
       originLabel: "Origem",
       originAll: "Todos",
