@@ -297,6 +297,7 @@ const { items, t } = Astro.props;
     padding: 0; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: all var(--transition-base);
+    -webkit-tap-highlight-color: transparent;
   }
   .results-nav svg { width: 20px; height: 20px; }
   .results-nav:hover:not(:disabled) { border-color: var(--c-lime); color: var(--c-lime); background: rgba(166,195,0,0.1); }
