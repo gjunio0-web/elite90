@@ -68,4 +68,44 @@
      confirmada em sessão: marca conteúdo criado/modificado pela equipe que
      o Coach ainda não revisou. */
   --c-pending: #E67E22;
+
+  /* SUPERFÍCIE ADICIONAL (Admin — M2 Atletas) */
+  --c-surface-2:  #242424;
+  --c-line-muted: #888888;
+
+  /* STATUS SEMÂNTICOS ADICIONAIS (Admin — M2 Atletas) */
+  --c-status-active:   #A6C300; /* Ativo — alias de --c-lime, nome semântico p/ badges de status */
+  --c-status-checkin:  #E67E22; /* Check-in enviado — alias de --c-status-new/--c-status-alert */
+  --c-status-pending:  #F1C40F; /* Aguardando check-in — cor nova; não confundir com --c-pending (selo público, cor diferente) */
+  --c-status-warning:  #EAB308; /* Atenção (±5-10%) */
+
+  /* TIPOGRAFIA ADICIONAL (Admin — M2 Atletas) */
+  --fw-body:      400;
+  --fw-body-bold: 700;
+  --fw-label:     700;
+  --lh-display:   1.1;
+  --lh-tight:     1.25;
+  --lh-body:      1.7;
+  --tracking-display: 0.04em;
+  --tracking-label:   0.15em;
+  --tracking-cta:     0.05em;
+
+  /* SOMBRAS E GLOW ADICIONAIS (Admin — M2 Atletas) */
+  --shadow-sm:    0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md:    0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg:    0 24px 60px rgba(0, 0, 0, 0.6);
+  --glow-lime:    0 0 0 1px rgba(166, 195, 0, 0.5), 0 0 24px rgba(166, 195, 0, 0.2);
+  --glow-lime-sm: 0 0 16px rgba(166, 195, 0, 0.2);
+
+  /* GRADIENTES ADICIONAIS (Admin — M2 Atletas) */
+  --grad-cta:     linear-gradient(180deg, var(--c-lime) 0%, var(--c-olive) 160%);
+  --grad-overlay: linear-gradient(180deg, rgba(13, 13, 13, 0) 0%, rgba(13, 13, 13, 0.92) 100%);
+  --grad-veil:    linear-gradient(180deg, rgba(13, 13, 13, 0.35) 0%, rgba(13, 13, 13, 0.85) 100%);
+
+  /* EASING E DURAÇÃO ADICIONAIS (Admin — M2 Atletas) */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 140ms;
+  --dur-med:  240ms;
+  --dur-slow: 420ms;
 }
