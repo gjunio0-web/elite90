@@ -22,7 +22,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
     body { min-height: 100vh; }
 
     .dash-main {
-      max-width: 1100px;
+      /* 1360px cabe 4 cards de >=300px numa única linha (com o novo módulo
+         "Acompanhamento do Atleta"), evitando um 4º card órfão sozinho
+         numa segunda linha vazia. */
+      max-width: 1360px;
       margin: 0 auto;
       padding: var(--space-7) var(--space-5);
     }
@@ -173,6 +176,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
       color: var(--c-textsub);
     }
     .status-text strong { color: var(--c-white); font-weight: 700; }
+
+    /* Faixa intermediária: 4 cards de >=300px não cabem numa única linha,
+       mas o auto-fill deixaria o 4º órfão numa segunda linha vazia.
+       Força 2×2, equilibrado, até a largura caber os 4 numa linha só. */
+    @media (max-width: 1335px) and (min-width: 601px) {
+      .modules { grid-template-columns: repeat(2, 1fr); }
+    }
 
     @media (max-width: 600px) {
       .dash-main { padding: var(--space-5) var(--space-3); }
