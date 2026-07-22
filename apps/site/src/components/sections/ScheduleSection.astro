@@ -23,7 +23,8 @@ const { t } = Astro.props;
 
 <style>
   .schedule__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-5); margin-top: var(--space-6); }
-  .schedule__phase { background-color: var(--c-darkbg); border-left: var(--border-card); padding: var(--space-5); border-radius: var(--radius-card); }
+  .schedule__phase { background-color: var(--c-darkbg); border-left: var(--border-card); padding: var(--space-5); border-radius: var(--radius-card); transition: transform var(--transition-base), box-shadow var(--transition-base); }
+  .schedule__phase:hover { transform: translateY(-4px); box-shadow: var(--shadow-cta); }
   .schedule__number { font-family: var(--font-display); font-size: 3rem; color: var(--c-lime); display: block; line-height: 1; margin-bottom: var(--space-3); }
   .schedule__phase-title { font-size: var(--fs-display-sm); color: var(--c-white); margin-bottom: var(--space-3); }
   .schedule__items { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
