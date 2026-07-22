@@ -352,6 +352,10 @@ const { items, t } = Astro.props;
       position: absolute;
       top: 88px;
       z-index: 3;
+      /* Preenchimento sólido — mesmo par cor/contorno do handle do
+         slider de comparação (#0D0D0D + lime), que já resolve o mesmo
+         problema de contraste sobre fotos de tom/exposição variáveis. */
+      background: var(--c-black);
     }
     .results-nav--prev { left: 4px; }
     .results-nav--next { right: 4px; }
