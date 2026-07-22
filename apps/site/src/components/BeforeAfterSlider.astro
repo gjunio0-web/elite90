@@ -357,6 +357,14 @@ const { items, t } = Astro.props;
          problema de contraste sobre fotos de tom/exposição variáveis. */
       background: var(--c-black);
     }
+    /* A regra base de :hover troca o fundo por rgba(166,195,0,.1), que é
+       translúcido e reintroduz o mesmo problema de contraste no toque
+       (mobile aplica :hover ao tocar). Aqui o tom lime é composto sobre
+       o preto sólido em vez de substituí-lo, mantendo o fundo opaco. */
+    .results-nav:hover:not(:disabled),
+    .results-nav:active:not(:disabled) {
+      background: linear-gradient(rgba(166,195,0,.15), rgba(166,195,0,.15)), var(--c-black);
+    }
     .results-nav--prev { left: 4px; }
     .results-nav--next { right: 4px; }
   }
