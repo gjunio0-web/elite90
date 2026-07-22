@@ -77,6 +77,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       flex-shrink: 0;
     }
     .mod-bar--blue  { background: linear-gradient(to right, #4A90D9, #2C5F8A); }
+    .mod-bar--amber { background: linear-gradient(to right, #E67E22, #A8570C); }
     .mod-bar--muted { background: rgba(255,255,255,0.06); }
 
     .mod-body {
@@ -96,6 +97,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       color: var(--c-lime);
     }
     .mod-eyebrow--blue  { color: #4A90D9; }
+    .mod-eyebrow--amber { color: #E67E22; }
     .mod-eyebrow--muted { color: rgba(255,255,255,0.2); }
 
     .mod-title {
@@ -217,7 +219,21 @@ import AdminHeader from '../../components/AdminHeader.astro';
         </div>
       </a>
 
-      <!-- Módulo 3: Portal do Atleta (Sprint 2+) -->
+      <!-- Módulo 3: Acompanhamento do Atleta -->
+      <a class="mod-card" href="/admin/atletas">
+        <div class="mod-bar mod-bar--amber"></div>
+        <div class="mod-body">
+          <p class="mod-eyebrow mod-eyebrow--amber">Acompanhamento do Atleta</p>
+          <h2 class="mod-title">Ciclo de 90 Dias</h2>
+          <p class="mod-sub">Treinos, Nutrição &amp; Evolução</p>
+          <p class="mod-desc">Acompanhe cada atleta no ciclo de 90 dias. Acesse check-ins semanais, treinos personalizados, plano nutricional, fotos evolutivas e relatórios gerados por IA.</p>
+        </div>
+        <div class="mod-footer">
+          <span class="mod-link" style="color:#E67E22">Acessar atletas <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
+
+      <!-- Módulo 4: Portal do Atleta (Sprint 2+) -->
       <div class="mod-card mod-card--disabled">
         <div class="mod-bar mod-bar--muted"></div>
         <div class="mod-body">
