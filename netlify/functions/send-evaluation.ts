@@ -155,7 +155,43 @@ export const handler = async (event: any) => {
     // Generate unique token
     const token = randomBytes(16).toString("hex");
 
-    // Save evaluation to Firestore
+    const siteUrl = `${event.headers["x-forwarded-proto"] ?? "https"}://${event.headers["host"]}`;
+
+    // Send email via Resend BEFORE writing to Firestore.
+    // This ensures that if delivery fails, the lead status is NOT advanced and
+    // the admin can retry without leaving orphan documents or a "avaliacao_enviada"
+    // state that the athlete can never access.
+    const resendKey = process.env.RESEND_API_KEY;
+    if (!resendKey) {
+      console.warn("send-evaluation: RESEND_API_KEY ausente no ambiente. Disparo abortado.");
+    } else {
+      const mailRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${resendKey}`,
+        },
+        body: JSON.stringify({
+          from: "Elite 90 Testes <onboarding@resend.dev>",
+          to: [lead.email],
+          subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - Elite 90`,
+          html: buildEvaluationEmail(lead.nome, token, sections, siteUrl),
+        }),
+      });
+
+      if (!mailRes.ok) {
+        let detail = `status ${mailRes.status}`;
+        try {
+          const errJson = await mailRes.json() as any;
+          detail = errJson.message ?? detail;
+        } catch {
+          detail = (await mailRes.text()) || detail;
+        }
+        throw new Error(`Falha no envio de e-mail: ${detail}`);
+      }
+    }
+
+    // Firestore writes only reach here if Resend accepted the email.
     const ninetyDaysFromNow = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
     await db.collection("avaliacoes").add({
       leadId,
@@ -178,34 +214,6 @@ export const handler = async (event: any) => {
       avaliacao_token: token,
       updatedAt: FieldValue.serverTimestamp(),
     });
-
-    const siteUrl = `${event.headers["x-forwarded-proto"] ?? "https"}://${event.headers["host"]}`;
-
-    // Send email via Resend
-    const resendKey = process.env.RESEND_API_KEY;
-    if (!resendKey) {
-      console.warn("send-evaluation: RESEND_API_KEY ausente no ambiente. Disparo abortado.");
-    } else {
-      const mailRes = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${resendKey}`,
-        },
-        body: JSON.stringify({
-          from: "Elite 90 Testes <onboarding@resend.dev>",
-          to: [lead.email],
-          subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - Elite 90`,
-          html: buildEvaluationEmail(lead.nome, token, sections, siteUrl),
-        }),
-      });
-      
-      // BLOQUEIO DA FALHA SILENCIOSA: Joga erro se a API recusar o e-mail
-      if (!mailRes.ok) {
-        const errorData = await mailRes.text();
-        throw new Error(`Falha na API do Resend (${mailRes.status}): ${errorData}`);
-      }
-    }
 
     return {
       statusCode: 200,
