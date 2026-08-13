@@ -366,14 +366,9 @@ export const en: Translations = {
     title: "Brand partnerships",
     items: [
       {
-        name: "Army",
-        description: "Sports supplementation for high-performance protocols.",
-        logo: "/images/partners/parceiro-army.svg",
-      },
-      {
-        name: "Adaptogen",
-        description: "Adaptogens and clinical supplements for hormonal balance.",
-        logo: "/images/partners/parceiro-adaptogen.svg",
+        name: "Chef Whey",
+        description: "Protein supplementation for the everyday dietary protocol.",
+        logo: "/images/partners/parceiro-chefwhey.png",
       },
       {
         name: "Oficial Farma",

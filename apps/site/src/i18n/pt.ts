@@ -409,14 +409,9 @@ export const pt = {
     title: "Parcerias com marcas",
     items: [
       {
-        name: "Army",
-        description: "Suplementação esportiva para protocolos de alta performance.",
-        logo: "/images/partners/parceiro-army.svg",
-      },
-      {
-        name: "Adaptogen",
-        description: "Adaptógenos e suplementos clínicos para equilíbrio hormonal.",
-        logo: "/images/partners/parceiro-adaptogen.svg",
+        name: "Chef Whey",
+        description: "Suplementação proteica para o protocolo alimentar do dia a dia.",
+        logo: "/images/partners/parceiro-chefwhey.png",
       },
       {
         name: "Oficial Farma",
