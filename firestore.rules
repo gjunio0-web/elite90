@@ -1,0 +1,80 @@
+rules_version = '2';
+
+// ELITE 90 · Regras de segurança do Firestore
+// Projeto: elite90-c716b (southamerica-east1)
+//
+// PRINCÍPIO: o Admin SDK (usado por todas as Netlify Functions) IGNORA estas
+// regras. Portanto, tudo o que passa por função de servidor continua
+// funcionando com as regras fechadas. Estas regras governam APENAS o acesso
+// direto do navegador.
+//
+// POR QUE `request.auth != null` NÃO SERVE: o provedor de e-mail/senha e o
+// Google estão habilitados, e a chave pública do Firebase está no HTML. Isso
+// significa que qualquer pessoa na internet consegue criar uma conta neste
+// projeto. "Autenticado" NÃO é sinônimo de "autorizado". A autorização real
+// deste projeto é o custom claim `admin`, atribuído manualmente por
+// scripts/set-admin-claim.js.
+//
+// ESTÁGIO ATUAL (1 de 2): admin-only. Mantém funcionando as duas leituras
+// diretas que ainda existem em admin/fichas.astro (linhas 1181 e 1982).
+// ESTÁGIO FINAL (2 de 2): negar tudo, depois que essas leituras migrarem
+// para funções de servidor. Ver bloco comentado no fim do arquivo.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // ── LEADS (fichas de triagem — dado pessoal sensível, LGPD)
+    // Criação: só via submit-lead (Admin SDK) — nunca pelo navegador.
+    // Leitura: painel admin (fichas.astro:1181).
+    // Alteração: troca de status (fichas.astro:1381) — a migrar para função.
+    // Exclusão: só via delete-lead (Admin SDK) e purge-rejected-leads.
+    match /leads/{leadId} {
+      allow read:   if isAdmin();
+      allow update: if isAdmin();
+      allow create, delete: if false;
+    }
+
+    // ── AVALIAÇÕES
+    // Leitura: painel admin (fichas.astro:1982).
+    // Escrita: só via send-evaluation / resend-evaluation (Admin SDK).
+    // Nota: a gravação de `lastLinkCopiedAt` em fichas.astro:2077 SEMPRE
+    // falhou por causa desta regra — o erro era engolido por um .catch()
+    // vazio. Isso confirma, empiricamente, que aquela linha é código morto.
+    match /avaliacoes/{avaliacaoId} {
+      allow read:  if isAdmin();
+      allow write: if false;
+    }
+
+    // ── ATLETAS (M2) — nenhum acesso direto do navegador.
+    // A leitura atual em admin/atletas.astro:4888 deve migrar para função
+    // de servidor. Enquanto não migrar, manter a leitura admin-only abaixo.
+    match /athletes/{athleteId} {
+      allow read:  if isAdmin();
+      allow write: if false;
+
+      // Subcoleções do M2 (weights, checkins, plans, evaluations):
+      // escrita e leitura exclusivamente por função de servidor.
+      match /{subcollection}/{docId} {
+        allow read, write: if false;
+      }
+    }
+
+    // ── Tudo o mais: negado. Explícito, para não depender do padrão.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// ── ESTÁGIO FINAL, a aplicar depois que as leituras diretas migrarem ──
+// service cloud.firestore {
+//   match /databases/{database}/documents {
+//     match /{document=**} {
+//       allow read, write: if false;
+//     }
+//   }
+// }

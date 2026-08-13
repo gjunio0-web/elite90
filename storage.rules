@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// ELITE 90 · Regras de segurança do Cloud Storage
+// Bucket: elite90-c716b.firebasestorage.app
+//
+// PRINCÍPIO: nenhum arquivo entra ou sai pelo navegador.
+//  · ENTRADA: submit-lead.ts recebe as fotos como dado na requisição e grava
+//    pelo Admin SDK. O formulário público NUNCA envia direto ao bucket.
+//  · SAÍDA: get-foto-urls.ts gera links temporários de 15 minutos, também
+//    pelo Admin SDK. O navegador consome o link, não o bucket.
+// Ambos os caminhos ignoram estas regras. Fechar tudo não quebra nada.
+//
+// O QUE ESTA VERSÃO CORRIGE:
+//  · `allow write: if true` em /leads/** — permitia que qualquer pessoa na
+//    internet, sem conta alguma, gravasse arquivos de qualquer tipo e
+//    tamanho no bucket do projeto. Nunca foi necessário para o formulário
+//    funcionar, porque o envio real passa pela função de servidor.
+//  · `allow read: if request.auth != null` em /leads/** — qualquer conta
+//    criada no projeto lia as fotos corporais de candidatos reais.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── HOMOLOGAÇÃO — REMOVER NO FIM DO PROJETO
+    // Fotos sintéticas usadas por scripts/seed-triagem-bulk.ts.
+    // Leitura pública, escrita bloqueada. Entra na família (C) da lista de
+    // limpeza, junto com o próprio script que a consome.
+    match /test_seed/{allPaths=**} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
+    // ── Todo o resto: negado, incluindo leads/, portals/ e galeria.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
