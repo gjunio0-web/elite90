@@ -318,6 +318,16 @@ export const pt = {
         demo: false,
       },
       {
+        title: "Cartilha de posing — NPC Women's Wellness",
+        body: "Manual técnico da divisão feminina: princípio da categoria, quartos de volta, posições frontal, lateral e de costas, Model Walk, rotina individual de até 30 segundos, traje e check-in, além das classes de altura. Separa as exigências da NPC das orientações do Coach.",
+        meta: "Cartilha · 8 páginas · PDF",
+        origin: "original",
+        tipo: "guia",
+        state: "live",
+        href: "/downloads/cartilha-posing-womens-wellness.pdf",
+        demo: false,
+      },
+      {
         title: "Podcast ELITE 90 PRO · Ep. 01 — Por que a maioria falha aos 40",
         body: "O Coach Fernando sobre os erros mais comuns de quem tenta recomeçar o treino na vida adulta.",
         meta: "Podcast · Áudio",

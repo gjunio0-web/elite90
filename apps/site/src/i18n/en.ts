@@ -276,6 +276,16 @@ export const en: Translations = {
         demo: false,
       },
       {
+        title: "Posing guide — NPC Women's Wellness",
+        body: "Technical manual for the women's division: the principle of the category, quarter turns, front, side and back positions, the Model Walk, the individual routine of up to 30 seconds, suit and check-in, plus the height classes. Keeps NPC requirements separate from the Coach's own guidance.",
+        meta: "Guide · 8 pages · PDF",
+        origin: "original",
+        tipo: "guia",
+        state: "live",
+        href: "/downloads/cartilha-posing-womens-wellness.pdf",
+        demo: false,
+      },
+      {
         title: "ELITE 90 PRO Podcast · Ep. 01 — Why most people fail at 40",
         body: "Coach Fernando on the most common mistakes people make when restarting training as an adult.",
         meta: "Podcast · Audio",
