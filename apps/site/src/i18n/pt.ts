@@ -112,7 +112,7 @@ export const pt = {
     paragraphs: [
       "A crença de que volume muscular e definição extrema são privilégios da juventude é o maior obstáculo entre você e o físico que merece. E ela está errada.",
       "A biologia do homem de 35 a 55 anos responde melhor a protocolos de longa duração, melhor a consistência do que a intensidade esporádica. O que falta não é tempo nem biologia. É o sistema correto.",
-      "[PERCENTUAL]% dos alunos têm entre 35 e 55 anos. O ELITE 90 PRO foi construído especificamente para este perfil.",
+      "Quase 90% dos mentorados têm entre 35 e 55 anos. O ELITE 90 PRO foi construído especificamente para este perfil.",
     ],
   },
 
@@ -463,7 +463,7 @@ export const pt = {
       {
         question: "O programa funciona para quem está acima dos 50 anos?",
         answer:
-          "Sim. [PERCENTUAL]% dos alunos têm entre 35 e 55 anos. A biologia do homem maduro responde melhor a protocolos de longa duração do que à intensidade esporádica.",
+          "Sim. Quase 90% dos mentorados têm entre 35 e 55 anos. A biologia do homem maduro responde melhor a protocolos de longa duração do que à intensidade esporádica.",
       },
       {
         question: "Quanto tempo por semana preciso dedicar?",

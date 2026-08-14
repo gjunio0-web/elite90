@@ -107,7 +107,7 @@ export const en: Translations = {
     paragraphs: [
       "The belief that muscle volume and extreme definition are privileges of youth is the biggest obstacle between you and the physique you deserve. And it is wrong.",
       "The biology of a man aged 35 to 55 responds better to long-term protocols, better to consistency than sporadic intensity. What is missing is not time or biology. It is the correct system.",
-      "[PERCENTAGE]% of athletes are between 35 and 55 years old. ELITE 90 PRO was built specifically for this profile.",
+      "Almost 90% of mentees are between 35 and 55 years old. ELITE 90 PRO was built specifically for this profile.",
     ],
   },
 
@@ -419,7 +419,7 @@ export const en: Translations = {
       {
         question: "Does the program work for people over 50?",
         answer:
-          "[PERCENTAGE]% of athletes are between 35 and 55 years old. Mature male biology responds better to long-term protocols than sporadic intensity.",
+          "Almost 90% of mentees are between 35 and 55 years old. Mature male biology responds better to long-term protocols than sporadic intensity.",
       },
       {
         question: "How much time per week do I need to dedicate?",
