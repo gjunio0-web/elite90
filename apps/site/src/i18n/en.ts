@@ -277,7 +277,7 @@ export const en: Translations = {
         demo: false,
       },
       {
-        title: "Elite 90 Podcast · Ep. 01 — Why most people fail at 40",
+        title: "ELITE 90 PRO Podcast · Ep. 01 — Why most people fail at 40",
         body: "Coach Fernando on the most common mistakes people make when restarting training as an adult.",
         meta: "Podcast · Audio",
         origin: "original",
@@ -287,7 +287,7 @@ export const en: Translations = {
         demo: true,
       },
       {
-        title: "Elite 90 Podcast · Ep. 02 — Recovery for a packed schedule",
+        title: "ELITE 90 PRO Podcast · Ep. 02 — Recovery for a packed schedule",
         body: "Sleep, stress and active recovery for those training on an executive schedule.",
         meta: "Podcast · Audio",
         origin: "original",
@@ -357,7 +357,7 @@ export const en: Translations = {
         demo: true,
       },
       {
-        title: "Elite 90 Podcast · Ep. 03 — Discipline without obsession",
+        title: "ELITE 90 PRO Podcast · Ep. 03 — Discipline without obsession",
         body: "Where the line falls between healthy consistency and perfectionism in the program.",
         meta: "Podcast · Audio",
         origin: "original",

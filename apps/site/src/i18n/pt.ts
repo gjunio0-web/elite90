@@ -319,7 +319,7 @@ export const pt = {
         demo: false,
       },
       {
-        title: "Podcast Elite 90 · Ep. 01 — Por que a maioria falha aos 40",
+        title: "Podcast ELITE 90 PRO · Ep. 01 — Por que a maioria falha aos 40",
         body: "O Coach Fernando sobre os erros mais comuns de quem tenta recomeçar o treino na vida adulta.",
         meta: "Podcast · Áudio",
         origin: "original",
@@ -329,7 +329,7 @@ export const pt = {
         demo: true,
       },
       {
-        title: "Podcast Elite 90 · Ep. 02 — Recuperação para rotina corrida",
+        title: "Podcast ELITE 90 PRO · Ep. 02 — Recuperação para rotina corrida",
         body: "Sono, estresse e recuperação ativa para quem treina com agenda de executivo.",
         meta: "Podcast · Áudio",
         origin: "original",
@@ -399,7 +399,7 @@ export const pt = {
         demo: true,
       },
       {
-        title: "Podcast Elite 90 · Ep. 03 — Disciplina sem obsessão",
+        title: "Podcast ELITE 90 PRO · Ep. 03 — Disciplina sem obsessão",
         body: "Onde fica a linha entre consistência saudável e perfeccionismo no programa.",
         meta: "Podcast · Áudio",
         origin: "original",
