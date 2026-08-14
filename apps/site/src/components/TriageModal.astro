@@ -61,13 +61,19 @@ const isEn = locale === "en";
             </div>
 
             <div class="field">
-              <label class="field__label" for="f-cpf">
-                CPF <span class="field__req">*</span>
+              <label class="field__label" for="f-doc">
+                {isEn ? "Passport / National ID" : "CPF"} <span class="field__req">*</span>
               </label>
-              <input class="field__input" type="text" id="f-cpf" name="cpf"
-                placeholder="000.000.000-00" maxlength="14" inputmode="numeric"
-                autocomplete="off" />
-              <p class="field__error" id="f-cpf-error" hidden></p>
+              {isEn
+                ? <input class="field__input" type="text" id="f-doc" name="documento"
+                    placeholder="AB1234567" maxlength="20" autocomplete="off" />
+                : <input class="field__input" type="text" id="f-doc" name="documento"
+                    placeholder="000.000.000-00" maxlength="14" inputmode="numeric"
+                    autocomplete="off" />
+              }
+              <p class="field__error" id="f-doc-error" hidden></p>
+              <input type="hidden" name="documento_tipo" value={isEn ? "passport_id" : "cpf"} />
+              <input type="hidden" name="idioma" value={locale} />
             </div>
 
             <div class="field">
@@ -93,6 +99,22 @@ const isEn = locale === "en";
                 autocomplete="email"
                 placeholder={isEn ? "your@email.com" : "seu@email.com"} />
               <p class="field__error" id="f-email-error" hidden></p>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="f-phone">
+                {isEn ? "Mobile phone (with country code)" : "Celular (com DDD)"}
+                <span class="field__req">*</span>
+              </label>
+              {isEn
+                ? <input class="field__input" type="tel" id="f-phone" name="celular"
+                    placeholder="+1 415 555 0172" maxlength="20"
+                    inputmode="tel" autocomplete="tel" />
+                : <input class="field__input" type="tel" id="f-phone" name="celular"
+                    placeholder="(11) 99999-9999" maxlength="15"
+                    inputmode="tel" autocomplete="tel" />
+              }
+              <p class="field__error" id="f-phone-error" hidden></p>
             </div>
 
             <div class="field">
@@ -601,10 +623,33 @@ const FIELD_RULES: Array<{
     validate: v => v.trim().length >= 2,
   },
   {
-    key: "cpf", inputId: "f-cpf", errorId: "f-cpf-error",
+    key: "documento", inputId: "f-doc", errorId: "f-doc-error",
     msgPt: v => !v.trim() ? "CPF é obrigatório." : "CPF inválido - verifique os dígitos.",
-    msgEn: v => !v.trim() ? "CPF is required." : "Invalid CPF - check the digits.",
-    validate: v => v.trim() !== "" && validaCPF(v),
+    msgEn: v => !v.trim() ? "Passport / National ID is required."
+                           : "Use 4 to 20 letters, numbers or hyphens.",
+    validate: v => {
+      const t = v.trim();
+      if (!t) return false;
+      // Versão em inglês: documento estrangeiro, sem máscara e sem dígito verificador.
+      if (isEnPage) return /^[A-Za-z0-9-]{4,20}$/.test(t);
+      return validaCPF(t);
+    },
+  },
+  {
+    key: "celular", inputId: "f-phone", errorId: "f-phone-error",
+    msgPt: v => !v.trim() ? "Celular é obrigatório."
+                           : "Informe um número válido com DDD, ex: (11) 99999-9999.",
+    msgEn: v => !v.trim() ? "Mobile phone is required."
+                           : "Include the country code, e.g. +1 415 555 0172.",
+    validate: v => {
+      const t = v.trim();
+      if (!t) return false;
+      const d = t.replace(/\D/g, "");
+      // Versão em inglês: padrão internacional E.164 - prefixo "+" e 8 a 15 dígitos.
+      if (isEnPage) return t.startsWith("+") && d.length >= 8 && d.length <= 15;
+      // Versão pt-BR: fixo com DDD (10 dígitos) ou celular com DDD (11 dígitos).
+      return d.length === 10 || d.length === 11;
+    },
   },
   {
     key: "dob", inputId: "f-dob", errorId: "f-dob-error",
@@ -1033,15 +1078,40 @@ FIELD_RULES.forEach(rule => attachBlurValidation(rule));
 // MASCARAS E SANITIZACAO DE ENTRADA
 // ============================================================
 
-// CPF: mascara xxx.xxx.xxx-xx
-const cpfInput = document.getElementById("f-cpf") as HTMLInputElement;
-cpfInput?.addEventListener("input", () => {
-  let v = cpfInput.value.replace(/\D/g, "").slice(0, 11);
-  if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
-  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
-  else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
-  cpfInput.value = v;
-});
+// Documento: mascara de CPF (xxx.xxx.xxx-xx) apenas na versao pt-BR.
+// Na versao em ingles o campo e um documento estrangeiro livre - sem mascara,
+// apenas sanitizacao para letras, numeros e hifen.
+const docInput = document.getElementById("f-doc") as HTMLInputElement;
+if (docInput && !isEnPage) {
+  docInput.addEventListener("input", () => {
+    let v = docInput.value.replace(/\D/g, "").slice(0, 11);
+    if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+    else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+    docInput.value = v;
+  });
+} else if (docInput) {
+  docInput.addEventListener("input", () => {
+    docInput.value = docInput.value.replace(/[^A-Za-z0-9-]/g, "").slice(0, 20);
+  });
+}
+
+// Celular: mascara (DD) 9NNNN-NNNN na versao pt-BR; na versao em ingles
+// aceita "+", digitos e espacos, sem reformatacao.
+const phoneInput = document.getElementById("f-phone") as HTMLInputElement;
+if (phoneInput && !isEnPage) {
+  phoneInput.addEventListener("input", () => {
+    let v = phoneInput.value.replace(/\D/g, "").slice(0, 11);
+    if (v.length > 10)     v = v.replace(/(\d{2})(\d{5})(\d{1,4})/, "($1) $2-$3");
+    else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{1,4})/, "($1) $2-$3");
+    else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,5})/, "($1) $2");
+    phoneInput.value = v;
+  });
+} else if (phoneInput) {
+  phoneInput.addEventListener("input", () => {
+    phoneInput.value = phoneInput.value.replace(/[^0-9+ ]/g, "").slice(0, 20);
+  });
+}
 
 // Data PT-BR: mascara DD/MM/AAAA
 const dobInput = document.getElementById("f-dob") as HTMLInputElement;

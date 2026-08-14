@@ -157,7 +157,9 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
 
     // Desestruturação limpa e segura com atribuição de valores padrão (fallbacks)
     const {
-      nome = "", email = "", cpf = "",
+      nome = "", email = "",
+      documento = "", documento_tipo = "cpf", idioma = "pt-br",
+      celular = "",
       data_nascimento = "", altura = "", peso = "",
       objetivo = "", objetivo_outro = "",
       atividade_fisica = "", atividade_outra = "", tempo_atividade = "",
@@ -212,7 +214,12 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     const docRef = await db.collection("leads").add({
       nome:                nome.trim(),
       email:               email.trim().toLowerCase(),
-      cpf,
+      // Documento: CPF na versão pt-BR, documento estrangeiro livre na versão em inglês.
+      // O tipo acompanha o valor para que o painel saiba o que está exibindo.
+      documento:           documento.trim(),
+      documento_tipo,
+      celular:             celular.trim(),
+      idioma,
       data_nascimento,
       altura,
       peso,

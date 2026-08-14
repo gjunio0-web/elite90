@@ -1461,7 +1461,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const secIdentificacao=[
         detailRow("Nome", lead.nome),
         detailRow("E-mail", lead.email ? `<a href="mailto:${lead.email}" style="color: var(--c-lime); text-decoration: underline;">${lead.email}</a>` : ""),
-        detailRow("CPF", lead.cpf),
+        detailRow(lead.documento_tipo === "passport_id" ? "Passaporte / ID" : "CPF",
+                  lead.documento ?? lead.cpf),
+        detailRow("Celular", lead.celular),
         detailRow("Nascimento", lead.data_nascimento),
       ];
 
@@ -1863,8 +1865,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
     
     // Export CSV
     document.getElementById("btn-csv")?.addEventListener("click",()=>{
-      const headers=["Data","Nome","Email","CPF","Nascimento","Altura","Peso","Objetivo","Atividade","Tempo","Frequencia","Disponibilidade","Personal","Competicao","Coach BB","Medico","TRT","Cardiaca","Diabetes","Cronica","Lesao","Dieta","Refeicoes","Suplementos","Agua","Status","Fotos (paths)"];
-      const rows=leads.map(l=>[l.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"",l.nome??"",l.email??"",l.cpf??"",l.data_nascimento??"",l.altura??"",l.peso??"",l.objetivo??"",l.atividade_fisica??"",l.tempo_atividade??"",l.frequencia_semanal??"",l.disponibilidade_diaria??"",l.personal_trainer??"",`${l.competicao??""}${l.competicao_detalhe?` - ${l.competicao_detalhe}`:""}`,l.conhece_coach??"",l.medico_esporte??"",`${l.trt??""}${l.trt_detalhe?` - ${l.trt_detalhe}`:""}`,l.condicao_cardiaca??"",l.diabetes??"",l.doenca_cronica??"",`${l.lesao??""}${l.lesao_detalhe?` - ${l.lesao_detalhe}`:""}`,l.dieta??"",l.refeicoes_dia??"",`${l.suplementos??""}${l.suplementos_detalhe?` - ${l.suplementos_detalhe}`:""}`,l.agua_litros??"",l.status??"",(l.fotos_paths??l.fotos_urls??[]).join(" | ")]);
+      const headers=["Data","Nome","Email","Documento","Tipo doc.","Celular","Nascimento","Altura","Peso","Objetivo","Atividade","Tempo","Frequencia","Disponibilidade","Personal","Competicao","Coach BB","Medico","TRT","Cardiaca","Diabetes","Cronica","Lesao","Dieta","Refeicoes","Suplementos","Agua","Status","Fotos (paths)"];
+      const rows=leads.map(l=>[l.createdAt?.toDate?.()?.toLocaleDateString("pt-BR")??"",l.nome??"",l.email??"",l.documento??l.cpf??"",l.documento_tipo??"cpf",l.celular??"",l.data_nascimento??"",l.altura??"",l.peso??"",l.objetivo??"",l.atividade_fisica??"",l.tempo_atividade??"",l.frequencia_semanal??"",l.disponibilidade_diaria??"",l.personal_trainer??"",`${l.competicao??""}${l.competicao_detalhe?` - ${l.competicao_detalhe}`:""}`,l.conhece_coach??"",l.medico_esporte??"",`${l.trt??""}${l.trt_detalhe?` - ${l.trt_detalhe}`:""}`,l.condicao_cardiaca??"",l.diabetes??"",l.doenca_cronica??"",`${l.lesao??""}${l.lesao_detalhe?` - ${l.lesao_detalhe}`:""}`,l.dieta??"",l.refeicoes_dia??"",`${l.suplementos??""}${l.suplementos_detalhe?` - ${l.suplementos_detalhe}`:""}`,l.agua_litros??"",l.status??"",(l.fotos_paths??l.fotos_urls??[]).join(" | ")]);
       const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
       const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
       const url=URL.createObjectURL(blob);
