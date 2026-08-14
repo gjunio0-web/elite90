@@ -6,107 +6,110 @@ import type { Locale } from "../../i18n/utils";
 interface Props { t: Translations; locale: Locale; }
 const { t, locale } = Astro.props;
 
-// ── Cases 1-4: real photos, text still unconfirmed placeholder.
-// Cases 5-10: real, Coach-confirmed text (name/stat/story), photo still a
-// genuine placeholder graphic pending the correct pairing.
+// Curadoria fechada pelo Coach em 13/08/2026: seis casos, nesta ordem.
+// Nome, cargo, pesos e narrativa vieram todos dele, por escrito.
+// A correspondencia foto <-> pessoa dos quatro primeiros tambem foi
+// confirmada por ele, sobre uma folha com as fotos numeradas de 1 a 4.
+// Luiz Fernando e Goncalo ainda nao tem par antes/depois: usam a imagem
+// provisoria e carregam photoPending, que marca apenas a foto.
 const copyByLocale = {
   "pt-br": {
-    placeholderName: "Atleta [INICIAIS]",
-    placeholderMeta: "[CARGO] · [PERIODO]",
-    placeholderStat: "[NÚMERO]",
-    placeholderNote: "[Aguardando confirmação de qual foto corresponde a qual caso — ver V-07]",
     cases: [
       {
-        name: "Gonçalo Marques",
-        meta: "Bunker Digital",
-        stat: "+19 kg",
-        statDesc: "de massa magra, construindo ano após ano um físico que virou título de campeão de categoria.",
-        story: "O Gonçalo é a prova de que consistência vence talento quando o talento não trabalha. Ano após ano, foi construindo um físico cada vez mais sólido até subir no palco e conquistar o título de campeão da sua categoria. Um projeto de longo prazo, feito com disciplina e paixão pelo esporte.",
+        name: "Dr. Ricardo Cauduro",
+        meta: "Médico oftalmologista · Esportista",
+        stat: "TOP 1 na estreia",
+        statDesc: "estreando nos palcos com destaque em condicionamento, qualidade muscular e qualidade de pele.",
+        story: "O Dr. Ricardo sempre manteve um físico atlético e, em determinado momento, resolveu conhecer os palcos. Logo na estreia conquistou o TOP 1, muito bem avaliado pelo condicionamento físico, pela qualidade muscular e pela qualidade de pele. Uma estreia que mostrou o que acontece quando existe uma boa base e o trabalho é conduzido com estratégia.",
+        photos: 1,
+      },
+      {
+        name: "Felipe Hunziker",
+        meta: "Mercado financeiro",
+        stat: "+10 kg",
+        statDesc: "de 98 kg a 108 kg, com ganho expressivo de massa muscular e redução do percentual de gordura.",
+        story: "O Felipe passou por uma transformação excepcional. Construímos um físico mais atlético, denso e condicionado, com ganho expressivo de massa muscular e redução do percentual de gordura, sem a necessidade de viver em função de um peso de competição. A proposta sempre foi maior: construir um físico para a vida. Um verdadeiro lifestyle, com estratégia, consistência e um corpo que pudesse ser sustentado no longo prazo.",
+        photos: 2,
+      },
+      {
+        name: "João Pedro Valle",
+        meta: "Advogado e empresário",
+        stat: "+10 kg",
+        statDesc: "de massa magra em cerca de 2 anos, com redução drástica do percentual de gordura.",
+        story: "O Jonny colocou 10 kg de massa magra ao longo de aproximadamente 2 anos, reduzindo drasticamente o percentual de gordura e promovendo uma verdadeira virada de chave. Mais do que mudar o físico, construiu uma nova relação com treinamento, alimentação e disciplina. Um lifestyle de respeito, e um físico que passou a ser consequência de tudo isso.",
+        photos: 3,
+      },
+      {
+        name: "Valmir Castilho",
+        meta: "Empresário no ramo de confecção",
+        stat: "90 dias",
+        statDesc: "para chegar ao shape de atleta no padrão da casa, sem nenhuma intenção de subir aos palcos.",
+        story: "O Valmir construiu um físico de respeito, o famoso shape de atleta. E pronto em 90 dias, sem qualquer intenção de competir. O objetivo era outro: provocar uma virada de chave que costumo chamar de preparação. Porque preparação vai muito além do físico — envolve disciplina, comportamento, mentalidade e, muitas vezes, um processo de reconstrução pessoal. Hoje o Valmir concilia musculação com corrida de rua.",
+        photos: 4,
       },
       {
         name: "Luiz Fernando Mello",
         meta: "Mercado financeiro",
-        stat: "-27,1 kg",
-        statDesc: "eliminando gordura com o máximo de massa magra preservada e sem extremismos.",
-        story: "Muito além dos números na balança, o Luiz reconstruiu sua relação com o próprio corpo. Eliminou gordura preservando ao máximo a massa magra e adotou um estilo de vida que hoje faz parte da sua rotina, sem extremismos.",
+        stat: "-27,2 kg",
+        statDesc: "de 138,1 kg a 110,9 kg, com preservação máxima de massa muscular e sem sofrimento.",
+        story: "O Fernando teve uma redução expressiva de 27,2 kg, conduzida de forma estratégica e com foco na preservação máxima de massa muscular. O processo envolveu ajustes progressivos na alimentação, no treinamento e na rotina, buscando melhorar composição corporal, digestão, metabolismo e aderência, sem transformar o caminho em sofrimento. E não terminou na balança: a mudança foi comportamental. O Fernando virou uma chave, abraçou um novo estilo de vida e hoje usufrui de um físico mais atlético, denso e funcional. Desde então, segue aprimorando.",
       },
       {
-        name: "Dr. Guilherme Fernandes",
-        meta: "Médico",
-        stat: "-7 kg",
-        statDesc: "de gordura, trocando massa gorda por massa magra num físico de atleta.",
-        story: "Nem toda transformação aparece na balança. No caso do Guilherme, a grande mudança foi na composição corporal: menos gordura, mais massa magra e um físico completamente diferente. Um médico, atleta e campeão brasileiro de hipismo que levou para o próprio corpo a mesma excelência que busca na profissão.",
-      },
-      {
-        name: "Clayton Sainz",
-        meta: "Empresário T.I.",
-        stat: "-14 kg",
-        statDesc: "de gordura, de ex-obeso a um físico pronto para a cirurgia reparadora.",
-        story: "O Clayton chegou decidido a mudar de vida. Como ex-obeso, cada etapa do processo foi construída com estratégia para preservar e desenvolver massa magra enquanto reduzia gordura. O resultado foi um físico preparado para a cirurgia reparadora e, principalmente, uma nova qualidade de vida.",
-      },
-      {
-        name: "Nikola Milenkovic",
-        meta: "Professor de francês",
-        stat: "-16 kg",
-        statDesc: "construindo um físico mais denso, funcional e saudável.",
-        story: "Direto da França, o Nikola confiou no processo e fez exatamente o que precisava ser feito. Reduziu gordura, fortaleceu o corpo e construiu um físico mais denso, funcional e saudável. Uma transformação que foi muito além da estética.",
-      },
-      {
-        name: "Vinicius Guimarães",
-        meta: "Empresário",
-        stat: "-5 kg",
-        statDesc: "de gordura com ganho expressivo de massa magra, buscando densidade e força além do número na balança.",
-        story: "O Vinicius entendeu que evolução não é apenas perder peso. Primeiro construímos massa muscular, depois refinamos o físico. O peso voltou praticamente ao ponto de partida, mas o corpo era outro: mais denso, mais atlético e muito mais forte.",
+        name: "Gonçalo Marques",
+        meta: "GM Digital Bunker",
+        stat: "+12 kg",
+        statDesc: "de 86 kg a 98 kg, quebrando um platô até o título de campeão de categoria.",
+        story: "O Gonçalo é a prova de que consistência vence talento quando o talento não trabalha. Quando começamos, o objetivo era único: ficar grande. Ele chegou com um físico denso, porém travado e desacreditado por outros profissionais. Quebramos o platô e evoluímos tanto que enfrentamos um palco ao longo da jornada, onde o Gon foi campeão da sua categoria, TOP 1 na maior federação de fisiculturismo. Seguimos na trajetória do ficar grande, e foi aí que ele percebeu que tinha perdido praticamente todo o guarda-roupa.",
       },
     ],
   },
   en: {
-    placeholderName: "Athlete [INITIALS]",
-    placeholderMeta: "[ROLE] · [PERIOD]",
-    placeholderStat: "[NUMBER]",
-    placeholderNote: "[Awaiting confirmation of which photo matches which case — see V-07]",
     cases: [
       {
-        name: "Gonçalo Marques",
-        meta: "Bunker Digital",
-        stat: "+19 kg",
-        statDesc: "of lean mass, building year after year a physique that became his category's championship title.",
-        story: "Gonçalo is proof that consistency beats talent when talent doesn't put in the work. Year after year, he built an increasingly solid physique until he stepped on stage and won his category's championship title. A long-term project, built with discipline and a passion for the sport.",
+        name: "Dr. Ricardo Cauduro",
+        meta: "Ophthalmologist · Athlete",
+        stat: "TOP 1 on debut",
+        statDesc: "debuting on stage with standout conditioning, muscle quality and skin quality.",
+        story: "Dr. Ricardo had always kept an athletic physique and, at a certain point, decided to try the competitive stage. On his very first appearance he took TOP 1, highly rated for conditioning, muscle quality and skin quality. A debut that showed what happens when there is a solid base and the work is guided by strategy.",
+        photos: 1,
+      },
+      {
+        name: "Felipe Hunziker",
+        meta: "Financial market",
+        stat: "+10 kg",
+        statDesc: "from 98 kg to 108 kg, with a significant gain in muscle mass and a drop in body fat.",
+        story: "Felipe went through an exceptional transformation. We built a more athletic, denser and better conditioned physique, with a significant gain in muscle mass and a reduction in body fat, without having to live around a competition weight. The goal was always bigger: to build a physique for life. A true lifestyle, with strategy, consistency and a body that could be sustained in the long run.",
+        photos: 2,
+      },
+      {
+        name: "João Pedro Valle",
+        meta: "Lawyer and entrepreneur",
+        stat: "+10 kg",
+        statDesc: "of lean mass over roughly 2 years, with a sharp drop in body fat.",
+        story: "Jonny added 10 kg of lean mass over roughly 2 years, sharply reducing his body fat and bringing about a real turning point. More than changing his physique, he built a new relationship with training, nutrition and discipline. A lifestyle to respect, and a physique that became the consequence of all of it.",
+        photos: 3,
+      },
+      {
+        name: "Valmir Castilho",
+        meta: "Entrepreneur in the apparel industry",
+        stat: "90 days",
+        statDesc: "to reach an athlete's physique by our standard, with no intention of ever competing.",
+        story: "Valmir built a physique to respect, the well-known athlete's shape. And ready in 90 days, with no intention of competing. The goal was different: to bring about the turning point I like to call preparation. Because preparation goes far beyond the physical — it involves discipline, behaviour, mindset and, often, a process of personal rebuilding. Today Valmir combines weight training with street running.",
+        photos: 4,
       },
       {
         name: "Luiz Fernando Mello",
         meta: "Financial market",
-        stat: "-27.1 kg",
-        statDesc: "eliminating fat while preserving as much lean mass as possible, without extremes.",
-        story: "Far beyond the numbers on the scale, Luiz rebuilt his relationship with his own body. He eliminated fat while preserving as much lean mass as possible and adopted a lifestyle that is now part of his routine, without extremes.",
+        stat: "-27.2 kg",
+        statDesc: "from 138.1 kg to 110.9 kg, preserving as much muscle mass as possible and without suffering.",
+        story: "Fernando achieved a significant reduction of 27.2 kg, guided strategically and focused on preserving as much muscle mass as possible. The process involved progressive adjustments to nutrition, training and routine, aiming to improve body composition, digestion, metabolism and adherence, without turning the journey into suffering. And it did not end on the scale: the change was behavioural. Fernando flipped a switch, embraced a new lifestyle and today enjoys a more athletic, denser and more functional physique. He has been refining it ever since.",
       },
       {
-        name: "Dr. Guilherme Fernandes",
-        meta: "Physician",
-        stat: "-7 kg",
-        statDesc: "of fat, trading fat mass for lean mass in an athlete's physique.",
-        story: "Not every transformation shows up on the scale. In Guilherme's case, the big change was in body composition: less fat, more lean mass, and a completely different physique. A physician, athlete and Brazilian equestrian champion who brought the same excellence he pursues in his profession to his own body.",
-      },
-      {
-        name: "Clayton Sainz",
-        meta: "IT Entrepreneur",
-        stat: "-14 kg",
-        statDesc: "of fat, from formerly obese to a physique ready for reconstructive surgery.",
-        story: "Clayton arrived determined to change his life. As a formerly obese man, every stage of the process was strategically built to preserve and develop lean mass while reducing fat. The result was a physique ready for reconstructive surgery and, above all, a new quality of life.",
-      },
-      {
-        name: "Nikola Milenkovic",
-        meta: "French teacher",
-        stat: "-16 kg",
-        statDesc: "building a denser, more functional and healthier physique.",
-        story: "Straight from France, Nikola trusted the process and did exactly what needed to be done. He reduced fat, strengthened his body and built a denser, more functional and healthier physique. A transformation that went far beyond aesthetics.",
-      },
-      {
-        name: "Vinicius Guimarães",
-        meta: "Entrepreneur",
-        stat: "-5 kg",
-        statDesc: "of fat with a significant gain in lean mass, chasing density and strength beyond the number on the scale.",
-        story: "Vinicius understood that progress isn't just about losing weight. First we built muscle mass, then we refined the physique. The weight went back to almost the starting point, but the body was a different one: denser, more athletic and much stronger.",
+        name: "Gonçalo Marques",
+        meta: "GM Digital Bunker",
+        stat: "+12 kg",
+        statDesc: "from 86 kg to 98 kg, breaking through a plateau all the way to a category championship title.",
+        story: "Gonçalo is proof that consistency beats talent when talent doesn't put in the work. When we started, the goal was a single one: get big. He arrived with a dense physique, but stuck, and written off by other professionals. We broke through the plateau and progressed so much that we took on a stage along the way, where Gon won his category, TOP 1 in the largest bodybuilding federation. We carried on with the get-big plan, and that was when he realised he had lost practically his whole wardrobe.",
       },
     ],
   },
@@ -114,39 +117,25 @@ const copyByLocale = {
 
 const c = copyByLocale[locale];
 
-const results = [
-  // Cases 1-4: the before/after photos are real (resultado-0X.webp is genuine
-  // photo content, not a placeholder graphic) -- only the identity/stat text
-  // is unconfirmed (bracket placeholders), so the badge belongs on the text,
-  // not the photo.
-  ...[1, 2, 3, 4].map(n => ({
-    n,
-    beforeSrc: `/images/results/resultado-0${n}-antes.webp`,
-    afterSrc:  `/images/results/resultado-0${n}-depois.webp`,
-    name:      c.placeholderName,
-    meta:      c.placeholderMeta,
-    stat:      c.placeholderStat,
-    statDesc:  c.placeholderNote,
-    story:     c.placeholderNote,
+const results = c.cases.map((item, i) => {
+  const n = (item as { photos?: number }).photos;
+  const hasPhotos = typeof n === "number";
+  return {
+    n: i + 1,
+    beforeSrc: hasPhotos ? `/images/results/resultado-0${n}-antes.webp` : "/images/results/placeholder-novo-caso-antes.webp",
+    afterSrc:  hasPhotos ? `/images/results/resultado-0${n}-depois.webp` : "/images/results/placeholder-novo-caso-depois.webp",
+    name: item.name,
+    meta: item.meta,
+    stat: item.stat,
+    statDesc: item.statDesc,
+    story: item.story,
     beforeLabel: t.results.beforeLabel,
     afterLabel:  t.results.afterLabel,
-    pending: true,
-  })),
-  // Cases 5-10: the opposite split -- name/meta/stat/statDesc/story are all
-  // real and Coach-confirmed, but the photo itself is a genuine placeholder
-  // graphic (real photos aren't verifiably matched to each person yet). Only
-  // the photo badge applies here, not the text/stat badge.
-  ...c.cases.map((item, i) => ({
-    n: i + 5,
-    beforeSrc: `/images/results/placeholder-novo-caso-antes.webp`,
-    afterSrc:  `/images/results/placeholder-novo-caso-depois.webp`,
-    ...item,
-    beforeLabel: t.results.beforeLabel,
-    afterLabel:  t.results.afterLabel,
-    photoPending: true,
-  })),
-];
+    ...(hasPhotos ? {} : { photoPending: true }),
+  };
+});
 ---
+
 
 <section class="section results" id="resultados" style="scroll-margin-top:80px" aria-label={t.results.ariaLabel}>
   <div class="container">

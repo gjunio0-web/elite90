@@ -1,4 +1,4 @@
-// --- ELITE 90 · i18n Utilities
+// --- ELITE 90 PRO · i18n Utilities
 import { pt } from "./pt";
 import { en } from "./en";
 

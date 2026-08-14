@@ -1,11 +1,11 @@
-// --- ELITE 90 · Traduções PT-BR
+// --- ELITE 90 PRO · Traduções PT-BR
 export const pt = {
   // META
   meta: {
-    title: "Coach Ruiz | Elite 90 - Consultoria de Alta Performance Física",
+    title: "Coach Ruiz | ELITE 90 PRO - Consultoria de Alta Performance Física",
     description:
       "Programa de transformação corporal em 90 dias. Protocolo individualizado com treino, nutrição e suporte multidisciplinar. Vagas limitadas.",
-    ogTitle: "Coach Ruiz | Elite 90",
+    ogTitle: "Coach Ruiz | ELITE 90 PRO",
     ogDescription:
       "Construa o físico que você merece. 90 dias. Protocolo de elite.",
   },
@@ -40,7 +40,7 @@ export const pt = {
   schedule: {
     ariaLabel: "Cronograma",
     eyebrow: "O programa",
-    title: "Cronograma do Programa Elite 90",
+    title: "Cronograma do Programa ELITE 90 PRO",
     phases: [
       {
         number: "01",
@@ -77,7 +77,7 @@ export const pt = {
     ariaLabel: "Pilares do programa",
     resultAriaLabel: "Resultado:",
     eyebrow: "O método",
-    title: "Pilares do Programa Elite 90",
+    title: "Pilares do Programa ELITE 90 PRO",
     intro:
       "Performance. Disciplina. Longevidade. Não são palavras de ordem - são os três vetores de um sistema. Em confluência, produzem o único resultado que importa: o corpo como consequência inevitável de um método correto.",
     items: [
@@ -112,7 +112,7 @@ export const pt = {
     paragraphs: [
       "A crença de que volume muscular e definição extrema são privilégios da juventude é o maior obstáculo entre você e o físico que merece. E ela está errada.",
       "A biologia do homem de 35 a 55 anos responde melhor a protocolos de longa duração, melhor a consistência do que a intensidade esporádica. O que falta não é tempo nem biologia. É o sistema correto.",
-      "[PERCENTUAL]% dos alunos têm entre 35 e 55 anos. O Elite 90 foi construído especificamente para este perfil.",
+      "Quase 90% dos mentorados têm entre 35 e 55 anos. O ELITE 90 PRO foi construído especificamente para este perfil.",
     ],
   },
 
@@ -121,7 +121,7 @@ export const pt = {
     ariaLabel: "Resultados reais",
     eyebrow: "Prova real",
     title: "Resultados Reais",
-    titleAccent: "obtidos através do Programa Elite 90",
+    titleAccent: "obtidos através do Programa ELITE 90 PRO",
     beforeLabel: "Antes",
     afterLabel: "Depois",
     readMore: "Ver mais",
@@ -134,7 +134,7 @@ export const pt = {
   process: {
     ariaLabel: "Como funciona",
     eyebrow: "Como funciona",
-    title: "Passo a passo para participar do Programa Elite 90",
+    title: "Passo a passo para participar do Programa ELITE 90 PRO",
     steps: [
       {
         who: "Você",
@@ -195,7 +195,7 @@ export const pt = {
   testimonials: {
     ariaLabel: "Depoimentos",
     eyebrow: "O que os",
-    titleAccent: "atletas",
+    titleAccent: "mentorados",
     titleSuffix: "estão dizendo",
     readMore: "Ver mais",
     readLess: "Ver menos",
@@ -227,9 +227,15 @@ export const pt = {
         name: "Flavio César",
         role: "Engenheiro Civil",
         metric: "Mais de 10 anos de parceria",
-        image: "/images/testimonials/depoente-placeholder.webp",
+        image: "/images/testimonials/depoente-flavio.webp",
         text: "Conheço o Fernando Ruiz há mais de 10 anos. De lá para cá, acumulei ganhos e também conquistei os resultados que ele estipula como meta. Fernando é atencioso, criterioso. Faz um trabalho de Coach certeiro por estar sempre antenado e pesquisar constantemente o que há de mais moderno e adequado ao meu biotipo, para manter o ganho de massa magra e a redução de gordura. Desde que começamos o tratamento venho acumulando resultados incríveis, motivo pelo qual nossa parceria se estende por tantos anos. Obrigado, Fernando!",
-        pending: true,
+      },
+      {
+        name: "João Sampaio",
+        role: "Visual Merchandising",
+        metric: '"Ele nunca entrega uma fórmula pronta"',
+        image: "/images/testimonials/depoente-joao-sampaio.webp",
+        text: "Conheço o Fernando Ruiz há mais de dez anos, e nossa parceria foi muito além dos treinos. Ao longo desse tempo, ele me ajudou a construir uma rotina mais saudável, equilibrada e consistente, sempre com orientações personalizadas que realmente fazem diferença no dia a dia. O que mais admiro no Fernando é que ele nunca entrega uma fórmula pronta. Ele acompanha de perto, entende o momento de cada pessoa e faz os ajustes necessários para que o processo seja sustentável e traga resultados. Com o tempo, essa relação profissional se transformou em uma grande amizade. Hoje tenho a sorte de contar com alguém em quem confio não só pelo conhecimento técnico, mas também pelo cuidado, pela dedicação e pelo interesse genuíno em me ver na minha melhor versão.",
       },
     ],
   },
@@ -244,7 +250,7 @@ export const pt = {
     filters: {
       originLabel: "Origem",
       originAll: "Todos",
-      originOriginal: "Original Elite 90",
+      originOriginal: "Original ELITE 90 PRO",
       originCurated: "Curadoria do Coach",
       typeLabel: "Tipo",
       typePodcast: "Podcast",
@@ -262,7 +268,7 @@ export const pt = {
     },
     loadMore: "Carregar mais conteúdos",
     showLess: "Mostrar menos",
-    notifyMe: "Seja parte do Programa Elite 90 e acompanhe os conteúdos novos por lá",
+    notifyMe: "Seja parte do Programa ELITE 90 PRO e acompanhe os conteúdos novos por lá",
     prevAriaLabel: "Conteúdo anterior",
     nextAriaLabel: "Próximo conteúdo",
     downloadCta: "Baixar",
@@ -270,7 +276,6 @@ export const pt = {
     comingSoon: "Em breve",
     pendingLabel: "Conteúdo novo, ainda não revisado por você",
     pendingTooltip: "Conteúdo novo — ainda não revisado por você.",
-    demoTag: "Exemplo ilustrativo — homologação",
     items: [
       {
         title: "Guia de poses para Men's Physique",
@@ -280,11 +285,40 @@ export const pt = {
         tipo: "guia",
         state: "live",
         href: "/downloads/guia-poses-mens-physique.pdf",
-        pending: true,
         demo: false,
       },
       {
-        title: "Podcast Elite 90 · Ep. 01 — Por que a maioria falha aos 40",
+        title: "Cartilha de posing — NPC Men's Physique",
+        body: "Manual técnico de apresentação para a categoria: apresentação individual, giros de frente e de costas, escolha de ângulos, transições e como treinar posing em off-season e pré-contest. Separa as exigências da NPC das orientações do Coach.",
+        meta: "Cartilha · 5 páginas · PDF",
+        origin: "original",
+        tipo: "guia",
+        state: "live",
+        href: "/downloads/cartilha-posing-mens-physique.pdf",
+        demo: false,
+      },
+      {
+        title: "Cartilha de posing — NPC Classic Physique",
+        body: "Manual técnico da categoria clássica: quartos de volta e as cinco poses compulsórias, escolha da pose clássica favorita, rotina de até 60 segundos e checklist de prontidão antes de competir.",
+        meta: "Cartilha · 5 páginas · PDF",
+        origin: "original",
+        tipo: "guia",
+        state: "live",
+        href: "/downloads/cartilha-posing-classic-physique.pdf",
+        demo: false,
+      },
+      {
+        title: "Cartilha de posing — NPC Men's Bodybuilding",
+        body: "Manual técnico da categoria: rodada relaxada, apresentação individual, as oito poses compulsórias, a Most Muscular favorita, comparações e transições, com checklist final de prontidão.",
+        meta: "Cartilha · 7 páginas · PDF",
+        origin: "original",
+        tipo: "guia",
+        state: "live",
+        href: "/downloads/cartilha-posing-mens-bodybuilding.pdf",
+        demo: false,
+      },
+      {
+        title: "Podcast ELITE 90 PRO · Ep. 01 — Por que a maioria falha aos 40",
         body: "O Coach Fernando sobre os erros mais comuns de quem tenta recomeçar o treino na vida adulta.",
         meta: "Podcast · Áudio",
         origin: "original",
@@ -294,7 +328,7 @@ export const pt = {
         demo: true,
       },
       {
-        title: "Podcast Elite 90 · Ep. 02 — Recuperação para rotina corrida",
+        title: "Podcast ELITE 90 PRO · Ep. 02 — Recuperação para rotina corrida",
         body: "Sono, estresse e recuperação ativa para quem treina com agenda de executivo.",
         meta: "Podcast · Áudio",
         origin: "original",
@@ -305,11 +339,11 @@ export const pt = {
       },
       {
         title: "Rotina de treino para quem viaja a trabalho",
-        body: "Como manter o programa Elite 90 em dia mesmo com semanas inteiras fora de casa.",
+        body: "Como manter o programa ELITE 90 PRO em dia mesmo com semanas inteiras fora de casa.",
         meta: "Artigo · Leitura de 6 min",
         origin: "original",
         tipo: "artigo",
-        state: "live",
+        state: "soon",
         href: "#",
         demo: true,
       },
@@ -319,7 +353,7 @@ export const pt = {
         meta: "Artigo · Leitura de 8 min",
         origin: "curated",
         tipo: "artigo",
-        state: "live",
+        state: "soon",
         href: "#",
         demo: true,
       },
@@ -329,7 +363,7 @@ export const pt = {
         meta: "Guia · PDF",
         origin: "original",
         tipo: "guia",
-        state: "live",
+        state: "soon",
         href: "#",
         demo: true,
       },
@@ -349,7 +383,7 @@ export const pt = {
         meta: "Vídeo · 9 min",
         origin: "original",
         tipo: "video",
-        state: "live",
+        state: "soon",
         href: "#",
         demo: true,
       },
@@ -364,7 +398,7 @@ export const pt = {
         demo: true,
       },
       {
-        title: "Podcast Elite 90 · Ep. 03 — Disciplina sem obsessão",
+        title: "Podcast ELITE 90 PRO · Ep. 03 — Disciplina sem obsessão",
         body: "Onde fica a linha entre consistência saudável e perfeccionismo no programa.",
         meta: "Podcast · Áudio",
         origin: "original",
@@ -379,7 +413,7 @@ export const pt = {
         meta: "Guia · PDF",
         origin: "curated",
         tipo: "guia",
-        state: "live",
+        state: "soon",
         href: "#",
         demo: true,
       },
@@ -389,7 +423,7 @@ export const pt = {
         meta: "Vídeo · 10 min",
         origin: "original",
         tipo: "video",
-        state: "live",
+        state: "soon",
         href: "#",
         demo: true,
       },
@@ -403,14 +437,9 @@ export const pt = {
     title: "Parcerias com marcas",
     items: [
       {
-        name: "Army",
-        description: "Suplementação esportiva para protocolos de alta performance.",
-        logo: "/images/partners/parceiro-army.svg",
-      },
-      {
-        name: "Adaptogen",
-        description: "Adaptógenos e suplementos clínicos para equilíbrio hormonal.",
-        logo: "/images/partners/parceiro-adaptogen.svg",
+        name: "Chef Whey",
+        description: "Suplementação proteica para o protocolo alimentar do dia a dia.",
+        logo: "/images/partners/parceiro-chefwhey.png",
       },
       {
         name: "Oficial Farma",
@@ -433,7 +462,7 @@ export const pt = {
       {
         question: "O programa funciona para quem está acima dos 50 anos?",
         answer:
-          "Sim. [PERCENTUAL]% dos alunos têm entre 35 e 55 anos. A biologia do homem maduro responde melhor a protocolos de longa duração do que à intensidade esporádica.",
+          "Sim. Quase 90% dos mentorados têm entre 35 e 55 anos. A biologia do homem maduro responde melhor a protocolos de longa duração do que à intensidade esporádica.",
       },
       {
         question: "Quanto tempo por semana preciso dedicar?",
@@ -454,7 +483,7 @@ export const pt = {
       {
         question: "Qual o investimento?",
         answer:
-          "O valor é apresentado na entrevista de aprovação, após análise do seu perfil. O Elite 90 é uma consultoria de alto ticket - não um produto de prateleira.",
+          "O valor é apresentado na entrevista de aprovação, após análise do seu perfil. O ELITE 90 PRO é uma consultoria de alto ticket - não um produto de prateleira.",
       },
     ],
   },
@@ -516,9 +545,8 @@ export const pt = {
         bio: "Bacharel em Educação Física pela Unip e atleta de Fisiculturismo (IFBB). Treinos individualizados de fortalecimento e definição muscular, com atenção a perfis cardíacos, obesos e diabéticos.",
         stat: "IFBB",
         statLabel: "Atleta credenciado",
-        image: "/images/team/placeholder-jd.webp",
+        image: "/images/team/jerffeson-diogenes.webp",
         link: "https://www.treinar.me/jerffesonpersonal",
-        pending: true,
       },
     ],
     prevAriaLabel: "Ver especialista anterior",
