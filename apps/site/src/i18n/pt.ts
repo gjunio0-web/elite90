@@ -1,11 +1,11 @@
-// --- ELITE 90 · Traduções PT-BR
+// --- ELITE 90 PRO · Traduções PT-BR
 export const pt = {
   // META
   meta: {
-    title: "Coach Ruiz | Elite 90 - Consultoria de Alta Performance Física",
+    title: "Coach Ruiz | ELITE 90 PRO - Consultoria de Alta Performance Física",
     description:
       "Programa de transformação corporal em 90 dias. Protocolo individualizado com treino, nutrição e suporte multidisciplinar. Vagas limitadas.",
-    ogTitle: "Coach Ruiz | Elite 90",
+    ogTitle: "Coach Ruiz | ELITE 90 PRO",
     ogDescription:
       "Construa o físico que você merece. 90 dias. Protocolo de elite.",
   },
@@ -40,7 +40,7 @@ export const pt = {
   schedule: {
     ariaLabel: "Cronograma",
     eyebrow: "O programa",
-    title: "Cronograma do Programa Elite 90",
+    title: "Cronograma do Programa ELITE 90 PRO",
     phases: [
       {
         number: "01",
@@ -77,7 +77,7 @@ export const pt = {
     ariaLabel: "Pilares do programa",
     resultAriaLabel: "Resultado:",
     eyebrow: "O método",
-    title: "Pilares do Programa Elite 90",
+    title: "Pilares do Programa ELITE 90 PRO",
     intro:
       "Performance. Disciplina. Longevidade. Não são palavras de ordem - são os três vetores de um sistema. Em confluência, produzem o único resultado que importa: o corpo como consequência inevitável de um método correto.",
     items: [
@@ -112,7 +112,7 @@ export const pt = {
     paragraphs: [
       "A crença de que volume muscular e definição extrema são privilégios da juventude é o maior obstáculo entre você e o físico que merece. E ela está errada.",
       "A biologia do homem de 35 a 55 anos responde melhor a protocolos de longa duração, melhor a consistência do que a intensidade esporádica. O que falta não é tempo nem biologia. É o sistema correto.",
-      "[PERCENTUAL]% dos alunos têm entre 35 e 55 anos. O Elite 90 foi construído especificamente para este perfil.",
+      "[PERCENTUAL]% dos alunos têm entre 35 e 55 anos. O ELITE 90 PRO foi construído especificamente para este perfil.",
     ],
   },
 
@@ -121,7 +121,7 @@ export const pt = {
     ariaLabel: "Resultados reais",
     eyebrow: "Prova real",
     title: "Resultados Reais",
-    titleAccent: "obtidos através do Programa Elite 90",
+    titleAccent: "obtidos através do Programa ELITE 90 PRO",
     beforeLabel: "Antes",
     afterLabel: "Depois",
     readMore: "Ver mais",
@@ -134,7 +134,7 @@ export const pt = {
   process: {
     ariaLabel: "Como funciona",
     eyebrow: "Como funciona",
-    title: "Passo a passo para participar do Programa Elite 90",
+    title: "Passo a passo para participar do Programa ELITE 90 PRO",
     steps: [
       {
         who: "Você",
@@ -250,7 +250,7 @@ export const pt = {
     filters: {
       originLabel: "Origem",
       originAll: "Todos",
-      originOriginal: "Original Elite 90",
+      originOriginal: "Original ELITE 90 PRO",
       originCurated: "Curadoria do Coach",
       typeLabel: "Tipo",
       typePodcast: "Podcast",
@@ -268,7 +268,7 @@ export const pt = {
     },
     loadMore: "Carregar mais conteúdos",
     showLess: "Mostrar menos",
-    notifyMe: "Seja parte do Programa Elite 90 e acompanhe os conteúdos novos por lá",
+    notifyMe: "Seja parte do Programa ELITE 90 PRO e acompanhe os conteúdos novos por lá",
     prevAriaLabel: "Conteúdo anterior",
     nextAriaLabel: "Próximo conteúdo",
     downloadCta: "Baixar",
@@ -340,7 +340,7 @@ export const pt = {
       },
       {
         title: "Rotina de treino para quem viaja a trabalho",
-        body: "Como manter o programa Elite 90 em dia mesmo com semanas inteiras fora de casa.",
+        body: "Como manter o programa ELITE 90 PRO em dia mesmo com semanas inteiras fora de casa.",
         meta: "Artigo · Leitura de 6 min",
         origin: "original",
         tipo: "artigo",
@@ -484,7 +484,7 @@ export const pt = {
       {
         question: "Qual o investimento?",
         answer:
-          "O valor é apresentado na entrevista de aprovação, após análise do seu perfil. O Elite 90 é uma consultoria de alto ticket - não um produto de prateleira.",
+          "O valor é apresentado na entrevista de aprovação, após análise do seu perfil. O ELITE 90 PRO é uma consultoria de alto ticket - não um produto de prateleira.",
       },
     ],
   },

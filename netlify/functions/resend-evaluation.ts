@@ -1,4 +1,4 @@
-// --- ELITE 90 · resend-evaluation
+// --- ELITE 90 PRO · resend-evaluation
 // Netlify Function: reenvia o e-mail de acesso a uma avaliação já enviada.
 // Usa subject e corpo diferenciados para não criar falsa expectativa de novo conteúdo.
 // Registra lastResentAt e incrementa resentCount no documento do Firestore.
@@ -41,7 +41,7 @@ function buildResendEmail(nome: string, token: string, siteUrl: string): string 
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Elite 90 - Acesso à sua avaliação</title>
+<title>ELITE 90 PRO - Acesso à sua avaliação</title>
 <style>
   body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
   .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
@@ -84,7 +84,7 @@ function buildResendEmail(nome: string, token: string, siteUrl: string): string 
 
   <div class="sig">
     <div class="sig-name">Fernando Ruiz</div>
-    <div class="sig-title">Coach Ruiz · Elite 90</div>
+    <div class="sig-title">Coach Ruiz · ELITE 90 PRO</div>
   </div>
 </div>
 </body>
@@ -142,9 +142,9 @@ export const handler = async (event: any) => {
         Authorization: `Bearer ${resendKey}`,
       },
       body: JSON.stringify({
-        from: "Elite 90 Testes <onboarding@resend.dev>",
+        from: "ELITE 90 PRO Testes <onboarding@resend.dev>",
         to: [avaliacao.email],
-        subject: `${avaliacao.nome.split(" ")[0]}, segue o acesso à sua avaliação — Elite 90`,
+        subject: `${avaliacao.nome.split(" ")[0]}, segue o acesso à sua avaliação — ELITE 90 PRO`,
         html: buildResendEmail(avaliacao.nome, avaliacao.token, siteUrl),
       }),
     });

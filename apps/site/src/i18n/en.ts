@@ -1,12 +1,12 @@
-// --- ELITE 90 · Translations EN
+// --- ELITE 90 PRO · Translations EN
 import type { Translations } from "./pt";
 
 export const en: Translations = {
   meta: {
-    title: "Coach Ruiz | Elite 90 - High Performance Physical Consulting",
+    title: "Coach Ruiz | ELITE 90 PRO - High Performance Physical Consulting",
     description:
       "90-day body transformation program. Individualized protocol with training, nutrition and multidisciplinary support. Limited spots.",
-    ogTitle: "Coach Ruiz | Elite 90",
+    ogTitle: "Coach Ruiz | ELITE 90 PRO",
     ogDescription:
       "Build the physique you deserve. 90 days. Elite protocol.",
   },
@@ -38,7 +38,7 @@ export const en: Translations = {
   schedule: {
     ariaLabel: "Schedule",
     eyebrow: "The program",
-    title: "Elite 90 Program Schedule",
+    title: "ELITE 90 PRO Program Schedule",
     phases: [
       {
         number: "01",
@@ -73,7 +73,7 @@ export const en: Translations = {
     ariaLabel: "Program pillars",
     resultAriaLabel: "Result:",
     eyebrow: "The method",
-    title: "Elite 90 Program Pillars",
+    title: "ELITE 90 PRO Program Pillars",
     intro:
       "Performance. Discipline. Longevity. These are not buzzwords - they are the three vectors of a system. Together, they produce the only result that matters: the physique as the inevitable consequence of a correct method.",
     items: [
@@ -107,7 +107,7 @@ export const en: Translations = {
     paragraphs: [
       "The belief that muscle volume and extreme definition are privileges of youth is the biggest obstacle between you and the physique you deserve. And it is wrong.",
       "The biology of a man aged 35 to 55 responds better to long-term protocols, better to consistency than sporadic intensity. What is missing is not time or biology. It is the correct system.",
-      "[PERCENTAGE]% of athletes are between 35 and 55 years old. Elite 90 was built specifically for this profile.",
+      "[PERCENTAGE]% of athletes are between 35 and 55 years old. ELITE 90 PRO was built specifically for this profile.",
     ],
   },
 
@@ -115,7 +115,7 @@ export const en: Translations = {
     ariaLabel: "Real results",
     eyebrow: "Real proof",
     title: "Real Results",
-    titleAccent: "achieved through the Elite 90 Program",
+    titleAccent: "achieved through the ELITE 90 PRO Program",
     beforeLabel: "Before",
     afterLabel: "After",
     readMore: "Read more",
@@ -127,7 +127,7 @@ export const en: Translations = {
   process: {
     ariaLabel: "How it works",
     eyebrow: "How it works",
-    title: "Step by step to join the Elite 90 Program",
+    title: "Step by step to join the ELITE 90 PRO Program",
     steps: [
       { who: "You", title: "Online application form", body: "3 questions, 2 minutes." },
       { who: "Ruiz", title: "Form review", body: "Approved candidates are contacted within 48 business hours." },
@@ -208,7 +208,7 @@ export const en: Translations = {
     filters: {
       originLabel: "Origin",
       originAll: "All",
-      originOriginal: "Original Elite 90",
+      originOriginal: "Original ELITE 90 PRO",
       originCurated: "Curated by the Coach",
       typeLabel: "Type",
       typePodcast: "Podcast",
@@ -226,7 +226,7 @@ export const en: Translations = {
     },
     loadMore: "Load more content",
     showLess: "Show less",
-    notifyMe: "Join the Elite 90 Program to follow new content as it drops",
+    notifyMe: "Join the ELITE 90 PRO Program to follow new content as it drops",
     prevAriaLabel: "Previous content",
     nextAriaLabel: "Next content",
     downloadCta: "Download",
@@ -298,7 +298,7 @@ export const en: Translations = {
       },
       {
         title: "Training routine for business travel",
-        body: "How to keep the Elite 90 program on track even during weeks away from home.",
+        body: "How to keep the ELITE 90 PRO program on track even during weeks away from home.",
         meta: "Article · 6 min read",
         origin: "original",
         tipo: "artigo",
@@ -439,7 +439,7 @@ export const en: Translations = {
       {
         question: "What is the investment?",
         answer:
-          "The value is presented at the approval interview, after analyzing your profile. Elite 90 is a high-ticket consulting service - not an off-the-shelf product.",
+          "The value is presented at the approval interview, after analyzing your profile. ELITE 90 PRO is a high-ticket consulting service - not an off-the-shelf product.",
       },
     ],
   },

@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// ELITE 90 · Regras de segurança do Firestore
+// ELITE 90 PRO · Regras de segurança do Firestore
 // Projeto: elite90-c716b (southamerica-east1)
 //
 // PRINCÍPIO: o Admin SDK (usado por todas as Netlify Functions) IGNORA estas

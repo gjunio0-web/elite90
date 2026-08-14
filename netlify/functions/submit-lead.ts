@@ -1,4 +1,4 @@
-// ELITE 90 - submit-lead
+// ELITE 90 PRO - submit-lead
 // Netlify Function: recebe dados do formulário em JSON,
 // salva no Firestore e dispara e-mail de confirmação via Resend.
 
@@ -86,7 +86,7 @@ function buildEmail(nome: string, objetivo: string): string {
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Elite 90 - Ficha recebida</title>
+<title>ELITE 90 PRO - Ficha recebida</title>
 <style>
   body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
   .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
@@ -110,7 +110,7 @@ function buildEmail(nome: string, objetivo: string): string {
   <div class="tagline">Estrategista em Alta Performance</div>
   <h1>${firstName}, sua ficha foi recebida.</h1>
   <p>
-    Você preencheu a ficha de triagem do <span class="highlight">Programa Elite 90</span>.
+    Você preencheu a ficha de triagem do <span class="highlight">Programa ELITE 90 PRO</span>.
     Isso já diz algo sobre você - a maioria continua procrastinando. Você agiu.
   </p>
   <p>
@@ -126,7 +126,7 @@ function buildEmail(nome: string, objetivo: string): string {
   <p class="scarcity">Vagas limitadas por ciclo. Aprovação sujeita à triagem.</p>
   <div class="sig">
     <div class="sig-name">Fernando Ruiz</div>
-    <div class="sig-title">Coach Ruiz | Elite 90</div>
+    <div class="sig-title">Coach Ruiz | ELITE 90 PRO</div>
   </div>
 </div>
 </body>
@@ -263,7 +263,7 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
         body: JSON.stringify({
           from: "Coach Ruiz <contato@coachruiz.com.br>",
           to: [email.trim()],
-          subject: `${nome.split(" ")[0]}, sua ficha foi recebida - Elite 90`,
+          subject: `${nome.split(" ")[0]}, sua ficha foi recebida - ELITE 90 PRO`,
           html: buildEmail(nome, objetivoFinal),
         }),
       }).catch(e => console.error("Erro na API do Resend (não-fatal):", e));

@@ -1,4 +1,4 @@
-// --- ELITE 90 · get-foto-urls
+// --- ELITE 90 PRO · get-foto-urls
 // Netlify Function: gera Signed URLs temporárias para as fotos de um lead.
 // Chamada pelo painel admin ao abrir a gaveta "Ficha do Atleta".
 //
