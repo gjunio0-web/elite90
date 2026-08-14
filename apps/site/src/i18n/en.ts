@@ -243,7 +243,6 @@ export const en: Translations = {
         tipo: "guia",
         state: "live",
         href: "/downloads/guia-poses-mens-physique.pdf",
-        pending: true,
         demo: false,
       },
       {
