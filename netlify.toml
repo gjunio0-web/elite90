@@ -20,3 +20,15 @@
   from = "/app/*"
   to = "/app/index.html"
   status = 200
+
+# 404 em ingles.
+# O Astro emite a versao PT em 404.html na raiz da publicacao, e o Netlify a
+# serve para qualquer endereco nao encontrado -- inclusive sob /en/, o que
+# devolveria a pagina em portugues a um visitante em ingles. A versao em ingles
+# e emitida em /en/404/index.html (o formato de diretorio do Astro), fora do
+# lugar onde o Netlify procura sozinho. Esta regra cobre essa lacuna.
+# Sem force: paginas reais sob /en/ continuam tendo precedencia sobre a regra.
+[[redirects]]
+  from = "/en/*"
+  to = "/en/404/index.html"
+  status = 404

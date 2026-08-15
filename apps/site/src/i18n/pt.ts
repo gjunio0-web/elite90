@@ -613,6 +613,19 @@ export const pt = {
     credit: "Criado por GM Digital Bunker ©, 2026",
   },
 
+  // PAGINA 404
+  notFound: {
+    metaTitle: "Página não encontrada | Coach Ruiz",
+    metaDescription:
+      "O endereço acessado não existe ou saiu do ar. Volte à página inicial do programa ELITE90 PRO.",
+    eyebrow: "Erro 404",
+    title: "Página não encontrada",
+    body: "O endereço acessado não existe, mudou de lugar ou saiu do ar. O erro não é de quem chegou até aqui.",
+    primaryCta: "Voltar ao início",
+    shortcutsLabel: "Ou ir direto para",
+    ghostAriaLabel: "Erro 404",
+  },
+
   // FORMULÁRIO DE TRIAGEM
   form: {
     closeAriaLabel: "Fechar",

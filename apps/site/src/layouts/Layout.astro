@@ -17,6 +17,12 @@ interface Props {
   ogDescription?: string;
   locale: Locale;
   canonicalUrl?: string;
+  /**
+   * Marca a pagina como nao indexavel. Usado pela pagina 404: um endereco
+   * inexistente nao deve entrar no indice dos buscadores. "follow" mantem o
+   * rastreio dos links de volta para a home.
+   */
+  noindex?: boolean;
 }
 
 const {
@@ -26,6 +32,7 @@ const {
   ogDescription,
   locale,
   canonicalUrl,
+  noindex = false,
 } = Astro.props;
 
 const siteUrl = "https://coachruiz.com.br";
@@ -42,6 +49,7 @@ const canon = canonicalUrl ?? Astro.url.href;
     <!-- Primary -->
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="canonical" href={canon} />
 
     <!-- Favicon -->

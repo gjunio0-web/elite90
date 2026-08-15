@@ -3,8 +3,19 @@ import LanguageSwitcher from "./LanguageSwitcher.astro";
 import type { Locale } from "../i18n/utils";
 import type { Translations } from "../i18n/pt";
 
-interface Props { t: Translations; locale: Locale; }
-const { t, locale } = Astro.props;
+interface Props {
+  t: Translations;
+  locale: Locale;
+  /**
+   * Prefixo aplicado as ancoras do menu. Vazio (padrao) mantem o
+   * comportamento historico das paginas iniciais, onde "#pilares" rola dentro
+   * da propria pagina. Paginas fora da home -- a 404, por exemplo -- passam
+   * "/" ou "/en/" para que a mesma ancora vire "/#pilares" e leve de volta a
+   * pagina inicial em vez de nao ir a lugar nenhum.
+   */
+  hrefBase?: string;
+}
+const { t, locale, hrefBase = "" } = Astro.props;
 const n = t.nav;
 
 // Nav links in page order
@@ -26,7 +37,7 @@ const navLinks = [
   <div class="site-header__inner container">
 
     <!-- Logo -->
-    <a href="#" class="site-header__logo" id="logo-home-link" aria-label={n.logoAriaLabel}>
+    <a href={hrefBase || "#"} class="site-header__logo" id="logo-home-link" aria-label={n.logoAriaLabel}>
       <img
         src="/images/brand/logo-header.webp"
         srcset="/images/brand/logo-header.webp 1x, /images/brand/logo-header@2x.webp 2x"
@@ -43,7 +54,7 @@ const navLinks = [
       <div class="nav-flex-wrapper" id="nav-flex-wrapper" style="display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); width: 100%; max-height: 35px; overflow: hidden;">
         {navLinks.map(link => (
           <a
-            href={link.href}
+            href={`${hrefBase}${link.href}`}
             class="site-header__link"
             data-nav-link
             data-href={link.href}
@@ -99,7 +110,7 @@ const navLinks = [
   <nav class="mobile-drawer__panel" aria-label={n.mobileNavAriaLabel}>
     <button class="mobile-drawer__close" id="drawer-close" type="button" aria-label={n.close}>&#x2715;</button>
     {navLinks.map(link => (
-      <a href={link.href} class="mobile-drawer__link" data-drawer-link>{link.label}</a>
+      <a href={`${hrefBase}${link.href}`} class="mobile-drawer__link" data-drawer-link>{link.label}</a>
     ))}
     <div class="mobile-drawer__lang">
       <LanguageSwitcher currentLocale={locale} t={t} />
@@ -126,8 +137,13 @@ const navLinks = [
   window.addEventListener("scroll", updateHeader, { passive: true });
   updateHeader();
 
-  // Logo click -> smooth scroll to top
-  document.getElementById("logo-home-link")?.addEventListener("click", e => {
+  // Logo click -> smooth scroll to top.
+  // So intercepta quando o proprio href e "#" (paginas iniciais). Quando a
+  // pagina passa hrefBase, o logo vira um link real para a home e precisa
+  // navegar normalmente -- rolar para o topo da 404 nao levaria a lugar nenhum.
+  const logoLink = document.getElementById("logo-home-link") as HTMLAnchorElement | null;
+  logoLink?.addEventListener("click", e => {
+    if (logoLink.getAttribute("href") !== "#") return;
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: "smooth" });
   });

@@ -1,0 +1,222 @@
+---
+// --- ELITE90 PRO · Seção da página 404
+// Corpo visual da página de erro. Fica num componente próprio (e não dentro de
+// cada uma das duas páginas 404) para que PT e EN compartilhem a mesma marcação
+// e o mesmo CSS, sem duplicação que possa divergir com o tempo.
+import type { Translations } from "../../i18n/pt";
+
+interface Props {
+  t: Translations;
+  /** "/" na versão PT, "/en/" na versão EN — prefixo das âncoras da home. */
+  hrefBase: string;
+}
+const { t, hrefBase } = Astro.props;
+const nf = t.notFound;
+
+// Atalhos: um subconjunto do menu, escolhido pelas seções de maior valor para
+// quem caiu aqui por engano. As chaves de rótulo vêm de t.nav, já traduzidas.
+const shortcuts = [
+  { href: "#pilares", label: t.nav.method },
+  { href: "#resultados", label: t.nav.results },
+  { href: "#nossa-equipe", label: t.nav.team },
+  { href: "#conteudos", label: t.nav.content },
+  { href: "#faq", label: t.nav.faq },
+];
+---
+
+<main class="nf">
+  <div class="nf__ghost" aria-hidden="true">404</div>
+
+  <div class="nf__inner">
+    <p class="nf__eyebrow">{nf.eyebrow}</p>
+    <h1 class="nf__title">{nf.title}</h1>
+    <div class="nf__rule" role="presentation"></div>
+    <p class="nf__body">{nf.body}</p>
+
+    <div class="nf__actions">
+      <a class="btn-cta" href={hrefBase}>{nf.primaryCta}</a>
+      <button class="btn-ghost" type="button" id="nf-triage-btn" aria-haspopup="dialog">
+        {t.nav.applyCta}
+      </button>
+    </div>
+
+    <p class="nf__shortcuts-label">{nf.shortcutsLabel}</p>
+    <nav class="nf__shortcuts" aria-label={nf.shortcutsLabel}>
+      {shortcuts.map(s => (
+        <a href={`${hrefBase}${s.href}`} class="nf__shortcut">{s.label}</a>
+      ))}
+    </nav>
+  </div>
+</main>
+
+<script>
+  // O TriageModal escuta o evento "open-triage-modal" no document. Disparar o
+  // evento (em vez de adicionar este botão à lista de seletores dentro do
+  // TriageModal) mantém a alteração contida nesta página.
+  document.getElementById("nf-triage-btn")?.addEventListener("click", () => {
+    document.dispatchEvent(new CustomEvent("open-triage-modal"));
+  });
+</script>
+
+<style>
+  .nf {
+    position: relative;
+    /* 190px ≈ altura do rodapé + respiro: mantém o rodapé logo abaixo da
+       dobra em telas de altura comum, sem criar rolagem vazia. */
+    min-height: calc(100vh - 190px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: calc(80px + var(--space-8)) var(--space-5) var(--space-8);
+    overflow: hidden;
+  }
+
+  .nf__ghost {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -54%);
+    font-family: var(--font-display);
+    font-size: clamp(16rem, 42vw, 34rem);
+    line-height: 0.8;
+    letter-spacing: 0.02em;
+    color: var(--c-lime);
+    opacity: 0.05;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .nf__inner {
+    position: relative;
+    z-index: 1;
+    max-width: var(--max-w-text);
+  }
+
+  .nf__eyebrow {
+    font-family: var(--font-label);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--c-lime);
+    margin-bottom: var(--space-3);
+  }
+
+  .nf__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-display-xl);
+    color: var(--c-white);
+    text-transform: uppercase;
+    line-height: 1.05;
+    margin-bottom: var(--space-4);
+  }
+
+  .nf__rule {
+    width: 120px;
+    height: 1px;
+    background: var(--c-lime);
+    opacity: 0.5;
+    margin: 0 auto var(--space-4);
+  }
+
+  .nf__body {
+    font-family: var(--font-body);
+    font-size: var(--fs-body-lg);
+    color: var(--c-textbody);
+    line-height: 1.7;
+    margin-bottom: var(--space-6);
+  }
+
+  .nf__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: center;
+    margin-bottom: var(--space-7);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--c-white);
+    font-family: var(--font-body);
+    font-size: var(--fs-body-md);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1.125rem 2rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color var(--transition-base), color var(--transition-base);
+  }
+
+  .btn-ghost:hover,
+  .btn-ghost:focus-visible {
+    border-color: var(--c-lime);
+    color: var(--c-lime);
+  }
+
+  .btn-ghost:focus-visible {
+    outline: 2px solid var(--c-lime);
+    outline-offset: 3px;
+  }
+
+  .nf__shortcuts-label {
+    font-family: var(--font-label);
+    font-size: var(--fs-body-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--c-textsub);
+    margin-bottom: var(--space-3);
+  }
+
+  .nf__shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    justify-content: center;
+  }
+
+  .nf__shortcut {
+    font-family: var(--font-label);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(204, 204, 204, 0.75);
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba(166, 195, 0, 0.25);
+    transition: color var(--transition-base), border-color var(--transition-base);
+  }
+
+  .nf__shortcut:hover,
+  .nf__shortcut:focus-visible {
+    color: var(--c-lime);
+    border-bottom-color: var(--c-lime);
+  }
+
+  @media (max-width: 767px) {
+    .nf {
+      min-height: auto;
+      padding-top: calc(80px + var(--space-6));
+      padding-bottom: var(--space-7);
+    }
+    .nf__actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .nf__actions .btn-cta,
+    .nf__actions .btn-ghost {
+      width: 100%;
+    }
+  }
+</style>

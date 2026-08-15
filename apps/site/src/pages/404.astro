@@ -1,0 +1,34 @@
+---
+// --- ELITE90 PRO · Página 404 (pt-BR)
+// Pré-renderizada: o Astro emite dist/404.html, servido pelo Netlify com
+// status 404 para qualquer endereço não encontrado fora de /en/.
+export const prerender = true;
+
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import TriageModal from "../components/TriageModal.astro";
+import ToastContainer from "../components/sections/ToastContainer.astro";
+import NotFoundSection from "../components/sections/NotFoundSection.astro";
+import { useTranslations } from "../i18n/utils";
+
+const locale = "pt-br";
+const t = useTranslations(locale);
+---
+
+<Layout
+  title={t.notFound.metaTitle}
+  description={t.notFound.metaDescription}
+  locale={locale}
+  noindex={true}
+>
+  <Header t={t} locale={locale} hrefBase="/" />
+  <NotFoundSection t={t} hrefBase="/" />
+  <Footer t={t} />
+  <TriageModal t={t} locale={locale} />
+  <ToastContainer />
+</Layout>
+
+<style is:global>
+  html, body { overflow-x: hidden; max-width: 100%; }
+</style>

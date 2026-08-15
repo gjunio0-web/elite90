@@ -564,6 +564,18 @@ export const en: Translations = {
     credit: "Created by GM Digital Bunker ©, 2026",
   },
 
+  notFound: {
+    metaTitle: "Page not found | Coach Ruiz",
+    metaDescription:
+      "The address you reached doesn't exist or is no longer available. Return to the ELITE90 PRO home page.",
+    eyebrow: "Error 404",
+    title: "Page not found",
+    body: "The address you reached doesn't exist, has moved, or is no longer available. Nothing here is your fault.",
+    primaryCta: "Back to home",
+    shortcutsLabel: "Or go straight to",
+    ghostAriaLabel: "Error 404",
+  },
+
   form: {
     closeAriaLabel: "Close",
     title: "Request my spot",
