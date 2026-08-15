@@ -420,14 +420,45 @@ const navLinks = [
     document.fonts.ready.then(() => {
       syncOverflowMenu();
     });
+    // "ready" resolve UMA VEZ e pode legitimamente resolver antes de um
+    // subconjunto de fonte que só é requisitado depois: o Raleway usado nos
+    // links (--font-label) vem do @fontsource, particionado em vários
+    // @font-face por unicode-range (latin, latin-ext, cyrillic...), cada um
+    // baixado sob demanda; e o pacote usa font-display:swap, então o texto do
+    // menu pinta primeiro com a fonte de fallback e troca de largura quando
+    // cada lote termina — silenciosamente, depois de "ready" já ter resolvido
+    // uma vez. "loadingdone" dispara a CADA lote concluído, não só no
+    // primeiro, e é o sinal que realmente corresponde a essa causa.
+    document.fonts.addEventListener("loadingdone", syncOverflowMenu);
   } else {
     setTimeout(syncOverflowMenu, 100);
   }
   window.addEventListener("load", syncOverflowMenu);
 
-  // Checagem tardia de segurança: cobre trocas de fonte ou reflows que
-  // terminem depois de "load" (não deveria acontecer, mas é barato conferir).
-  setTimeout(syncOverflowMenu, 1500);
+  // Rede de segurança agnóstica de causa: por ~3s depois do load, confere a
+  // cada quadro se o conteúdo real bate com o que foi calculado. As tentativas
+  // anteriores (load, fonts.ready, um único timer em 1500ms, visibilitychange)
+  // apostavam em UM evento específico avisar que algo mudou — e o relato
+  // deste bug voltou a acontecer mesmo depois de todos eles já estarem no
+  // lugar. Em vez de caçar mais um gatilho específico (a suspeita mais forte
+  // que resta é comportamento de ResizeObserver variando entre navegadores
+  // neste exato cenário de overflow:hidden + max-height, algo que não dá pra
+  // confirmar testando só em Chromium), esta rede não depende de nenhum
+  // evento avisar: lê o sintoma direto (scrollHeight > clientHeight) a cada
+  // quadro, o que é barato o bastante por ser só leitura — só chama
+  // syncOverflowMenu(), que escreve no DOM, quando algo realmente estourou.
+  let quadrosVigilancia = 0;
+  const MAX_QUADROS_VIGILANCIA = 180; // ~3s a 60fps
+  function vigiaQuadroAQuadro() {
+    quadrosVigilancia += 1;
+    if (navFlexWrapper && navFlexWrapper.scrollHeight > navFlexWrapper.clientHeight + 1) {
+      syncOverflowMenu();
+    }
+    if (quadrosVigilancia < MAX_QUADROS_VIGILANCIA) {
+      requestAnimationFrame(vigiaQuadroAQuadro);
+    }
+  }
+  requestAnimationFrame(vigiaQuadroAQuadro);
 
   // Uma aba aberta em segundo plano (ex.: link aberto com o botão do meio)
   // pode ter timers e ResizeObserver atrasados pelo navegador enquanto não
