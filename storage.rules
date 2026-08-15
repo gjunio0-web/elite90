@@ -22,9 +22,20 @@ service firebase.storage {
   match /b/{bucket}/o {
 
     // ── HOMOLOGAÇÃO — REMOVER NO FIM DO PROJETO
-    // Fotos sintéticas usadas por scripts/seed-triagem-bulk.ts.
-    // Leitura pública, escrita bloqueada. Entra na família (C) da lista de
-    // limpeza, junto com o próprio script que a consome.
+    // Fotos sintéticas usadas por scripts/seed-triagem-bulk.ts. São imagens de
+    // pessoas que não existem; nenhuma foto real de candidato fica aqui (o
+    // submit-lead grava sempre em leads/{uploadId}/, coberto pela regra final).
+    //
+    // ALCANCE REAL desta permissão: `read` inclui LISTAR o conteúdo do prefixo,
+    // não só abrir um arquivo cujo caminho já se conhece. Na prática, qualquer
+    // pessoa na internet consegue enumerar e baixar TODO o conteúdo de
+    // test_seed/. Aceito por serem imagens sintéticas — mas é bom saber que a
+    // exposição é essa, e não "só quem souber o endereço".
+    //
+    // Não substituir por leitura admin-only: as fichas fictícias precisam ter
+    // foto visível no painel para os testes de triagem fazerem sentido. A saída
+    // correta é a remoção no encerramento, não o fechamento agora.
+    // Entra na família (C) da lista de limpeza, junto com o script que a consome.
     match /test_seed/{allPaths=**} {
       allow read:  if true;
       allow write: if false;

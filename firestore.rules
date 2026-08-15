@@ -15,10 +15,16 @@ rules_version = '2';
 // deste projeto é o custom claim `admin`, atribuído manualmente por
 // scripts/set-admin-claim.js.
 //
-// ESTÁGIO ATUAL (1 de 2): admin-only. Mantém funcionando as duas leituras
-// diretas que ainda existem em admin/fichas.astro (linhas 1181 e 1982).
+// ESTÁGIO ATUAL (1 de 2): admin-only. Mantém funcionando as leituras diretas
+// que ainda existem no navegador — admin/fichas.astro:1181 (leads) e
+// admin/fichas.astro:1985 (avaliacoes) — e a de admin/atletas.astro:4888
+// (athletes), esta última pendente de item de backlog próprio no épico do M2.
 // ESTÁGIO FINAL (2 de 2): negar tudo, depois que essas leituras migrarem
 // para funções de servidor. Ver bloco comentado no fim do arquivo.
+//
+// Números de linha conferidos contra o código em 15/08/2026. Se divergirem,
+// vale localizar pelo trecho (getDocs de "leads" / "avaliacoes" / "athletes")
+// em vez de confiar na linha.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -32,6 +38,11 @@ service cloud.firestore {
     // Leitura: painel admin (fichas.astro:1181).
     // Alteração: troca de status (fichas.astro:1381) — a migrar para função.
     // Exclusão: só via delete-lead (Admin SDK) e purge-rejected-leads.
+    // ESCOPO DA ALTERAÇÃO: `update` aqui permite ao admin alterar QUALQUER
+    // campo da ficha, não só `status` — a regra é mais larga que o uso real.
+    // Decisão consciente (15/08/2026): restringir campo a campo seria trabalho
+    // jogado fora, já que esta escrita deve migrar para função de servidor.
+    // Fechar no momento da migração, não antes.
     match /leads/{leadId} {
       allow read:   if isAdmin();
       allow update: if isAdmin();
@@ -39,11 +50,14 @@ service cloud.firestore {
     }
 
     // ── AVALIAÇÕES
-    // Leitura: painel admin (fichas.astro:1982).
+    // Leitura: painel admin (fichas.astro:1985, filtro por leadId na 1984).
     // Escrita: só via send-evaluation / resend-evaluation (Admin SDK).
-    // Nota: a gravação de `lastLinkCopiedAt` em fichas.astro:2077 SEMPRE
-    // falhou por causa desta regra — o erro era engolido por um .catch()
-    // vazio. Isso confirma, empiricamente, que aquela linha é código morto.
+    // Histórico: existiu no painel uma gravação de `lastLinkCopiedAt` nesta
+    // coleção, feita direto do navegador ao copiar o link da avaliação. Ela
+    // teria falhado assim que esta regra entrasse em vigor, e o erro seria
+    // engolido por um .catch() vazio. O campo não era lido em nenhum ponto do
+    // código — era telemetria morta. REMOVIDA do painel em 15/08/2026.
+    // Não reintroduzir: não é funcionalidade faltando.
     match /avaliacoes/{avaliacaoId} {
       allow read:  if isAdmin();
       allow write: if false;
@@ -56,8 +70,12 @@ service cloud.firestore {
       allow read:  if isAdmin();
       allow write: if false;
 
-      // Subcoleções do M2 (weights, checkins, plans, evaluations):
-      // escrita e leitura exclusivamente por função de servidor.
+      // Subcoleções do M2: o wildcard {subcollection} nega TODAS, existentes e
+      // futuras — não é preciso enumerá-las aqui, e nenhuma escapa por omissão.
+      // As previstas no esquema de persistência v3 são weights, checkins e
+      // plans; a lista deve ser conferida contra o esquema quando o M2 ganhar
+      // back-end, para garantir que nenhuma precise de acesso direto.
+      // Escrita e leitura exclusivamente por função de servidor.
       match /{subcollection}/{docId} {
         allow read, write: if false;
       }
