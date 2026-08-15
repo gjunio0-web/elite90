@@ -1,4 +1,4 @@
-// ELITE 90 PRO · delete-lead
+// ELITE90 PRO · delete-lead
 // Netlify Function: exclui permanentemente a ficha de um lead (LGPD Art. 18, VI).
 // Remove as fotos do Firebase Storage antes de apagar o documento Firestore,
 // garantindo que nenhum dado pessoal permaneça no bucket após a exclusão.

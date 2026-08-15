@@ -1,12 +1,12 @@
-// --- ELITE 90 PRO · Translations EN
+// --- ELITE90 PRO · Translations EN
 import type { Translations } from "./pt";
 
 export const en: Translations = {
   meta: {
-    title: "Coach Ruiz | ELITE 90 PRO - High Performance Physical Consulting",
+    title: "Coach Ruiz | ELITE90 PRO - High Performance Physical Consulting",
     description:
       "90-day body transformation program. Individualized protocol with training, nutrition and multidisciplinary support. Limited spots.",
-    ogTitle: "Coach Ruiz | ELITE 90 PRO",
+    ogTitle: "Coach Ruiz | ELITE90 PRO",
     ogDescription:
       "Build the physique you deserve. 90 days. Elite protocol.",
   },
@@ -38,7 +38,7 @@ export const en: Translations = {
   schedule: {
     ariaLabel: "Schedule",
     eyebrow: "The program",
-    title: "ELITE 90 PRO Program Schedule",
+    title: "ELITE90 PRO Program Schedule",
     phases: [
       {
         number: "01",
@@ -73,7 +73,7 @@ export const en: Translations = {
     ariaLabel: "Program pillars",
     resultAriaLabel: "Result:",
     eyebrow: "The method",
-    title: "ELITE 90 PRO Program Pillars",
+    title: "ELITE90 PRO Program Pillars",
     intro:
       "Performance. Discipline. Longevity. These are not buzzwords - they are the three vectors of a system. Together, they produce the only result that matters: the physique as the inevitable consequence of a correct method.",
     items: [
@@ -107,7 +107,7 @@ export const en: Translations = {
     paragraphs: [
       "The belief that muscle volume and extreme definition are privileges of youth is the biggest obstacle between you and the physique you deserve. And it is wrong.",
       "The biology of a man aged 35 to 55 responds better to long-term protocols, better to consistency than sporadic intensity. What is missing is not time or biology. It is the correct system.",
-      "Almost 90% of mentees are between 35 and 55 years old. ELITE 90 PRO was built specifically for this profile.",
+      "Almost 90% of mentees are between 35 and 55 years old. ELITE90 PRO was built specifically for this profile.",
     ],
   },
 
@@ -115,7 +115,7 @@ export const en: Translations = {
     ariaLabel: "Real results",
     eyebrow: "Real proof",
     title: "Real Results",
-    titleAccent: "achieved through the ELITE 90 PRO Program",
+    titleAccent: "achieved through the ELITE90 PRO Program",
     beforeLabel: "Before",
     afterLabel: "After",
     readMore: "Read more",
@@ -127,7 +127,7 @@ export const en: Translations = {
   process: {
     ariaLabel: "How it works",
     eyebrow: "How it works",
-    title: "Step by step to join the ELITE 90 PRO Program",
+    title: "Step by step to join the ELITE90 PRO Program",
     steps: [
       { who: "You", title: "Online application form", body: "3 questions, 2 minutes." },
       { who: "Ruiz", title: "Form review", body: "Approved candidates are contacted within 48 business hours." },
@@ -215,7 +215,7 @@ export const en: Translations = {
     filters: {
       originLabel: "Origin",
       originAll: "All",
-      originOriginal: "Original ELITE 90 PRO",
+      originOriginal: "Original ELITE90 PRO",
       originCurated: "Curated by the Coach",
       typeLabel: "Type",
       typePodcast: "Podcast",
@@ -233,7 +233,7 @@ export const en: Translations = {
     },
     loadMore: "Load more content",
     showLess: "Show less",
-    notifyMe: "Join the ELITE 90 PRO Program to follow new content as it drops",
+    notifyMe: "Join the ELITE90 PRO Program to follow new content as it drops",
     prevAriaLabel: "Previous content",
     nextAriaLabel: "Next content",
     downloadCta: "Download",
@@ -294,7 +294,7 @@ export const en: Translations = {
         demo: false,
       },
       {
-        title: "ELITE 90 PRO Podcast · Ep. 01 — Why most people fail at 40",
+        title: "ELITE90 PRO Podcast · Ep. 01 — Why most people fail at 40",
         body: "Coach Fernando on the most common mistakes people make when restarting training as an adult.",
         meta: "Podcast · Audio",
         origin: "original",
@@ -304,7 +304,7 @@ export const en: Translations = {
         demo: true,
       },
       {
-        title: "ELITE 90 PRO Podcast · Ep. 02 — Recovery for a packed schedule",
+        title: "ELITE90 PRO Podcast · Ep. 02 — Recovery for a packed schedule",
         body: "Sleep, stress and active recovery for those training on an executive schedule.",
         meta: "Podcast · Audio",
         origin: "original",
@@ -315,7 +315,7 @@ export const en: Translations = {
       },
       {
         title: "Training routine for business travel",
-        body: "How to keep the ELITE 90 PRO program on track even during weeks away from home.",
+        body: "How to keep the ELITE90 PRO program on track even during weeks away from home.",
         meta: "Article · 6 min read",
         origin: "original",
         tipo: "artigo",
@@ -374,7 +374,7 @@ export const en: Translations = {
         demo: true,
       },
       {
-        title: "ELITE 90 PRO Podcast · Ep. 03 — Discipline without obsession",
+        title: "ELITE90 PRO Podcast · Ep. 03 — Discipline without obsession",
         body: "Where the line falls between healthy consistency and perfectionism in the program.",
         meta: "Podcast · Audio",
         origin: "original",
@@ -456,7 +456,7 @@ export const en: Translations = {
       {
         question: "What is the investment?",
         answer:
-          "The value is presented at the approval interview, after analyzing your profile. ELITE 90 PRO is a high-ticket consulting service - not an off-the-shelf product.",
+          "The value is presented at the approval interview, after analyzing your profile. ELITE90 PRO is a high-ticket consulting service - not an off-the-shelf product.",
       },
     ],
   },

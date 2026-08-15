@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// ELITE 90 PRO · Regras de segurança do Cloud Storage
+// ELITE90 PRO · Regras de segurança do Cloud Storage
 // Bucket: elite90-c716b.firebasestorage.app
 //
 // PRINCÍPIO: nenhum arquivo entra ou sai pelo navegador.

@@ -1,4 +1,4 @@
-// ELITE 90 PRO · _scoring
+// ELITE90 PRO · _scoring
 // Módulo compartilhado: lógica de cálculo de score de triagem.
 // Importado por generate-triage-score.ts e submit-lead.ts.
 // O prefixo _ impede o Netlify de tratar este arquivo como endpoint.
@@ -149,11 +149,11 @@ export async function ajusteIA(lead: Record<string, any>): Promise<{ ajuste: num
 
   const prompt = `Você é um assistente de triagem do Coach Ruiz, especialista em fisiculturismo de alto nível.
 
-Analise os campos abaixo de um candidato ao Programa ELITE 90 PRO e retorne um ajuste de pontuação entre -10 e +10, acompanhado de uma justificativa objetiva de até 2 linhas.
+Analise os campos abaixo de um candidato ao Programa ELITE90 PRO e retorne um ajuste de pontuação entre -10 e +10, acompanhado de uma justificativa objetiva de até 2 linhas.
 
 Critérios de ajuste POSITIVO: protocolo de TRT detalhado e clinicamente coerente, histórico competitivo relevante (Classic Physique, Men's Physique ou categorias similares), stack de suplementação sofisticado, lesão resolvida com tratamento documentado.
 
-Critérios de ajuste NEGATIVO: protocolo de TRT vago ou incoerente (risco clínico não gerenciado), objetivo "Outro" incompatível com a metodologia ELITE 90 PRO, lesão grave recente sem indicação de tratamento, suplementação inexistente apesar de declarar SIM.
+Critérios de ajuste NEGATIVO: protocolo de TRT vago ou incoerente (risco clínico não gerenciado), objetivo "Outro" incompatível com a metodologia ELITE90 PRO, lesão grave recente sem indicação de tratamento, suplementação inexistente apesar de declarar SIM.
 
 CAMPOS PARA ANÁLISE:
 ${camposTexto.join("\n")}

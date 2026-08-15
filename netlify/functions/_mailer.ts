@@ -1,4 +1,4 @@
-// ELITE 90 PRO · _mailer
+// ELITE90 PRO · _mailer
 // Módulo compartilhado: ÚNICO ponto de envio de e-mail da plataforma (Resend).
 // Importado por submit-lead.ts, send-evaluation.ts e resend-evaluation.ts.
 // O prefixo _ impede o Netlify de tratar este arquivo como endpoint.
@@ -8,7 +8,7 @@
 //   RESEND_FROM    — remetente exibido ao destinatário, no formato
 //                    "Nome <endereco@dominio>". É o que difere entre ambientes:
 //                    em homologação, o remetente da caixa de areia do Resend
-//                    ("ELITE 90 PRO Testes <onboarding@resend.dev>"), que só
+//                    ("ELITE90 PRO Testes <onboarding@resend.dev>"), que só
 //                    entrega para o endereço do titular da conta; em produção,
 //                    o endereço do domínio próprio, que exige o domínio
 //                    verificado no Resend (registros SPF e DKIM publicados).

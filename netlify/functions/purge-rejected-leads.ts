@@ -1,7 +1,7 @@
-// --- ELITE 90 PRO · purge-rejected-leads
+// --- ELITE90 PRO · purge-rejected-leads
 // Netlify Scheduled Function: rotina de retenção de dados (LGPD, Art. 16).
 //
-// Política definida pelo controlador (ELITE 90 PRO / Coach Ruiz):
+// Política definida pelo controlador (ELITE90 PRO / Coach Ruiz):
 //   Leads com status "recusado" são eliminados permanentemente 90 dias
 //   após a última atualização de status (campo "updatedAt").
 //

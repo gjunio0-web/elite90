@@ -1,4 +1,4 @@
-// ELITE 90 PRO · _firebase
+// ELITE90 PRO · _firebase
 // Módulo compartilhado: ÚNICA inicialização do Firebase Admin SDK.
 // Importado por todas as Netlify Functions que falam com o Firestore, o
 // Storage ou o Auth. O prefixo _ impede o Netlify de tratar este arquivo

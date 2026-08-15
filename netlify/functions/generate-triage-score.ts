@@ -1,4 +1,4 @@
-// ELITE 90 PRO · generate-triage-score
+// ELITE90 PRO · generate-triage-score
 // Netlify Function: calcula o score de triagem automático (0–100) de um lead.
 // Aceita dois modos de autenticação:
 //   • Interno (function-to-function): header X-Function-Secret == FUNCTION_SECRET

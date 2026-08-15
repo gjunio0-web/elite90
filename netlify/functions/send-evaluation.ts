@@ -1,4 +1,4 @@
-// --- ELITE 90 PRO · send-evaluation
+// --- ELITE90 PRO · send-evaluation
 // Netlify Function: salva o documento de avaliação no Firestore,
 // gera token único, cria a página /avaliacao/{token} e envia por e-mail.
 
@@ -24,7 +24,7 @@ function buildEvaluationEmail(
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>ELITE 90 PRO - Sua Avaliação</title>
+<title>ELITE90 PRO - Sua Avaliação</title>
 <style>
   body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
   .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
@@ -74,7 +74,7 @@ function buildEvaluationEmail(
 
   <div class="sig">
     <div class="sig-name">Fernando Ruiz</div>
-    <div class="sig-title">Coach Ruiz · ELITE 90 PRO</div>
+    <div class="sig-title">Coach Ruiz · ELITE90 PRO</div>
   </div>
 </div>
 </body>
@@ -131,7 +131,7 @@ export const handler = async (event: any) => {
     // neste caminho, a garantia que o parágrafo acima descreve.
     const { id: evaluationEmailId } = await sendMail({
       to: lead.email,
-      subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - ELITE 90 PRO`,
+      subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - ELITE90 PRO`,
       html: buildEvaluationEmail(lead.nome, token, sections, siteUrl),
     });
 

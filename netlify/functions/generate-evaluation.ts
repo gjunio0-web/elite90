@@ -1,4 +1,4 @@
-// --- ELITE 90 PRO · generate-evaluation
+// --- ELITE90 PRO · generate-evaluation
 // Netlify Function: gera rascunho do documento de avaliação via Gemini 2.5 Flash.
 // Chamada pelo painel admin ao clicar em "Gerar avaliação".
 

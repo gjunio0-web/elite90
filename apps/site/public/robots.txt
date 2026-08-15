@@ -1,4 +1,4 @@
-# ELITE 90 PRO · coachruiz.com.br
+# ELITE90 PRO · coachruiz.com.br
 
 User-agent: *
 Allow: /
