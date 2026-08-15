@@ -8,6 +8,12 @@ dist
 .astro
 .turbo
 
+# Dados pessoais — NUNCA commitar
+# Copias de seguranca do inventario de leads: contem nome, e-mail, data de
+# nascimento, informacoes de saude e o texto integral das avaliacoes de pessoas
+# reais. Gravadas na raiz do repositorio pelo script de inventario.
+backup-leads-*.json
+
 # Environment variables — NUNCA commitar
 .env
 .env.local
