@@ -39,14 +39,52 @@ async function uploadFotos(fotosB64: string[], uploadId: string): Promise<string
   return paths;
 }
 
-function buildEmail(nome: string, objetivo: string): string {
+// Textos por idioma. A estrutura visual é única — só o conteúdo muda, para que
+// um ajuste de estilo não precise ser feito duas vezes e sair divergente.
+function buildEmail(nome: string, objetivo: string, idioma: string): string {
   const firstName = nome.split(" ")[0];
+  const en = idioma === "en";
+  const t = en ? {
+    lang: "en",
+    title: "ELITE90 PRO - Application received",
+    tagline: "High Performance Strategist",
+    h1: `${firstName}, we received your application.`,
+    p1a: `You completed the screening form for the`,
+    program: "ELITE90 PRO Program",
+    p1b: `Most people think about this for months. You did it today.`,
+    goalLabel: "Stated goal:",
+    goalFallback: "not provided",
+    p2b: "That is where my analysis begins.",
+    stepsTitle: "What happens now:",
+    step1: "- Your application is under review.",
+    step2: "- Within 2 business days you will be contacted to schedule the approval interview.",
+    step3: "- The interview is by video and takes about 30 minutes.",
+    scarcity: "Limited spots per cycle. Approval subject to screening.",
+    sigTitle: "Coach Ruiz | ELITE90 PRO",
+  } : {
+    lang: "pt-BR",
+    title: "ELITE90 PRO - Ficha recebida",
+    tagline: "Estrategista em Alta Performance",
+    h1: `${firstName}, sua ficha foi recebida.`,
+    p1a: "Você preencheu a ficha de triagem do",
+    program: "Programa ELITE90 PRO",
+    p1b: "Isso já diz algo sobre você - a maioria continua procrastinando. Você agiu.",
+    goalLabel: "Objetivo declarado:",
+    goalFallback: "não informado",
+    p2b: "É com essa informação que começo a análise.",
+    stepsTitle: "O que acontece agora:",
+    step1: "- Sua ficha está em análise.",
+    step2: "- Em até 48 horas úteis você receberá um contato para agendar a entrevista de aprovação.",
+    step3: "- A entrevista é por vídeo e dura aproximadamente 30 minutos.",
+    scarcity: "Vagas limitadas por ciclo. Aprovação sujeita à triagem.",
+    sigTitle: "Coach Ruiz | ELITE90 PRO",
+  };
   return `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="${t.lang}">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>ELITE90 PRO - Ficha recebida</title>
+<title>${t.title}</title>
 <style>
   body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
   .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
@@ -67,26 +105,26 @@ function buildEmail(nome: string, objetivo: string): string {
 <body>
 <div class="wrap">
   <div class="logo">Coach Ruiz</div>
-  <div class="tagline">Estrategista em Alta Performance</div>
-  <h1>${firstName}, sua ficha foi recebida.</h1>
+  <div class="tagline">${t.tagline}</div>
+  <h1>${t.h1}</h1>
   <p>
-    Você preencheu a ficha de triagem do <span class="highlight">Programa ELITE90 PRO</span>.
-    Isso já diz algo sobre você - a maioria continua procrastinando. Você agiu.
+    ${t.p1a} <span class="highlight">${t.program}</span>.
+    ${t.p1b}
   </p>
   <p>
-    Objetivo declarado: <span class="highlight">${objetivo || "não informado"}</span>. 
-    É com essa informação que começo a análise.
+    ${t.goalLabel} <span class="highlight">${objetivo || t.goalFallback}</span>. 
+    ${t.p2b}
   </p>
   <div class="steps">
-    <p><strong style="color:#fff;">O que acontece agora:</strong></p>
-    <p>- Sua ficha está em análise.</p>
-    <p>- Em até 48 horas úteis você receberá um contato para agendar a entrevista de aprovação.</p>
-    <p>- A entrevista é por vídeo e dura aproximadamente 30 minutos.</p>
+    <p><strong style="color:#fff;">${t.stepsTitle}</strong></p>
+    <p>${t.step1}</p>
+    <p>${t.step2}</p>
+    <p>${t.step3}</p>
   </div>
-  <p class="scarcity">Vagas limitadas por ciclo. Aprovação sujeita à triagem.</p>
+  <p class="scarcity">${t.scarcity}</p>
   <div class="sig">
     <div class="sig-name">Fernando Ruiz</div>
-    <div class="sig-title">Coach Ruiz | ELITE90 PRO</div>
+    <div class="sig-title">${t.sigTitle}</div>
   </div>
 </div>
 </body>
@@ -229,8 +267,10 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     try {
       const { id } = await sendMail({
         to: email.trim(),
-        subject: `${nome.split(" ")[0]}, sua ficha foi recebida - ELITE90 PRO`,
-        html: buildEmail(nome, objetivoFinal),
+        subject: idioma === "en"
+          ? `${nome.split(" ")[0]}, we received your application - ELITE90 PRO`
+          : `${nome.split(" ")[0]}, sua ficha foi recebida - ELITE90 PRO`,
+        html: buildEmail(nome, objetivoFinal, idioma),
       });
       confirmationEmailId = id;
     } catch (mailErr: any) {

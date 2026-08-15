@@ -13,18 +13,45 @@ function buildEvaluationEmail(
   nome: string,
   token: string,
   sections: Record<string, string>,
-  siteUrl: string
+  siteUrl: string,
+  idioma: string
 ): string {
   const firstName = nome.split(" ")[0];
   const pageUrl = `${siteUrl}/avaliacao/${token}`;
+  const en = idioma === "en";
+  const t = en ? {
+    lang: "en",
+    title: "ELITE90 PRO - Your Assessment",
+    tagline: "High Performance Strategist",
+    h1: `${firstName}, your strategic plan is ready.`,
+    p1: "I reviewed your application carefully. Based on what you sent me, I prepared your",
+    docName: "Physique Preparation and Strategic Planning Guidelines",
+    p2: "This is the starting point. The document below contains my full analysis and the next steps to build the physique you deserve.",
+    previewTitle: "Preview - Assessment",
+    cta: "Access my full plan",
+    direct: "Or go directly to:",
+    sigTitle: "Coach Ruiz · ELITE90 PRO",
+  } : {
+    lang: "pt-BR",
+    title: "ELITE90 PRO - Sua Avaliação",
+    tagline: "Estrategista em Alta Performance",
+    h1: `${firstName}, seu planejamento estratégico está pronto.`,
+    p1: "Analisei sua ficha com atenção. Com base no que você me enviou, preparei suas",
+    docName: "Diretrizes de Preparação e Planejamento Estratégico do Físico",
+    p2: "Este é o ponto de partida. O documento abaixo contém minha análise completa e os próximos passos para construir o físico que você merece.",
+    previewTitle: "Prévia - Diagnóstico",
+    cta: "Acessar meu planejamento completo",
+    direct: "Ou acesse diretamente:",
+    sigTitle: "Coach Ruiz · ELITE90 PRO",
+  };
 
   return `
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="${t.lang}">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>ELITE90 PRO - Sua Avaliação</title>
+<title>${t.title}</title>
 <style>
   body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
   .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
@@ -45,36 +72,34 @@ function buildEvaluationEmail(
 <body>
 <div class="wrap">
   <div class="logo">Coach Ruiz</div>
-  <div class="tagline">Estrategista em Alta Performance</div>
+  <div class="tagline">${t.tagline}</div>
 
-  <h1>${firstName}, seu planejamento estratégico está pronto.</h1>
+  <h1>${t.h1}</h1>
 
   <p>
-    Analisei sua ficha com atenção. Com base no que você me enviou, 
-    preparei suas <span class="highlight">Diretrizes de Preparação e Planejamento Estratégico do Físico</span>.
+    ${t.p1} <span class="highlight">${t.docName}</span>.
   </p>
 
   <p>
-    Este é o ponto de partida. O documento abaixo contém minha análise completa 
-    e os próximos passos para construir o físico que você merece.
+    ${t.p2}
   </p>
 
   <div class="section-preview">
-    <div class="section-title">Prévia - Diagnóstico</div>
+    <div class="section-title">${t.previewTitle}</div>
     ${(sections.s1 ?? "").slice(0, 300)}${sections.s1?.length > 300 ? "..." : ""}
   </div>
 
   <div class="cta-wrap">
-    <a href="${pageUrl}" class="cta">Acessar meu planejamento completo</a>
+    <a href="${pageUrl}" class="cta">${t.cta}</a>
   </div>
 
   <p style="font-size:13px;color:#666;text-align:center;">
-    Ou acesse diretamente: <a href="${pageUrl}" style="color:#A6C300;">${pageUrl}</a>
+    ${t.direct} <a href="${pageUrl}" style="color:#A6C300;">${pageUrl}</a>
   </p>
 
   <div class="sig">
     <div class="sig-name">Fernando Ruiz</div>
-    <div class="sig-title">Coach Ruiz · ELITE90 PRO</div>
+    <div class="sig-title">${t.sigTitle}</div>
   </div>
 </div>
 </body>
@@ -129,10 +154,16 @@ export const handler = async (event: any) => {
     // Configuração ausente RECUSA o envio (o módulo _mailer lança), em vez de
     // seguir adiante gravando — o comportamento anterior anulava, justamente
     // neste caminho, a garantia que o parágrafo acima descreve.
+    // Idioma declarado na ficha ("pt-br" ou "en"). Qualquer outro valor cai no
+    // português — a reserva segura, dado o perfil predominante da base.
+    const idioma = lead.idioma === "en" ? "en" : "pt-br";
+
     const { id: evaluationEmailId } = await sendMail({
       to: lead.email,
-      subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - ELITE90 PRO`,
-      html: buildEvaluationEmail(lead.nome, token, sections, siteUrl),
+      subject: idioma === "en"
+        ? `${lead.nome.split(" ")[0]}, your strategic plan is ready - ELITE90 PRO`
+        : `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - ELITE90 PRO`,
+      html: buildEvaluationEmail(lead.nome, token, sections, siteUrl, idioma),
     });
 
     // Firestore writes only reach here if Resend accepted the email.
@@ -150,6 +181,8 @@ export const handler = async (event: any) => {
       expiresAt: ninetyDaysFromNow,
       resentCount: 0,
       emailId: evaluationEmailId,
+      // Gravado aqui para que o reenvio não precise reler a ficha do lead.
+      idioma,
     });
 
     // Update lead status

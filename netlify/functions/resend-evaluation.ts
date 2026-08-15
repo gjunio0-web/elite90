@@ -9,17 +9,41 @@ import { getApp, getDb } from "./_firebase";
 import { sendMail } from "./_mailer";
 
 
-function buildResendEmail(nome: string, token: string, siteUrl: string): string {
+function buildResendEmail(nome: string, token: string, siteUrl: string, idioma: string): string {
   const firstName = nome.split(" ")[0];
   const pageUrl = `${siteUrl}/avaliacao/${token}`;
+  const en = idioma === "en";
+  const t = en ? {
+    lang: "en",
+    title: "ELITE90 PRO - Access to your assessment",
+    tagline: "High Performance Strategist",
+    h1: `${firstName}, here is the access to your assessment.`,
+    p1: "As requested, we are resending the link to your",
+    docName: "Physique Preparation and Strategic Planning Guidelines",
+    notice: "This is the same document Coach Ruiz already prepared — the content has not changed.",
+    cta: "Access my plan",
+    direct: "Or go directly to:",
+    sigTitle: "Coach Ruiz · ELITE90 PRO",
+  } : {
+    lang: "pt-BR",
+    title: "ELITE90 PRO - Acesso à sua avaliação",
+    tagline: "Estrategista em Alta Performance",
+    h1: `${firstName}, segue o acesso à sua avaliação.`,
+    p1: "Conforme solicitado, reenviamos o link de acesso às suas",
+    docName: "Diretrizes de Preparação e Planejamento Estratégico do Físico",
+    notice: "Este é o mesmo documento já preparado pelo Coach Ruiz — o conteúdo não foi alterado.",
+    cta: "Acessar meu planejamento",
+    direct: "Ou acesse diretamente:",
+    sigTitle: "Coach Ruiz · ELITE90 PRO",
+  };
 
   return `
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="${t.lang}">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>ELITE90 PRO - Acesso à sua avaliação</title>
+<title>${t.title}</title>
 <style>
   body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
   .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
@@ -39,30 +63,30 @@ function buildResendEmail(nome: string, token: string, siteUrl: string): string 
 <body>
 <div class="wrap">
   <div class="logo">Coach Ruiz</div>
-  <div class="tagline">Estrategista em Alta Performance</div>
+  <div class="tagline">${t.tagline}</div>
 
-  <h1>${firstName}, segue o acesso à sua avaliação.</h1>
+  <h1>${t.h1}</h1>
 
   <p>
-    Conforme solicitado, reenviamos o link de acesso às suas
-    <span class="highlight">Diretrizes de Preparação e Planejamento Estratégico do Físico</span>.
+    ${t.p1}
+    <span class="highlight">${t.docName}</span>.
   </p>
 
   <div class="notice">
-    Este é o mesmo documento já preparado pelo Coach Ruiz — o conteúdo não foi alterado.
+    ${t.notice}
   </div>
 
   <div class="cta-wrap">
-    <a href="${pageUrl}" class="cta">Acessar meu planejamento</a>
+    <a href="${pageUrl}" class="cta">${t.cta}</a>
   </div>
 
   <p style="font-size:13px;color:#666;text-align:center;">
-    Ou acesse diretamente: <a href="${pageUrl}" style="color:#A6C300;">${pageUrl}</a>
+    ${t.direct} <a href="${pageUrl}" style="color:#A6C300;">${pageUrl}</a>
   </p>
 
   <div class="sig">
     <div class="sig-name">Fernando Ruiz</div>
-    <div class="sig-title">Coach Ruiz · ELITE90 PRO</div>
+    <div class="sig-title">${t.sigTitle}</div>
   </div>
 </div>
 </body>
@@ -110,10 +134,26 @@ export const handler = async (event: any) => {
 
     // Configuração ausente lança e cai no catch abaixo (resposta 500), mantendo
     // o comportamento que esta função já tinha: nunca registrar reenvio sem envio.
+    // Avaliações criadas antes do campo `idioma` não o carregam — nesse caso
+    // relemos a ficha de origem, em vez de assumir português e reenviar em
+    // idioma diferente do primeiro envio.
+    let idioma = avaliacao.idioma === "en" ? "en" : (avaliacao.idioma === "pt-br" ? "pt-br" : null);
+    if (!idioma && avaliacao.leadId) {
+      try {
+        const leadDoc = await db.collection("leads").doc(avaliacao.leadId).get();
+        idioma = leadDoc.exists && (leadDoc.data() as any)?.idioma === "en" ? "en" : "pt-br";
+      } catch {
+        idioma = "pt-br";
+      }
+    }
+    if (!idioma) idioma = "pt-br";
+
     const { id: resentEmailId } = await sendMail({
       to: avaliacao.email,
-      subject: `${avaliacao.nome.split(" ")[0]}, segue o acesso à sua avaliação — ELITE90 PRO`,
-      html: buildResendEmail(avaliacao.nome, avaliacao.token, siteUrl),
+      subject: idioma === "en"
+        ? `${avaliacao.nome.split(" ")[0]}, here is the access to your assessment — ELITE90 PRO`
+        : `${avaliacao.nome.split(" ")[0]}, segue o acesso à sua avaliação — ELITE90 PRO`,
+      html: buildResendEmail(avaliacao.nome, avaliacao.token, siteUrl, idioma),
     });
 
     await db.collection("avaliacoes").doc(evalId).update({

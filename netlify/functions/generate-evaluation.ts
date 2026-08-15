@@ -60,6 +60,12 @@ O coach fala como estrategista biológico, não como personal trainer.
 `;
 
 function buildPrompt(lead: Record<string, any>, previousDocs: string[], hasPhotos: boolean = false): string {
+  // O documento é redigido no idioma declarado na ficha. Sem isto, um lead
+  // captado pela versão em inglês do site receberia um e-mail em inglês com
+  // uma prévia em português — pior que o e-mail inteiro em português.
+  const idiomaSaida = lead.idioma === "en"
+    ? "\n- IDIOMA DE SAÍDA: redija TODO o conteúdo das 5 seções em INGLÊS. A terminologia técnica de fisiculturismo deve usar os termos correntes em inglês (body fat, fasted cardio, TRT, bulking, cutting). As instruções acima continuam em português; apenas o texto produzido muda de idioma."
+    : "";
   const prevContext = previousDocs.length > 0
     ? `\n\nDOCUMENTOS ANTERIORES DO COACH (para calibrar o estilo):\n${previousDocs.slice(0, 3).join("\n---\n")}`
     : "";
@@ -98,7 +104,7 @@ INSTRUÇÕES DE PREENCHIMENTO CRÍTICAS:
 - Cada seção deve ser resumida em apenas 1 parágrafo contínuo, extremamente denso, direto e focado nas condutas do atleta, sem enrolação.
 - Use exclusivamente a linguagem técnica e a terminologia do fisiculturismo de alto nível.
 - Onde os dados do atleta forem insuficientes para estruturar uma conduta, sinalize com [COMPLETAR] para que o coach revise manualmente depois.
-- IMPORTANTE: Forneça apenas o texto corrido correspondente a cada seção. Não inclua títulos, não use blocos de código Markdown (\`\`\`) e não tente estruturar chaves ou sintaxe JSON manualmente.
+- IMPORTANTE: Forneça apenas o texto corrido correspondente a cada seção. Não inclua títulos, não use blocos de código Markdown (\`\`\`) e não tente estruturar chaves ou sintaxe JSON manualmente.${idiomaSaida}
 ${hasPhotos ? `- As fotos do atleta estão incluídas nesta chamada como dados de imagem. Utilize-as para fundamentar a seção 01 (Diagnóstico Estético e Análise de Proporções): avalie qualidade epidérmica, percentual de gordura estimado visualmente, simetria muscular, densidade do tronco e marcadores visuais de resposta hormonal. Para as demais seções, baseie-se exclusivamente nos dados textuais acima.` : ""}
 `;
 }
