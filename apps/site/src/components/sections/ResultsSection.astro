@@ -155,9 +155,18 @@ const results = c.cases.map((item, i) => {
   /* Container mais largo só nesta seção (não mexe no --max-w-content
      global, que as outras seções continuam usando) — dá espaço para o
      carrossel de Resultados encaixar 3 cards por página no desktop em
-     vez de 2. 1200px fica com folga entre o piso de 3 cards (~1088px)
-     e o teto que passaria para 4 (~1400px). */
+     vez de 2.
+     1096px é calculado, não arredondado por acaso: o viewport do
+     carrossel (.results-viewport) é o que sobra do container depois de
+     descontar as duas setas (44px cada) e os dois gaps ao redor delas
+     (16px cada) — então container = viewport + 184. Um viewport maior
+     que o necessário para 3 cards (3×280px + 2×32px de gap = 904px)
+     deixa a sobra do lado direito (os cards ficam alinhados à esquerda
+     no trilho), abrindo um vão bem maior antes da seta direita do que
+     antes da esquerda. 1096px → viewport de 912px, ou seja, só 8px de
+     sobra além do necessário — o suficiente para não cair pra 2 cards
+     por arredondamento de subpixel, sem reabrir a assimetria. */
   .results .container {
-    max-width: 1200px;
+    max-width: 1096px;
   }
 </style>
