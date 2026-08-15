@@ -37,6 +37,26 @@ export const handler = async (event: any) => {
     if (!leadDoc.exists) return { statusCode: 404, body: "Lead não encontrado" };
 
     const lead = leadDoc.data() as Record<string, any>;
+
+    // GUARDA DE FICHA PROMOVIDA (15/08/2026)
+    // O atleta criado por promote-lead aponta para AS MESMAS fotos desta ficha
+    // (baselinePhotos = fotos_paths, sem cópia no Storage). Excluir a ficha
+    // apagaria as fotos do Dia 1 de um atleta ativo, e o campo continuaria
+    // preenchido com caminhos que não levam a lugar nenhum.
+    // Pedido legítimo de exclusão por parte de um atleta deve ser tratado a
+    // partir do registro do atleta — envolve encerrar um acompanhamento em
+    // curso, não apenas apagar uma ficha de candidatura.
+    if (lead.convertedAt) {
+      return {
+        statusCode: 409,
+        body: JSON.stringify({
+          error: "Esta ficha não pode ser excluída: o candidato já foi promovido a atleta. "
+               + "A remoção dos dados deve ser feita a partir do registro do atleta.",
+          athleteUid: lead.convertedAthleteUid ?? null,
+        }),
+      };
+    }
+
     const fotosPaths: string[] = Array.isArray(lead.fotos_paths) ? lead.fotos_paths : [];
 
     const bucketName = storageBucketName();

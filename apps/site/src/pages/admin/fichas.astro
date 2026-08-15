@@ -856,6 +856,52 @@ import AdminHeader from '../../components/AdminHeader.astro';
       color: var(--c-status-rejected) !important;
       border-bottom-color: rgba(192, 57, 43, 0.2) !important;
     }
+    .promoted-seal {
+      display: inline-block; margin-left: 6px;
+      font-family: var(--font-label); font-size: 0.58rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--c-lime); border: 1px solid var(--c-lime);
+      border-radius: 2px; padding: 2px 6px; vertical-align: middle;
+    }
+    .promotion-note {
+      font-family: var(--font-body); font-size: 0.78rem;
+      color: var(--c-textsub); line-height: 1.6; margin-bottom: var(--space-3);
+    }
+    .detail-section__title--promote { color: var(--c-lime) !important; }
+    .promote-field { margin-bottom: var(--space-3); text-align: left; }
+    .promote-field label {
+      display: block; font-family: var(--font-label); font-size: 0.62rem;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--c-textsub); margin-bottom: 6px;
+    }
+    .promote-field input, .promote-field select {
+      width: 100%; background: var(--c-darkbg);
+      border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card);
+      color: var(--c-white); font-family: var(--font-body);
+      font-size: 0.85rem; padding: 9px 11px;
+    }
+    .promote-check {
+      display: flex; align-items: flex-start; gap: 9px;
+      font-family: var(--font-body); font-size: 0.8rem;
+      color: var(--c-textbody, #C7C7C7); margin: var(--space-3) 0;
+      cursor: pointer; text-align: left;
+    }
+    .promote-warn {
+      background: rgba(230,126,34,0.09); border: 1px solid rgba(230,126,34,0.4);
+      border-radius: var(--radius-card); padding: 11px 13px;
+      font-family: var(--font-body); font-size: 0.75rem;
+      color: #E4B888; line-height: 1.55; margin-bottom: var(--space-4);
+      text-align: left;
+    }
+    .eval-cost-warn {
+      background: rgba(230,126,34,0.09);
+      border: 1px solid rgba(230,126,34,0.4);
+      border-radius: var(--radius-card);
+      padding: 10px 13px; margin-bottom: var(--space-3);
+      font-family: var(--font-body); font-size: 0.76rem;
+      color: #E4B888; line-height: 1.55;
+    }
+    .eval-cost-warn[hidden] { display: none; }
     .privacy-note {
       font-family: var(--font-body);
       font-size: 0.78rem;
@@ -895,6 +941,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       <div class="stat-card"><div class="stat-card__label">Aprovados</div><div class="stat-card__value" id="stat-app" style="color:var(--c-status-approved)">0</div></div>
       <div class="stat-card"><div class="stat-card__label">Recusados</div><div class="stat-card__value" id="stat-rejected" style="color:var(--c-status-rejected)">0</div></div>
       <div class="stat-card"><div class="stat-card__label">Avaliados</div><div class="stat-card__value" id="stat-eval" style="color:var(--c-status-sent)">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Promovidos</div><div class="stat-card__value" id="stat-promoted" style="color:var(--c-lime)">0</div></div>
     </div>
 
     <div class="toolbar">
@@ -907,6 +954,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <option value="aprovado">Aprovado</option>
           <option value="recusado">Recusado</option>
           <option value="avaliacao_enviada">Avaliação enviada</option>
+          <option value="promovido">Promovido a atleta</option>
         </select>
         <button type="button" id="filter-dropdown-btn" class="filter-select">
           <span id="filter-dropdown-label">Todos os status</span>
@@ -964,6 +1012,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
+      <!-- Aviso de custo: gerar avaliação para ficha ainda não aprovada consome
+           tempo do Coach e uma chamada de IA em quem talvez não entre no programa.
+           É orientação, não bloqueio — o envio continua permitido. -->
+      <p class="eval-cost-warn" id="eval-cost-warn" hidden></p>
       <div class="eval-actions">
         <button class="btn-sm btn-ai" id="btn-gen-ai">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="2.5"/></svg>
@@ -1058,6 +1110,50 @@ import AdminHeader from '../../components/AdminHeader.astro';
   </div>
 
   <!-- Modal de confirmação de reenvio -->
+  <!-- Promoção a atleta (ADM-04c1) — mesmo padrão visual dos modais acima -->
+  <div class="confirm-overlay" id="promote-overlay" hidden>
+    <div class="confirm-box">
+      <h3 class="confirm-title">Promover <span>a atleta</span></h3>
+      <p class="confirm-summary">
+        <strong id="promote-name"></strong> receberá uma conta de acesso e entrará no
+        ciclo de 90 dias a partir da data escolhida. As fotos enviadas na ficha
+        passam a ser as fotos de referência do Dia&nbsp;1.
+      </p>
+
+      <div class="promote-field">
+        <label for="promote-start">Data de início</label>
+        <input type="date" id="promote-start" />
+      </div>
+
+      <div class="promote-field">
+        <label for="promote-phase">Fase inicial</label>
+        <select id="promote-phase">
+          <option value="Bulking" selected>Bulking</option>
+          <option value="Cutting">Cutting</option>
+          <option value="Diet Break">Diet Break</option>
+        </select>
+      </div>
+
+      <label class="promote-check">
+        <input type="checkbox" id="promote-welcome" checked />
+        <span>Enviar e-mail de boas-vindas ao atleta</span>
+      </label>
+
+      <div class="promote-warn">
+        A conta de acesso é criada de imediato e a ficha deixa de poder ser excluída.
+        O e-mail não traz senha — o primeiro acesso ainda é enviado pelo Coach.
+      </div>
+
+      <p id="promote-error" hidden role="alert"
+         style="color:var(--c-status-rejected);font-size:0.78rem;margin-bottom:var(--space-3);"></p>
+
+      <div class="confirm-actions">
+        <button class="btn-sm btn-outline" id="promote-cancel">Cancelar</button>
+        <button class="btn-sm btn-primary" id="promote-confirm">Confirmar promoção</button>
+      </div>
+    </div>
+  </div>
+
   <div class="confirm-overlay" id="resend-overlay" hidden>
     <div class="confirm-box">
       <h3 class="confirm-title">Reenviar <span>acesso à avaliação</span></h3>
@@ -1214,6 +1310,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
       document.getElementById("stat-app").textContent=leads.filter(l=>l.status==="aprovado").length;
       document.getElementById("stat-rejected").textContent=leads.filter(l=>l.status==="recusado").length;
       document.getElementById("stat-eval").textContent=leads.filter(l=>l.status==="avaliacao_enviada").length;
+      // Promovido NÃO é um status: é derivado de convertedAt, para não
+      // sobrescrever o status anterior da ficha (aprovado / avaliação enviada).
+      document.getElementById("stat-promoted").textContent=leads.filter(l=>l.convertedAt).length;
     }
 
     const STATUS_LABEL={"novo":"Novo","em_analise":"Em análise","aprovado":"Aprovado","recusado":"Recusado","avaliacao_enviada":"Avaliação enviada"};
@@ -1221,23 +1320,29 @@ import AdminHeader from '../../components/AdminHeader.astro';
     // Quando status é "avaliacao_enviada", exibe badge somente-leitura — não permitir reversão manual,
     // pois o estado é criado exclusivamente pelo fluxo de envio (send-evaluation) e
     // revertê-lo manualmente causaria inconsistência com a coleção "avaliacoes".
+    // O selo acompanha o status em vez de substituí-lo: a ficha preserva o
+    // histórico (aprovada, avaliação enviada) depois da promoção.
+    function promotedSeal(lead){
+      return lead.convertedAt ? `<span class="promoted-seal" title="Promovido a atleta">Promovido</span>` : "";
+    }
+
     function statusControl(lead){
       if(lead.status==="avaliacao_enviada"){
-        return `<span class="status-badge status-badge--avaliacao_enviada">Avaliação enviada</span>`;
+        return `<span class="status-badge status-badge--avaliacao_enviada">Avaliação enviada</span>${promotedSeal(lead)}`;
       }
       return `<select class="status-sel status-sel--${lead.status}" data-id="${lead.id}" onchange="window.__updStatus(this)">
         <option value="novo" ${lead.status==="novo"?"selected":""}>Novo</option>
         <option value="em_analise" ${lead.status==="em_analise"?"selected":""}>Em análise</option>
         <option value="aprovado" ${lead.status==="aprovado"?"selected":""}>Aprovado</option>
         <option value="recusado" ${lead.status==="recusado"?"selected":""}>Recusado</option>
-      </select>`;
+      </select>${promotedSeal(lead)}`;
     }
 
     function statusControlCard(lead){
       if(lead.status==="avaliacao_enviada"){
-        return `<span class="status-badge status-badge--avaliacao_enviada">Avaliação enviada</span>`;
+        return `<span class="status-badge status-badge--avaliacao_enviada">Avaliação enviada</span>${promotedSeal(lead)}`;
       }
-      return `<button type="button" class="status-sel status-sel--${lead.status} status-dropdown-trigger" data-id="${lead.id}" style="width:100%;text-align:left;">${STATUS_LABEL[lead.status]??lead.status}</button>`;
+      return `<button type="button" class="status-sel status-sel--${lead.status} status-dropdown-trigger" data-id="${lead.id}" style="width:100%;text-align:left;">${STATUS_LABEL[lead.status]??lead.status}</button>${promotedSeal(lead)}`;
     }
 
     const FLAG_META = {
@@ -1280,7 +1385,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
       updateSortHeaders();
       const filter=document.getElementById("status-filter").value;
       const search=document.getElementById("search-input").value.trim().toLowerCase();
-      let filtered=filter?leads.filter(l=>l.status===filter):[...leads];
+      // "promovido" não é valor de status — filtra pela marca de conversão.
+      let filtered = filter==="promovido" ? leads.filter(l=>l.convertedAt)
+                   : filter               ? leads.filter(l=>l.status===filter)
+                   :                        [...leads];
       if(search){
         filtered=filtered.filter(l=>
           (l.nome??"").toLowerCase().includes(search) ||
@@ -1504,6 +1612,34 @@ import AdminHeader from '../../components/AdminHeader.astro';
         <div class="detail-table">${rows.join("")}</div>
       </div>`;
 
+      // Entrada no programa (ADM-04c1). "Promovido" é derivado de convertedAt,
+      // nunca um valor de status — a ficha preserva o histórico anterior.
+      const jaPromovido = !!lead.convertedAt;
+      const aptoParaPromover = ["aprovado","avaliacao_enviada"].includes(lead.status);
+      let promotionSection = "";
+      if (jaPromovido) {
+        const quando = lead.convertedAt?.toDate?.()?.toLocaleDateString("pt-BR") ?? "--";
+        promotionSection = `<div class="detail-section">
+          <div class="detail-section__title detail-section__title--promote">Entrada no programa</div>
+          <div class="detail-table">
+            <div class="detail-row"><div class="detail-th">Situação</div><div class="detail-td" style="color:var(--c-lime);font-weight:700;">Promovido a atleta</div></div>
+            <div class="detail-row"><div class="detail-th">Promovido em</div><div class="detail-td">${quando}</div></div>
+            <div class="detail-row"><div class="detail-th">Por</div><div class="detail-td">${lead.convertedByEmail ?? "--"}</div></div>
+          </div>
+          <p class="promotion-note" style="margin-top:var(--space-3)">Esta ficha não pode mais ser excluída: as fotos são as mesmas do registro do atleta.</p>
+          <a class="btn-sm btn-outline" href="/admin/atletas" style="display:block;text-align:center;text-decoration:none;">Ver no acompanhamento</a>
+        </div>`;
+      } else if (aptoParaPromover) {
+        const nota = lead.status === "avaliacao_enviada"
+          ? "Ficha aprovada e avaliação enviada. A promoção cria a conta de acesso do atleta e inicia o ciclo de 90 dias."
+          : "Ficha aprovada. A promoção pode ser feita mesmo antes do envio da avaliação — cria a conta de acesso e inicia o ciclo de 90 dias.";
+        promotionSection = `<div class="detail-section">
+          <div class="detail-section__title detail-section__title--promote">Entrada no programa</div>
+          <p class="promotion-note">${nota}</p>
+          <button class="btn-sm btn-outline" id="btn-promote-lead" style="width:100%;">Promover a atleta</button>
+        </div>`;
+      }
+
       const privacySection=`<div class="detail-section detail-section--danger">
         <div class="detail-section__title detail-section__title--danger">Privacidade &amp; LGPD</div>
         <p class="privacy-note">
@@ -1582,6 +1718,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         section("Saúde", secSaude) +
         section("Nutrição", secNutricao) +
         fotosSection +
+        promotionSection +
         privacySection;
 
       document.getElementById("detail-drawer").hidden=false;
@@ -1650,16 +1787,87 @@ import AdminHeader from '../../components/AdminHeader.astro';
           headers:{"content-type":"application/json","Authorization":`Bearer ${token}`},
           body:JSON.stringify({leadId:currentDetailLeadId}),
         });
-        if(!res.ok) throw new Error(await res.text());
+        if(!res.ok){
+          let msg="";
+          try{ msg=(JSON.parse(await res.text())||{}).error||""; }catch{}
+          throw new Error(msg||"falha na exclusão");
+        }
         leads=leads.filter(l=>l.id!==currentDetailLeadId);
         document.getElementById("delete-overlay").hidden=true;
         document.getElementById("detail-drawer").hidden=true;
         renderStats(); renderTable();
       }catch(err){
         console.error("Erro ao excluir ficha:",err);
-        alert("Não foi possível excluir a ficha agora. Tente novamente em instantes.");
+        alert(err?.message || "Não foi possível excluir a ficha agora. Tente novamente em instantes.");
       }finally{
         btn.disabled=false; btn.textContent="Confirmar exclusão definitiva";
+      }
+    });
+
+    // ── Promoção a atleta (ADM-04c1 → promote-lead) ──
+    // O botão é injetado via innerHTML na gaveta, por isso o listener é delegado.
+    document.getElementById("detail-content")?.addEventListener("click", e => {
+      if (e.target.id !== "btn-promote-lead") return;
+      const lead = leads.find(l => l.id === currentDetailLeadId);
+      if (!lead) return;
+      document.getElementById("promote-name").textContent = lead.nome ?? "este candidato";
+      const hoje = new Date();
+      document.getElementById("promote-start").value =
+        `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`;
+      document.getElementById("promote-phase").value = "Bulking";
+      document.getElementById("promote-welcome").checked = true;
+      const errEl = document.getElementById("promote-error");
+      errEl.hidden = true; errEl.textContent = "";
+      document.getElementById("promote-overlay").hidden = false;
+    });
+
+    document.getElementById("promote-cancel")?.addEventListener("click", () => {
+      document.getElementById("promote-overlay").hidden = true;
+    });
+    document.getElementById("promote-overlay")?.addEventListener("click", e => {
+      if (e.target === document.getElementById("promote-overlay")) {
+        document.getElementById("promote-overlay").hidden = true;
+      }
+    });
+
+    document.getElementById("promote-confirm")?.addEventListener("click", async () => {
+      if (!currentDetailLeadId) return;
+      const btn = document.getElementById("promote-confirm");
+      const errEl = document.getElementById("promote-error");
+      const rawDate = document.getElementById("promote-start").value;
+      if (!rawDate) {
+        errEl.textContent = "Informe a data de início."; errEl.hidden = false; return;
+      }
+      // input[type=date] devolve AAAA-MM-DD; a função espera DD/MM/AAAA
+      const [yyyy, mm, dd] = rawDate.split("-");
+      const startDate = `${dd}/${mm}/${yyyy}`;
+      const phase = document.getElementById("promote-phase").value;
+      const sendWelcome = document.getElementById("promote-welcome").checked;
+
+      errEl.hidden = true;
+      btn.disabled = true; btn.textContent = "Promovendo...";
+      try {
+        const token = await getFreshToken();
+        const res = await fetch("/.netlify/functions/promote-lead", {
+          method: "POST",
+          headers: { "content-type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify({ leadId: currentDetailLeadId, startDate, phase, sendWelcome }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error ?? "Não foi possível promover agora.");
+
+        document.getElementById("promote-overlay").hidden = true;
+        await loadLeads();
+        window.__openDetail(currentDetailLeadId);
+        if (!sendWelcome)            showToast("Atleta promovido.");
+        else if (data.welcomeSent)   showToast("Atleta promovido e e-mail de boas-vindas enviado.");
+        else                         showToast("Atleta promovido, mas o e-mail de boas-vindas não saiu: " + (data.welcomeError ?? "falha no envio."), "warning");
+      } catch (err) {
+        console.error("[promover]", err);
+        errEl.textContent = err.message ?? "Não foi possível promover agora.";
+        errEl.hidden = false;
+      } finally {
+        btn.disabled = false; btn.textContent = "Confirmar promoção";
       }
     });
 
@@ -1692,6 +1900,21 @@ import AdminHeader from '../../components/AdminHeader.astro';
       document.getElementById("eval-name").textContent=lead?.nome??"";
       ["s1","s2","s3","s4","s5","notes"].forEach(k=>{document.getElementById(`eval-${k}`).value="";});
       document.getElementById("eval-status").textContent="";
+      // Aviso de custo — só para fichas que o Coach ainda não aprovou.
+      const warnEl = document.getElementById("eval-cost-warn");
+      const statusAtual = lead?.status;
+      if (statusAtual === "novo" || statusAtual === "em_analise") {
+        warnEl.textContent = "Esta ficha ainda não foi aprovada. Gerar e enviar a avaliação "
+          + "consome tempo de revisão em alguém que talvez não entre no programa — vale conferir "
+          + "o score de triagem antes de seguir.";
+        warnEl.hidden = false;
+      } else if (statusAtual === "recusado") {
+        warnEl.textContent = "Esta ficha está recusada. Seguir só faz sentido se a intenção for "
+          + "enviar uma devolutiva a quem não entra no programa.";
+        warnEl.hidden = false;
+      } else {
+        warnEl.hidden = true;
+      }
       updateSendBtnState();
       document.getElementById("eval-drawer").hidden=false;
     };
@@ -1905,7 +2128,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     ]);
     let __sdActiveId = null;
 
-    const FILTER_LABELS = {...STATUS_LABEL, "":"Todos os status"};
+    const FILTER_LABELS = {...STATUS_LABEL, "":"Todos os status", "promovido":"Promovido a atleta"};
     const __filterMenu = __createMenu([
       {value:"",                  label:"Todos os status"},
       {value:"novo",              label:"Novo"},
@@ -1913,6 +2136,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       {value:"aprovado",          label:"Aprovado"},
       {value:"recusado",          label:"Recusado"},
       {value:"avaliacao_enviada", label:"Avaliação enviada"},
+      {value:"promovido",         label:"Promovido a atleta"},
     ]);
 
     function __closeAll() {

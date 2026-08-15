@@ -36,6 +36,14 @@ const handlerFn = async () => {
       const data = docSnap.data();
       const referenceTs: Timestamp | undefined = data.updatedAt ?? data.createdAt;
 
+      // GUARDA DE FICHA PROMOVIDA (15/08/2026): mesma razão de delete-lead —
+      // as fotos são compartilhadas com o atleta. Improvável (exigiria uma
+      // ficha promovida marcada como "recusado"), mas o status permanece
+      // editável depois da promoção, então a guarda não é supérflua.
+      if (data.convertedAt) {
+        continue;
+      }
+
       if (!referenceTs) {
         // Sem timestamp de referência: não exclui automaticamente,
         // para evitar remoção indevida de dados sem critério auditável.
