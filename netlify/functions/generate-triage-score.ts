@@ -19,8 +19,11 @@ export const handler = async (event: any) => {
 
   const functionSecret = process.env.FUNCTION_SECRET ?? "";
   const callerSecret   = event.headers["x-function-secret"] ?? "";
-  const isInternalCall = callerSecret.length > 0 &&
-                         (functionSecret.length === 0 || callerSecret === functionSecret);
+  // Segredo AUSENTE no ambiente RECUSA a chamada interna — nunca autoriza.
+  // A versao anterior tratava functionSecret.length === 0 como permissao: sem a
+  // variavel definida, qualquer requisicao com um cabecalho x-function-secret
+  // nao vazio passava como chamada interna e contornava a checagem de admin.
+  const isInternalCall = functionSecret.length > 0 && callerSecret === functionSecret;
 
   if (!isInternalCall) {
     const authHeader = event.headers["authorization"] ?? "";
