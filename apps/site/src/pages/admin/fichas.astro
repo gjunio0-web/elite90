@@ -1828,22 +1828,69 @@ import AdminHeader from '../../components/AdminHeader.astro';
       document.getElementById("promote-overlay").hidden = false;
     });
 
-    // Máscara DD/MM/AAAA — insere as barras conforme o Coach digita.
+    // Máscara DD/MM/AAAA que LIMITA os valores enquanto o Coach digita — não
+    // apenas insere barras. Dia acima de 31 e mês acima de 12 são impedidos na
+    // origem; um primeiro dígito que não pode iniciar dia ou mês (4 a 9 no dia,
+    // 2 a 9 no mês) recebe zero à esquerda automaticamente, técnica dos campos
+    // de validade de cartão. Sem isso o campo aceitava 54/55/5555 em silêncio.
     document.getElementById("promote-start")?.addEventListener("input", (e) => {
       const el = e.target;
-      let v = el.value.replace(/\D/g, "").slice(0, 8);
-      if (v.length > 4)      v = v.replace(/(\d{2})(\d{2})(\d{1,4})/, "$1/$2/$3");
-      else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,2})/, "$1/$2");
+      let d = el.value.replace(/\D/g, "").slice(0, 8);
+
+      // Dia
+      if (d.length === 1 && +d[0] > 3) d = "0" + d;
+      if (d.length >= 2) {
+        const dia = +d.slice(0, 2);
+        if (dia === 0)      d = "01" + d.slice(2);
+        else if (dia > 31)  d = "31" + d.slice(2);
+      }
+      // Mês
+      if (d.length === 3 && +d[2] > 1) d = d.slice(0, 2) + "0" + d[2];
+      if (d.length >= 4) {
+        const mes = +d.slice(2, 4);
+        if (mes === 0)      d = d.slice(0, 2) + "01" + d.slice(4);
+        else if (mes > 12)  d = d.slice(0, 2) + "12" + d.slice(4);
+      }
+      // Ano: o intervalo aceito (2020-2100) começa sempre em 2, então um primeiro
+      // dígito diferente é impossível e é descartado em vez de virar 5555.
+      if (d.length >= 5 && d[4] !== "2") d = d.slice(0, 4);
+      d = d.slice(0, 8);
+
+      let v = d;
+      if (d.length > 4)      v = `${d.slice(0,2)}/${d.slice(2,4)}/${d.slice(4)}`;
+      else if (d.length > 2) v = `${d.slice(0,2)}/${d.slice(2)}`;
       el.value = v;
+      // Digitou de novo: limpa o erro anterior, não corrige em cima do vermelho.
+      const errEl = document.getElementById("promote-error");
+      if (errEl && !errEl.hidden) { errEl.hidden = true; errEl.textContent = ""; }
     });
 
-    // Confirma que a data existe de fato — rejeita 31/02/2026, que passa no formato.
-    function dataBrValida(txt){
-      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(txt ?? "");
-      if (!m) return false;
+    // Aviso ao sair do campo — o Coach não espera até o clique em confirmar.
+    document.getElementById("promote-start")?.addEventListener("blur", (e) => {
+      const txt = e.target.value.trim();
+      if (!txt) return;
+      const msg = erroDeData(txt);
+      const errEl = document.getElementById("promote-error");
+      if (msg) { errEl.textContent = msg; errEl.hidden = false; }
+    });
+
+    // Devolve a mensagem do problema, ou "" se a data estiver boa. Mensagem
+    // específica: dizer "use o formato DD/MM/AAAA" quando o formato está certo e
+    // o errado é o dia manda o Coach procurar no lugar errado.
+    function erroDeData(txt){
+      const t = (txt ?? "").trim();
+      if (!t) return "Informe a data de início.";
+      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(t);
+      if (!m) return "Data incompleta. Use o formato DD/MM/AAAA.";
       const [, dd, mm, yyyy] = m;
+      if (+dd < 1 || +dd > 31) return "Dia inválido.";
+      if (+mm < 1 || +mm > 12) return "Mês inválido.";
+      if (+yyyy < 2020 || +yyyy > 2100) return "Ano inválido.";
       const d = new Date(+yyyy, +mm - 1, +dd);
-      return d.getFullYear() === +yyyy && d.getMonth() + 1 === +mm && d.getDate() === +dd;
+      if (d.getFullYear() !== +yyyy || d.getMonth() + 1 !== +mm || d.getDate() !== +dd) {
+        return `A data ${t} não existe no calendário.`;
+      }
+      return "";
     }
 
     document.getElementById("promote-cancel")?.addEventListener("click", () => {
@@ -1860,13 +1907,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const btn = document.getElementById("promote-confirm");
       const errEl = document.getElementById("promote-error");
       const startDate = document.getElementById("promote-start").value.trim();
-      if (!startDate) {
-        errEl.textContent = "Informe a data de início."; errEl.hidden = false; return;
-      }
-      if (!dataBrValida(startDate)) {
-        errEl.textContent = "Data inválida. Use o formato DD/MM/AAAA.";
-        errEl.hidden = false; return;
-      }
+      const msgData = erroDeData(startDate);
+      if (msgData) { errEl.textContent = msgData; errEl.hidden = false; return; }
       const phase = document.getElementById("promote-phase").value;
       const sendWelcome = document.getElementById("promote-welcome").checked;
 
