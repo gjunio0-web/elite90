@@ -205,9 +205,31 @@ const { items, t } = Astro.props;
     }
 
     // ── Modo desktop: desliza o trilho inteiro via transform (já validado) ──
+    // Offset alinhado a cards inteiros (perPage * largura do card + gap),
+    // não à largura crua do viewport — evita que uma página não-inicial
+    // pare no meio de um card quando o viewport não é múltiplo exato de
+    // (cardWidth + gap).
+    //
+    // Isso sozinho não bastava: .results-viewport é flex:1 (ocupa o espaço
+    // que sobrar ao lado das setas), e essa largura raramente é um múltiplo
+    // exato de (cardWidth + gap) — sempre sobra um resto menor que um card
+    // inteiro. Como todos os cards ficam lado a lado no fluxo normal do
+    // flex, o card seguinte ao último completo sempre vaza parcialmente
+    // nesse resto antes do overflow:hidden cortá-lo — a foto e o texto
+    // cortados que apareciam no último card da fileira. A correção: qualquer
+    // card fora do intervalo da página atual vira visibility:hidden (não
+    // display:none, que tiraria os outros cards do fluxo e desalinharia o
+    // deslocamento calculado acima).
     function renderDesktop() {
-      const offset = current * viewport.clientWidth;
+      const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || "0");
+      const cardWidth = cards[0].getBoundingClientRect().width;
+      const offset = current * perPage * (cardWidth + gap);
       track.style.transform = `translateX(-${offset}px)`;
+      const firstVisible = current * perPage;
+      const lastVisible = firstVisible + perPage - 1;
+      cards.forEach((card, i) => {
+        card.style.visibility = i >= firstVisible && i <= lastVisible ? "" : "hidden";
+      });
       updateChrome();
     }
 
@@ -248,6 +270,7 @@ const { items, t } = Astro.props;
       buildDots();
       if (mobileQuery.matches) {
         track.style.transform = ""; // a rolagem nativa governa a posição, não o transform
+        cards.forEach(card => { card.style.visibility = ""; }); // todo card visível/rolável no mobile
         syncFromScroll();
       } else {
         viewport.scrollLeft = 0; // volta ao início ao trocar para o modo desktop
@@ -259,10 +282,23 @@ const { items, t } = Astro.props;
     nextBtn?.addEventListener("click", () => goTo(current + 1));
 
     let resizeTimer: ReturnType<typeof setTimeout>;
-    window.addEventListener("resize", () => {
+    const scheduleRefresh = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(refresh, 150);
-    });
+    };
+    window.addEventListener("resize", scheduleRefresh);
+
+    // ── ResizeObserver no viewport: cobre o caso que o "resize" da window
+    // não pega — uma barra de rolagem vertical aparecendo depois que este
+    // script já rodou (ex.: o resto da página termina de carregar e a
+    // página fica mais alta que a tela). Isso encolhe a largura real do
+    // viewport sem mudar o tamanho da própria janela, então perPage/offset
+    // ficavam calculados para uma largura que já não existe mais, cortando
+    // o último card da fileira. ResizeObserver reage à mudança de largura
+    // do elemento em si, não à da janela.
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(scheduleRefresh).observe(viewport);
+    }
 
     refresh();
   })();
