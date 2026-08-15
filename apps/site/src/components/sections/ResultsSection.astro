@@ -150,3 +150,14 @@ const results = c.cases.map((item, i) => {
     <BeforeAfterSlider items={results} t={t} />
   </div>
 </section>
+
+<style>
+  /* Container mais largo só nesta seção (não mexe no --max-w-content
+     global, que as outras seções continuam usando) — dá espaço para o
+     carrossel de Resultados encaixar 3 cards por página no desktop em
+     vez de 2. 1200px fica com folga entre o piso de 3 cards (~1088px)
+     e o teto que passaria para 4 (~1400px). */
+  .results .container {
+    max-width: 1200px;
+  }
+</style>
