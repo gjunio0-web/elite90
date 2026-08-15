@@ -16,10 +16,14 @@ const originLabels: Record<string, string> = {
   curated: c.filters.originCurated,
 };
 
-// Esconde os cards "em breve" (state: "soon") sem apagar nada do i18n —
-// para reexibi-los, troque para true.
-const SHOW_COMING_SOON = false;
-const items = SHOW_COMING_SOON ? c.items : c.items.filter(item => item.state !== "soon");
+// Esconde cards da grade sem apagar nada do i18n — para reexibi-los,
+// troque a flag correspondente para true.
+const SHOW_COMING_SOON = false; // cards com state: "soon"
+const SHOW_HIDDEN = false;      // cards marcados com hidden: true (ex.: o guia de poses original)
+const items = c.items.filter(item =>
+  (SHOW_COMING_SOON || item.state !== "soon") &&
+  (SHOW_HIDDEN || !item.hidden)
+);
 ---
 
 <section class="section content" id="conteudos" style="scroll-margin-top:80px" aria-label={c.ariaLabel}>

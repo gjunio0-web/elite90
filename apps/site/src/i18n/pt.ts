@@ -293,6 +293,7 @@ export const pt = {
         state: "live",
         href: "/downloads/guia-poses-mens-physique.pdf",
         demo: false,
+        hidden: true,
       },
       {
         title: "Cartilha de posing — NPC Men's Physique",

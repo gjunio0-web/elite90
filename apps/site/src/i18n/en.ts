@@ -251,6 +251,7 @@ export const en: Translations = {
         state: "live",
         href: "/downloads/guia-poses-mens-physique.pdf",
         demo: false,
+        hidden: true,
       },
       {
         title: "Posing guide — NPC Men's Physique",
