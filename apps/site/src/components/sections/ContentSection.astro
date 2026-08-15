@@ -15,6 +15,11 @@ const originLabels: Record<string, string> = {
   original: c.filters.originOriginal,
   curated: c.filters.originCurated,
 };
+
+// Esconde os cards "em breve" (state: "soon") sem apagar nada do i18n —
+// para reexibi-los, troque para true.
+const SHOW_COMING_SOON = false;
+const items = SHOW_COMING_SOON ? c.items : c.items.filter(item => item.state !== "soon");
 ---
 
 <section class="section content" id="conteudos" style="scroll-margin-top:80px" aria-label={c.ariaLabel}>
@@ -59,7 +64,7 @@ const originLabels: Record<string, string> = {
       </button>
 
       <div class="content__grid" id="content-grid">
-        {c.items.map((item) => {
+        {items.map((item) => {
           const searchIndex = `${item.title} ${item.body}`.toLowerCase();
           return (
             <article
@@ -111,7 +116,7 @@ const originLabels: Record<string, string> = {
     </div>
 
     <div class="content__dots" id="content-dots">
-      {c.items.map((_, idx) => (
+      {items.map((_, idx) => (
         <span class={idx === 0 ? "is-active" : ""}></span>
       ))}
     </div>
