@@ -43,14 +43,36 @@ function isValidBrDate(s: string): boolean {
 // O primeiro acesso do atleta será tratado junto com o Portal do Atleta (PRT-01).
 // Por isso o texto diz que o Coach enviará os dados de acesso — e não que eles
 // virão automaticamente. Não prometer o que o sistema ainda não faz.
-function buildWelcomeEmail(nome: string, startDate: string): string {
+function buildWelcomeEmail(nome: string, startDate: string, idioma: string): string {
   const firstName = String(nome || "").split(" ")[0];
+  const en = idioma === "en";
+  const txt = en ? {
+    lang: "en", title: "ELITE 90 PRO — Welcome",
+    tagline: "High Performance Strategist",
+    h1: `${firstName}, your place is confirmed.`,
+    p1a: "You have been approved for the", p1b: "Your 90-day cycle starts on",
+    stepsTitle: "What happens now:",
+    s1: "— The Coach will contact you to arrange the first step.",
+    s2: "— Your training and nutrition plans will be built from your assessment.",
+    s3: "— From then on, follow-up is weekly.",
+    close: "If you have any questions, just reply to this message.",
+  } : {
+    lang: "pt-BR", title: "ELITE 90 PRO — Bem-vindo",
+    tagline: "Estrategista em Alta Performance",
+    h1: `${firstName}, sua vaga está confirmada.`,
+    p1a: "Você foi aprovado no", p1b: "Seu ciclo de 90 dias começa em",
+    stepsTitle: "O que acontece agora:",
+    s1: "— O Coach entrará em contato com você para combinar o primeiro passo.",
+    s2: "— Seu plano de treino e de nutrição será montado a partir da sua avaliação.",
+    s3: "— A partir daí, o acompanhamento é semanal.",
+    close: "Qualquer dúvida, basta responder a esta mensagem.",
+  };
   return `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="${txt.lang}">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>ELITE 90 PRO — Bem-vindo</title>
+<title>${txt.title}</title>
 <style>
   body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
   .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
@@ -70,19 +92,19 @@ function buildWelcomeEmail(nome: string, startDate: string): string {
 <body>
 <div class="wrap">
   <div class="logo">Coach Ruiz</div>
-  <div class="tagline">Estrategista em Alta Performance</div>
-  <h1>${firstName}, sua vaga está confirmada.</h1>
+  <div class="tagline">${txt.tagline}</div>
+  <h1>${txt.h1}</h1>
   <p>
-    Você foi aprovado no <span class="highlight">Programa ELITE 90 PRO</span>.
-    Seu ciclo de 90 dias começa em <span class="highlight">${startDate}</span>.
+    ${txt.p1a} <span class="highlight">Programa ELITE 90 PRO</span>.
+    ${txt.p1b} <span class="highlight">${startDate}</span>.
   </p>
   <div class="steps">
-    <p><strong style="color:#fff;">O que acontece agora:</strong></p>
-    <p>— O Coach entrará em contato com você para combinar o primeiro passo.</p>
-    <p>— Seu plano de treino e de nutrição será montado a partir da sua avaliação.</p>
-    <p>— A partir daí, o acompanhamento é semanal.</p>
+    <p><strong style="color:#fff;">${txt.stepsTitle}</strong></p>
+    <p>${txt.s1}</p>
+    <p>${txt.s2}</p>
+    <p>${txt.s3}</p>
   </div>
-  <p>Qualquer dúvida, basta responder a esta mensagem.</p>
+  <p>${txt.close}</p>
   <div class="sig">
     <div class="sig-name">Fernando Ruiz</div>
     <div class="sig-title">Coach Ruiz | ELITE 90 PRO</div>
@@ -194,6 +216,23 @@ export const handler = async (event: any) => {
     });
     // Fotos do Dia 1 = as mesmas enviadas na ficha de triagem (decisão 15/08/2026).
     athleteDoc.baselinePhotos = Array.isArray(lead.fotos_paths) ? lead.fotos_paths : [];
+
+    // DATA NO PASSADO É INTENCIONAL (decisão de 15/08/2026): permite regularizar
+    // quem já começou o acompanhamento antes de existir registro no sistema.
+    // Por isso semana e dia NÃO podem ficar fixos em 1 como o contrato entrega por
+    // padrão — ficariam contradizendo a própria data de início desde o instante da
+    // criação. São derivados aqui, limitados ao tamanho do ciclo (13 semanas / 90
+    // dias). Data futura mantém dia 1: o ciclo ainda não começou.
+    const [ddS, mmS, yyyyS] = startDate.split("/").map(Number);
+    const inicio = new Date(yyyyS, mmS - 1, ddS);
+    const hoje = new Date();
+    const diasCorridos = Math.floor(
+      (Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
+       - Date.UTC(inicio.getFullYear(), inicio.getMonth(), inicio.getDate())) / 86400000
+    );
+    const dia = Math.min(90, Math.max(1, diasCorridos + 1));
+    athleteDoc.day  = dia;
+    athleteDoc.week = Math.min(13, Math.ceil(dia / 7));
     athleteDoc.payment         = null;   // entrada por decisão do Coach, não por pagamento
     athleteDoc._source         = "promote-lead";
     athleteDoc.promotedBy      = caller.uid;
@@ -219,10 +258,15 @@ export const handler = async (event: any) => {
         welcomeError = "Envio de e-mail não configurado no ambiente.";
       } else {
         try {
+          // Idioma da ficha, mesmo critério de submit-lead e send-evaluation.
+          const idioma = lead.idioma === "en" ? "en" : "pt-br";
+          const primeiroNome = String(lead.nome ?? "").split(" ")[0];
           await sendMail({
             to: emailNorm,
-            subject: `${String(lead.nome ?? "").split(" ")[0]}, sua vaga no ELITE 90 PRO está confirmada`,
-            html: buildWelcomeEmail(lead.nome, startDate),
+            subject: idioma === "en"
+              ? `${primeiroNome}, your place in ELITE 90 PRO is confirmed`
+              : `${primeiroNome}, sua vaga no ELITE 90 PRO está confirmada`,
+            html: buildWelcomeEmail(lead.nome, startDate, idioma),
           });
           welcomeSent = true;
         } catch (e: any) {
