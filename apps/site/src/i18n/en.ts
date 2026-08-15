@@ -196,6 +196,14 @@ export const en: Translations = {
         image: "/images/testimonials/depoente-joao-sampaio.webp",
         text: "I have known Fernando Ruiz for over ten years, and our partnership went far beyond the training sessions. Over that time, he helped me build a healthier, more balanced and more consistent routine, always with personalised guidance that genuinely makes a difference day to day. What I admire most about Fernando is that he never hands you a ready-made formula. He follows you closely, understands where each person is at, and makes the adjustments needed for the process to be sustainable and to deliver results. Over time, that professional relationship turned into a great friendship. Today I am fortunate to have someone I trust not only for his technical knowledge, but also for his care, his dedication and his genuine interest in seeing me at my best.",
       },
+      {
+        name: "Jorge Coutinho",
+        role: "Business owner",
+        metric: "+6 kg of lean mass",
+        image: "/images/testimonials/depoente-placeholder.webp",
+        text: "My name is Jorge and I am a business owner. I have always been into sport — I practised several disciplines, such as jiu-jitsu and squash, and used weight training as a complement, to support those sports. I always trained with real interest, but my life in sport truly changed once I started training with Fernando Ruiz. With Fernando, I came to understand weight training as a sport in its own right — the scope for technical progress, the importance of diet and of everything else it takes to improve. What is most striking, though, is the effect he has on people's lives. His close guidance goes far beyond the training itself: he genuinely changes the lives of those who pass through his hands. From Fernando I learned technical values, performance values and moral values — things that make a difference inside the gym, but that you carry for the rest of your life. That is his greatest quality: the ability to deliver that value to every one of his students, and to genuinely transform the life of each person who trains alongside him.",
+        pending: true,
+      },
     ],
   },
 

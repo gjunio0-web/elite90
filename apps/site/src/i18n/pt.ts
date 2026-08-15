@@ -237,6 +237,14 @@ export const pt = {
         image: "/images/testimonials/depoente-joao-sampaio.webp",
         text: "Conheço o Fernando Ruiz há mais de dez anos, e nossa parceria foi muito além dos treinos. Ao longo desse tempo, ele me ajudou a construir uma rotina mais saudável, equilibrada e consistente, sempre com orientações personalizadas que realmente fazem diferença no dia a dia. O que mais admiro no Fernando é que ele nunca entrega uma fórmula pronta. Ele acompanha de perto, entende o momento de cada pessoa e faz os ajustes necessários para que o processo seja sustentável e traga resultados. Com o tempo, essa relação profissional se transformou em uma grande amizade. Hoje tenho a sorte de contar com alguém em quem confio não só pelo conhecimento técnico, mas também pelo cuidado, pela dedicação e pelo interesse genuíno em me ver na minha melhor versão.",
       },
+      {
+        name: "Jorge Coutinho",
+        role: "Empresário",
+        metric: "+6 kg de massa magra",
+        image: "/images/testimonials/depoente-placeholder.webp",
+        text: "Meu nome é Jorge, sou empresário. Sempre fui ligado a esporte — pratiquei diversas modalidades, como jiu-jitsu e squash, e usava a musculação como um complemento, para dar suporte a esses esportes. Sempre treinei com muito interesse, mas a minha vida no esporte realmente mudou depois que passei a treinar com o Fernando Ruiz. Com o Fernando, passei a entender a musculação como um esporte de verdade — as possibilidades de evolução técnica, a importância da dieta e de tudo o que é necessário para evoluir. Mas o mais impressionante é o efeito que ele tem na vida das pessoas. O acompanhamento próximo dele vai muito além do treino: ele realmente muda a vida de quem passa pelas mãos dele. Aprendi com o Fernando valores técnicos, valores de desempenho e valores morais — coisas que fazem diferença dentro da academia, mas que você leva para o resto da vida. Essa é a maior qualidade dele: a capacidade de entregar esse valor a todos os seus alunos, de transformar de verdade a vida de cada pessoa que treina ao seu lado.",
+        pending: true,
+      },
     ],
   },
 
