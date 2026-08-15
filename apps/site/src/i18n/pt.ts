@@ -336,6 +336,16 @@ export const pt = {
         demo: false,
       },
       {
+        title: "Cartilha de posing — NPC Women's Bikini",
+        body: "Manual técnico da categoria: princípio da divisão, formato de julgamento e transições, poses frontal e posterior, rotina individual de até 20 segundos, Model Walk, traje, salto e check-in, além das classes de altura. Separa as exigências da NPC das orientações do Coach.",
+        meta: "Cartilha · 8 páginas · PDF",
+        origin: "original",
+        tipo: "guia",
+        state: "live",
+        href: "/downloads/cartilha-posing-womens-bikini.pdf",
+        demo: false,
+      },
+      {
         title: "Podcast ELITE90 PRO · Ep. 01 — Por que a maioria falha aos 40",
         body: "O Coach Fernando sobre os erros mais comuns de quem tenta recomeçar o treino na vida adulta.",
         meta: "Podcast · Áudio",
