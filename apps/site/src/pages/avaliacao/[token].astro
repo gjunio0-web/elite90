@@ -28,6 +28,7 @@ const { token } = Astro.params;
 let avaliacao = null;
 let notFound  = false;
 let isExpired = false;
+let idioma    = "pt-br";
 
 try {
   const db = getDb();
@@ -46,26 +47,86 @@ try {
         : new Date(avaliacao.expiresAt._seconds * 1000);
       if (exp < new Date()) isExpired = true;
     }
+
+    // Idioma do documento. Gravado na avaliação desde a introdução do envio
+    // bilíngue; avaliações anteriores não o têm, e nesse caso relemos a ficha
+    // de origem — a página precisa sair no MESMO idioma do e-mail que a
+    // anunciou, senão o atleta clica num link em inglês e cai em português.
+    if (avaliacao.idioma === "en" || avaliacao.idioma === "pt-br") {
+      idioma = avaliacao.idioma;
+    } else if (avaliacao.leadId) {
+      try {
+        const leadSnap = await db.collection("leads").doc(avaliacao.leadId).get();
+        if (leadSnap.exists && (leadSnap.data() as any)?.idioma === "en") idioma = "en";
+      } catch {
+        // Mantém o português — reserva segura.
+      }
+    }
   }
 } catch (e) {
   notFound = true;
 }
 
-const sections = [
+const en = idioma === "en";
+
+// Títulos das seções — devem espelhar a estrutura que o modelo de linguagem
+// recebe em generate-evaluation.ts, para que a moldura da página e o conteúdo
+// gerado falem do mesmo documento.
+const sections = en ? [
+  { num: "01", title: "Aesthetic Assessment and Proportion Analysis", key: "s1" },
+  { num: "02", title: "Training and Cardio Planning",                 key: "s2" },
+  { num: "03", title: "Cardiovascular Health Protocol",               key: "s3" },
+  { num: "04", title: "Competition Strategy",                         key: "s4" },
+  { num: "05", title: "Operational Alignment",                        key: "s5" },
+] : [
   { num: "01", title: "Diagnóstico Estético e Análise de Proporções", key: "s1" },
   { num: "02", title: "Planejamento de Treinamento e Cardio",          key: "s2" },
   { num: "03", title: "Protocolo de Saúde Cardiovascular",             key: "s3" },
   { num: "04", title: "Estratégia de Competição",                      key: "s4" },
   { num: "05", title: "Alinhamento Operacional",                        key: "s5" },
 ];
+
+// Moldura da página. O conteúdo das seções vem do documento gerado; tudo o que
+// está aqui é o que a plataforma escreve em volta dele.
+const t = en ? {
+  lang: "en",
+  titleNotFound: "Assessment not found",
+  titleDoc: "Assessment",
+  tagline: "High Performance Strategist",
+  expiredH: "Link expired",
+  expiredP: "This access link expired after 90 days. Please contact Coach Ruiz to request new access.",
+  notFoundH: "Assessment not found",
+  notFoundP: "The link may be incorrect. Check the email you received or contact Coach Ruiz.",
+  eyebrow: "Official preparation document",
+  docTitle: "Physique preparation and strategic planning guidelines",
+  summaryA: "Individual strategic planning document prepared by Coach Ruiz for",
+  summaryB: "based on the submitted screening form. Confidential and prepared exclusively for this athlete.",
+  rights: "Coach Ruiz 2026 © All rights reserved",
+  credit: "Created by GM Digital Bunker ©, 2026",
+} : {
+  lang: "pt-BR",
+  titleNotFound: "Avaliação não encontrada",
+  titleDoc: "Avaliação",
+  tagline: "Estrategista em Alta Performance",
+  expiredH: "Link expirado",
+  expiredP: "Este link de acesso expirou após 90 dias. Entre em contato com o Coach Ruiz para solicitar um novo acesso.",
+  notFoundH: "Avaliação não encontrada",
+  notFoundP: "O link pode estar incorreto. Verifique o e-mail recebido ou entre em contato com o Coach Ruiz.",
+  eyebrow: "Documento oficial de preparação",
+  docTitle: "Diretrizes de preparação e planejamento estratégico do físico",
+  summaryA: "Documento de planejamento estratégico individual preparado pelo Coach Ruiz para",
+  summaryB: "com base na ficha de triagem submetida. Confidencial e elaborado exclusivamente para este atleta.",
+  rights: "Coach Ruiz 2026 © Todos os direitos reservados",
+  credit: "Criado por GM Digital Bunker ©, 2026",
+};
 ---
 
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang={t.lang}>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ELITE90 PRO - {notFound ? "Avaliação não encontrada" : `Avaliação - ${avaliacao?.nome}`}</title>
+  <title>ELITE90 PRO - {notFound ? t.titleNotFound : `${t.titleDoc} - ${avaliacao?.nome}`}</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" href="/favicon.ico" />
 
@@ -160,13 +221,13 @@ const sections = [
       <div class="not-found">
         {isExpired ? (
           <>
-            <h2>Link expirado</h2>
-            <p>Este link de acesso expirou após 90 dias. Entre em contato com o Coach Ruiz para solicitar um novo acesso.</p>
+            <h2>{t.expiredH}</h2>
+            <p>{t.expiredP}</p>
           </>
         ) : (
           <>
-            <h2>Avaliação não encontrada</h2>
-            <p>O link pode estar incorreto. Verifique o e-mail recebido ou entre em contato com o Coach Ruiz.</p>
+            <h2>{t.notFoundH}</h2>
+            <p>{t.notFoundP}</p>
           </>
         )}
       </div>
@@ -181,7 +242,7 @@ const sections = [
             </svg>
             <div>
               <div class="logo-name">Coach Ruiz</div>
-              <div class="logo-sub">Estrategista em Alta Performance</div>
+              <div class="logo-sub">{t.tagline}</div>
             </div>
           </div>
           <span class="badge">Classic Physique</span>
@@ -190,13 +251,11 @@ const sections = [
 
       <main>
         <article class="card">
-          <div class="card-eyebrow">Documento oficial de preparação</div>
-          <h1 class="card-title">Diretrizes de preparação e planejamento estratégico do físico</h1>
+          <div class="card-eyebrow">{t.eyebrow}</div>
+          <h1 class="card-title">{t.docTitle}</h1>
 
           <div class="summary">
-            Documento de planejamento estratégico individual preparado pelo Coach Ruiz
-            para <strong style="color:var(--c-white)">{avaliacao.nome}</strong> com base na
-            ficha de triagem submetida. Confidencial e elaborado exclusivamente para este atleta.
+            {t.summaryA} <strong style="color:var(--c-white)">{avaliacao.nome}</strong> {t.summaryB}
           </div>
 
           {sections.map((s, i) => (
@@ -219,8 +278,8 @@ const sections = [
       <footer class="eval-footer">
         <div class="eval-footer__divider" role="presentation"></div>
         <div class="eval-footer__inner">
-          <p class="eval-footer__copy">Coach Ruiz 2026 © Todos os direitos reservados</p>
-          <p class="eval-footer__credit">Criado por GM Digital Bunker ©, 2026</p>
+          <p class="eval-footer__copy">{t.rights}</p>
+          <p class="eval-footer__credit">{t.credit}</p>
         </div>
       </footer>
     </>
