@@ -7,37 +7,12 @@
 //   - Signed URLs expiram em 15 minutos — não são acessíveis publicamente.
 //   - Fotos ficam privadas no Storage; acesso apenas via esta function.
 
-import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
+import { getApp, storageBucketName } from "./_firebase";
 
 const SIGNED_URL_EXPIRY_MS = 15 * 60 * 1000; // 15 minutos
 
-function getApp() {
-  if (!getApps().length) {
-    let saEnv: string = (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}").trim();
-    let serviceAccount: any = null;
-    try {
-      if (saEnv.startsWith('"') && saEnv.endsWith('"')) saEnv = saEnv.slice(1, -1);
-      if (saEnv.startsWith("'") && saEnv.endsWith("'")) saEnv = saEnv.slice(1, -1);
-      try {
-        serviceAccount = JSON.parse(saEnv);
-      } catch {
-        serviceAccount = JSON.parse(saEnv.replace(/\\"/g, '"'));
-      }
-      if (serviceAccount?.private_key) {
-        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
-      }
-    } catch (e: any) {
-      throw new Error(`Erro no parse das credenciais: ${e.message}`);
-    }
-    initializeApp({
-      credential: cert(serviceAccount as any),
-      storageBucket: process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? "elite90-c716b.firebasestorage.app",
-    });
-  }
-  return getApps()[0];
-}
 
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
@@ -62,7 +37,7 @@ export const handler = async (event: any) => {
     }
 
     // Nome do bucket explícito — mesma correção aplicada em submit-lead.ts
-    const bucketName = process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? "elite90-c716b.firebasestorage.app";
+    const bucketName = storageBucketName();
     const bucket = getStorage().bucket(bucketName);
     const expiry = Date.now() + SIGNED_URL_EXPIRY_MS;
 

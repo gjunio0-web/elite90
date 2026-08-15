@@ -3,34 +3,11 @@
 // Usa subject e corpo diferenciados para não criar falsa expectativa de novo conteúdo.
 // Registra lastResentAt e incrementa resentCount no documento do Firestore.
 
-import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { FieldValue } from "firebase-admin/firestore";
+import { getApp, getDb } from "./_firebase";
 import { sendMail } from "./_mailer";
 
-function getDb() {
-  if (!getApps().length) {
-    let saEnv: string = (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}").trim();
-    let serviceAccount: any = null;
-    try {
-      if (saEnv.startsWith('"') && saEnv.endsWith('"')) saEnv = saEnv.slice(1, -1);
-      if (saEnv.startsWith("'") && saEnv.endsWith("'")) saEnv = saEnv.slice(1, -1);
-      try {
-        serviceAccount = JSON.parse(saEnv);
-      } catch {
-        serviceAccount = JSON.parse(saEnv.replace(/\\"/g, '"'));
-      }
-      if (serviceAccount?.private_key) {
-        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
-      }
-    } catch (e: any) {
-      throw new Error(`Erro no parse das credenciais do Firebase: ${e.message}`);
-    }
-    if (!serviceAccount?.private_key) throw new Error("Credenciais do Firebase ausentes.");
-    initializeApp({ credential: cert(serviceAccount as any) });
-  }
-  return getFirestore();
-}
 
 function buildResendEmail(nome: string, token: string, siteUrl: string): string {
   const firstName = nome.split(" ")[0];
@@ -104,7 +81,7 @@ export const handler = async (event: any) => {
   const idToken = authHeader.replace("Bearer ", "").trim();
   if (!idToken) return { statusCode: 401, body: "Unauthorized" };
   try {
-    const decoded = await getAuth(getApps()[0]).verifyIdToken(idToken);
+    const decoded = await getAuth(getApp()).verifyIdToken(idToken);
     if (!decoded.admin) return { statusCode: 403, body: "Acesso não autorizado" };
   } catch {
     return { statusCode: 401, body: "Invalid token" };

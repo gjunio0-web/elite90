@@ -2,53 +2,12 @@
 // Netlify Function: recebe dados do formulário em JSON,
 // salva no Firestore e dispara e-mail de confirmação via Resend.
 
-import { initializeApp, getApps, cert } from "firebase-admin/app";
-import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { FieldValue } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
+import { getDb, storageBucketName } from "./_firebase";
 import { calcularScoreBase, ajusteIA, classificarPrioridade } from "./_scoring";
 import { sendMail } from "./_mailer";
 
-function getDb(): FirebaseFirestore.Firestore {
-  if (!getApps().length) {
-    let saEnv: string = (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}").trim();
-    let serviceAccount: any = null;
-    
-    try {
-      // Remove aspas externas extras caso a plataforma de CI/CD tenha envelopado o JSON incorretamente
-      if (saEnv.startsWith('"') && saEnv.endsWith('"')) saEnv = saEnv.slice(1, -1);
-      if (saEnv.startsWith("'") && saEnv.endsWith("'")) saEnv = saEnv.slice(1, -1);
-      
-      // Parse primário e Fallback: tenta converter a string bruta diretamente para objeto.
-      // Se a infraestrutura de CI/CD aplicar múltiplos invólucros, aciona a recuperação.
-      try {
-        serviceAccount = JSON.parse(saEnv);
-      } catch (initialParseError) {
-        // Fallback Cascata: tentativa de descompressão de escapes excessivos injetados pela host
-        const unescapedEnv = saEnv.replace(/\\"/g, '"');
-        serviceAccount = JSON.parse(unescapedEnv);
-      }
-      
-      // Mutação Pós-Parse: Transforma as sequências de escape em quebras de linha reais
-      // estritamente na chave criptográfica isolada, preservando a integridade do JSON original.
-      if (serviceAccount && serviceAccount.private_key) {
-        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-      }
-    } catch (parseError: any) {
-      console.error("FALHA CRÍTICA: FIREBASE_SERVICE_ACCOUNT_JSON inválido - verifique a variável de ambiente no Netlify.");
-      throw new Error(`Erro no parse das credenciais do Firebase: ${saEnv ? parseError.message : "Variável vazia"}`);
-    }
-
-    if (!serviceAccount || !serviceAccount.private_key) {
-      throw new Error("Erro na inicialização do Firebase: Objeto de credenciais ou private_key ausente.");
-    }
-
-    initializeApp({
-      credential: cert(serviceAccount),
-      storageBucket: process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? "elite90-c716b.firebasestorage.app",
-    });
-  }
-  return getFirestore();
-}
 
 // Upload de fotos base64 para Firebase Storage via Admin SDK (sem CORS, sem restrições de bucket)
 // Fotos salvas como privadas — acesso via Signed URL gerada no painel admin sob demanda.
@@ -56,7 +15,7 @@ async function uploadFotos(fotosB64: string[], uploadId: string): Promise<string
   // Nome do bucket passado explicitamente — evita resolução implícita via
   // app.options.storageBucket, que retornou "bucket does not exist" mesmo
   // com storageBucket configurado corretamente no initializeApp().
-  const bucketName = process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? "elite90-c716b.firebasestorage.app";
+  const bucketName = storageBucketName();
   const bucket = getStorage().bucket(bucketName);
   const paths: string[] = [];
 

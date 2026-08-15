@@ -5,37 +5,11 @@
 //
 // Segurança: requer Firebase ID token com custom claim admin:true.
 
-import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
+import { getApp, storageBucketName } from "./_firebase";
 
-function getApp() {
-  if (!getApps().length) {
-    let saEnv: string = (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}").trim();
-    let serviceAccount: any = null;
-    try {
-      if (saEnv.startsWith('"') && saEnv.endsWith('"')) saEnv = saEnv.slice(1, -1);
-      if (saEnv.startsWith("'") && saEnv.endsWith("'")) saEnv = saEnv.slice(1, -1);
-      try {
-        serviceAccount = JSON.parse(saEnv);
-      } catch {
-        serviceAccount = JSON.parse(saEnv.replace(/\\"/g, '"'));
-      }
-      if (serviceAccount?.private_key) {
-        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
-      }
-    } catch (e: any) {
-      throw new Error(`Erro no parse das credenciais: ${e.message}`);
-    }
-    if (!serviceAccount?.private_key) throw new Error("Credenciais do Firebase ausentes.");
-    initializeApp({
-      credential: cert(serviceAccount as any),
-      storageBucket: process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? "elite90-c716b.firebasestorage.app",
-    });
-  }
-  return getApps()[0];
-}
 
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
@@ -65,7 +39,7 @@ export const handler = async (event: any) => {
     const lead = leadDoc.data() as Record<string, any>;
     const fotosPaths: string[] = Array.isArray(lead.fotos_paths) ? lead.fotos_paths : [];
 
-    const bucketName = process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? "elite90-c716b.firebasestorage.app";
+    const bucketName = storageBucketName();
     const bucket = getStorage().bucket(bucketName);
 
     const storageErrors: string[] = [];
