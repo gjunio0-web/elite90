@@ -284,43 +284,73 @@ const navLinks = [
     }
 
     // --- FASE 3: ESCRITA ÚNICA EM LOTE (Tarefa B - Write) ---
-    dropdown.innerHTML = "";
-    const fragmentoDropdown = document.createDocumentFragment();
+    function aplicarCorte(corte: number) {
+      dropdown.innerHTML = "";
+      const fragmentoDropdown = document.createDocumentFragment();
 
-    links.forEach((link, indice) => {
-      if (indice >= indiceCorte) {
-        // Elementos cortados matematicamente: somem da barra e vão para o Dropdown
-        link.style.display = "none";
-        link.setAttribute("tabindex", "-1"); // Bloqueia foco do teclado (WCAG 2.2)
+      links.forEach((link, indice) => {
+        if (indice >= corte) {
+          // Elementos cortados matematicamente: somem da barra e vão para o Dropdown
+          link.style.display = "none";
+          link.setAttribute("tabindex", "-1"); // Bloqueia foco do teclado (WCAG 2.2)
 
-        const a = document.createElement("a");
-        a.href = link.getAttribute("href") ?? "#";
-        a.className = "site-header__dropdown-item";
-        a.textContent = link.textContent?.trim() ?? "";
-        a.setAttribute("role", "menuitem");
+          const a = document.createElement("a");
+          a.href = link.getAttribute("href") ?? "#";
+          a.className = "site-header__dropdown-item";
+          a.textContent = link.textContent?.trim() ?? "";
+          a.setAttribute("role", "menuitem");
 
-        // --- CORREÇÃO DE ASSINATURA DE ESCOPO (Astro Scoping) ---
-        // Descobre dinamicamente se o link original possui o atributo com o hash do Astro
-        const astroAttr = Array.from(link.attributes).find(attr => attr.name.startsWith('data-astro-cid'));
-        if (astroAttr) {
-          // Aplica exatamente a mesma assinatura do Astro no novo link criado
-          a.setAttribute(astroAttr.name, astroAttr.value);
+          // --- CORREÇÃO DE ASSINATURA DE ESCOPO (Astro Scoping) ---
+          // Descobre dinamicamente se o link original possui o atributo com o hash do Astro
+          const astroAttr = Array.from(link.attributes).find(attr => attr.name.startsWith('data-astro-cid'));
+          if (astroAttr) {
+            // Aplica exatamente a mesma assinatura do Astro no novo link criado
+            a.setAttribute(astroAttr.name, astroAttr.value);
+          }
+          // --------------------------------------------------------
+
+          fragmentoDropdown.appendChild(a);
+        } else {
+          link.style.display = "";
+          link.setAttribute("tabindex", "0");
         }
-        // --------------------------------------------------------
-        
-        fragmentoDropdown.appendChild(a);
-      }
-    });
+      });
 
-    // Despejo físico e controle de visibilidade baseado em dados estruturais consistentes
-    if (indiceCorte < links.length) {
-      dropdown.appendChild(fragmentoDropdown);
-      moreWrap.style.display = "inline-block"; // Posiciona o botão colado ao último link visível
-    } else {
-      moreWrap.style.display = "none";
-      dropdown.hidden = true;
-      moreBtn.setAttribute("aria-expanded", "false");
-      if (moreIcon) moreIcon.style.transform = "";
+      // Despejo físico e controle de visibilidade baseado em dados estruturais consistentes
+      if (corte < links.length) {
+        dropdown.appendChild(fragmentoDropdown);
+        moreWrap.style.display = "inline-block"; // Posiciona o botão colado ao último link visível
+      } else {
+        moreWrap.style.display = "none";
+        dropdown.hidden = true;
+        moreBtn.setAttribute("aria-expanded", "false");
+        if (moreIcon) moreIcon.style.transform = "";
+      }
+    }
+
+    aplicarCorte(indiceCorte);
+
+    // --- FASE 4: AUTO-VERIFICAÇÃO (rede de segurança) ---
+    // O cálculo acima parte de medidas (largura da barra, largura de cada
+    // link) tiradas num único instante. Se esse instante pegou um estado
+    // transitório — uma barra de rolagem que ainda vai aparecer/sumir, uma
+    // fonte que ainda vai trocar de métrica, a aba tendo carregado em
+    // segundo plano — o resultado pode não bater com o que a página
+    // realmente desenha, e a barra (flex-wrap + max-height:35px +
+    // overflow:hidden) esconde o excedente em silêncio, sem "Mais" nenhum:
+    // foi exatamente esse o sintoma reportado. Em vez de confiar cegamente
+    // no cálculo, confere o resultado de verdade — se algo ainda estourou
+    // a altura de uma linha, corta mais um link para dentro do "Mais" e
+    // testa de novo, até caber ou não sobrar mais nada para cortar.
+    let tentativas = 0;
+    while (
+      navFlexWrapper.scrollHeight > navFlexWrapper.clientHeight + 1 &&
+      indiceCorte > 0 &&
+      tentativas < links.length
+    ) {
+      indiceCorte -= 1;
+      aplicarCorte(indiceCorte);
+      tentativas += 1;
     }
   }
 
@@ -394,6 +424,18 @@ const navLinks = [
     setTimeout(syncOverflowMenu, 100);
   }
   window.addEventListener("load", syncOverflowMenu);
+
+  // Checagem tardia de segurança: cobre trocas de fonte ou reflows que
+  // terminem depois de "load" (não deveria acontecer, mas é barato conferir).
+  setTimeout(syncOverflowMenu, 1500);
+
+  // Uma aba aberta em segundo plano (ex.: link aberto com o botão do meio)
+  // pode ter timers e ResizeObserver atrasados pelo navegador enquanto não
+  // está em foco. Reconfere assim que ela for exibida, para não deixar o
+  // cálculo "congelado" numa medida tirada enquanto a aba ainda carregava.
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) syncOverflowMenu();
+  });
 
   // Garante que o dropdown flutuante acompanhe a barra durante a rolagem ou redimensionamento
   window.addEventListener("scroll", () => {
