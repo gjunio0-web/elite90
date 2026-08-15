@@ -1122,7 +1122,14 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
       <div class="promote-field">
         <label for="promote-start">Data de início</label>
-        <input type="date" id="promote-start" />
+        <!-- Campo de digitação com máscara, não input[type=date]: o campo nativo
+             formata segundo o idioma do NAVEGADOR, não o da página, e exibia
+             08/15/2026 (padrão norte-americano) em máquinas com navegador em
+             inglês. Não há atributo que force o formato. A máscara garante
+             DD/MM/AAAA em qualquer ambiente — mesma solução já usada nos campos
+             de CPF e celular do formulário público. -->
+        <input type="text" id="promote-start" inputmode="numeric"
+               maxlength="10" placeholder="DD/MM/AAAA" autocomplete="off" />
       </div>
 
       <div class="promote-field">
@@ -1813,13 +1820,31 @@ import AdminHeader from '../../components/AdminHeader.astro';
       document.getElementById("promote-name").textContent = lead.nome ?? "este candidato";
       const hoje = new Date();
       document.getElementById("promote-start").value =
-        `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`;
+        `${String(hoje.getDate()).padStart(2,"0")}/${String(hoje.getMonth()+1).padStart(2,"0")}/${hoje.getFullYear()}`;
       document.getElementById("promote-phase").value = "Bulking";
       document.getElementById("promote-welcome").checked = true;
       const errEl = document.getElementById("promote-error");
       errEl.hidden = true; errEl.textContent = "";
       document.getElementById("promote-overlay").hidden = false;
     });
+
+    // Máscara DD/MM/AAAA — insere as barras conforme o Coach digita.
+    document.getElementById("promote-start")?.addEventListener("input", (e) => {
+      const el = e.target;
+      let v = el.value.replace(/\D/g, "").slice(0, 8);
+      if (v.length > 4)      v = v.replace(/(\d{2})(\d{2})(\d{1,4})/, "$1/$2/$3");
+      else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,2})/, "$1/$2");
+      el.value = v;
+    });
+
+    // Confirma que a data existe de fato — rejeita 31/02/2026, que passa no formato.
+    function dataBrValida(txt){
+      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(txt ?? "");
+      if (!m) return false;
+      const [, dd, mm, yyyy] = m;
+      const d = new Date(+yyyy, +mm - 1, +dd);
+      return d.getFullYear() === +yyyy && d.getMonth() + 1 === +mm && d.getDate() === +dd;
+    }
 
     document.getElementById("promote-cancel")?.addEventListener("click", () => {
       document.getElementById("promote-overlay").hidden = true;
@@ -1834,13 +1859,14 @@ import AdminHeader from '../../components/AdminHeader.astro';
       if (!currentDetailLeadId) return;
       const btn = document.getElementById("promote-confirm");
       const errEl = document.getElementById("promote-error");
-      const rawDate = document.getElementById("promote-start").value;
-      if (!rawDate) {
+      const startDate = document.getElementById("promote-start").value.trim();
+      if (!startDate) {
         errEl.textContent = "Informe a data de início."; errEl.hidden = false; return;
       }
-      // input[type=date] devolve AAAA-MM-DD; a função espera DD/MM/AAAA
-      const [yyyy, mm, dd] = rawDate.split("-");
-      const startDate = `${dd}/${mm}/${yyyy}`;
+      if (!dataBrValida(startDate)) {
+        errEl.textContent = "Data inválida. Use o formato DD/MM/AAAA.";
+        errEl.hidden = false; return;
+      }
       const phase = document.getElementById("promote-phase").value;
       const sendWelcome = document.getElementById("promote-welcome").checked;
 
