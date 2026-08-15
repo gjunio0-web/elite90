@@ -2076,7 +2076,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
       }
 
       if (copied) {
-        updateDoc(doc(db, "avaliacoes", currentViewEval.id), { lastLinkCopiedAt: serverTimestamp() }).catch(() => {});
+        // Telemetria lastLinkCopiedAt removida: era a única escrita do navegador na
+        // coleção avaliacoes, que firestore.rules nega (allow write: if false). Com as
+        // regras publicadas, falharia em silêncio pelo .catch() vazio. O campo também
+        // não era lido em nenhum ponto do código.
         showToast("Link copiado. Compartilhe apenas com o atleta — este link dá acesso direto à avaliação.", "warning");
       } else {
         showToast("Não foi possível copiar o link. Tente novamente.", "warning");
