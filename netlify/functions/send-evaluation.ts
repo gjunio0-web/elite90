@@ -6,6 +6,7 @@ import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { randomBytes } from "crypto";
+import { sendMail } from "./_mailer";
 
 function getDb() {
   if (!getApps().length) {
@@ -157,39 +158,18 @@ export const handler = async (event: any) => {
 
     const siteUrl = `${event.headers["x-forwarded-proto"] ?? "https"}://${event.headers["host"]}`;
 
-    // Send email via Resend BEFORE writing to Firestore.
-    // This ensures that if delivery fails, the lead status is NOT advanced and
-    // the admin can retry without leaving orphan documents or a "avaliacao_enviada"
-    // state that the athlete can never access.
-    const resendKey = process.env.RESEND_API_KEY;
-    if (!resendKey) {
-      console.warn("send-evaluation: RESEND_API_KEY ausente no ambiente. Disparo abortado.");
-    } else {
-      const mailRes = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${resendKey}`,
-        },
-        body: JSON.stringify({
-          from: "ELITE 90 PRO Testes <onboarding@resend.dev>",
-          to: [lead.email],
-          subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - ELITE 90 PRO`,
-          html: buildEvaluationEmail(lead.nome, token, sections, siteUrl),
-        }),
-      });
-
-      if (!mailRes.ok) {
-        let detail = `status ${mailRes.status}`;
-        try {
-          const errJson = await mailRes.json() as any;
-          detail = errJson.message ?? detail;
-        } catch {
-          detail = (await mailRes.text()) || detail;
-        }
-        throw new Error(`Falha no envio de e-mail: ${detail}`);
-      }
-    }
+    // Envio ANTES da escrita no Firestore: se a entrega falhar, o lead não
+    // avança de estado e o admin pode repetir sem deixar documento órfão nem um
+    // "avaliacao_enviada" que o atleta jamais conseguiria acessar.
+    //
+    // Configuração ausente RECUSA o envio (o módulo _mailer lança), em vez de
+    // seguir adiante gravando — o comportamento anterior anulava, justamente
+    // neste caminho, a garantia que o parágrafo acima descreve.
+    const { id: evaluationEmailId } = await sendMail({
+      to: lead.email,
+      subject: `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - ELITE 90 PRO`,
+      html: buildEvaluationEmail(lead.nome, token, sections, siteUrl),
+    });
 
     // Firestore writes only reach here if Resend accepted the email.
     const ninetyDaysFromNow = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
@@ -205,6 +185,7 @@ export const handler = async (event: any) => {
       sentAt: FieldValue.serverTimestamp(),
       expiresAt: ninetyDaysFromNow,
       resentCount: 0,
+      emailId: evaluationEmailId,
     });
 
     // Update lead status

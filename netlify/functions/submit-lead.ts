@@ -6,6 +6,7 @@ import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { calcularScoreBase, ajusteIA, classificarPrioridade } from "./_scoring";
+import { sendMail } from "./_mailer";
 
 function getDb(): FirebaseFirestore.Firestore {
   if (!getApps().length) {
@@ -257,23 +258,38 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       fotos_upload_id:     uploadId,
     });
 
-    // Disparo assíncrono e isolado de e-mail através da API do Resend (Global Fetch)
-    const resendKey = process.env.RESEND_API_KEY;
-    if (resendKey) {
-      // Uso do escopo global explicitando a chamada de rede não-bloqueante
-      globalThis.fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${resendKey}`,
-        },
-        body: JSON.stringify({
-          from: "Coach Ruiz <contato@coachruiz.com.br>",
-          to: [email.trim()],
-          subject: `${nome.split(" ")[0]}, sua ficha foi recebida - ELITE 90 PRO`,
-          html: buildEmail(nome, objetivoFinal),
-        }),
-      }).catch(e => console.error("Erro na API do Resend (não-fatal):", e));
+    // Confirmação ao candidato — envio AGUARDADO, falha não-fatal.
+    // O envio precisa ser aguardado porque o ambiente de execução da função é
+    // congelado quando o handler retorna: uma requisição em voo nesse instante
+    // pode não completar, e o candidato nunca recebe a confirmação — sem erro
+    // visível em lugar nenhum. É a mesma razão pela qual o score de triagem
+    // deixou de ser um salto HTTP entre funções (ver bloco abaixo).
+    // A falha continua sendo não-fatal: a ficha já está gravada e o visitante
+    // recebe sucesso de qualquer forma.
+    let confirmationEmailId: string | null = null;
+    try {
+      const { id } = await sendMail({
+        to: email.trim(),
+        subject: `${nome.split(" ")[0]}, sua ficha foi recebida - ELITE 90 PRO`,
+        html: buildEmail(nome, objetivoFinal),
+      });
+      confirmationEmailId = id;
+    } catch (mailErr: any) {
+      console.error("[submit-lead] Falha no e-mail de confirmação (não-fatal):",
+        mailErr?.message ?? mailErr);
+    }
+
+    // Identificador devolvido pelo Resend — sem ele, "não recebi o e-mail" não
+    // tem investigação possível no painel do provedor.
+    if (confirmationEmailId) {
+      try {
+        await db.collection("leads").doc(docRef.id).update({
+          confirmation_email_id: confirmationEmailId,
+        });
+      } catch (idErr: any) {
+        console.warn("[submit-lead] Falha ao registrar o id do e-mail (não-fatal):",
+          idErr?.message ?? idErr);
+      }
     }
 
     // Calcula o score de triagem inline — evita o HTTP hop entre funções Lambda,

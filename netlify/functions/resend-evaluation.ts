@@ -6,6 +6,7 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { sendMail } from "./_mailer";
 
 function getDb() {
   if (!getApps().length) {
@@ -128,35 +129,20 @@ export const handler = async (event: any) => {
       }
     }
 
-    const resendKey = process.env.RESEND_API_KEY;
-    if (!resendKey) {
-      return { statusCode: 500, body: "RESEND_API_KEY não configurada" };
-    }
-
     const siteUrl = `${event.headers["x-forwarded-proto"] ?? "https"}://${event.headers["host"]}`;
 
-    const mailRes = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${resendKey}`,
-      },
-      body: JSON.stringify({
-        from: "ELITE 90 PRO Testes <onboarding@resend.dev>",
-        to: [avaliacao.email],
-        subject: `${avaliacao.nome.split(" ")[0]}, segue o acesso à sua avaliação — ELITE 90 PRO`,
-        html: buildResendEmail(avaliacao.nome, avaliacao.token, siteUrl),
-      }),
+    // Configuração ausente lança e cai no catch abaixo (resposta 500), mantendo
+    // o comportamento que esta função já tinha: nunca registrar reenvio sem envio.
+    const { id: resentEmailId } = await sendMail({
+      to: avaliacao.email,
+      subject: `${avaliacao.nome.split(" ")[0]}, segue o acesso à sua avaliação — ELITE 90 PRO`,
+      html: buildResendEmail(avaliacao.nome, avaliacao.token, siteUrl),
     });
-
-    if (!mailRes.ok) {
-      const errorData = await mailRes.text();
-      throw new Error(`Falha na API do Resend (${mailRes.status}): ${errorData}`);
-    }
 
     await db.collection("avaliacoes").doc(evalId).update({
       lastResentAt: FieldValue.serverTimestamp(),
       resentCount: FieldValue.increment(1),
+      lastResentEmailId: resentEmailId,
     });
 
     return {
