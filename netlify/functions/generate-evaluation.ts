@@ -4,14 +4,18 @@
 
 import { getAuth } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
-import { getApp, getDb } from "./_firebase";
+import { getApp, getDb, storageBucketName } from "./_firebase";
 
 
 async function downloadPhotosAsBase64(
   paths: string[]
 ): Promise<Array<{ mimeType: string; data: string }>> {
   if (!paths?.length) return [];
-  const bucket = getStorage().bucket();
+  // Nome do bucket passado explicitamente — a resolução implícita pelas opções
+  // do app já devolveu "bucket does not exist" mesmo com o valor correto
+  // configurado (ver _firebase.ts). Este era o último ponto de chamada do
+  // projeto que ainda dependia da resolução implícita.
+  const bucket = getStorage().bucket(storageBucketName());
   const results: Array<{ mimeType: string; data: string }> = [];
   for (const path of paths) {
     try {
