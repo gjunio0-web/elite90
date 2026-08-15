@@ -6,13 +6,19 @@ interface Props {
   t: Translations;
 }
 const { t } = Astro.props;
+
+// O relatorio de progresso e artefato de homologacao: a edge function
+// progresso-guard devolve 404 em /progresso* quando o contexto de publicacao
+// e "production". O link no rodape segue a mesma regra, para nao ficar visivel
+// apontando para uma rota morta. CONTEXT e definido pelo Netlify no build.
+const isProduction = process.env.CONTEXT === "production";
 ---
 
 <footer class="site-footer">
   <div class="site-footer__divider" role="presentation"></div>
   <div class="container site-footer__inner">
     <p class="site-footer__copy" id="admin-ignite" style="user-select: none;">{t.footer.copyright}</p>
-    <p class="site-footer__credit">{t.footer.credit} <a href="/progresso/" class="site-footer__status-dot" aria-hidden="true" tabindex="-1"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="10"/></svg></a></p>
+    <p class="site-footer__credit">{t.footer.credit} <a href={isProduction ? undefined : "/progresso/"} class="site-footer__status-dot" aria-hidden="true" tabindex="-1"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="10"/></svg></a></p>
   </div>
 </footer>
 
