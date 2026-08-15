@@ -50,8 +50,8 @@ const { stage1, targetId = "triagem" } = Astro.props;
 
   function applyVisibility() {
     const show = visible && !suppressed;
-    wrap.setAttribute("aria-hidden", String(!show));
-    wrap.classList.toggle("sticky-cta--visible", show);
+    wrap?.setAttribute("aria-hidden", String(!show));
+    wrap?.classList.toggle("sticky-cta--visible", show);
   }
 
   function update() {

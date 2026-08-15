@@ -255,18 +255,18 @@ const t = en ? {
           <h1 class="card-title">{t.docTitle}</h1>
 
           <div class="summary">
-            {t.summaryA} <strong style="color:var(--c-white)">{avaliacao.nome}</strong> {t.summaryB}
+            {t.summaryA} <strong style="color:var(--c-white)">{avaliacao?.nome}</strong> {t.summaryB}
           </div>
 
           {sections.map((s, i) => (
-            avaliacao.sections?.[s.key] ? (
+            avaliacao?.sections?.[s.key] ? (
               <>
                 <section class="section">
                   <div class="section-header">
                     <span class="section-num">{s.num}</span>
                     <h2 class="section-title">{s.title}</h2>
                   </div>
-                  <p class="section-body">{avaliacao.sections[s.key]}</p>
+                  <p class="section-body">{avaliacao!.sections[s.key]}</p>
                 </section>
                 {i < sections.length - 1 && <div class="divider"></div>}
               </>

@@ -23,12 +23,6 @@ const { t } = Astro.props;
       <div class="team__grid" id="teamGrid">
         {t.team.items.map((member, idx) => (
           <article class="team-card">
-            {member.pending && (
-              <span class="team-card__pending-mark" tabindex="0" aria-label={t.team.pendingLabel}>
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
-                <span class="team-card__pending-tip">{t.team.pendingTooltip}</span>
-              </span>
-            )}
             <div class="team-card__photo">
               <img
                 src={member.image}
@@ -117,28 +111,6 @@ const { t } = Astro.props;
   .team-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-cta);
-  }
-
-  .team-card__pending-mark {
-    position: absolute; top: -1px; right: -1px; z-index: 5;
-    width: 26px; height: 26px;
-    background: var(--c-pending);
-    border-radius: 0 4px 0 10px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: help;
-  }
-  .team-card__pending-mark svg { width: 13px; height: 13px; stroke: var(--c-black); }
-  .team-card__pending-mark:hover .team-card__pending-tip,
-  .team-card__pending-mark:focus-visible .team-card__pending-tip {
-    opacity: 1; transform: translateY(0); pointer-events: auto;
-  }
-  .team-card__pending-tip {
-    position: absolute; top: 32px; right: 0;
-    background: var(--c-black); border: 1px solid var(--c-pending);
-    color: var(--c-white); font-family: var(--font-label); font-size: 11px; font-weight: 600;
-    padding: 8px 11px; border-radius: 4px; width: 200px; line-height: 1.5;
-    opacity: 0; transform: translateY(-4px); transition: opacity .15s, transform .15s;
-    pointer-events: none;
   }
 
   .team-card__photo {

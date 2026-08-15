@@ -14,12 +14,6 @@ const { t } = Astro.props;
     <div class="testimonials__grid">
       {t.testimonials.items.map(item => (
         <article class="testimonial-card">
-          {item.pending && (
-            <span class="testimonial-card__pending-mark" tabindex="0" aria-label={t.testimonials.pendingLabel}>
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
-              <span class="testimonial-card__pending-tip">{t.testimonials.pendingTooltip}</span>
-            </span>
-          )}
           <div class="testimonial-card__header">
             <img
               src={item.image}
@@ -86,27 +80,6 @@ const { t } = Astro.props;
   .testimonials__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-5); }
   .testimonial-card { position: relative; background-color: var(--c-darkbg); border-left: var(--border-card); border-right: 1px solid rgba(166,195,0,.15); padding: var(--space-5); border-radius: var(--radius-card); display: flex; flex-direction: column; gap: var(--space-4); transition: transform var(--transition-base), box-shadow var(--transition-base); }
   .testimonial-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-cta); }
-  .testimonial-card__pending-mark {
-    position: absolute; top: -1px; right: -1px; z-index: 5;
-    width: 26px; height: 26px;
-    background: var(--c-pending);
-    border-radius: 0 4px 0 10px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: help;
-  }
-  .testimonial-card__pending-mark svg { width: 13px; height: 13px; stroke: var(--c-black); }
-  .testimonial-card__pending-mark:hover .testimonial-card__pending-tip,
-  .testimonial-card__pending-mark:focus-visible .testimonial-card__pending-tip {
-    opacity: 1; transform: translateY(0); pointer-events: auto;
-  }
-  .testimonial-card__pending-tip {
-    position: absolute; top: 32px; right: 0;
-    background: var(--c-black); border: 1px solid var(--c-pending);
-    color: var(--c-white); font-family: var(--font-label); font-size: 11px; font-weight: 600;
-    padding: 8px 11px; border-radius: 4px; width: 200px; line-height: 1.5;
-    opacity: 0; transform: translateY(-4px); transition: opacity .15s, transform .15s;
-    pointer-events: none;
-  }
   .testimonial-card__header { display: flex; gap: var(--space-4); align-items: center; }
   .testimonial-card__photo { width: 72px; height: 72px; border-radius: 50%; border: var(--ring-photo); object-fit: cover; flex-shrink: 0; }
   .testimonial-card__name { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-lime); text-transform: uppercase; }

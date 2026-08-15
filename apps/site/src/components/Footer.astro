@@ -83,9 +83,9 @@ const isProduction = process.env.CONTEXT === "production";
 
   if (triggerElement) {
     let clickCount = 0;
-    let clickTimer = null;
+    let clickTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const handleIgnition = (e) => {
+    const handleIgnition = (e: Event) => {
       // Previne comportamentos padrão em dispositivos móveis (zoom ou seleção)
       e.preventDefault(); 
 
@@ -100,7 +100,7 @@ const isProduction = process.env.CONTEXT === "production";
 
       // Conclusão do ritual (5 cliques dentro do tempo limite)
       if (clickCount >= 5) {
-        clearTimeout(clickTimer);
+        if (clickTimer) clearTimeout(clickTimer);
         clickCount = 0;
         
         // Injeção do Salvo-Conduto no navegador (Token Efêmero)
