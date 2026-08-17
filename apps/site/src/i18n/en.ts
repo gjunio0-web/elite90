@@ -17,7 +17,7 @@ export const en: Translations = {
     eyebrow: "Individual Consulting Program · Limited Spots",
     headline: "Build an athlete's body in 90 days",
     subheadline:
-      "You receive a detailed training plan, diet, supplementation guidance and all the support necessary to ensure your complete evolution in 90 days.",
+      "You receive an integrated high-performance strategy, built from an analysis of where you are right now, your routine and your individual profile. Coaching, physical and nutritional direction, monitoring and clinical assessment work together to drive your transformation over 90 days.",
     socialProof: {
       athletes: "1,000+ lives transformed",
       experience: "Over 10 years building elite physiques and developing high-performance executives.",
