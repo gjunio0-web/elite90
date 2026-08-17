@@ -131,6 +131,83 @@ function buildEmail(nome: string, objetivo: string, idioma: string): string {
 </html>`;
 }
 
+// Aviso ao Coach de que uma ficha nova entrou.
+//
+// Sempre em português: o destinatário é o Coach, não o candidato. O idioma da
+// ficha entra como informação dentro da mensagem, nunca como língua dela.
+//
+// CONTEÚDO DELIBERADAMENTE MÍNIMO. A mensagem NÃO carrega nenhum dado de
+// saúde — condição cardíaca, diabetes, doença crônica, lesão, reposição
+// hormonal. E-mail não é canal seguro: fica retido em servidores do provedor
+// e em cópias locais por tempo indeterminado, e esses são exatamente os dados
+// que o consentimento do formulário promete tratar com finalidade restrita.
+// Das bandeiras de risco, só a CONTAGEM viaja ("2 alertas clínicos"), sem
+// dizer quais — o suficiente para o Coach saber que a ficha merece atenção,
+// insuficiente para reconstituir o quadro clínico de alguém a partir do
+// e-mail. O detalhe está no painel, atrás de autenticação, que é onde deve
+// estar. O aviso serve para chamar o Coach até lá, não para substituí-lo.
+function buildCoachNotification(
+  nome: string,
+  objetivo: string,
+  idioma: string,
+  score: number | null,
+  prioridade: string | null,
+  alertas: number,
+  painelUrl: string
+): string {
+  const idiomaLabel = idioma === "en" ? "Inglês" : "Português";
+  const scoreLinha = score !== null
+    ? `${score}/100${prioridade ? ` &middot; prioridade ${prioridade}` : ""}`
+    : "não calculada (ver painel)";
+  const alertasLinha = alertas > 0
+    ? `${alertas} alerta${alertas > 1 ? "s" : ""} clínico${alertas > 1 ? "s" : ""}`
+    : "nenhum alerta clínico";
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ELITE90 PRO - Ficha nova</title>
+<style>
+  body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
+  .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
+  .logo{font-size:28px;font-weight:900;letter-spacing:.08em;color:#A6C300;text-transform:uppercase;margin-bottom:4px;}
+  .tagline{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#666;margin-bottom:40px;}
+  h1{font-size:22px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:.04em;margin:0 0 16px;}
+  p{font-size:15px;line-height:1.7;margin:0 0 16px;}
+  .card{background:#121212;border-left:3px solid #A6C300;padding:20px 24px;border-radius:0 6px 6px 0;margin:24px 0;}
+  .card p{margin:0 0 8px;font-size:14px;}
+  .card p:last-child{margin:0;}
+  .k{color:#666;text-transform:uppercase;letter-spacing:.1em;font-size:11px;}
+  .v{color:#FFFFFF;font-weight:700;}
+  .cta{display:inline-block;background:#A6C300;color:#0D0D0D;text-decoration:none;font-weight:700;
+       text-transform:uppercase;letter-spacing:.08em;font-size:13px;padding:14px 28px;border-radius:6px;margin-top:8px;}
+  .nota{font-size:12px;color:#666;margin-top:32px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Coach Ruiz</div>
+  <div class="tagline">ELITE90 PRO &middot; Aviso interno</div>
+  <h1>Ficha nova na triagem</h1>
+  <p>Uma ficha acabou de entrar e está aguardando análise no painel.</p>
+  <div class="card">
+    <p><span class="k">Candidato</span><br/><span class="v">${nome}</span></p>
+    <p><span class="k">Objetivo declarado</span><br/><span class="v">${objetivo || "não informado"}</span></p>
+    <p><span class="k">Idioma da ficha</span><br/><span class="v">${idiomaLabel}</span></p>
+    <p><span class="k">Nota de triagem</span><br/><span class="v">${scoreLinha}</span></p>
+    <p><span class="k">Sinalizações</span><br/><span class="v">${alertasLinha}</span></p>
+  </div>
+  <a class="cta" href="${painelUrl}">Abrir o painel</a>
+  <p class="nota">
+    Este aviso traz apenas o necessário para decidir se a ficha exige atenção agora.
+    Os dados de saúde, o contato e as fotos ficam no painel, com acesso autenticado.
+  </p>
+</div>
+</body>
+</html>`;
+}
+
 export const handler = async (event: any): Promise<{ statusCode: number; body: string }> => {
   // Recusa imediatamente requisições que violem o verbo do protocolo HTTP
   if (event.httpMethod !== "POST") {
@@ -301,11 +378,23 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       diabetes, doenca_cronica, doenca_cronica_detalhe, lesao, lesao_detalhe, dieta, refeicoes_dia,
       suplementos, suplementos_detalhe, agua_litros,
     };
+    // Declarados FORA do try porque o aviso ao Coach (abaixo) os consome. Se o
+    // cálculo falhar, permanecem nulos e o aviso sai assim mesmo, dizendo que a
+    // nota não foi calculada — a chegada da ficha é a informação essencial, e
+    // ela não pode depender do sucesso de um passo acessório.
+    let scoreParaAviso: number | null = null;
+    let prioridadeParaAviso: string | null = null;
+    let alertasClinicos = 0;
     try {
       const { base, flags }           = calcularScoreBase(leadParaScore);
       const { ajuste, justificativa } = await ajusteIA(leadParaScore);
       const scoreFinal  = Math.max(0, Math.min(100, base + ajuste));
       const prioridade  = classificarPrioridade(scoreFinal);
+      scoreParaAviso      = scoreFinal;
+      prioridadeParaAviso = prioridade;
+      // RISCO_MULTIPLO é derivada — existe quando já há duas outras bandeiras.
+      // Contá-la inflaria o número e faria duas condições virarem "3 alertas".
+      alertasClinicos     = flags.filter(f => f !== "RISCO_MULTIPLO").length;
       await db.collection("leads").doc(docRef.id).update({
         score:               scoreFinal,
         score_base:          base,
@@ -317,6 +406,39 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       });
     } catch (scoreErr: any) {
       console.warn("[submit-lead] Score de triagem falhou (não-fatal):", scoreErr.message);
+    }
+
+    // Aviso ao Coach — depois da nota, para que a mensagem já a carregue.
+    //
+    // A AUSÊNCIA de COACH_NOTIFICATION_EMAIL DESLIGA o aviso e não faz mais
+    // nada: é comportamento deliberado, para que um ambiente sem essa
+    // configuração continue aceitando fichas normalmente. Note a diferença em
+    // relação a RESEND_FROM, cuja ausência RECUSA o envio: ali a variável
+    // define COMO se envia e um valor de reserva reintroduziria o padrão de
+    // "configuração ausente vale como autorização"; aqui ela define SE existe
+    // destinatário, e sem destinatário não há o que enviar.
+    //
+    // Falha não-fatal, como os demais envios: a ficha já está gravada e o
+    // visitante já recebeu sucesso. O erro fica nos registros da função.
+    const coachEmail = process.env.COACH_NOTIFICATION_EMAIL?.trim();
+    if (coachEmail) {
+      try {
+        const siteUrl = `${event.headers["x-forwarded-proto"] ?? "https"}://${event.headers["host"]}`;
+        await sendMail({
+          to: coachEmail,
+          subject: `Ficha nova - ${nome.trim()} - ELITE90 PRO`,
+          html: buildCoachNotification(
+            nome.trim(), objetivoFinal, idioma,
+            scoreParaAviso, prioridadeParaAviso, alertasClinicos,
+            `${siteUrl}/admin/fichas`
+          ),
+        });
+      } catch (coachErr: any) {
+        console.error("[submit-lead] Falha no aviso ao Coach (não-fatal):",
+          coachErr?.message ?? coachErr);
+      }
+    } else {
+      console.info("[submit-lead] COACH_NOTIFICATION_EMAIL ausente — aviso ao Coach desligado.");
     }
 
     return {
