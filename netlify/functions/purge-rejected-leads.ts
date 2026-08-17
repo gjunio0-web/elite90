@@ -30,6 +30,7 @@ const handlerFn = async () => {
       .get();
 
     let deleted = 0;
+    let avaliacoesDeleted = 0;
     const errors: string[] = [];
 
     for (const docSnap of snap.docs) {
@@ -68,6 +69,29 @@ const handlerFn = async () => {
               })
             );
           }
+          // CASCATA PARA AS AVALIAÇÕES VINCULADAS
+          // Uma ficha recusada pode ter recebido avaliação: enviá-la a quem foi
+          // recusado é prática deliberada do programa. O documento em
+          // "avaliacoes" guarda nome, e-mail, o texto integral das cinco seções
+          // e o token que abre /avaliacao/{token} — página pública, sem
+          // autenticação. Apagar só a ficha manteria esse conjunto acessível a
+          // quem tivesse o link, esvaziando a própria rotina de retenção.
+          // Mesma ordem de delete-lead: a avaliação sai antes da ficha. Se esta
+          // etapa falhar, a exceção interrompe a iteração deste documento, a
+          // ficha permanece e a próxima execução diária tenta de novo — a ordem
+          // inversa deixaria uma avaliação órfã, sem registro que levasse a ela.
+          const avaliacoesSnap = await db
+            .collection("avaliacoes")
+            .where("leadId", "==", docSnap.id)
+            .get();
+
+          if (!avaliacoesSnap.empty) {
+            const lote = db.batch();
+            avaliacoesSnap.docs.forEach((d) => lote.delete(d.ref));
+            await lote.commit();
+            avaliacoesDeleted += avaliacoesSnap.size;
+          }
+
           await docSnap.ref.delete();
           deleted++;
         } catch (e: any) {
@@ -80,6 +104,7 @@ const handlerFn = async () => {
       success: true,
       checked: snap.size,
       deleted,
+      avaliacoesDeleted,
       retentionDays: RETENTION_DAYS,
       errors,
       ranAt: new Date().toISOString(),
