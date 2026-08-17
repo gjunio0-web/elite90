@@ -430,7 +430,7 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
           html: buildCoachNotification(
             nome.trim(), objetivoFinal, idioma,
             scoreParaAviso, prioridadeParaAviso, alertasClinicos,
-            `${siteUrl}/admin/fichas`
+            `${siteUrl}/admin/login`
           ),
         });
       } catch (coachErr: any) {
