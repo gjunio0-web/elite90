@@ -2071,7 +2071,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
       
       try{
         const res=await fetch("/.netlify/functions/send-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId,sections,coachNotes})});
-        if(!res.ok)throw new Error(await res.text());
+        if(!res.ok){
+          let msg="";
+          try{ msg=(JSON.parse(await res.text())||{}).error||""; }catch{}
+          throw new Error(msg||`Erro ${res.status} ao enviar.`);
+        }
         
         document.getElementById("eval-drawer").hidden = true;
         
@@ -2147,7 +2151,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         await loadLeads();
       }catch(e){
         console.error("Erro ao enviar avaliação:",e);
-        statusEl.textContent="Não foi possível enviar a avaliação agora. Tente novamente.";
+        statusEl.textContent = e?.message || "Não foi possível enviar a avaliação agora. Tente novamente.";
       }finally{
         btnConfirm.disabled = false;
         btnConfirm.textContent = "Confirmar envio";
