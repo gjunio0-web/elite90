@@ -76,6 +76,26 @@ export const handler = async (event: any) => {
       })
     );
 
+    // CASCATA PARA AS AVALIAÇÕES VINCULADAS
+    // O documento gravado por send-evaluation em "avaliacoes" guarda nome,
+    // e-mail, o texto integral das cinco seções e o token que abre
+    // /avaliacao/{token} — página pública, sem autenticação, válida por 90
+    // dias. Apagar apenas a ficha deixaria esse conjunto acessível a quem
+    // tivesse o link, o que contraria o próprio pedido de exclusão.
+    // A exclusão vem ANTES da ficha: se falhar, a ficha permanece e a operação
+    // pode ser repetida — o inverso deixaria uma avaliação órfã, sem nenhum
+    // registro que levasse de volta a ela.
+    const avaliacoesSnap = await db
+      .collection("avaliacoes")
+      .where("leadId", "==", leadId)
+      .get();
+
+    if (!avaliacoesSnap.empty) {
+      const lote = db.batch();
+      avaliacoesSnap.docs.forEach((d) => lote.delete(d.ref));
+      await lote.commit();
+    }
+
     await leadDoc.ref.delete();
 
     if (storageErrors.length > 0) {
@@ -87,6 +107,7 @@ export const handler = async (event: any) => {
       body: JSON.stringify({
         success: true,
         fotosApagadas: fotosPaths.length - storageErrors.length,
+        avaliacoesApagadas: avaliacoesSnap.size,
         storageErrors,
       }),
     };
