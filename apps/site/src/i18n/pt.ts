@@ -17,7 +17,7 @@ export const pt = {
     eyebrow: "Programa de Consultoria Individual · Vagas Limitadas",
     headline: "Construa um corpo de atleta em 90 dias",
     subheadline:
-      "Você recebe em detalhes seu treino, sua dieta, direcionamento de suplementação e todo suporte necessário para garantir sua evolução completa em 90 dias.",
+      "Você recebe uma estratégia integrada de alta performance, construída a partir da análise do seu momento, da sua rotina e perfil individual. Coaching, direcionamento físico e nutricional, monitoramento e avaliação clínica trabalham juntos para conduzir sua transformação ao longo de 90 dias.",
     socialProof: {
       athletes: "+1.000 vidas transformadas",
       experience: "Mais de 10 anos formando físicos de alto nível e desenvolvendo executivos de alta performance.",
