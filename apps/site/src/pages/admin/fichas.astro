@@ -1036,7 +1036,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
            tempo do Coach e uma chamada de IA em quem talvez não entre no programa.
            É orientação, não bloqueio — o envio continua permitido. -->
       <p class="eval-cost-warn" id="eval-cost-warn" hidden></p>
-      <a class="guide-inline" href="/admin/guia?from=%2Fadmin%2Ffichas#avaliacao" target="_blank" rel="noopener" style="margin-bottom:var(--space-3)">O que a IA faz e o que não faz aqui</a>
+      <a class="guide-inline" id="guide-link-avaliacao" href="/admin/guia?from=%2Fadmin%2Ffichas#avaliacao" target="_blank" rel="noopener" style="margin-bottom:var(--space-3)">O que a IA faz e o que não faz aqui</a>
       <div class="eval-actions">
         <button class="btn-sm btn-ai" id="btn-gen-ai">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="2.5"/></svg>
@@ -1305,11 +1305,25 @@ import AdminHeader from '../../components/AdminHeader.astro';
         const snap=await getDocs(query(collection(db,"leads"),orderBy("createdAt","desc")));
         leads=snap.docs.map(d=>({id:d.id,...d.data()}));
         renderStats(); renderTable();
+        reopenDrawerFromUrl();
       } catch (err) {
         console.error("Erro sistêmico ao carregar fichas:", err);
         document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="6" style="text-align:center;color:var(--c-status-alert);font-weight:700;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede. Verifique as regras do Firestore.</td></tr>`;
         document.getElementById("leads-cards").innerHTML=`<div class="lead-card" style="color:var(--c-status-alert);font-weight:700;text-align:center;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede.</div>`;
       }
+    }
+
+    // Reabre a gaveta que estava aberta quando o Coach saiu para o guia, a
+    // partir de ?lead=&drawer= deixados por guia.astro no link "voltar".
+    // Some da URL em seguida para não reabrir de novo num refresh manual.
+    function reopenDrawerFromUrl(){
+      const params=new URLSearchParams(location.search);
+      const leadId=params.get("lead");
+      const drawer=params.get("drawer");
+      if(!leadId || !leads.some(l=>l.id===leadId))return;
+      if(drawer==="eval")window.__openEval(leadId);
+      else window.__openDetail(leadId);
+      history.replaceState(null,"","/admin/fichas");
     }
 
     function renderSkeleton(){
@@ -1664,7 +1678,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         promotionSection = `<div class="detail-section">
           <div class="detail-section__title detail-section__title--promote">Entrada no programa</div>
           <p class="promotion-note">${nota}</p>
-          <a class="guide-inline" href="/admin/guia?from=%2Fadmin%2Ffichas#promocao" target="_blank" rel="noopener">O que acontece ao promover</a>
+          <a class="guide-inline" href="/admin/guia?from=%2Fadmin%2Ffichas&lead=${id}&drawer=detail#promocao" target="_blank" rel="noopener">O que acontece ao promover</a>
           <button class="btn-sm btn-outline" id="btn-promote-lead" style="width:100%;">Promover a atleta</button>
         </div>`;
       }
@@ -1736,7 +1750,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const scoreSection = `<div class="detail-section">
         <div class="detail-section__title">Score de Triagem</div>
         <div class="detail-table">${scoreRowsHtml}</div>
-        <a class="guide-inline" href="/admin/guia?from=%2Fadmin%2Ffichas#triagem" target="_blank" rel="noopener">Como esta nota é montada</a>
+        <a class="guide-inline" href="/admin/guia?from=%2Fadmin%2Ffichas&lead=${id}&drawer=detail#triagem" target="_blank" rel="noopener">Como esta nota é montada</a>
         <button class="btn-sm btn-outline" id="btn-recalcular-score" data-lead-id="${id}" style="margin-top:var(--space-3);width:100%;">Recalcular score</button>
       </div>`;
 
@@ -1987,6 +2001,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     window.__openEval=function(id){
       currentLeadId=id;
+      const guideLink=document.getElementById("guide-link-avaliacao");
+      if(guideLink)guideLink.href=`/admin/guia?from=%2Fadmin%2Ffichas&lead=${id}&drawer=eval#avaliacao`;
       const lead=leads.find(l=>l.id===id);
       document.getElementById("eval-name").textContent=lead?.nome??"";
       ["s1","s2","s3","s4","s5","notes"].forEach(k=>{document.getElementById(`eval-${k}`).value="";});

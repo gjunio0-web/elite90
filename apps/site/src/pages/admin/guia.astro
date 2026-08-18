@@ -14,10 +14,24 @@ import AdminHeader from '../../components/AdminHeader.astro';
 // tela de onde ele veio, em vez de sempre cair no Hub. Validado contra uma
 // lista de caminhos do próprio painel — nunca repassado sem checagem — para
 // não virar redirecionamento aberto, e nunca aponta pra própria página do guia.
+//
+// "lead" + "drawer" chegam só dos links dentro de uma ficha aberta (avaliação,
+// promoção, score) e permitem reabrir a MESMA gaveta ao voltar — sem eles, o
+// Coach cairia na lista em vez de retomar de onde saiu.
 const fromParam = Astro.url.searchParams.get('from');
+const leadParam = Astro.url.searchParams.get('lead');
+const drawerParam = Astro.url.searchParams.get('drawer');
+
 const isSafeAdminPath = (p: string | null): p is string =>
   !!p && /^\/admin(\/[a-zA-Z0-9-_]+)?$/.test(p) && p !== '/admin/guia';
-const backHref = isSafeAdminPath(fromParam) ? fromParam : '/admin';
+const isSafeLeadId = (v: string | null): v is string => !!v && /^[A-Za-z0-9_-]{1,64}$/.test(v);
+const isSafeDrawer = (v: string | null): v is 'detail' | 'eval' => v === 'detail' || v === 'eval';
+
+const basePath = isSafeAdminPath(fromParam) ? fromParam : '/admin';
+const backHref =
+  basePath === '/admin/fichas' && isSafeLeadId(leadParam) && isSafeDrawer(drawerParam)
+    ? `${basePath}?lead=${encodeURIComponent(leadParam)}&drawer=${drawerParam}`
+    : basePath;
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
