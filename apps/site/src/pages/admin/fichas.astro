@@ -893,6 +893,29 @@ import AdminHeader from '../../components/AdminHeader.astro';
       color: #E4B888; line-height: 1.55; margin-bottom: var(--space-4);
       text-align: left;
     }
+    /* Entrada contextual para o guia: aparece onde a dúvida nasce (composição
+       da nota, papel da IA na avaliação, efeitos da promoção) e leva direto ao
+       trecho correspondente. Abre em aba nova de propósito — consultar não pode
+       custar o filtro, a rolagem nem a gaveta abertos. */
+    .guide-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-label);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--c-textsub);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(166,195,0,0.3);
+      padding-bottom: 2px;
+      margin-top: var(--space-3);
+      transition: color var(--transition-base), border-color var(--transition-base);
+    }
+    .guide-inline::before { content: "?"; color: var(--c-lime); font-weight: 700; }
+    .guide-inline:hover { color: var(--c-lime); border-color: var(--c-lime); }
+
     .eval-cost-warn {
       background: rgba(230,126,34,0.09);
       border: 1px solid rgba(230,126,34,0.4);
@@ -1016,6 +1039,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
            tempo do Coach e uma chamada de IA em quem talvez não entre no programa.
            É orientação, não bloqueio — o envio continua permitido. -->
       <p class="eval-cost-warn" id="eval-cost-warn" hidden></p>
+      <a class="guide-inline" href="/admin/guia#avaliacao" target="_blank" rel="noopener" style="margin-bottom:var(--space-3)">O que a IA faz e o que não faz aqui</a>
       <div class="eval-actions">
         <button class="btn-sm btn-ai" id="btn-gen-ai">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="2.5"/></svg>
@@ -1643,6 +1667,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         promotionSection = `<div class="detail-section">
           <div class="detail-section__title detail-section__title--promote">Entrada no programa</div>
           <p class="promotion-note">${nota}</p>
+          <a class="guide-inline" href="/admin/guia#promocao" target="_blank" rel="noopener">O que acontece ao promover</a>
           <button class="btn-sm btn-outline" id="btn-promote-lead" style="width:100%;">Promover a atleta</button>
         </div>`;
       }
@@ -1714,6 +1739,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const scoreSection = `<div class="detail-section">
         <div class="detail-section__title">Score de Triagem</div>
         <div class="detail-table">${scoreRowsHtml}</div>
+        <a class="guide-inline" href="/admin/guia#triagem" target="_blank" rel="noopener">Como esta nota é montada</a>
         <button class="btn-sm btn-outline" id="btn-recalcular-score" data-lead-id="${id}" style="margin-top:var(--space-3);width:100%;">Recalcular score</button>
       </div>`;
 

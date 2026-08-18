@@ -6,14 +6,19 @@
 //   badge   — rótulo do contexto atual (ex: "Admin", "Fichas"). Obrigatório.
 //   backHref — se fornecido, exibe botão de voltar apontando para este href.
 //   showLogout — exibe botão de logout (padrão: true).
+//   showGuide — exibe o atalho para o Guia de Referência Rápida (padrão: true).
+//     Fica em todas as telas do painel de propósito: a dúvida sobre o que um
+//     aviso significa nasce com a ficha aberta, não no Hub. Desligar apenas na
+//     própria página do guia, onde o atalho apontaria para ela mesma.
 
 interface Props {
   badge: string;
   backHref?: string;
   showLogout?: boolean;
+  showGuide?: boolean;
 }
 
-const { badge, backHref, showLogout = true } = Astro.props;
+const { badge, backHref, showLogout = true, showGuide = true } = Astro.props;
 ---
 
 <header class="adm-header">
@@ -22,6 +27,20 @@ const { badge, backHref, showLogout = true } = Astro.props;
     <span class="adm-badge">{badge}</span>
   </div>
   <div class="adm-header__right">
+    {showGuide && (
+      <a
+        class="adm-btn-icon adm-btn-icon--guide"
+        href="/admin/guia"
+        aria-label="Abrir o guia de referência rápida"
+        title="Como o painel funciona"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M9.2 9.2a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.4-2.8 4"/>
+          <line x1="12" y1="17.4" x2="12" y2="17.4"/>
+        </svg>
+      </a>
+    )}
     {backHref && (
       <button
         class="adm-btn-icon"
@@ -103,5 +122,12 @@ const { badge, backHref, showLogout = true } = Astro.props;
     color: var(--c-lime);
     border-color: rgba(166, 195, 0, 0.6);
     background: rgba(166, 195, 0, 0.05);
+  }
+  /* O atalho do guia é consulta, não ação: borda apagada em repouso, para não
+     disputar atenção com voltar e encerrar sessão. Acende igual aos demais no
+     hover, porque continua sendo um alvo clicável do mesmo peso. */
+  .adm-btn-icon--guide {
+    border-color: rgba(255, 255, 255, 0.1);
+    text-decoration: none;
   }
 </style>

@@ -146,6 +146,74 @@ import AdminHeader from '../../components/AdminHeader.astro';
     }
     .mod-link--muted { color: rgba(255,255,255,0.15); }
 
+    /* ── GUIDE CARD ──────────────────────────────────────────────────── */
+    /* Fica FORA da grade .modules de propósito. A grade responde "o que
+       gerenciar"; o guia não é um módulo que se gerencia, e um quarto cartão
+       idêntico faria a tela parecer ter quatro módulos quando tem dois.
+       Daí a diferença deliberada: largura inteira, sem barra colorida no topo,
+       fundo transparente com borda tracejada, ícone à esquerda. */
+    .guide-card {
+      margin-top: var(--space-4);
+      background: transparent;
+      border: 1px dashed rgba(166,195,0,0.28);
+      border-radius: var(--radius-card);
+      padding: var(--space-4) var(--space-5);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-4);
+      text-decoration: none;
+      transition: border-color var(--transition-base), background var(--transition-base);
+    }
+    .guide-card:hover {
+      border-color: rgba(166,195,0,0.6);
+      background: rgba(166,195,0,0.03);
+    }
+    .guide-card__icon {
+      color: var(--c-lime);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .guide-card__body { flex: 1; min-width: 220px; }
+    .guide-card__eyebrow {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--c-textsub);
+      margin-bottom: var(--space-1);
+    }
+    .guide-card__title {
+      font-family: var(--font-display);
+      font-size: var(--fs-display-sm);
+      font-weight: 400;
+      color: var(--c-white);
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin-bottom: var(--space-2);
+    }
+    .guide-card__desc {
+      font-family: var(--font-body);
+      font-size: var(--fs-body-sm);
+      color: var(--c-textsub);
+      line-height: 1.7;
+      max-width: 62ch;
+      margin: 0;
+    }
+    .guide-card__link {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--c-lime);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-shrink: 0;
+      align-self: center;
+    }
+
     /* ── STATUS BAR ──────────────────────────────────────────────────── */
     .status-bar {
       margin-top: var(--space-7);
@@ -176,6 +244,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
       .dash-main { padding: var(--space-5) var(--space-3); }
       .dash-title { font-size: var(--fs-display-md); margin-bottom: var(--space-5); }
       .modules { grid-template-columns: 1fr; }
+      .guide-card { flex-wrap: wrap; gap: var(--space-3); }
+      .guide-card__link { align-self: flex-start; }
     }
   </style>
 </head>
@@ -232,6 +302,22 @@ import AdminHeader from '../../components/AdminHeader.astro';
       </div>
 
     </div>
+
+    <a class="guide-card" href="/admin/guia">
+      <div class="guide-card__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M9.2 9.2a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.4-2.8 4"/>
+          <line x1="12" y1="17.4" x2="12" y2="17.4"/>
+        </svg>
+      </div>
+      <div class="guide-card__body">
+        <p class="guide-card__eyebrow">Referência rápida</p>
+        <h2 class="guide-card__title">Como o painel funciona</h2>
+        <p class="guide-card__desc">Da candidatura que chega sozinha ao atleta aceito no programa: o que o sistema faz por conta própria, onde a inteligência artificial ajuda e o que só você decide. Inclui a composição da nota de triagem e o significado de cada aviso de saúde.</p>
+      </div>
+      <span class="guide-card__link">Abrir guia <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+    </a>
 
     <div class="status-bar">
       <span class="status-dot"></span>

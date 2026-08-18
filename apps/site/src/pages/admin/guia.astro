@@ -1,0 +1,705 @@
+---
+export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../../styles/tokens.css';
+import '../../styles/global.css';
+import AdminHeader from '../../components/AdminHeader.astro';
+---
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELITE90 PRO — Guia de Referência Rápida</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+  <style is:global>
+
+  :root{
+    /* Codigo de autoria — quem age em cada etapa do guia */
+    --ator-sistema:#4A90D9; --ator-ia:#A0A820; --ator-coach:#A6C300;
+    --line: 1px solid rgba(255,255,255,0.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+
+  :focus-visible{outline:2px solid var(--c-lime); outline-offset:3px}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 var(--space-4)}
+
+  /* ── Cabeçalho ───────────────────────────────── */
+  .top{
+    border-bottom:4px solid var(--c-lime);
+    background:linear-gradient(180deg,#0D0D0D 0%,#141414 100%);
+    padding:var(--space-7) 0 var(--space-6);
+  }
+  .eyebrow{
+    font-family:var(--font-label); font-size:.7rem; font-weight:700;
+    letter-spacing:var(--tracking-label); text-transform:uppercase; color:var(--c-lime);
+  }
+  h1{
+    font-family:var(--font-display); font-weight:400;
+    font-size:clamp(2.6rem,8vw,5.2rem); line-height:.95; letter-spacing:var(--tracking-display);
+    text-transform:uppercase; color:var(--c-white); margin:var(--space-3) 0 var(--space-3);
+  }
+  h1 em{font-style:normal; color:var(--c-lime)}
+  .top p{max-width:62ch; color:var(--c-textsub); margin:0}
+  .top .stamp{
+    margin-top:var(--space-5); padding-top:var(--space-3); border-top:var(--line);
+    font-family:var(--font-label); font-size:.7rem; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--c-textsub);
+  }
+
+  /* ── Blocos ──────────────────────────────────── */
+  section{padding:var(--space-7) 0}
+  section + section{border-top:var(--line)}
+  h2{
+    font-family:var(--font-display); font-weight:400;
+    font-size:clamp(1.7rem,4vw,2.6rem); line-height:1.1; letter-spacing:var(--tracking-display);
+    text-transform:uppercase; color:var(--c-white); margin:var(--space-2) 0 var(--space-4);
+  }
+  h3{
+    font-family:var(--font-label); font-size:.72rem; font-weight:700;
+    letter-spacing:var(--tracking-label); text-transform:uppercase;
+    color:var(--c-textsub); margin:0 0 var(--space-3);
+  }
+  p{margin:0 0 var(--space-3)}
+  .lead{font-size:1.05rem; color:var(--c-textbody); max-width:64ch}
+  strong{color:var(--c-white); font-weight:600}
+
+  /* ── Código de autoria ───────────────────────── */
+  .atores{display:grid; gap:var(--space-3); grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .ator{
+    background:var(--c-darkbg); border:var(--line); border-left:4px solid var(--cor);
+    border-radius:var(--radius-card); padding:var(--space-4);
+  }
+  .ator .n{
+    font-family:var(--font-label); font-size:.72rem; font-weight:700;
+    letter-spacing:var(--tracking-label); text-transform:uppercase; color:var(--cor);
+    display:flex; align-items:center; gap:var(--space-2);
+  }
+  .ator .n::before{content:""; width:10px; height:10px; border-radius:50%; background:var(--cor); flex:none}
+  .ator .verbo{
+    font-family:var(--font-display); font-size:1.9rem; line-height:1;
+    letter-spacing:var(--tracking-display); text-transform:uppercase;
+    color:var(--c-white); margin:var(--space-2) 0 var(--space-2);
+  }
+  .ator p{font-size:.875rem; color:var(--c-textsub); margin:0}
+
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--font-label); font-size:.62rem; font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase;
+    padding:4px 10px; border-radius:var(--radius-pill);
+    border:1px solid var(--cor); color:var(--cor); background:rgba(255,255,255,.02);
+    white-space:nowrap;
+  }
+  .chip::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--cor)}
+  .c-sis{--cor:var(--ator-sistema)} .c-ia{--cor:var(--ator-ia)} .c-coach{--cor:var(--ator-coach)}
+
+  /* ── Esteira de etapas ───────────────────────── */
+  .etapa{position:relative; padding-left:calc(var(--space-6) + var(--space-2)); margin-bottom:var(--space-6)}
+  .etapa::before{
+    content:""; position:absolute; left:22px; top:56px; bottom:-var(--space-6);
+    width:1px; background:linear-gradient(180deg,rgba(166,195,0,.5),rgba(166,195,0,.05));
+  }
+  .etapa:last-child::before{display:none}
+  .etapa .num{
+    position:absolute; left:0; top:0; width:46px; height:46px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--c-lime); border-radius:50%; background:var(--c-black);
+    font-family:var(--font-display); font-size:1.4rem; color:var(--c-lime); letter-spacing:.02em;
+  }
+  .etapa-hd{display:flex; align-items:center; gap:var(--space-3); flex-wrap:wrap; min-height:46px}
+  .etapa-hd h2{margin:0}
+  .etapa-body{margin-top:var(--space-4)}
+
+  .card{
+    background:var(--c-darkbg); border:var(--line); border-radius:var(--radius-card);
+    padding:var(--space-4); transition:border-color var(--transition-base);
+  }
+  .card:hover{border-color:rgba(166,195,0,.3)}
+  .grid-2{display:grid; gap:var(--space-3); grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .grid-3{display:grid; gap:var(--space-3); grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+
+  ul.clean{list-style:none; margin:0; padding:0}
+  ul.clean li{position:relative; padding-left:var(--space-4); margin-bottom:var(--space-2); font-size:.925rem}
+  ul.clean li::before{
+    content:""; position:absolute; left:0; top:.62em;
+    width:8px; height:2px; background:var(--c-lime);
+  }
+  ul.clean li:last-child{margin-bottom:0}
+
+  /* ── A RÉGUA (elemento assinatura) ───────────── */
+  .regua{
+    background:var(--c-surface-2); border:var(--line); border-radius:var(--radius-card);
+    padding:var(--space-5) var(--space-4) var(--space-4); margin-top:var(--space-3);
+  }
+  .regua-titulo{
+    font-family:var(--font-display); font-size:1.5rem; letter-spacing:var(--tracking-display);
+    text-transform:uppercase; color:var(--c-white); margin-bottom:var(--space-1);
+  }
+  .regua-sub{font-size:.85rem; color:var(--c-textsub); margin-bottom:var(--space-5)}
+  .escala{position:relative; height:64px; margin-bottom:var(--space-5)}
+  .barra{
+    position:absolute; left:0; right:0; top:26px; height:14px; display:flex;
+    border-radius:2px; overflow:hidden;
+  }
+  .barra .conta{flex:0 0 82%; background:linear-gradient(90deg,#3d4a00,var(--c-lime))}
+  .barra .ajuste{
+    flex:0 0 18%;
+    background:repeating-linear-gradient(45deg,var(--c-olive),var(--c-olive) 5px,#3f4d00 5px,#3f4d00 10px);
+  }
+  .tick{position:absolute; top:0; transform:translateX(-50%); text-align:center}
+  .tick span{
+    display:block; font-family:var(--font-label); font-size:.62rem; font-weight:700;
+    letter-spacing:.08em; color:var(--c-textsub); margin-bottom:4px; white-space:nowrap;
+  }
+  .tick::after{content:""; display:block; width:1px; height:12px; background:rgba(255,255,255,.25); margin:0 auto}
+  .cap{
+    position:absolute; top:46px; font-family:var(--font-label); font-size:.62rem; font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase; white-space:nowrap;
+  }
+  .cap-conta{left:0; color:var(--c-lime)}
+  .cap-ajuste{right:0; color:var(--c-charcoal); text-align:right}
+
+  .descontos{display:grid; gap:var(--space-2); grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+  .desc{
+    display:flex; align-items:center; justify-content:space-between; gap:var(--space-2);
+    background:var(--c-black); border:1px solid rgba(230,126,34,.35);
+    border-radius:var(--radius-card); padding:10px var(--space-3);
+  }
+  .desc .rot{font-size:.8rem; color:var(--c-textbody)}
+  .desc .val{
+    font-family:var(--font-display); font-size:1.25rem; color:var(--c-status-alert); letter-spacing:.02em;
+  }
+
+  .faixas{display:grid; gap:2px; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); margin-top:var(--space-4)}
+  .faixa{background:var(--c-black); border-top:3px solid var(--cor); padding:var(--space-3)}
+  .faixa .p{font-family:var(--font-display); font-size:1.6rem; color:var(--cor); line-height:1}
+  .faixa .r{font-family:var(--font-label); font-size:.65rem; font-weight:700; letter-spacing:.1em;
+            text-transform:uppercase; color:var(--c-textsub); margin-top:4px}
+
+  /* ── Entra / Sai ─────────────────────────────── */
+  .fluxo{display:grid; gap:var(--space-3); grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .fluxo .col{background:var(--c-darkbg); border:var(--line); border-radius:var(--radius-card); padding:var(--space-4)}
+  .fluxo .col.destaque{border-color:rgba(166,195,0,.4); box-shadow:var(--shadow-cta)}
+  .fluxo .col h3{color:var(--c-lime)}
+
+  /* ── Avisos e garantias ──────────────────────── */
+  .aviso{
+    border-left:3px solid var(--cor); background:rgba(255,255,255,.02);
+    padding:var(--space-3) var(--space-4); border-radius:0 var(--radius-card) var(--radius-card) 0;
+    margin-bottom:var(--space-3);
+  }
+  .aviso .t{
+    font-family:var(--font-label); font-size:.68rem; font-weight:700; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--cor); margin-bottom:6px;
+  }
+  .aviso p{margin:0; font-size:.9rem}
+  .a-laranja{--cor:var(--c-status-alert)} .a-lime{--cor:var(--c-lime)} .a-azul{--cor:var(--c-status-progress)}
+
+  .garantias{display:grid; gap:2px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); background:rgba(255,255,255,.09)}
+  .g{background:var(--c-black); padding:var(--space-5) var(--space-4)}
+  .g .k{
+    font-family:var(--font-display); font-size:2.4rem; line-height:1; color:var(--c-lime);
+    letter-spacing:var(--tracking-display); margin-bottom:var(--space-2);
+  }
+  .g p{font-size:.9rem; margin:0; color:var(--c-textsub)}
+  .g p b{color:var(--c-white); font-weight:600}
+
+  /* ── Rodapé ──────────────────────────────────── */
+  footer{border-top:4px solid var(--c-lime); padding:var(--space-6) 0 var(--space-7); background:#141414}
+  footer .marca{
+    font-family:var(--font-display); font-size:2rem; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--c-white);
+  }
+  footer .marca span{color:var(--c-lime)}
+  footer p{font-size:.8rem; color:var(--c-textsub); max-width:60ch; margin-top:var(--space-2)}
+
+  @media (max-width:640px){
+    .etapa{padding-left:0}
+    .etapa::before{display:none}
+    .etapa .num{position:static; margin-bottom:var(--space-3)}
+    .escala{height:78px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important; scroll-behavior:auto !important}}
+
+  </style>
+</head>
+<body>
+  <AdminHeader badge="Guia" backHref="/admin" showGuide={false} />
+
+
+<header class="top" id="inicio">
+  <div class="wrap">
+    <div class="eyebrow">Coach Ruiz · Elite 90 Pro</div>
+    <h1>Guia de<br><em>Referência Rápida</em></h1>
+    <p class="lead">Da candidatura que chega sozinha ao atleta aceito no programa: o que o
+      sistema faz por conta própria, onde a inteligência artificial ajuda, e o que só o Coach decide.</p>
+    <div class="stamp">Painel de administração · Fichas de triagem e acompanhamento</div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h3>Comece por aqui</h3>
+    <h2>Três papéis, sem sobreposição</h2>
+    <p class="lead" style="margin-bottom:var(--space-5)">Este código de cores acompanha o guia
+      inteiro. Em cada etapa, a etiqueta indica quem age — e a separação não é uma promessa de
+      conduta, é a forma como o sistema foi construído.</p>
+
+    <div class="atores">
+      <div class="ator" style="--cor:var(--ator-sistema)">
+        <div class="n">O sistema</div>
+        <div class="verbo">Recebe e organiza</div>
+        <p>Guarda a ficha e as fotos, envia a confirmação ao candidato, calcula a nota e avisa o
+          Coach. Acontece sozinho, sem ninguém apertar nada.</p>
+      </div>
+      <div class="ator" style="--cor:var(--ator-ia)">
+        <div class="n">A inteligência artificial</div>
+        <div class="verbo">Lê e resume</div>
+        <p>Interpreta o que o candidato escreveu com as próprias palavras e redige rascunhos.
+          Não aprova ninguém, não recusa ninguém e não envia nada.</p>
+      </div>
+      <div class="ator" style="--cor:var(--ator-coach)">
+        <div class="n">O Coach</div>
+        <div class="verbo">Decide</div>
+        <p>Aprova ou recusa, revisa e corrige cada texto, aperta o botão de enviar e escolhe
+          quem entra no programa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h3>A jornada, passo a passo</h3>
+    <h2>Do formulário ao atleta</h2>
+
+    <!-- 1 -->
+    <div class="etapa">
+      <div class="num" id="chegada">01</div>
+      <div class="etapa-hd">
+        <h2 style="font-size:clamp(1.4rem,3vw,2rem)">Chega uma candidatura</h2>
+        <span class="chip c-sis">Automático</span>
+      </div>
+      <div class="etapa-body">
+        <p class="lead">O candidato preenche o formulário e envia as fotos. É a única coisa que
+          ele faz sozinho — e, a partir daí, quatro coisas acontecem sem nenhuma ação:</p>
+        <div class="grid-2">
+          <div class="card">
+            <ul class="clean">
+              <li>Os dados e as fotos ficam guardados em local protegido.</li>
+              <li>O candidato recebe a confirmação por e-mail.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <ul class="clean">
+              <li>A nota de prioridade da ficha é calculada.</li>
+              <li>O Coach recebe o aviso, já com a nota.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="aviso a-azul" style="margin-top:var(--space-3)">
+          <div class="t">Se algo falhar no caminho</div>
+          <p>A ficha é guardada assim mesmo. Um problema momentâneo no cálculo da nota nunca
+            faz uma candidatura se perder.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="etapa">
+      <div class="num" id="triagem">02</div>
+      <div class="etapa-hd">
+        <h2 style="font-size:clamp(1.4rem,3vw,2rem)">A triagem</h2>
+        <span class="chip c-ia">Leitura por IA</span>
+        <span class="chip c-coach">Decisão do Coach</span>
+      </div>
+      <div class="etapa-body">
+        <p class="lead">A nota que aparece na lista não vem toda do mesmo lugar. Ela tem duas
+          partes somadas, e entender a diferença é o que permite confiar no número.</p>
+
+        <div class="regua">
+          <div class="regua-titulo">Como a nota é montada</div>
+          <div class="regua-sub">Escala de 0 a 100 pontos</div>
+
+          <div class="escala">
+            <div class="tick" style="left:0"><span>0</span></div>
+            <div class="tick" style="left:82%"><span>90</span></div>
+            <div class="tick" style="left:100%"><span>100</span></div>
+            <div class="barra">
+              <div class="conta"></div>
+              <div class="ajuste"></div>
+            </div>
+            <div class="cap cap-conta">Régua fixa · 0 a 90</div>
+            <div class="cap cap-ajuste">Ajuste da IA · até 10</div>
+          </div>
+
+          <div class="grid-2" style="margin-bottom:var(--space-5)">
+            <div class="card">
+              <h3 style="color:var(--c-lime)">A parte que é pura conta</h3>
+              <p style="font-size:.9rem">Regras fixas, escritas de antemão. Sem inteligência
+                artificial nenhuma. Qualquer pessoa refaz a conta no papel e chega ao mesmo número.</p>
+              <ul class="clean">
+                <li>Idade entre 35 e 55 anos vale a pontuação cheia.</li>
+                <li>O objetivo declarado pontua pela proximidade com o programa.</li>
+                <li>Experiência conta anos de treino, modalidade e frequência.</li>
+                <li>Disciplina conta dieta, refeições, água e tempo disponível.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3 style="color:var(--c-charcoal)">A parte que a IA ajusta</h3>
+              <p style="font-size:.9rem">Existe para o que a régua não alcança: os campos em que
+                o candidato escreve com as próprias palavras.</p>
+              <ul class="clean">
+                <li><strong>Sobe</strong> quando o relato é detalhado e coerente, há histórico de
+                  palco relevante ou lesão já tratada.</li>
+                <li><strong>Desce</strong> quando o relato é vago, a lesão é recente e sem
+                  tratamento, ou o suplemento declarado não é sabido.</li>
+                <li>Se o candidato não escreveu nada nesses campos, a IA nem é acionada.</li>
+              </ul>
+            </div>
+          </div>
+
+          <h3>Descontos de saúde — e o aviso que acende junto</h3>
+          <div class="descontos">
+            <div class="desc"><span class="rot">Problema cardíaco</span><span class="val">−8</span></div>
+            <div class="desc"><span class="rot">Diabetes</span><span class="val">−5</span></div>
+            <div class="desc"><span class="rot">Doença crônica</span><span class="val">−5</span></div>
+            <div class="desc"><span class="rot">Reposição sem médico</span><span class="val">−5</span></div>
+            <div class="desc"><span class="rot">Lesão declarada</span><span class="val">−3</span></div>
+          </div>
+          <p style="font-size:.85rem; color:var(--c-textsub); margin-top:var(--space-3)">
+            Dois ou mais avisos acesos acendem um terceiro, de risco combinado. Os avisos aparecem
+            ao lado da nota na própria lista — o risco clínico chega antes da leitura, não depois.</p>
+
+          <h3 style="margin-top:var(--space-5)">Onde cada nota cai</h3>
+          <div class="faixas">
+            <div class="faixa" style="--cor:var(--c-lime)"><div class="p">80+</div><div class="r">Prioridade alta</div></div>
+            <div class="faixa" style="--cor:#E6C200"><div class="p">60+</div><div class="r">Prioridade média</div></div>
+            <div class="faixa" style="--cor:var(--c-status-alert)"><div class="p">40+</div><div class="r">Prioridade baixa</div></div>
+            <div class="faixa" style="--cor:var(--c-textsub)"><div class="p">&lt;40</div><div class="r">Fora do perfil</div></div>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top:var(--space-5)">
+          <div class="card">
+            <h3>Não muda o destino de ninguém</h3>
+            <p style="font-size:.9rem; margin:0">Dez pontos em cem não transformam um candidato fora
+              do perfil em prioridade alta, nem reprovam quem está bem qualificado. A IA ajusta a
+              fila — não decide quem entra.</p>
+          </div>
+          <div class="card">
+            <h3>Se a IA falhar, nada trava</h3>
+            <p style="font-size:.9rem; margin:0">Sem resposta do serviço, o ajuste vira zero, a
+              ficha é salva e o Coach recebe a nota da régua. O trabalho não para.</p>
+          </div>
+          <div class="card">
+            <h3>Sempre explicável</h3>
+            <p style="font-size:.9rem; margin:0">A ficha mostra em separado quanto veio da régua,
+              quanto veio do ajuste e a frase de justificativa. Se alguém perguntar por que foi
+              priorizado, existe resposta.</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-5)">O que a tela oferece</h3>
+        <div class="grid-2">
+          <div class="card">
+            <ul class="clean">
+              <li>Sete contadores no alto: total, novas, em análise, aprovadas, recusadas, com
+                avaliação enviada e já promovidas.</li>
+              <li>Busca por nome ou e-mail, filtros e ordenação.</li>
+              <li>Tabela no computador, cartões no celular — mesma informação.</li>
+              <li>A lista inteira sai em planilha com um clique.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <ul class="clean">
+              <li>Ficha aberta: nota explicada, avisos de saúde com o significado de cada um,
+                identificação, perfil físico, objetivo, saúde e alimentação.</li>
+              <li>Pontos de atenção da saúde destacados em cor.</li>
+              <li>As fotos abrem por um endereço temporário que <strong>expira em 15
+                minutos</strong>.</li>
+              <li>A situação da ficha muda ali mesmo: nova, em análise, aprovada, recusada.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="etapa">
+      <div class="num" id="avaliacao">03</div>
+      <div class="etapa-hd">
+        <h2 style="font-size:clamp(1.4rem,3vw,2rem)">A avaliação estratégica</h2>
+        <span class="chip c-ia">Rascunho por IA</span>
+        <span class="chip c-coach">Revisão e envio</span>
+      </div>
+      <div class="etapa-body">
+        <p class="lead">É o documento de maior valor entregue ao candidato antes de qualquer
+          compromisso — e o uso mais profundo de inteligência artificial em funcionamento.</p>
+
+        <div class="fluxo">
+          <div class="col">
+            <h3>O que a máquina recebe</h3>
+            <ul class="clean">
+              <li>Todas as respostas do formulário.</li>
+              <li><strong>As fotos do candidato</strong>, usadas especificamente na primeira seção
+                — condição estética, proporção, simetria.</li>
+              <li><strong>Os três documentos mais recentes já enviados</strong>, como referência de
+                estilo. Quanto mais o Coach usa, mais o rascunho soa como ele.</li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>O que ela devolve</h3>
+            <ul class="clean">
+              <li>Um rascunho em cinco seções fixas: diagnóstico estético, treino e cardio,
+                protocolo de saúde, estratégia de competição, alinhamento de trabalho.</li>
+              <li>Tom técnico definido, sem motivacional genérico.</li>
+              <li>Onde os dados não bastam, o trecho é marcado como <strong>a completar</strong> —
+                a lacuna é apontada, não disfarçada.</li>
+            </ul>
+          </div>
+          <div class="col destaque">
+            <h3>O que só o Coach faz</h3>
+            <ul class="clean">
+              <li>Lê, corrige e reescreve à vontade os cinco campos.</li>
+              <li>Acrescenta anotações internas que ficam com a equipe.</li>
+              <li>Confirma o envio numa tela de revisão que mostra o documento como será recebido.</li>
+              <li><strong>A IA não envia nada. Em nenhuma hipótese.</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-5)">Dois cuidados que a tela toma sozinha</h3>
+        <div class="aviso a-laranja">
+          <div class="t">Aviso de custo</div>
+          <p>Ao abrir a avaliação de uma ficha ainda não aprovada, a tela lembra que gerar e
+            revisar consome tempo em alguém que talvez não entre no programa, e sugere conferir a
+            nota antes. Em ficha recusada, o aviso muda de teor: seguir só faz sentido como
+            devolutiva a quem não entra.</p>
+        </div>
+        <div class="aviso a-laranja">
+          <div class="t">Aviso de texto interrompido</div>
+          <p>Se a máquina atingir o limite de tamanho e cortar algum trecho, a tela avisa que parte
+            do conteúdo pode estar incompleta. O Coach nunca recebe um rascunho cortado sem saber
+            que está cortado.</p>
+        </div>
+
+        <h3 style="margin-top:var(--space-5)">Como o documento chega ao candidato</h3>
+        <div class="grid-2">
+          <div class="card">
+            <ul class="clean">
+              <li>Por e-mail, <strong>no idioma em que ele preencheu o formulário</strong>.</li>
+              <li>Um endereço exclusivo abre uma página feita só para ele.</li>
+              <li>A página não aparece em buscadores e para de funcionar depois de 90 dias.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <ul class="clean">
+              <li>Depois de enviada, a ficha passa a ser apenas de leitura — para não descolar do
+                documento que já saiu.</li>
+              <li>O Coach pode copiar o endereço, com aviso na tela de que aquele link dá acesso
+                direto ao documento.</li>
+              <li>E pode reenviar o e-mail, com confirmação.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="aviso a-lime" style="margin-top:var(--space-3)">
+          <div class="t">Proteção discreta e importante</div>
+          <p>O e-mail sai <strong>antes</strong> de o sistema registrar qualquer coisa. Se a entrega
+            falhar, nada é gravado, a ficha não muda de situação e a operação pode ser repetida.
+            Nunca sobra um "enviado" para um candidato que não recebeu.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="etapa">
+      <div class="num" id="promocao">04</div>
+      <div class="etapa-hd">
+        <h2 style="font-size:clamp(1.4rem,3vw,2rem)">Aceitar no programa</h2>
+        <span class="chip c-coach">Decisão do Coach</span>
+      </div>
+      <div class="etapa-body">
+        <p class="lead">Quem decide é o Coach. A opção de promover <strong>só aparece em ficha
+          aprovada ou com avaliação já enviada</strong> — em ficha nova, em análise ou recusada, o
+          botão simplesmente não existe.</p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>O que o Coach informa</h3>
+            <ul class="clean">
+              <li><strong>A data de início.</strong> Pode ser no passado, de propósito, para
+                regularizar quem já treinava antes.</li>
+              <li><strong>A fase inicial</strong> do ciclo.</li>
+              <li><strong>Se o e-mail de boas-vindas deve sair.</strong></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>O que acontece em seguida</h3>
+            <ul class="clean">
+              <li>A conta de acesso do atleta é criada.</li>
+              <li>O registro dele é aberto, com semana e dia calculados a partir da data.</li>
+              <li>As fotos da candidatura passam a valer como registro do primeiro dia.</li>
+              <li>A ficha guarda quem promoveu e quando.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-4)">Três proteções embutidas</h3>
+        <div class="grid-3">
+          <div class="card">
+            <p style="font-size:.9rem; margin:0">Promover a mesma pessoa duas vezes é
+              <strong>recusado</strong> — evita zerar o ciclo de quem já está andando.</p>
+          </div>
+          <div class="card">
+            <p style="font-size:.9rem; margin:0">Se o e-mail de boas-vindas falhar, a promoção
+              <strong>continua válida</strong> e o Coach é avisado da falha.</p>
+          </div>
+          <div class="card">
+            <p style="font-size:.9rem; margin:0">A ficha promovida <strong>não pode mais ser
+              apagada</strong>: as fotos são as mesmas do atleta ativo.</p>
+          </div>
+        </div>
+
+        <div class="aviso a-lime" style="margin-top:var(--space-4)">
+          <div class="t">O que o e-mail de boas-vindas diz</div>
+          <p>Que <strong>o Coach entrará em contato</strong> para combinar o primeiro passo. A
+            redação é deliberada: o sistema não promete ao atleta nada que não possa cumprir.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="etapa">
+      <div class="num" id="retencao">05</div>
+      <div class="etapa-hd">
+        <h2 style="font-size:clamp(1.4rem,3vw,2rem)">A rotina da madrugada</h2>
+        <span class="chip c-sis">Automático</span>
+      </div>
+      <div class="etapa-body">
+        <p class="lead">Todo dia às três da manhã, o sistema apaga em definitivo as fichas
+          recusadas há mais de noventa dias. É exigência de proteção de dados: não se guarda
+          indefinidamente informação pessoal de saúde de quem não entrou.</p>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Ela é conservadora de propósito</h3>
+            <ul class="clean">
+              <li>Pula fichas de pessoas que viraram atletas.</li>
+              <li>Não apaga ficha sem data confiável de referência.</li>
+              <li>Na dúvida, mantém.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>O Coach não precisa fazer nada</h3>
+            <p style="font-size:.9rem; margin:0">A rotina roda sozinha e não pede confirmação. A
+              única coisa que a aciona é a situação da ficha: uma ficha marcada como recusada entra
+              na contagem dos noventa dias.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h3 id="seguranca">Quem consegue ver os dados</h3>
+    <h2>As fechaduras do painel</h2>
+    <p class="lead" style="margin-bottom:var(--space-4)">As fichas guardam informação de saúde.
+      O acesso a elas é fechado em três camadas independentes.</p>
+    <div class="grid-3">
+      <div class="card">
+        <h3>Entrar não basta</h3>
+        <p style="font-size:.9rem; margin:0">O painel exige senha ou conta Google <strong>e</strong>
+          uma permissão de administrador concedida à mão. Ter conta no serviço não dá acesso a nada.</p>
+      </div>
+      <div class="card">
+        <h3>As fotos ficam trancadas</h3>
+        <p style="font-size:.9rem; margin:0">Ninguém acessa as fotos direto, nem com conta. Elas só
+          saem pelos endereços temporários de quinze minutos que o painel gera.</p>
+      </div>
+      <div class="card">
+        <h3>O envio passa pelo sistema</h3>
+        <p style="font-size:.9rem; margin:0">Os arquivos que o candidato envia não vão direto para o
+          depósito: passam pelo sistema, que os recebe e grava.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h3>Para levar na memória</h3>
+    <h2>Quatro regras que não mudam</h2>
+    <div class="garantias">
+      <div class="g">
+        <div class="k">01</div>
+        <p><b>A IA nunca decide.</b> Ela lê, resume e rascunha. Aprovar, recusar, enviar e aceitar
+          no programa são sempre do Coach.</p>
+      </div>
+      <div class="g">
+        <div class="k">02</div>
+        <p><b>Todo número é explicável.</b> A nota mostra em separado o que veio da régua fixa e o
+          que veio do ajuste, com a justificativa por escrito.</p>
+      </div>
+      <div class="g">
+        <div class="k">03</div>
+        <p><b>Falha não vira dado errado.</b> Quando algo dá errado, o sistema prefere não gravar e
+          avisar a registrar uma meia-verdade.</p>
+      </div>
+      <div class="g">
+        <div class="k">04</div>
+        <p><b>Nada sai sem revisão.</b> Todo texto que chega a um candidato passou pelos olhos e
+          pelo dedo do Coach antes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const cfg = {
+      apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
+      authDomain:        document.querySelector('meta[name="fb-auth"]')?.content,
+      projectId:         document.querySelector('meta[name="fb-proj"]')?.content,
+      storageBucket:     document.querySelector('meta[name="fb-bucket"]')?.content,
+      messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
+      appId:             document.querySelector('meta[name="fb-appid"]')?.content,
+    };
+    const app  = initializeApp(cfg);
+    const auth = getAuth(app);
+
+    // Mesmo guarda das demais telas do painel: o guia descreve o funcionamento
+    // interno e não fica acessível fora da área autenticada.
+    onAuthStateChanged(auth, user => {
+      if (!user) { window.location.href = "/admin/login"; return; }
+    });
+
+    document.getElementById("btn-logout")?.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "/admin/login";
+    });
+  </script>
+
+  <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+  <meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+  <meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+  <meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
+  <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
+  <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
+</body>
+</html>
