@@ -19,6 +19,12 @@ interface Props {
 }
 
 const { badge, backHref, showLogout = true, showGuide = true } = Astro.props;
+
+// O atalho do guia carrega a página atual em "from" para que, se o guia por
+// sua vez for aberto com o link "voltar" apontando para /admin/guia (ver
+// guia.astro), ele saiba devolver o Coach à tela de onde partiu — em vez de
+// sempre cair no Hub, que era o comportamento anterior.
+const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`;
 ---
 
 <header class="adm-header">
@@ -30,7 +36,7 @@ const { badge, backHref, showLogout = true, showGuide = true } = Astro.props;
     {showGuide && (
       <a
         class="adm-btn-icon adm-btn-icon--guide"
-        href="/admin/guia"
+        href={guideHref}
         aria-label="Abrir o guia de referência rápida"
         title="Como o painel funciona"
       >

@@ -8,6 +8,16 @@ import '@fontsource/montserrat/700.css';
 import '../../styles/tokens.css';
 import '../../styles/global.css';
 import AdminHeader from '../../components/AdminHeader.astro';
+
+// "from" chega dos links de AdminHeader e das entradas contextuais em
+// fichas.astro (?from=/admin/fichas), para que "voltar" devolva o Coach à
+// tela de onde ele veio, em vez de sempre cair no Hub. Validado contra uma
+// lista de caminhos do próprio painel — nunca repassado sem checagem — para
+// não virar redirecionamento aberto, e nunca aponta pra própria página do guia.
+const fromParam = Astro.url.searchParams.get('from');
+const isSafeAdminPath = (p: string | null): p is string =>
+  !!p && /^\/admin(\/[a-zA-Z0-9-_]+)?$/.test(p) && p !== '/admin/guia';
+const backHref = isSafeAdminPath(fromParam) ? fromParam : '/admin';
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -231,7 +241,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   </style>
 </head>
 <body>
-  <AdminHeader badge="Guia" backHref="/admin" showGuide={false} />
+  <AdminHeader badge="Guia" backHref={backHref} showGuide={false} />
 
 
 <header class="top" id="inicio">

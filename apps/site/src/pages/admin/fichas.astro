@@ -75,10 +75,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
       max-width: 1200px;
       margin: 0 auto;
       padding: var(--space-6) var(--space-5) var(--space-4);
-      height: calc(100vh - 64px);
+      min-height: calc(100vh - 64px);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
     }
     
     .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--space-6); gap: var(--space-4); flex-wrap: wrap; }
@@ -289,9 +288,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     /* TABELA DE LEADS (NOIR EDITORIAL) */
     .table-wrap {
-      flex: 1;
-      min-height: 180px;
-      overflow: auto;
+      overflow-x: auto;
       scrollbar-width: thin;
       scrollbar-color: var(--c-lime) transparent;
       margin-top: var(--space-5);
@@ -1039,7 +1036,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
            tempo do Coach e uma chamada de IA em quem talvez não entre no programa.
            É orientação, não bloqueio — o envio continua permitido. -->
       <p class="eval-cost-warn" id="eval-cost-warn" hidden></p>
-      <a class="guide-inline" href="/admin/guia#avaliacao" target="_blank" rel="noopener" style="margin-bottom:var(--space-3)">O que a IA faz e o que não faz aqui</a>
+      <a class="guide-inline" href="/admin/guia?from=%2Fadmin%2Ffichas#avaliacao" target="_blank" rel="noopener" style="margin-bottom:var(--space-3)">O que a IA faz e o que não faz aqui</a>
       <div class="eval-actions">
         <button class="btn-sm btn-ai" id="btn-gen-ai">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="2.5"/></svg>
@@ -1667,7 +1664,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         promotionSection = `<div class="detail-section">
           <div class="detail-section__title detail-section__title--promote">Entrada no programa</div>
           <p class="promotion-note">${nota}</p>
-          <a class="guide-inline" href="/admin/guia#promocao" target="_blank" rel="noopener">O que acontece ao promover</a>
+          <a class="guide-inline" href="/admin/guia?from=%2Fadmin%2Ffichas#promocao" target="_blank" rel="noopener">O que acontece ao promover</a>
           <button class="btn-sm btn-outline" id="btn-promote-lead" style="width:100%;">Promover a atleta</button>
         </div>`;
       }
@@ -1739,7 +1736,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const scoreSection = `<div class="detail-section">
         <div class="detail-section__title">Score de Triagem</div>
         <div class="detail-table">${scoreRowsHtml}</div>
-        <a class="guide-inline" href="/admin/guia#triagem" target="_blank" rel="noopener">Como esta nota é montada</a>
+        <a class="guide-inline" href="/admin/guia?from=%2Fadmin%2Ffichas#triagem" target="_blank" rel="noopener">Como esta nota é montada</a>
         <button class="btn-sm btn-outline" id="btn-recalcular-score" data-lead-id="${id}" style="margin-top:var(--space-3);width:100%;">Recalcular score</button>
       </div>`;
 
