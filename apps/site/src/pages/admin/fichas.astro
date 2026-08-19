@@ -1533,7 +1533,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         renderStats(); renderTable();
       } catch (err) {
         console.error("Erro sistêmico ao atualizar status:", err);
-        alert("[ERRO] Falha de permissão ao tentar atualizar a ficha. A operação será revertida.");
+        showToast("Falha de permissão ao tentar atualizar a ficha. A operação será revertida.", "warning");
         if (originalValue) sel.value = originalValue;
       }
     };
@@ -1842,7 +1842,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         renderStats(); renderTable();
       }catch(err){
         console.error("Erro ao excluir ficha:",err);
-        alert(err?.message || "Não foi possível excluir a ficha agora. Tente novamente em instantes.");
+        showToast(err?.message || "Não foi possível excluir a ficha agora. Tente novamente em instantes.", "warning");
       }finally{
         btn.disabled=false; btn.textContent="Confirmar exclusão definitiva";
       }
