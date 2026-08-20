@@ -7,6 +7,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { getApp, getDb } from "./_firebase";
 import { randomBytes } from "crypto";
 import { sendMail } from "./_mailer";
+import { EMAIL_BASE_CSS, emailHeader } from "./_email-header";
 
 
 function buildEvaluationEmail(
@@ -53,10 +54,7 @@ function buildEvaluationEmail(
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>${t.title}</title>
 <style>
-  body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
-  .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
-  .logo{font-size:28px;font-weight:900;letter-spacing:.08em;color:#A6C300;text-transform:uppercase;margin-bottom:4px;}
-  .tagline{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#666;margin-bottom:40px;}
+${EMAIL_BASE_CSS}
   h1{font-size:22px;font-weight:700;color:#fff;text-transform:uppercase;margin:0 0 16px;}
   p{font-size:15px;line-height:1.7;margin:0 0 16px;}
   .highlight{color:#A6C300;font-weight:700;}
@@ -71,8 +69,7 @@ function buildEvaluationEmail(
 </head>
 <body>
 <div class="wrap">
-  <div class="logo">Coach Ruiz</div>
-  <div class="tagline">${t.tagline}</div>
+${emailHeader(t.tagline)}
 
   <h1>${t.h1}</h1>
 

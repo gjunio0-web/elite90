@@ -23,6 +23,7 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
 import { sendMail, isMailerConfigured } from "./_mailer";
+import { EMAIL_BASE_CSS, emailHeader } from "./_email-header";
 
 // @ts-ignore — módulo CommonJS compartilhado com scripts/emulate-fn08.js
 import athleteContract from "./_athlete-from-lead.js";
@@ -74,10 +75,7 @@ function buildWelcomeEmail(nome: string, startDate: string, idioma: string): str
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>${txt.title}</title>
 <style>
-  body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}
-  .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}
-  .logo{font-size:28px;font-weight:900;letter-spacing:.08em;color:#A6C300;text-transform:uppercase;margin-bottom:4px;}
-  .tagline{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#666;margin-bottom:40px;}
+${EMAIL_BASE_CSS}
   h1{font-size:22px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:.04em;margin:0 0 16px;}
   p{font-size:15px;line-height:1.7;margin:0 0 16px;}
   .highlight{color:#A6C300;font-weight:700;}
@@ -91,8 +89,7 @@ function buildWelcomeEmail(nome: string, startDate: string, idioma: string): str
 </head>
 <body>
 <div class="wrap">
-  <div class="logo">Coach Ruiz</div>
-  <div class="tagline">${txt.tagline}</div>
+${emailHeader(txt.tagline)}
   <h1>${txt.h1}</h1>
   <p>
     ${txt.p1a} <span class="highlight">Programa ELITE 90 PRO</span>.
