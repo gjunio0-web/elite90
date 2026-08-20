@@ -16,9 +16,95 @@
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--c-black);color:var(--c-textbody);font-family:var(--font-body);
-       font-size:0.875rem;-webkit-font-smoothing:antialiased;padding:clamp(16px,4vw,40px) clamp(12px,4vw,24px)}
+       font-size:0.875rem;-webkit-font-smoothing:antialiased;padding-bottom:64px}
 
-  /* ── Nota de demonstracao — rodape; nao existe no documento real do atleta ── */
+  /* ── Cabeçalho, card e rodapé: mesma marcação e CSS de avaliacao/[token].astro,
+       para que treino e nutrição sigam a mesma moldura do documento oficial. ── */
+  header{
+    position:sticky;top:0;z-index:5;
+    background:rgba(13,13,13,0.86);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(166,195,0,0.2);
+  }
+  .header-inner{
+    max-width:880px;margin:0 auto;height:78px;padding:0 20px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .logo-group{display:flex;align-items:center;gap:14px}
+  .logo-emblema{width:51px;height:56px;flex-shrink:0;display:block}
+  .logo-name{
+    font-family:var(--font-display);font-size:26px;letter-spacing:0.08em;
+    color:var(--c-lime);line-height:1;text-transform:uppercase;
+  }
+  .logo-sub{
+    font-family:var(--font-label);font-weight:700;font-size:9px;
+    letter-spacing:0.2em;text-transform:uppercase;color:var(--c-textsub);margin-top:3px;
+  }
+  .badge{
+    font-family:var(--font-label);font-weight:700;font-size:11px;
+    letter-spacing:0.12em;text-transform:uppercase;padding:6px 14px;
+    border-radius:var(--radius-pill);background:rgba(166,195,0,0.12);
+    color:var(--c-lime);border:1px solid rgba(166,195,0,0.2);white-space:nowrap;
+  }
+  main{max-width:880px;margin:0 auto;padding:48px 20px 0}
+  .card{
+    position:relative;background:var(--c-darkbg);border-radius:var(--radius-card);
+    border:1px solid rgba(166,195,0,0.2);padding:clamp(28px,5vw,52px);overflow:hidden;
+    margin-bottom:32px;
+  }
+  .card-eyebrow{
+    font-family:var(--font-label);font-weight:700;font-size:11px;
+    letter-spacing:0.18em;text-transform:uppercase;color:var(--c-lime);margin-bottom:14px;
+  }
+  .card-title{
+    font-family:var(--font-display);font-size:clamp(2rem,5vw,3.25rem);
+    letter-spacing:0.02em;color:var(--c-white);line-height:1.04;text-transform:uppercase;margin:0;
+  }
+  .summary{
+    border-left:3px solid var(--c-lime);background:var(--c-black);
+    padding:18px 22px;margin:30px 0 44px;
+    font-family:var(--font-body);font-size:14px;line-height:1.8;color:var(--c-textbody);
+  }
+  .summary strong{color:var(--c-white)}
+  .section{margin-bottom:40px}
+  .section:last-child{margin-bottom:0}
+  .section-header{display:flex;align-items:baseline;gap:14px;margin-bottom:14px}
+  .section-num{font-family:var(--font-display);font-size:30px;color:var(--c-lime);line-height:1}
+  .section-title{
+    font-family:var(--font-label);font-weight:800;font-size:clamp(1rem,2.4vw,1.3rem);
+    letter-spacing:0.04em;color:var(--c-white);text-transform:uppercase;margin:0;
+  }
+  .divider{height:1px;background:rgba(255,255,255,0.08);margin-top:40px}
+  .eval-footer{padding-bottom:40px;margin-top:16px}
+  .eval-footer__divider{
+    width:100%;height:1px;margin-bottom:24px;opacity:0.25;
+    background:linear-gradient(to right,transparent,var(--c-lime) 20%,var(--c-lime) 80%,transparent);
+  }
+  .eval-footer__inner{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+  .eval-footer__copy{
+    font-family:var(--font-label);font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.1em;color:var(--c-textsub);
+  }
+  .eval-footer__credit{
+    font-family:var(--font-label);font-size:10px;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.08em;color:rgba(153,153,153,0.5);
+  }
+  @media (max-width:600px){
+    .card{padding:24px}
+    .header-inner{padding:0 16px}
+    .demo-wrap{padding:0 16px}
+  }
+
+  /* ── Conteúdo estruturado do plano de treino: sem equivalente na avaliação
+       (que é só texto corrido), permanece com marcação própria. ── */
+  .doc-ex{border-top:1px solid rgba(255,255,255,0.06);padding:10px 0}
+  .doc-ex:first-of-type{border-top:none;padding-top:4px}
+  .doc-ex-name{font-family:var(--font-label);font-size:0.72rem;font-weight:var(--fw-label);color:var(--c-white);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px}
+  .doc-ex-sets{font-family:var(--font-body);font-size:0.76rem;color:var(--c-textbody)}
+  .doc-empty{font-family:var(--font-body);font-size:0.74rem;color:var(--c-textsub);font-style:italic;padding:4px 0}
+
+  /* ── Nota de demonstracao — nao existe no documento real do atleta ── */
+  .demo-wrap{max-width:880px;margin:0 auto;padding:0 20px}
   .demo-banner{max-width:760px;margin:34px auto 0;background:rgba(230,126,34,.10);
     border:1px solid rgba(230,126,34,.45);border-radius:10px;padding:16px 18px}
   .demo-banner-h{font-family:var(--font-label);font-size:.62rem;font-weight:700;
@@ -32,56 +118,71 @@
     text-transform:uppercase;color:var(--c-textsub);text-decoration:none;border:1px solid rgba(255,255,255,.12);
     border-radius:var(--radius-pill);padding:7px 14px;transition:.15s}
   .demo-nav a:hover{color:var(--c-lime);border-color:rgba(166,195,0,.5)}
-
-  .doc-sheet{max-width:760px;margin:0 auto}
-  .doc-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:20px;margin-bottom:28px;border-bottom:1px solid rgba(166,195,0,0.2)}
-  .doc-logo{display:flex;align-items:center;gap:12px}
-  .doc-logo img{width:51px;height:56px;flex-shrink:0;display:block}
-  .doc-logo-h{font-family:var(--font-display);font-size:2.16rem;letter-spacing:0.1em;color:var(--c-lime);line-height:1}
-  .doc-logo-p{font-family:var(--font-body);font-size:0.88rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-textsub);margin-top:3px}
-  .doc-badge{padding:6px 14px;border-radius:var(--radius-pill);font-family:var(--font-label);font-size:0.6rem;font-weight:var(--fw-label);letter-spacing:0.12em;text-transform:uppercase;background:rgba(85,102,0,0.3);color:var(--c-lime);border:1px solid rgba(166,195,0,0.50);white-space:nowrap}
-  .doc-card{position:relative;background:#121212;border-radius:18px;padding:32px;border:1px solid rgba(255,255,255,0.05)}
-  .doc-card::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(to bottom right,rgba(166,195,0,0.35),rgba(85,102,0,0.05));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
-  .doc-title{font-family:var(--font-display);font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:0.04em;color:var(--c-white);line-height:1.1;margin-bottom:24px}
-  .doc-summary{padding:18px 20px;background:rgba(0,0,0,0.4);border-left:3px solid var(--c-lime);border-radius:0 10px 10px 0;font-family:var(--font-body);font-size:0.8rem;color:var(--c-textbody);line-height:1.8;margin-bottom:36px}
-  .doc-summary strong{color:var(--c-white)}
-  .doc-section{margin-bottom:32px}
-  .doc-section:last-child{margin-bottom:0}
-  .doc-section-h{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-  .doc-section-num{font-family:var(--font-display);font-size:1.7rem;color:var(--c-lime);line-height:1}
-  .doc-section-title{font-family:var(--font-display);font-size:clamp(1.1rem,3vw,1.5rem);letter-spacing:0.06em;color:var(--c-white);text-transform:uppercase}
-  .doc-divider{height:1px;background:rgba(255,255,255,0.06);margin:28px 0}
-  .doc-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 6px}
-  .doc-macro{background:var(--c-black);border-radius:var(--radius-card);padding:10px;text-align:center}
-  .doc-macro-v{font-family:var(--font-display);font-size:1.2rem;color:var(--c-lime);line-height:1}
-  .doc-macro-l{font-family:var(--font-label);font-size:0.5rem;color:var(--c-textsub);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px}
-  .doc-meal{border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;margin-top:12px}
-  .doc-meal:first-of-type{border-top:none;margin-top:8px;padding-top:0}
-  .doc-meal-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
-  .doc-meal-name{font-family:var(--font-label);font-size:0.68rem;font-weight:var(--fw-label);color:var(--c-white);text-transform:uppercase;letter-spacing:0.06em}
-  .doc-meal-kcal{font-family:var(--font-display);font-size:0.9rem;color:var(--c-lime)}
-  .doc-food{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:3px 0}
-  .doc-food-name{font-family:var(--font-body);font-size:0.76rem;color:var(--c-textbody)}
-  .doc-food-qty{font-family:var(--font-body);font-size:0.7rem;color:var(--c-textsub);white-space:nowrap}
-  .doc-empty{font-family:var(--font-body);font-size:0.74rem;color:var(--c-textsub);font-style:italic;padding:4px 0}
-  .doc-ex{border-top:1px solid rgba(255,255,255,0.06);padding:10px 0}
-  .doc-ex:first-of-type{border-top:none;padding-top:4px}
-  .doc-ex-name{font-family:var(--font-label);font-size:0.72rem;font-weight:var(--fw-label);color:var(--c-white);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px}
-  .doc-ex-sets{font-family:var(--font-body);font-size:0.76rem;color:var(--c-textbody)}
-  .doc-footer{text-align:center;padding:24px 0 8px;margin-top:28px}
-  .doc-footer-div{width:100%;height:1px;background:linear-gradient(to right,transparent,var(--c-lime) 20%,var(--c-lime) 80%,transparent);opacity:0.25;margin-bottom:18px}
-  .doc-footer-copy{font-family:var(--font-label);font-size:0.55rem;font-weight:var(--fw-label);text-transform:uppercase;letter-spacing:0.1em;color:var(--c-textsub)}
-  .doc-footer-credit{font-family:var(--font-label);font-size:0.5rem;font-weight:var(--fw-label);text-transform:uppercase;letter-spacing:0.08em;color:rgba(153,153,153,0.5);margin-top:6px}
-  @media (max-width:768px){
-    .doc-logo-h{font-size:1.35rem}
-    .doc-logo-p{font-size:0.55rem}
-  }
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<div class="doc-sheet"><div class="doc-header"><div class="doc-logo"><img src="/images/brand/logo-emblema.webp" srcset="/images/brand/logo-emblema.webp 1x, /images/brand/logo-emblema@2x.webp 2x" alt="" width="51" height="56" decoding="async" aria-hidden="true"/><div><div class="doc-logo-h">Coach Ruiz</div><div class="doc-logo-p">Estrategista em Alta Performance</div></div></div><span class="doc-badge">Plano de Treino</span></div><div class="doc-card"><div class="doc-title">Plano de Treino</div><div class="doc-summary">Documento preparado pelo Coach Ruiz para <strong>Atleta de Demonstração</strong> com base na sua fase e objetivo do ciclo. Confidencial, elaborado exclusivamente para este atleta.</div><div class="doc-section"><div class="doc-section-h"><span class="doc-section-num">01</span><span class="doc-section-title">Dia A</span></div><div class="doc-ex"><div class="doc-ex-name">Supino Reto</div><div class="doc-ex-sets">6-8 × 100kg  ·  6-8 × 100kg  ·  8-10 × 90kg  ·  8-10 × 90kg</div></div><div class="doc-ex"><div class="doc-ex-name">Supino Inclinado com Halteres</div><div class="doc-ex-sets">8-10 × 38kg  ·  8-10 × 38kg  ·  10-12 × 34kg</div></div><div class="doc-ex"><div class="doc-ex-name">Crucifixo na Polia</div><div class="doc-ex-sets">12-15 × 22kg  ·  12-15 × 22kg  ·  12-15 × 22kg</div></div><div class="doc-ex"><div class="doc-ex-name">Tríceps Testa</div><div class="doc-ex-sets">8-10 × 42kg  ·  8-10 × 42kg  ·  10-12 × 38kg</div></div><div class="doc-ex"><div class="doc-ex-name">Tríceps Corda</div><div class="doc-ex-sets">12-15 × 32kg  ·  12-15 × 32kg  ·  15-20 × 28kg</div></div></div><div class="doc-divider"></div><div class="doc-section"><div class="doc-section-h"><span class="doc-section-num">02</span><span class="doc-section-title">Dia B</span></div><div class="doc-ex"><div class="doc-ex-name">Puxada Frontal</div><div class="doc-ex-sets">6-8 × 78kg  ·  6-8 × 78kg  ·  8-10 × 70kg  ·  8-10 × 70kg</div></div><div class="doc-ex"><div class="doc-ex-name">Remada Curvada</div><div class="doc-ex-sets">8-10 × 85kg  ·  8-10 × 85kg  ·  10-12 × 75kg</div></div><div class="doc-ex"><div class="doc-ex-name">Remada Unilateral</div><div class="doc-ex-sets">8-10 × 42kg  ·  8-10 × 42kg  ·  10-12 × 38kg</div></div><div class="doc-ex"><div class="doc-ex-name">Rosca Direta</div><div class="doc-ex-sets">8-10 × 40kg  ·  8-10 × 40kg  ·  10-12 × 35kg</div></div><div class="doc-ex"><div class="doc-ex-name">Rosca Martelo</div><div class="doc-ex-sets">10-12 × 24kg  ·  10-12 × 24kg  ·  12-15 × 22kg</div></div></div><div class="doc-divider"></div><div class="doc-section"><div class="doc-section-h"><span class="doc-section-num">03</span><span class="doc-section-title">Dia C</span></div><div class="doc-ex"><div class="doc-ex-name">Agachamento Livre</div><div class="doc-ex-sets">6-8 × 135kg  ·  6-8 × 135kg  ·  8-10 × 120kg  ·  8-10 × 120kg</div></div><div class="doc-ex"><div class="doc-ex-name">Leg Press 45°</div><div class="doc-ex-sets">10-12 × 290kg  ·  10-12 × 290kg  ·  12-15 × 260kg</div></div><div class="doc-ex"><div class="doc-ex-name">Cadeira Extensora</div><div class="doc-ex-sets">12-15 × 85kg  ·  12-15 × 85kg  ·  15-20 × 75kg</div></div><div class="doc-ex"><div class="doc-ex-name">Mesa Flexora</div><div class="doc-ex-sets">10-12 × 70kg  ·  10-12 × 70kg  ·  12-15 × 62kg</div></div><div class="doc-ex"><div class="doc-ex-name">Panturrilha em Pé</div><div class="doc-ex-sets">15-20 × 115kg  ·  15-20 × 115kg  ·  20-25 × 100kg</div></div></div></div><div class="doc-footer"><div class="doc-footer-div"></div><div class="doc-footer-copy">Coach Ruiz 2026 © Todos os direitos reservados</div><div class="doc-footer-credit">Criado por GM Digital Bunker ©, 2026</div></div></div>
-<div class="demo-banner"><div class="demo-banner-h">Demonstração — avaliação interna</div><p>Este documento é uma <b>peça de demonstração</b>. O atleta não existe, e o conteúdo abaixo é gerado a partir dos dados fictícios embutidos no painel administrativo (funções <b>wkeBuildBasePlan</b> e <b>nteBuildBasePlan</b>, em <b>atletas.astro</b>). Nada aqui foi prescrito pelo Coach Ruiz, e nada aqui está gravado no banco de dados.</p><p>A finalidade é única: mostrar ao time <b>o formato</b> em que o atleta receberá o documento, antes de o módulo de acompanhamento existir de verdade. Não deve ser enviado a atleta, candidato ou parceiro.</p></div>
-<nav class="demo-nav"><a href="../demo-nutricional/">Ver o plano nutricional</a><a href="../">Voltar ao relatório de progresso</a></nav>
+<header>
+  <div class="header-inner">
+    <div class="logo-group">
+      <img src="/images/brand/logo-emblema.webp" srcset="/images/brand/logo-emblema.webp 1x, /images/brand/logo-emblema@2x.webp 2x" alt="" class="logo-emblema" width="51" height="56" decoding="async" aria-hidden="true"/>
+      <div>
+        <div class="logo-name">Coach Ruiz</div>
+        <div class="logo-sub">Estrategista em Alta Performance</div>
+      </div>
+    </div>
+    <span class="badge">Plano de Treino</span>
+  </div>
+</header>
+
+<main>
+  <article class="card">
+    <div class="card-eyebrow">Demonstração — avaliação interna</div>
+    <h1 class="card-title">Plano de Treino</h1>
+    <div class="summary">Documento preparado pelo Coach Ruiz para <strong>Atleta de Demonstração</strong> com base na sua fase e objetivo do ciclo. Confidencial, elaborado exclusivamente para este atleta.</div>
+
+    <section class="section">
+      <div class="section-header"><span class="section-num">01</span><h2 class="section-title">Dia A</h2></div>
+      <div class="doc-ex"><div class="doc-ex-name">Supino Reto</div><div class="doc-ex-sets">6-8 × 100kg  ·  6-8 × 100kg  ·  8-10 × 90kg  ·  8-10 × 90kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Supino Inclinado com Halteres</div><div class="doc-ex-sets">8-10 × 38kg  ·  8-10 × 38kg  ·  10-12 × 34kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Crucifixo na Polia</div><div class="doc-ex-sets">12-15 × 22kg  ·  12-15 × 22kg  ·  12-15 × 22kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Tríceps Testa</div><div class="doc-ex-sets">8-10 × 42kg  ·  8-10 × 42kg  ·  10-12 × 38kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Tríceps Corda</div><div class="doc-ex-sets">12-15 × 32kg  ·  12-15 × 32kg  ·  15-20 × 28kg</div></div>
+    </section>
+    <div class="divider"></div>
+
+    <section class="section">
+      <div class="section-header"><span class="section-num">02</span><h2 class="section-title">Dia B</h2></div>
+      <div class="doc-ex"><div class="doc-ex-name">Puxada Frontal</div><div class="doc-ex-sets">6-8 × 78kg  ·  6-8 × 78kg  ·  8-10 × 70kg  ·  8-10 × 70kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Remada Curvada</div><div class="doc-ex-sets">8-10 × 85kg  ·  8-10 × 85kg  ·  10-12 × 75kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Remada Unilateral</div><div class="doc-ex-sets">8-10 × 42kg  ·  8-10 × 42kg  ·  10-12 × 38kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Rosca Direta</div><div class="doc-ex-sets">8-10 × 40kg  ·  8-10 × 40kg  ·  10-12 × 35kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Rosca Martelo</div><div class="doc-ex-sets">10-12 × 24kg  ·  10-12 × 24kg  ·  12-15 × 22kg</div></div>
+    </section>
+    <div class="divider"></div>
+
+    <section class="section">
+      <div class="section-header"><span class="section-num">03</span><h2 class="section-title">Dia C</h2></div>
+      <div class="doc-ex"><div class="doc-ex-name">Agachamento Livre</div><div class="doc-ex-sets">6-8 × 135kg  ·  6-8 × 135kg  ·  8-10 × 120kg  ·  8-10 × 120kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Leg Press 45°</div><div class="doc-ex-sets">10-12 × 290kg  ·  10-12 × 290kg  ·  12-15 × 260kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Cadeira Extensora</div><div class="doc-ex-sets">12-15 × 85kg  ·  12-15 × 85kg  ·  15-20 × 75kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Mesa Flexora</div><div class="doc-ex-sets">10-12 × 70kg  ·  10-12 × 70kg  ·  12-15 × 62kg</div></div>
+      <div class="doc-ex"><div class="doc-ex-name">Panturrilha em Pé</div><div class="doc-ex-sets">15-20 × 115kg  ·  15-20 × 115kg  ·  20-25 × 100kg</div></div>
+    </section>
+  </article>
+</main>
+
+<footer class="eval-footer">
+  <div class="eval-footer__divider" role="presentation"></div>
+  <div class="eval-footer__inner">
+    <p class="eval-footer__copy">Coach Ruiz 2026 © Todos os direitos reservados</p>
+    <p class="eval-footer__credit">Criado por GM Digital Bunker ©, 2026</p>
+  </div>
+</footer>
+
+<div class="demo-wrap">
+  <div class="demo-banner"><div class="demo-banner-h">Demonstração — avaliação interna</div><p>Este documento é uma <b>peça de demonstração</b>. O atleta não existe, e o conteúdo abaixo é gerado a partir dos dados fictícios embutidos no painel administrativo (funções <b>wkeBuildBasePlan</b> e <b>nteBuildBasePlan</b>, em <b>atletas.astro</b>). Nada aqui foi prescrito pelo Coach Ruiz, e nada aqui está gravado no banco de dados.</p><p>A finalidade é única: mostrar ao time <b>o formato</b> em que o atleta receberá o documento, antes de o módulo de acompanhamento existir de verdade. Não deve ser enviado a atleta, candidato ou parceiro.</p></div>
+  <nav class="demo-nav"><a href="../demo-nutricional/">Ver o plano nutricional</a><a href="../">Voltar ao relatório de progresso</a></nav>
+</div>
 </body>
 </html>
