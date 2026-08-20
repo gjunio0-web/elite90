@@ -167,6 +167,13 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
     }
   }
 
+  /* Inset lateral menor no mobile — mesmo valor (--space-3) já usado como
+     padding horizontal em fichas.astro sob o mesmo corte de 760px. Só o
+     lado esquerdo muda: o direito já fica justo por conta dos botões. */
+  @media (max-width: 760px) {
+    .adm-header { padding-left: var(--space-3); }
+  }
+
   .adm-logo {
     font-family: var(--font-display);
     font-size: var(--fs-display-md);
