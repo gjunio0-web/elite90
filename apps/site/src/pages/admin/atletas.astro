@@ -647,7 +647,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .doc-sheet { max-width: 760px; margin: 0 auto; }
     .doc-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 20px; margin-bottom: 28px; border-bottom: 1px solid rgba(166,195,0,0.2); }
     .doc-logo { display: flex; align-items: center; gap: 12px; }
-    .doc-logo svg { width: 34px; height: 34px; flex-shrink: 0; }
+    .doc-logo img { width: 51px; height: 56px; flex-shrink: 0; display: block; }
     .doc-logo-h { font-family: var(--font-display); font-size: 1.35rem; letter-spacing: 0.1em; color: var(--c-lime); line-height: 1; }
     .doc-logo-p { font-family: var(--font-body); font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--c-textsub); margin-top: 3px; }
     .doc-badge { padding: 6px 14px; border-radius: var(--radius-pill); font-family: var(--font-label); font-size: 0.6rem; font-weight: var(--fw-label); letter-spacing: 0.12em; text-transform: uppercase; background: rgba(85,102,0,0.3); color: var(--c-lime); border: 1px solid rgba(166, 195, 0, 0.50); white-space: nowrap; }
@@ -4252,11 +4252,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
     }
 
     // ── Envelope de documento do atleta (compartilhado treino + nutrição), espelha /avaliacao/[token] ──
-    var DOC_LOGO_SVG = '<svg viewBox="0 0 100 100" fill="#A6C300" aria-hidden="true"><path d="M50,15 C45,15 36,18 33,28 C30.5,36.3 32,46 36,52 L38,42 C38,42 42,43 50,43 C58,43 62,42 62,42 L64,52 C68,46 69.5,36.3 67,28 C64,18 55,15 50,15 Z M42,46 L40,78 L50,88 L60,78 L58,46 C54,49 46,49 42,46 Z"/></svg>';
+    // Emblema da marca: mesmo brasão do cabeçalho da landing page e da ficha de
+    // avaliação. Fonte única de verdade do ativo: /images/brand/logo-emblema.webp.
+    // A marcação abaixo é gêmea da que está em pages/avaliacao/[token].astro —
+    // alterar os dois juntos. Aqui ela é string porque este documento é montado
+    // dentro de <script is:inline>, que não aceita import de componente.
+    var DOC_LOGO_IMG = '<img src="/images/brand/logo-emblema.webp" srcset="/images/brand/logo-emblema.webp 1x, /images/brand/logo-emblema@2x.webp 2x" alt="" width="51" height="56" decoding="async" aria-hidden="true"/>';
     function docEnvelope(badgeText, title, athleteName, summaryExtra, innerHtml) {
       return '<div class="doc-sheet">' +
         '<div class="doc-header">' +
-          '<div class="doc-logo">' + DOC_LOGO_SVG +
+          '<div class="doc-logo">' + DOC_LOGO_IMG +
             '<div><div class="doc-logo-h">Coach Ruiz</div><div class="doc-logo-p">Estrategista em Alta Performance</div></div>' +
           '</div>' +
           '<span class="doc-badge">' + badgeText + '</span>' +

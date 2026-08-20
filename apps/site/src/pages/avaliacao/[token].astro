@@ -143,6 +143,10 @@ const t = en ? {
       display: flex; align-items: center; justify-content: space-between;
     }
     .logo-group { display: flex; align-items: center; gap: 14px; }
+    /* Emblema da marca. Dimensoes fixas em px (nao em em) para nao variar com
+       o tamanho de fonte do documento; flex-shrink impede que o cabecalho o
+       esprema quando o nome do atleta e longo. */
+    .logo-emblema { width: 51px; height: 56px; flex-shrink: 0; display: block; }
     .logo-name {
       font-family: var(--font-display); font-size: 26px; letter-spacing: 0.08em;
       color: var(--c-lime); line-height: 1; text-transform: uppercase;
@@ -237,9 +241,26 @@ const t = en ? {
       <header>
         <div class="header-inner">
           <div class="logo-group">
-            <svg width="38" height="38" viewBox="0 0 100 100" fill="currentColor" style="color:var(--c-lime)" aria-hidden="true">
-              <path d="M50,15 C45,15 36,18 33,28 C30.5,36.3 32,46 36,52 L38,42 C38,42 42,43 50,43 C58,43 62,42 62,42 L64,52 C68,46 69.5,36.3 67,28 C64,18 55,15 50,15 Z M42,46 L40,78 L50,88 L60,78 L58,46 C54,49 46,49 42,46 Z"/>
-            </svg>
+            <!-- Emblema da marca: o mesmo brasao que aparece no cabecalho da
+                 landing page (Header.astro usa o logotipo completo; aqui usamos
+                 so o emblema, porque o nome e a assinatura sao escritos em HTML
+                 logo ao lado e a assinatura e traduzida).
+                 Fonte unica de verdade do ativo: /images/brand/logo-emblema.webp.
+                 A mesma marcacao esta espelhada em admin/atletas.astro
+                 (const DOC_LOGO_IMG, envelope dos documentos de treino, nutricao
+                 e relatorio semanal) — os dois pontos precisam mudar juntos.
+                 Nao ha como compartilhar componente: aquele arquivo monta o
+                 documento dentro de <script is:inline>, que nao aceita import. -->
+            <img
+              src="/images/brand/logo-emblema.webp"
+              srcset="/images/brand/logo-emblema.webp 1x, /images/brand/logo-emblema@2x.webp 2x"
+              alt=""
+              class="logo-emblema"
+              width="51"
+              height="56"
+              decoding="async"
+              aria-hidden="true"
+            />
             <div>
               <div class="logo-name">Coach Ruiz</div>
               <div class="logo-sub">{t.tagline}</div>
