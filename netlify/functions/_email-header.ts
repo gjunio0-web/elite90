@@ -41,9 +41,9 @@ export { emblemaAttachment };
 
 /** Regras de estilo comuns aos cinco modelos: corpo, moldura e cabeçalho. */
 export const EMAIL_BASE_CSS = [
-  "  body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;}",
+  "  body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;-webkit-text-size-adjust:100%;text-size-adjust:100%;}",
   "  .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}",
-  "  .logo{font-size:28px;font-weight:900;letter-spacing:.08em;color:#A6C300;text-transform:uppercase;margin-bottom:4px;}",
+  "  .logo{font-size:28px;font-weight:900;letter-spacing:.08em;color:#A6C300;text-transform:uppercase;}",
   "  .tagline{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#666;}",
 ].join("\n");
 
@@ -57,6 +57,26 @@ export const EMAIL_BASE_CSS = [
  * correspondente o leitor recebe um ícone de imagem quebrada. Por isso a
  * função de anexo é reexportada logo abaixo: um único import entrega as duas
  * metades, e fica mais difícil levar uma sem a outra.
+ *
+ * POR QUE A ASSINATURA FICA EM LINHA PRÓPRIA, E NÃO AO LADO DO EMBLEMA
+ * Ela é o elemento MAIS LARGO do cabeçalho — mais largo que o próprio nome da
+ * marca. São 32 caracteres com espaçamento de 0,2em, o que dá cerca de 281
+ * pixels, contra cerca de 212 do nome. Dividindo a linha com o emblema, sobram
+ * ~247 pixels num aparelho de 360, e ela quebra em duas linhas. Ocupando a
+ * largura inteira logo abaixo, cabe com folga. Evidência: conferência no
+ * aplicativo do Gmail em 20/08/2026, onde nome e assinatura quebravam.
+ *
+ * POR QUE `text-size-adjust` NO CORPO
+ * Aparelhos móveis aplicam um algoritmo de inflação que AUMENTA o tamanho do
+ * texto sem modificar o leiaute — o texto cresce, o contêiner não, e a quebra
+ * é consequência. A propriedade desliga esse comportamento e é suportada com o
+ * prefixo -webkit no aplicativo do Gmail para Android.
+ *
+ * O QUE FOI DELIBERADAMENTE NÃO FEITO
+ * Não há `white-space:nowrap` no nome da marca. Impediria a quebra, mas se a
+ * inflação escapasse do controle o texto TRANSBORDARIA em vez de quebrar — e
+ * transbordar é pior que quebrar. A quebra continua sendo o comportamento de
+ * reserva, de propósito.
  *
  * POR QUE TABELA, E NÃO `flex`
  * O Outlook para Windows renderiza e-mail com o motor do Word, que não
@@ -90,7 +110,7 @@ export const EMAIL_BASE_CSS = [
  */
 export function emailHeader(tagline: string): string {
   return [
-    '  <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">',
+    '  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">',
     "    <tr>",
     '      <td width="51" valign="middle" style="padding:0 14px 0 0;vertical-align:middle;">',
     `        <img src="cid:${EMBLEMA_CID}" width="51" height="56" alt="" border="0"`,
@@ -98,6 +118,10 @@ export function emailHeader(tagline: string): string {
     "      </td>",
     '      <td valign="middle" style="vertical-align:middle;">',
     '        <div class="logo">Coach Ruiz</div>',
+    "      </td>",
+    "    </tr>",
+    "    <tr>",
+    '      <td colspan="2" style="padding-top:4px;">',
     `        <div class="tagline">${tagline}</div>`,
     "      </td>",
     "    </tr>",
