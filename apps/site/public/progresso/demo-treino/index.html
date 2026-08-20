@@ -37,8 +37,8 @@
   .doc-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:20px;margin-bottom:28px;border-bottom:1px solid rgba(166,195,0,0.2)}
   .doc-logo{display:flex;align-items:center;gap:12px}
   .doc-logo img{width:51px;height:56px;flex-shrink:0;display:block}
-  .doc-logo-h{font-family:var(--font-display);font-size:1.35rem;letter-spacing:0.1em;color:var(--c-lime);line-height:1}
-  .doc-logo-p{font-family:var(--font-body);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-textsub);margin-top:3px}
+  .doc-logo-h{font-family:var(--font-display);font-size:2.7rem;letter-spacing:0.1em;color:var(--c-lime);line-height:1}
+  .doc-logo-p{font-family:var(--font-body);font-size:1.1rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-textsub);margin-top:3px}
   .doc-badge{padding:6px 14px;border-radius:var(--radius-pill);font-family:var(--font-label);font-size:0.6rem;font-weight:var(--fw-label);letter-spacing:0.12em;text-transform:uppercase;background:rgba(85,102,0,0.3);color:var(--c-lime);border:1px solid rgba(166,195,0,0.50);white-space:nowrap}
   .doc-card{position:relative;background:#121212;border-radius:18px;padding:32px;border:1px solid rgba(255,255,255,0.05)}
   .doc-card::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(to bottom right,rgba(166,195,0,0.35),rgba(85,102,0,0.05));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
@@ -72,6 +72,10 @@
   .doc-footer-div{width:100%;height:1px;background:linear-gradient(to right,transparent,var(--c-lime) 20%,var(--c-lime) 80%,transparent);opacity:0.25;margin-bottom:18px}
   .doc-footer-copy{font-family:var(--font-label);font-size:0.55rem;font-weight:var(--fw-label);text-transform:uppercase;letter-spacing:0.1em;color:var(--c-textsub)}
   .doc-footer-credit{font-family:var(--font-label);font-size:0.5rem;font-weight:var(--fw-label);text-transform:uppercase;letter-spacing:0.08em;color:rgba(153,153,153,0.5);margin-top:6px}
+  @media (max-width:768px){
+    .doc-logo-h{font-size:1.35rem}
+    .doc-logo-p{font-size:0.55rem}
+  }
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
