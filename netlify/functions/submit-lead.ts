@@ -7,7 +7,7 @@ import { getStorage } from "firebase-admin/storage";
 import { getDb, storageBucketName } from "./_firebase";
 import { calcularScoreBase, ajusteIA, classificarPrioridade } from "./_scoring";
 import { sendMail } from "./_mailer";
-import { EMAIL_BASE_CSS, emailHeader } from "./_email-header";
+import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header";
 
 
 // Upload de fotos base64 para Firebase Storage via Admin SDK (sem CORS, sem restrições de bucket)
@@ -341,6 +341,9 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
           ? `${nome.split(" ")[0]}, we received your application - ELITE90 PRO`
           : `${nome.split(" ")[0]}, sua ficha foi recebida - ELITE90 PRO`,
         html: buildEmail(nome, objetivoFinal, idioma),
+        // O cabeçalho referencia o emblema por "cid:"; sem este anexo o leitor
+        // receberia um ícone de imagem quebrada.
+        attachments: [emblemaAttachment()],
       });
       confirmationEmailId = id;
     } catch (mailErr: any) {
@@ -425,6 +428,9 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
             scoreParaAviso, prioridadeParaAviso, alertasClinicos,
             `${siteUrl}/admin/login`
           ),
+          // O cabeçalho referencia o emblema por "cid:"; sem este anexo o leitor
+          // receberia um ícone de imagem quebrada.
+          attachments: [emblemaAttachment()],
         });
       } catch (coachErr: any) {
         console.error("[submit-lead] Falha no aviso ao Coach (não-fatal):",

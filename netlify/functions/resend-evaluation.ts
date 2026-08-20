@@ -7,7 +7,7 @@ import { getAuth } from "firebase-admin/auth";
 import { FieldValue } from "firebase-admin/firestore";
 import { getApp, getDb } from "./_firebase";
 import { sendMail } from "./_mailer";
-import { EMAIL_BASE_CSS, emailHeader } from "./_email-header";
+import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header";
 
 
 function buildResendEmail(nome: string, token: string, siteUrl: string, idioma: string): string {
@@ -151,6 +151,9 @@ export const handler = async (event: any) => {
         ? `${avaliacao.nome.split(" ")[0]}, here is the access to your assessment — ELITE90 PRO`
         : `${avaliacao.nome.split(" ")[0]}, segue o acesso à sua avaliação — ELITE90 PRO`,
       html: buildResendEmail(avaliacao.nome, avaliacao.token, siteUrl, idioma),
+      // O cabeçalho referencia o emblema por "cid:"; sem este anexo o leitor
+      // receberia um ícone de imagem quebrada.
+      attachments: [emblemaAttachment()],
     });
 
     await db.collection("avaliacoes").doc(evalId).update({

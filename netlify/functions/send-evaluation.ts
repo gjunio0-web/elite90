@@ -7,7 +7,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { getApp, getDb } from "./_firebase";
 import { randomBytes } from "crypto";
 import { sendMail } from "./_mailer";
-import { EMAIL_BASE_CSS, emailHeader } from "./_email-header";
+import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header";
 
 
 function buildEvaluationEmail(
@@ -161,6 +161,9 @@ export const handler = async (event: any) => {
         ? `${lead.nome.split(" ")[0]}, your strategic plan is ready - ELITE90 PRO`
         : `${lead.nome.split(" ")[0]}, seu planejamento estratégico está pronto - ELITE90 PRO`,
       html: buildEvaluationEmail(lead.nome, token, sections, siteUrl, idioma),
+      // O cabeçalho referencia o emblema por "cid:"; sem este anexo o leitor
+      // receberia um ícone de imagem quebrada.
+      attachments: [emblemaAttachment()],
     });
 
     // Firestore writes only reach here if Resend accepted the email.

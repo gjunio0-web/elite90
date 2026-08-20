@@ -23,7 +23,7 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
 import { sendMail, isMailerConfigured } from "./_mailer";
-import { EMAIL_BASE_CSS, emailHeader } from "./_email-header";
+import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header";
 
 // @ts-ignore — módulo CommonJS compartilhado com scripts/emulate-fn08.js
 import athleteContract from "./_athlete-from-lead.js";
@@ -264,6 +264,9 @@ export const handler = async (event: any) => {
               ? `${primeiroNome}, your place in ELITE 90 PRO is confirmed`
               : `${primeiroNome}, sua vaga no ELITE 90 PRO está confirmada`,
             html: buildWelcomeEmail(lead.nome, startDate, idioma),
+            // O cabeçalho referencia o emblema por "cid:"; sem este anexo o leitor
+            // receberia um ícone de imagem quebrada.
+            attachments: [emblemaAttachment()],
           });
           welcomeSent = true;
         } catch (e: any) {
