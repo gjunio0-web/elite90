@@ -48,8 +48,8 @@ export const EMAIL_BASE_CSS = [
 ].join("\n");
 
 /**
- * Cabeçalho de marca do e-mail: emblema à esquerda, nome e assinatura à
- * direita.
+ * Cabeçalho de marca do e-mail: emblema, nome e assinatura empilhados numa
+ * coluna só.
  *
  * CONTRATO — LEIA ANTES DE USAR
  * Quem chama esta função É OBRIGADO a enviar `emblemaAttachment()` na lista de
@@ -58,13 +58,15 @@ export const EMAIL_BASE_CSS = [
  * função de anexo é reexportada logo abaixo: um único import entrega as duas
  * metades, e fica mais difícil levar uma sem a outra.
  *
- * POR QUE A ASSINATURA FICA EM LINHA PRÓPRIA, E NÃO AO LADO DO EMBLEMA
- * Ela é o elemento MAIS LARGO do cabeçalho — mais largo que o próprio nome da
- * marca. São 32 caracteres com espaçamento de 0,2em, o que dá cerca de 281
- * pixels, contra cerca de 212 do nome. Dividindo a linha com o emblema, sobram
- * ~247 pixels num aparelho de 360, e ela quebra em duas linhas. Ocupando a
- * largura inteira logo abaixo, cabe com folga. Evidência: conferência no
- * aplicativo do Gmail em 20/08/2026, onde nome e assinatura quebravam.
+ * POR QUE UMA COLUNA SÓ, E NÃO EMBLEMA AO LADO DO NOME
+ * Era emblema numa célula e nome+assinatura na célula ao lado — até o nome
+ * virar "Coach Ruiz · ELITE90 PRO". Mais largo que "Coach Ruiz" sozinho, ele
+ * já não cabe dividindo a linha com a coluna do emblema (51px + 14px de
+ * respiro): quebra em duas linhas num aparelho de 360px, e em três num de
+ * 320px, com "PRO" isolado. Dar ao nome a largura inteira da tabela resolve
+ * na raiz — mesma solução já aplicada à assinatura antes dele. Só restava
+ * então tirar o emblema da mesma linha do nome, para que "largura inteira"
+ * quisesse dizer algo: cada elemento vira sua própria linha da tabela.
  *
  * POR QUE `text-size-adjust` NO CORPO
  * Aparelhos móveis aplicam um algoritmo de inflação que AUMENTA o tamanho do
@@ -72,18 +74,12 @@ export const EMAIL_BASE_CSS = [
  * é consequência. A propriedade desliga esse comportamento e é suportada com o
  * prefixo -webkit no aplicativo do Gmail para Android.
  *
- * O QUE FOI DELIBERADAMENTE NÃO FEITO
- * Não há `white-space:nowrap` no nome da marca. Impediria a quebra, mas se a
- * inflação escapasse do controle o texto TRANSBORDARIA em vez de quebrar — e
- * transbordar é pior que quebrar. A quebra continua sendo o comportamento de
- * reserva, de propósito.
- *
  * POR QUE TABELA, E NÃO `flex`
  * O Outlook para Windows renderiza e-mail com o motor do Word, que não
- * implementa Flexbox nem Grid. Colocar duas coisas lado a lado de forma
- * confiável em todos os clientes ainda se faz com tabela. Daí `role
- * "presentation"` — a tabela é recurso de diagramação, não dado tabular, e o
- * atributo informa isso a leitor de tela.
+ * implementa Flexbox nem Grid. Empilhar linhas de forma confiável em todos os
+ * clientes ainda se faz com tabela. Daí `role "presentation"` — a tabela é
+ * recurso de diagramação, não dado tabular, e o atributo informa isso a
+ * leitor de tela.
  *
  * DETALHES QUE PARECEM SUPÉRFLUOS E NÃO SÃO
  *  • `width`/`height` como ATRIBUTOS da imagem, além do estilo: o Outlook
@@ -91,8 +87,8 @@ export const EMAIL_BASE_CSS = [
  *    original — aqui, o dobro.
  *  • `display:block` na imagem: sem isso, vários clientes deixam uma folga
  *    embaixo, herdada do comportamento de elemento de linha.
- *  • `alt` vazio: o nome "Coach Ruiz" está escrito ao lado, em texto. Um alt
- *    com o mesmo nome faria a marca aparecer duas vezes quando as imagens
+ *  • `alt` vazio: o nome "Coach Ruiz" está escrito logo abaixo, em texto. Um
+ *    alt com o mesmo nome faria a marca aparecer duas vezes quando as imagens
  *    estivessem bloqueadas, e o leitor de tela anunciaria duas vezes.
  *  • Linha vazia ao final da tabela: substitui o `margin-bottom` que a
  *    assinatura tinha antes. Margem dentro de célula de tabela é tratada de
@@ -112,21 +108,23 @@ export function emailHeader(tagline: string): string {
   return [
     '  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">',
     "    <tr>",
-    '      <td width="51" valign="middle" style="padding:0 14px 0 0;vertical-align:middle;">',
+    '      <td style="padding-bottom:8px;">',
     `        <img src="cid:${EMBLEMA_CID}" width="51" height="56" alt="" border="0"`,
     '             style="display:block;width:51px;height:56px;border:0;outline:none;text-decoration:none;">',
     "      </td>",
-    '      <td valign="middle" style="vertical-align:middle;">',
+    "    </tr>",
+    "    <tr>",
+    '      <td>',
     '        <div class="logo">Coach Ruiz · ELITE90 PRO</div>',
     "      </td>",
     "    </tr>",
     "    <tr>",
-    '      <td colspan="2" style="padding-top:4px;">',
+    '      <td style="padding-top:4px;">',
     `        <div class="tagline">${tagline}</div>`,
     "      </td>",
     "    </tr>",
     "    <tr>",
-    '      <td colspan="2" height="40" style="height:40px;line-height:40px;font-size:0;">&nbsp;</td>',
+    '      <td height="40" style="height:40px;line-height:40px;font-size:0;">&nbsp;</td>',
     "    </tr>",
     "  </table>",
   ].join("\n");
