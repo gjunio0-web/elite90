@@ -103,9 +103,10 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
   .adm-btn-icon__label { display: none; }
 
   /* Gatilho "⋮" — some no desktop, onde os três ícones cabem soltos.
-     Abaixo de 760px (mesmo corte já usado no restante do painel), ele some
-     e os três viram uma lista, porque nessa largura a linha inteira —
-     logo, badge e três botões de 44px — não cabe sem colidir. */
+     Some também em landscape: mesmo abaixo de 760px de largura, a altura
+     do celular deitado sobra e a linha inteira cabe sem colidir. Só em
+     retrato (o formato em que a colisão foi reportada) a largura some e
+     os três ícones — mais logo e badge — deixam de caber numa linha. */
   .adm-menu-toggle {
     display: none;
     background: transparent;
@@ -126,7 +127,7 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
     background: rgba(166, 195, 0, 0.05);
   }
 
-  @media (max-width: 760px) {
+  @media (max-width: 760px) and (orientation: portrait) {
     .adm-menu-toggle { display: inline-flex; }
     .adm-actions {
       display: none;
