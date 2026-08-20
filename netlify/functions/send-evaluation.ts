@@ -23,7 +23,7 @@ function buildEvaluationEmail(
   const t = en ? {
     lang: "en",
     title: "ELITE90 PRO - Your Assessment",
-    tagline: "High Performance Strategist",
+    tagline: "High Performance Strategy",
     h1: `${firstName}, your strategic plan is ready.`,
     p1: "I reviewed your application carefully. Based on what you sent me, I prepared your",
     docName: "Physique Preparation and Strategic Planning Guidelines",
@@ -35,7 +35,7 @@ function buildEvaluationEmail(
   } : {
     lang: "pt-BR",
     title: "ELITE90 PRO - Sua Avaliação",
-    tagline: "Estrategista em Alta Performance",
+    tagline: "Estratégia de Alta Performance",
     h1: `${firstName}, seu planejamento estratégico está pronto.`,
     p1: "Analisei sua ficha com atenção. Com base no que você me enviou, preparei suas",
     docName: "Diretrizes de Preparação e Planejamento Estratégico do Físico",

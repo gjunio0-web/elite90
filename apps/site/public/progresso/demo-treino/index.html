@@ -32,9 +32,13 @@
   }
   .logo-group{display:flex;align-items:center;gap:14px}
   .logo-emblema{width:51px;height:56px;flex-shrink:0;display:block}
+  /* Assinatura: "COACH RUIZ · ELITE90 PRO" numa linha em telas largas.
+     Abaixo de 660px o separador some e os dois termos empilham (ver media
+     query), porque a linha inteira não cabe ao lado do badge. */
   .logo-name{
     font-family:var(--font-display);font-size:26px;letter-spacing:0.08em;
     color:var(--c-lime);line-height:1;text-transform:uppercase;
+    display:flex;align-items:baseline;gap:0.3em;white-space:nowrap;
   }
   .logo-sub{
     font-family:var(--font-label);font-weight:700;font-size:9px;
@@ -89,10 +93,20 @@
     font-family:var(--font-label);font-size:10px;font-weight:700;
     text-transform:uppercase;letter-spacing:0.08em;color:rgba(153,153,153,0.5);
   }
-  @media (max-width:600px){
+  @media (max-width:660px){
     .card{padding:24px}
     .header-inner{padding:0 16px}
     .demo-wrap{padding:0 16px}
+    /* Nome em duas linhas, sem o separador: "COACH RUIZ" / "ELITE90 PRO". */
+    .logo-name{flex-direction:column;align-items:flex-start;gap:2px;font-size:22px}
+    .logo-sep{display:none}
+    .logo-sub{font-size:8px;letter-spacing:0.1em}
+    .badge{font-size:9px;padding:5px 10px;letter-spacing:0.08em}
+  }
+  /* Abaixo de 400px não há largura para o badge conviver com a assinatura;
+     por decisão de 20/08/2026, o badge é que cede. */
+  @media (max-width:399px){
+    .badge{display:none}
   }
 
   /* ── Conteúdo estruturado do plano de treino: sem equivalente na avaliação
@@ -127,8 +141,8 @@
     <div class="logo-group">
       <img src="/images/brand/logo-emblema.webp" srcset="/images/brand/logo-emblema.webp 1x, /images/brand/logo-emblema@2x.webp 2x" alt="" class="logo-emblema" width="51" height="56" decoding="async" aria-hidden="true"/>
       <div>
-        <div class="logo-name">Coach Ruiz</div>
-        <div class="logo-sub">Estrategista em Alta Performance</div>
+        <div class="logo-name"><span>Coach Ruiz</span><span class="logo-sep">·</span><span>ELITE90 PRO</span></div>
+        <div class="logo-sub">Estratégia de Alta Performance</div>
       </div>
     </div>
     <span class="badge">Plano de Treino</span>

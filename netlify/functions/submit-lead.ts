@@ -48,7 +48,7 @@ function buildEmail(nome: string, objetivo: string, idioma: string): string {
   const t = en ? {
     lang: "en",
     title: "ELITE90 PRO - Application received",
-    tagline: "High Performance Strategist",
+    tagline: "High Performance Strategy",
     h1: `${firstName}, we received your application.`,
     p1a: `You completed the screening form for the`,
     program: "ELITE90 PRO Program",
@@ -65,7 +65,7 @@ function buildEmail(nome: string, objetivo: string, idioma: string): string {
   } : {
     lang: "pt-BR",
     title: "ELITE90 PRO - Ficha recebida",
-    tagline: "Estrategista em Alta Performance",
+    tagline: "Estratégia de Alta Performance",
     h1: `${firstName}, sua ficha foi recebida.`,
     p1a: "Você preencheu a ficha de triagem do",
     program: "Programa ELITE90 PRO",

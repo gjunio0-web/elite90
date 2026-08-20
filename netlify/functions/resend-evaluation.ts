@@ -17,7 +17,7 @@ function buildResendEmail(nome: string, token: string, siteUrl: string, idioma: 
   const t = en ? {
     lang: "en",
     title: "ELITE90 PRO - Access to your assessment",
-    tagline: "High Performance Strategist",
+    tagline: "High Performance Strategy",
     h1: `${firstName}, here is the access to your assessment.`,
     p1: "As requested, we are resending the link to your",
     docName: "Physique Preparation and Strategic Planning Guidelines",
@@ -28,7 +28,7 @@ function buildResendEmail(nome: string, token: string, siteUrl: string, idioma: 
   } : {
     lang: "pt-BR",
     title: "ELITE90 PRO - Acesso à sua avaliação",
-    tagline: "Estrategista em Alta Performance",
+    tagline: "Estratégia de Alta Performance",
     h1: `${firstName}, segue o acesso à sua avaliação.`,
     p1: "Conforme solicitado, reenviamos o link de acesso às suas",
     docName: "Diretrizes de Preparação e Planejamento Estratégico do Físico",

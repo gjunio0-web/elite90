@@ -49,7 +49,7 @@ function buildWelcomeEmail(nome: string, startDate: string, idioma: string): str
   const en = idioma === "en";
   const txt = en ? {
     lang: "en", title: "ELITE 90 PRO — Welcome",
-    tagline: "High Performance Strategist",
+    tagline: "High Performance Strategy",
     h1: `${firstName}, your place is confirmed.`,
     p1a: "You have been approved for the", p1b: "Your 90-day cycle starts on",
     stepsTitle: "What happens now:",
@@ -59,7 +59,7 @@ function buildWelcomeEmail(nome: string, startDate: string, idioma: string): str
     close: "If you have any questions, just reply to this message.",
   } : {
     lang: "pt-BR", title: "ELITE 90 PRO — Bem-vindo",
-    tagline: "Estrategista em Alta Performance",
+    tagline: "Estratégia de Alta Performance",
     h1: `${firstName}, sua vaga está confirmada.`,
     p1a: "Você foi aprovado no", p1b: "Seu ciclo de 90 dias começa em",
     stepsTitle: "O que acontece agora:",

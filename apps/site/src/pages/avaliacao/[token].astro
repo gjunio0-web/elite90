@@ -92,7 +92,7 @@ const t = en ? {
   lang: "en",
   titleNotFound: "Assessment not found",
   titleDoc: "Assessment",
-  tagline: "High Performance Strategist",
+  tagline: "High Performance Strategy",
   expiredH: "Link expired",
   expiredP: "This access link expired after 90 days. Please contact Coach Ruiz to request new access.",
   notFoundH: "Assessment not found",
@@ -107,7 +107,7 @@ const t = en ? {
   lang: "pt-BR",
   titleNotFound: "Avaliação não encontrada",
   titleDoc: "Avaliação",
-  tagline: "Estrategista em Alta Performance",
+  tagline: "Estratégia de Alta Performance",
   expiredH: "Link expirado",
   expiredP: "Este link de acesso expirou após 90 dias. Entre em contato com o Coach Ruiz para solicitar um novo acesso.",
   notFoundH: "Avaliação não encontrada",
@@ -147,9 +147,13 @@ const t = en ? {
        o tamanho de fonte do documento; flex-shrink impede que o cabecalho o
        esprema quando o nome do atleta e longo. */
     .logo-emblema { width: 51px; height: 56px; flex-shrink: 0; display: block; }
+    /* Assinatura da marca: "COACH RUIZ · ELITE90 PRO" numa linha em telas largas.
+       Abaixo de 660px o separador some e os dois termos empilham (ver media query),
+       porque a linha inteira nao cabe ao lado do distintivo de categoria. */
     .logo-name {
       font-family: var(--font-display); font-size: 26px; letter-spacing: 0.08em;
       color: var(--c-lime); line-height: 1; text-transform: uppercase;
+      display: flex; align-items: baseline; gap: 0.3em; white-space: nowrap;
     }
     .logo-sub {
       font-family: var(--font-label); font-weight: 700; font-size: 9px;
@@ -212,9 +216,19 @@ const t = en ? {
       font-family: var(--font-label); font-size: 10px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.08em; color: rgba(153,153,153,0.5);
     }
-    @media (max-width: 600px) {
+    @media (max-width: 660px) {
       .card { padding: 24px; }
       .header-inner { padding: 0 16px; }
+      /* Nome em duas linhas, sem o separador: "COACH RUIZ" / "ELITE90 PRO". */
+      .logo-name { flex-direction: column; align-items: flex-start; gap: 2px; font-size: 22px; }
+      .logo-sep { display: none; }
+      .logo-sub { font-size: 8px; letter-spacing: 0.1em; }
+      .badge { font-size: 9px; padding: 5px 10px; letter-spacing: 0.08em; }
+    }
+    /* Abaixo de 400px nao ha largura para o distintivo de categoria conviver com
+       a assinatura; por decisao de 20/08/2026, o distintivo e que cede. */
+    @media (max-width: 399px) {
+      .badge { display: none; }
     }
   </style>
 </head>
@@ -262,7 +276,7 @@ const t = en ? {
               aria-hidden="true"
             />
             <div>
-              <div class="logo-name">Coach Ruiz</div>
+              <div class="logo-name"><span>Coach Ruiz</span><span class="logo-sep">·</span><span>ELITE90 PRO</span></div>
               <div class="logo-sub">{t.tagline}</div>
             </div>
           </div>

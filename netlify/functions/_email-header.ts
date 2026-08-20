@@ -99,7 +99,7 @@ export const EMAIL_BASE_CSS = [
  *    forma irregular pelos clientes; célula com altura declarada, não.
  *
  * A assinatura é o único trecho que varia entre os modelos — nos quatro
- * dirigidos ao atleta ela é a tradução de "Estrategista em Alta Performance";
+ * dirigidos ao atleta ela é a tradução de "Estratégia de Alta Performance";
  * no aviso interno ao Coach é "ELITE90 PRO &middot; Aviso interno". Por isso
  * entra como argumento, e não como constante.
  *
@@ -117,7 +117,7 @@ export function emailHeader(tagline: string): string {
     '             style="display:block;width:51px;height:56px;border:0;outline:none;text-decoration:none;">',
     "      </td>",
     '      <td valign="middle" style="vertical-align:middle;">',
-    '        <div class="logo">Coach Ruiz</div>',
+    '        <div class="logo">Coach Ruiz · ELITE90 PRO</div>',
     "      </td>",
     "    </tr>",
     "    <tr>",
