@@ -33,43 +33,53 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
     <span class="adm-badge">{badge}</span>
   </div>
   <div class="adm-header__right">
-    {showGuide && (
-      <a
-        class="adm-btn-icon adm-btn-icon--guide"
-        href={guideHref}
-        aria-label="Abrir o guia de referência rápida"
-        title="Como o painel funciona"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="9"/>
-          <path d="M9.2 9.2a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.4-2.8 4"/>
-          <line x1="12" y1="17.4" x2="12" y2="17.4"/>
-        </svg>
-      </a>
-    )}
-    {backHref && (
-      <button
-        class="adm-btn-icon"
-        onclick={`window.location.href='${backHref}'`}
-        aria-label="Voltar"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
-          <line x1="19" y1="12" x2="5" y2="12"/>
-          <polyline points="12 19 5 12 12 5"/>
-        </svg>
-      </button>
-    )}
-    {showLogout && (
-      <button
-        class="adm-btn-icon"
-        id="btn-logout"
-        aria-label="Encerrar sessão"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
-        </svg>
-      </button>
-    )}
+    <button class="adm-menu-toggle" id="adm-menu-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="adm-actions" aria-label="Mais ações">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/>
+      </svg>
+    </button>
+    <div class="adm-actions" id="adm-actions">
+      {showGuide && (
+        <a
+          class="adm-btn-icon adm-btn-icon--guide"
+          href={guideHref}
+          aria-label="Abrir o guia de referência rápida"
+          title="Como o painel funciona"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M9.2 9.2a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.4-2.8 4"/>
+            <line x1="12" y1="17.4" x2="12" y2="17.4"/>
+          </svg>
+          <span class="adm-btn-icon__label">Como o painel funciona</span>
+        </a>
+      )}
+      {backHref && (
+        <button
+          class="adm-btn-icon"
+          onclick={`window.location.href='${backHref}'`}
+          aria-label="Voltar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          <span class="adm-btn-icon__label">Voltar</span>
+        </button>
+      )}
+      {showLogout && (
+        <button
+          class="adm-btn-icon"
+          id="btn-logout"
+          aria-label="Encerrar sessão"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+          </svg>
+          <span class="adm-btn-icon__label">Encerrar sessão</span>
+        </button>
+      )}
+    </div>
   </div>
 </header>
 
@@ -88,7 +98,73 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
     z-index: 100;
   }
   .adm-header__left  { display: flex; align-items: center; gap: var(--space-3); }
-  .adm-header__right { display: flex; align-items: center; gap: var(--space-2); }
+  .adm-header__right { display: flex; align-items: center; gap: var(--space-2); position: relative; }
+  .adm-actions { display: flex; align-items: center; gap: var(--space-2); }
+  .adm-btn-icon__label { display: none; }
+
+  /* Gatilho "⋮" — some no desktop, onde os três ícones cabem soltos.
+     Abaixo de 760px (mesmo corte já usado no restante do painel), ele some
+     e os três viram uma lista, porque nessa largura a linha inteira —
+     logo, badge e três botões de 44px — não cabe sem colidir. */
+  .adm-menu-toggle {
+    display: none;
+    background: transparent;
+    color: var(--c-textsub);
+    border: 1px solid rgba(166, 195, 0, 0.25);
+    border-radius: var(--radius-card);
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    transition: color var(--transition-base), border-color var(--transition-base), background var(--transition-base);
+  }
+  .adm-menu-toggle:hover,
+  .adm-menu-toggle[aria-expanded="true"] {
+    color: var(--c-lime);
+    border-color: rgba(166, 195, 0, 0.6);
+    background: rgba(166, 195, 0, 0.05);
+  }
+
+  @media (max-width: 760px) {
+    .adm-menu-toggle { display: inline-flex; }
+    .adm-actions {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 150;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      min-width: 230px;
+      background: var(--c-darkbg);
+      border: 1px solid rgba(166, 195, 0, 0.25);
+      border-radius: var(--radius-card);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+    .adm-actions.is-open { display: flex; }
+    .adm-actions .adm-btn-icon {
+      width: auto;
+      height: auto;
+      border: none;
+      border-radius: 0;
+      justify-content: flex-start;
+      gap: var(--space-3);
+      padding: 14px var(--space-4);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .adm-actions .adm-btn-icon:last-child { border-bottom: none; }
+    .adm-btn-icon__label {
+      display: inline;
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+  }
 
   .adm-logo {
     font-family: var(--font-display);
@@ -137,3 +213,36 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
     text-decoration: none;
   }
 </style>
+
+<script>
+  // Menu "⋮" do mobile (≤760px) — guia/voltar/sair colapsados numa lista.
+  // No desktop o toggle fica oculto por CSS e os três ícones já aparecem
+  // soltos, então este script só tem efeito visível abaixo do corte.
+  const menuToggle = document.getElementById("adm-menu-toggle");
+  const actions = document.getElementById("adm-actions");
+
+  function closeMenu() {
+    actions?.classList.remove("is-open");
+    menuToggle?.setAttribute("aria-expanded", "false");
+  }
+
+  menuToggle?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = actions?.classList.toggle("is-open");
+    menuToggle.setAttribute("aria-expanded", String(!!isOpen));
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!actions?.classList.contains("is-open")) return;
+    if (actions.contains(e.target as Node) || menuToggle?.contains(e.target as Node)) return;
+    closeMenu();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMenu();
+  });
+
+  actions?.addEventListener("click", (e) => {
+    if ((e.target as Element)?.closest("a, button")) closeMenu();
+  });
+</script>
