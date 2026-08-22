@@ -33,3 +33,7 @@ Thumbs.db
 
 # Netlify
 .netlify
+
+# Catálogo de exercícios: artefato de build, gerado por scripts/filtrar-catalogo.mjs
+# a partir de scripts/dados-exercicios/catalogo-fonte.json (esse sim, versionado).
+apps/site/public/dados/exercicios.json

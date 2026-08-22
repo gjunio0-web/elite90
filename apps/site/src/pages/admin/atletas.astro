@@ -307,6 +307,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .wke-ex-name { font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-body-sm); text-transform: uppercase; color: var(--c-white); letter-spacing: 0.04em; }
     .wke-ex-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
     .wke-ex-tag { font-family: var(--font-body); font-size: 10px; color: var(--c-textsub); text-transform: uppercase; letter-spacing: 0.05em; background: var(--c-black); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-pill); padding: 2px 9px; }
+    /* Selo de pendência do buscador de exercícios: marca o que ainda não foi
+       validado pelo Coach. Usa --c-pending, o mesmo token já empregado nos
+       casos e depoimentos pendentes da página pública. Só aparece fora de
+       produção — em produção o catálogo já vem filtrado pelo gerador. */
+    .wke-ex-tag--pending { color: var(--c-pending); border-color: rgba(230, 126, 34, 0.4); background: rgba(230, 126, 34, 0.1); }
     .wke-ex-actions { display: flex; gap: 4px; flex-shrink: 0; }
     .wke-ex-actionbtn { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 1px solid transparent; border-radius: var(--radius-card); color: var(--c-textsub); cursor: pointer; transition: color 150ms ease, border-color 150ms ease; }
     .wke-ex-actionbtn:hover { color: var(--c-lime); border-color: rgba(255, 255, 255, 0.14); }
@@ -2549,44 +2554,61 @@ import AdminHeader from '../../components/AdminHeader.astro';
     // ════════════════════════════════════════════════════════
     //  WKE-01 — WORKOUT EDITOR (Aba 4 · Treino)
     // ════════════════════════════════════════════════════════
-    const WKE_EXERCISE_DB = [
-      { name: 'Supino Reto', group: 'Peito', equip: 'Barra' },
-      { name: 'Supino Inclinado com Halteres', group: 'Peito', equip: 'Halteres' },
-      { name: 'Supino Declinado', group: 'Peito', equip: 'Barra' },
-      { name: 'Crucifixo na Polia', group: 'Peito', equip: 'Polia' },
-      { name: 'Crucifixo Inclinado', group: 'Peito', equip: 'Halteres' },
-      { name: 'Crossover', group: 'Peito', equip: 'Polia' },
-      { name: 'Puxada Frontal', group: 'Costas', equip: 'Polia' },
-      { name: 'Puxada Triângulo', group: 'Costas', equip: 'Polia' },
-      { name: 'Remada Curvada', group: 'Costas', equip: 'Barra' },
-      { name: 'Remada Unilateral', group: 'Costas', equip: 'Halteres' },
-      { name: 'Remada Cavalinho', group: 'Costas', equip: 'Máquina' },
-      { name: 'Barra Fixa', group: 'Costas', equip: 'Peso Corporal' },
-      { name: 'Desenvolvimento Militar', group: 'Ombros', equip: 'Barra' },
-      { name: 'Desenvolvimento com Halteres', group: 'Ombros', equip: 'Halteres' },
-      { name: 'Elevação Lateral', group: 'Ombros', equip: 'Halteres' },
-      { name: 'Elevação Frontal', group: 'Ombros', equip: 'Halteres' },
-      { name: 'Crucifixo Inverso', group: 'Ombros', equip: 'Máquina' },
-      { name: 'Rosca Direta', group: 'Bíceps', equip: 'Barra' },
-      { name: 'Rosca Martelo', group: 'Bíceps', equip: 'Halteres' },
-      { name: 'Rosca Scott', group: 'Bíceps', equip: 'Máquina' },
-      { name: 'Rosca Concentrada', group: 'Bíceps', equip: 'Halteres' },
-      { name: 'Tríceps Testa', group: 'Tríceps', equip: 'Barra' },
-      { name: 'Tríceps Corda', group: 'Tríceps', equip: 'Polia' },
-      { name: 'Tríceps Francês', group: 'Tríceps', equip: 'Halteres' },
-      { name: 'Mergulho em Paralelas', group: 'Tríceps', equip: 'Peso Corporal' },
-      { name: 'Agachamento Livre', group: 'Pernas', equip: 'Barra' },
-      { name: 'Leg Press 45°', group: 'Pernas', equip: 'Máquina' },
-      { name: 'Cadeira Extensora', group: 'Pernas', equip: 'Máquina' },
-      { name: 'Mesa Flexora', group: 'Pernas', equip: 'Máquina' },
-      { name: 'Stiff', group: 'Pernas', equip: 'Barra' },
-      { name: 'Afundo', group: 'Pernas', equip: 'Halteres' },
-      { name: 'Panturrilha em Pé', group: 'Pernas', equip: 'Máquina' },
-      { name: 'Panturrilha Sentado', group: 'Pernas', equip: 'Máquina' },
-      { name: 'Abdominal Supra', group: 'Abdômen', equip: 'Peso Corporal' },
-      { name: 'Prancha', group: 'Abdômen', equip: 'Peso Corporal' },
-      { name: 'Elevação de Pernas', group: 'Abdômen', equip: 'Peso Corporal' }
-    ];
+    // Catálogo de exercícios — carregado do arquivo estático publicado em
+    // /dados/exercicios.json, gerado por scripts/gerar-catalogo-exercicios.mjs
+    // a partir da coleção exercises/ do Firestore.
+    //
+    // Antes desta rodada, aqui havia um vetor literal com 36 exercícios de
+    // simulação, e o plano guardava o NOME do exercício como chave. Renomear
+    // um exercício quebrava o vínculo com o histórico de carga e com o recorde
+    // do atleta. Agora o vínculo é o identificador (exerciseId) e o nome é
+    // apenas campo de exibição — ver a especificação da coleção exercises/
+    // no Drive, seção 7.
+    //
+    // O arquivo traz somente os exercícios PUBLICADOS pelo Coach (seção 9).
+    // Enquanto nenhum lote tiver sido aprovado, a busca fica legitimamente
+    // vazia, e a mensagem abaixo diz isso em vez de fingir um catálogo.
+    let WKE_EXERCISE_DB = [];
+    let wkeCatalogoEstado = 'nao-carregado'; // nao-carregado | carregando | pronto | erro
+    let wkeCatalogoMotivo = '';
+    let wkeCatalogoSemente = false;
+
+    async function wkeCarregarCatalogo() {
+      if (wkeCatalogoEstado === 'pronto' || wkeCatalogoEstado === 'carregando') return;
+      wkeCatalogoEstado = 'carregando';
+      try {
+        const resp = await fetch('/dados/exercicios.json', { cache: 'no-cache' });
+        if (resp.status === 404) throw new Error('ARQUIVO_AUSENTE');
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const dados = await resp.json();
+        // O arquivo semente versionado tem geradoEm nulo: distingue "nunca
+        // gerado" de "gerado e legitimamente vazio".
+        wkeCatalogoSemente = !dados.geradoEm;
+        WKE_EXERCISE_DB = (dados.exercicios || []).map(function(e) {
+          return {
+            id: e.id,
+            name: e.nome_pt,
+            group: e.grupo,
+            equip: e.equipamento,
+            instrucao: e.instrucao_pt || '',
+            musculo: e.musculoPrimario || '',
+            // Em produção o gerador só emite revisados, então este campo vem
+            // sempre true. Fora dela, distingue o que o Coach já validou.
+            revisado: e.revisado !== false
+          };
+        });
+        wkeCatalogoEstado = 'pronto';
+      } catch (err) {
+        WKE_EXERCISE_DB = [];
+        wkeCatalogoEstado = 'erro';
+        // A causa mais provável NÃO é conexão: é o arquivo nunca ter sido
+        // gerado. Culpar a rede mandaria quem lê para o lugar errado.
+        wkeCatalogoMotivo = (err && err.message === 'ARQUIVO_AUSENTE')
+          ? 'O arquivo /dados/exercicios.json não existe nesta publicação — o filtro de build não chegou a rodar.'
+          : 'Falha de rede ou arquivo inválido. Feche e abra a busca para tentar de novo.';
+        console.error('[WKE] falha ao carregar o catálogo de exercícios:', err);
+      }
+    }
 
     // Plano-base (escalado por atleta). Cargas calibradas p/ atleta ~85kg.
     function wkeBuildBasePlan() {
@@ -3451,6 +3473,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       wkeSearchSelIdx = -1;
       res.innerHTML = '<div class="wke-search-hint">Digite ao menos 3 letras para buscar.</div>';
       setTimeout(function() { inp.focus(); }, 30);
+      wkeCarregarCatalogo();
     }
     function closeExerciseSearch() {
       document.getElementById('wke-search-overlay').hidden = true;
@@ -3469,6 +3492,20 @@ import AdminHeader from '../../components/AdminHeader.astro';
         res.innerHTML = '<div class="wke-search-hint">Digite ao menos 3 letras para buscar.</div>';
         return;
       }
+      if (wkeCatalogoEstado === 'carregando') {
+        res.innerHTML = '<div class="wke-search-hint">Carregando o catálogo…</div>';
+        return;
+      }
+      if (wkeCatalogoEstado === 'erro') {
+        res.innerHTML = '<div class="wke-search-hint">Não foi possível carregar o catálogo de exercícios.<br>' + (wkeCatalogoMotivo || 'Motivo não identificado.') + '</div>';
+        return;
+      }
+      if (!WKE_EXERCISE_DB.length) {
+        res.innerHTML = wkeCatalogoSemente
+          ? '<div class="wke-search-hint">O catálogo de exercícios ainda não foi gerado a partir do banco. Rode <code>npm run catalogo:exercicios</code>, faça commit do arquivo-fonte e publique o site.</div>'
+          : '<div class="wke-search-hint">Nenhum exercício revisado pelo Coach chegou a esta publicação.</div>';
+        return;
+      }
       wkeSearchResults = WKE_EXERCISE_DB.filter(function(e) {
         return e.name.toLowerCase().includes(q) || e.group.toLowerCase().includes(q);
       }).slice(0, 10); // top 10
@@ -3479,7 +3516,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
       res.innerHTML = wkeSearchResults.map(function(e, i) {
         return '<div class="wke-search-result" data-i="' + i + '" onclick="wkePickExercise(' + i + ')">' +
           '<span class="wke-search-result-name">' + e.name + '</span>' +
-          '<span class="wke-search-result-tags"><span class="wke-ex-tag">' + e.group + '</span><span class="wke-ex-tag">' + e.equip + '</span></span>' +
+          '<span class="wke-search-result-tags"><span class="wke-ex-tag">' + e.group + '</span><span class="wke-ex-tag">' + e.equip + '</span>' +
+          (e.revisado ? '' : '<span class="wke-ex-tag wke-ex-tag--pending" title="Nome e instrução ainda não validados pelo Coach Fernando. Não aparece em produção.">aguardando validação do Coach</span>') +
+          '</span>' +
         '</div>';
       }).join('');
       renderIcons();
@@ -3501,6 +3540,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
       if (!pick) return;
       const day = wkeCurrentDay();
       day.exercises.push({
+        // exerciseId é o vínculo estável com a coleção exercises/ (especificação,
+        // seção 7). name/group/equip ficam como cópia de exibição enquanto o
+        // plano-base de demonstração ainda for dado de simulação; quando o mock
+        // for refeito, a resolução passa a ser feita pelo identificador.
+        exerciseId: pick.id,
         name: pick.name, group: pick.group, equip: pick.equip, pr: 0, last: '', rest_default: 60, last_max: null,
         sets: [ { reps: '8-12', load: null, rest: 60, obs: '' }, { reps: '8-12', load: null, rest: 60, obs: '' }, { reps: '8-12', load: null, rest: 60, obs: '' } ]
       });

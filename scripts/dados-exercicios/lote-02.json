@@ -1,0 +1,868 @@
+[
+ {
+  "idOrigem": "Incline_Dumbbell_Flyes",
+  "nome_en": "Incline Dumbbell Flyes",
+  "grupo": "Peito",
+  "musculoPrimario": "Peitoral",
+  "musculosSecundarios": [
+   "Deltoide"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Crucifixo Inclinado com Halteres",
+  "instrucao_pt": "Banco inclinado entre 30 e 45 graus, halteres acima do peito com os cotovelos levemente flexionados. Abra os braços em arco até sentir alongamento no peitoral e feche pelo mesmo caminho. O cotovelo mantém o mesmo ângulo o tempo todo — se ele flexiona e estende, virou supino.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Decline_Dumbbell_Flyes",
+  "nome_en": "Decline Dumbbell Flyes",
+  "grupo": "Peito",
+  "musculoPrimario": "Peitoral",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Crucifixo Declinado com Halteres",
+  "instrucao_pt": "Banco declinado, pés travados no apoio, halteres acima do peito com cotovelos levemente flexionados. Abra em arco até o alongamento e feche pelo mesmo caminho.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Decline_Dumbbell_Bench_Press",
+  "nome_en": "Decline Dumbbell Bench Press",
+  "grupo": "Peito",
+  "musculoPrimario": "Peitoral",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Supino Declinado com Halteres",
+  "instrucao_pt": "Banco declinado, pés travados, halteres na linha da parte baixa do peito. Empurre até quase juntar os halteres no alto e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Bench_Press_with_Neutral_Grip",
+  "nome_en": "Dumbbell Bench Press with Neutral Grip",
+  "grupo": "Peito",
+  "musculoPrimario": "Peitoral",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Supino Reto com Pegada Neutra",
+  "instrucao_pt": "Deitado no banco horizontal, palmas voltadas uma para a outra. Empurre até estender os cotovelos e desça controlado com os cotovelos mais rentes ao tronco. A pegada neutra costuma ser mais tolerável para quem tem desconforto no ombro.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Hammer_Grip_Incline_DB_Bench_Press",
+  "nome_en": "Hammer Grip Incline DB Bench Press",
+  "grupo": "Peito",
+  "musculoPrimario": "Peitoral",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Supino Inclinado com Pegada Neutra",
+  "instrucao_pt": "Banco inclinado entre 30 e 45 graus, palmas voltadas uma para a outra. Empurre até estender os cotovelos e desça controlado até a altura do peito.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Smith_Machine_Incline_Bench_Press",
+  "nome_en": "Smith Machine Incline Bench Press",
+  "grupo": "Peito",
+  "musculoPrimario": "Peitoral",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Tríceps"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Supino Inclinado no Smith",
+  "instrucao_pt": "Banco inclinado posicionado sob a barra guiada, pegada pouco além dos ombros. Desça até a parte alta do peito e empurre até estender os cotovelos.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Smith_Machine_Decline_Press",
+  "nome_en": "Smith Machine Decline Press",
+  "grupo": "Peito",
+  "musculoPrimario": "Peitoral",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Tríceps"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Supino Declinado no Smith",
+  "instrucao_pt": "Banco declinado sob a barra guiada, pés travados no apoio. Desça a barra até a parte baixa do peito e empurre até estender.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Leverage_Chest_Press",
+  "nome_en": "Leverage Chest Press",
+  "grupo": "Peito",
+  "musculoPrimario": "Peitoral",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Tríceps"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Supino em Máquina Articulada",
+  "instrucao_pt": "Sentado com as costas apoiadas, pegadores na linha do peito. Empurre à frente até estender os cotovelos e volte controlado até o alongamento. Os braços articulados seguem um arco mais próximo do movimento natural que o supino guiado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Incline_Cable_Chest_Press",
+  "nome_en": "Incline Cable Chest Press",
+  "grupo": "Peito",
+  "musculoPrimario": "Peitoral",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Tríceps"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Supino Inclinado na Polia",
+  "instrucao_pt": "Banco inclinado entre duas polias baixas, manoplas na altura do peito. Empurre para cima e à frente até quase juntar as mãos e volte controlado, mantendo a tensão dos cabos.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Straight-Arm_Dumbbell_Pullover",
+  "nome_en": "Straight-Arm Dumbbell Pullover",
+  "grupo": "Peito",
+  "musculoPrimario": "Peitoral",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Dorsal",
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Pullover com Halter",
+  "instrucao_pt": "Deitado no banco horizontal, um halter segurado com as duas mãos acima do peito, cotovelos quase estendidos. Leve o halter para trás da cabeça em arco até sentir alongamento e traga de volta pelo mesmo caminho.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Wide-Grip_Lat_Pulldown",
+  "nome_en": "Wide-Grip Lat Pulldown",
+  "grupo": "Costas",
+  "musculoPrimario": "Dorsal",
+  "musculosSecundarios": [
+   "Bíceps",
+   "Deltoide",
+   "Dorsal"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Puxada Frontal Aberta",
+  "instrucao_pt": "Sentado com as coxas travadas no apoio, pegada bem além da largura dos ombros. Puxe a barra até a parte alta do peito levando os cotovelos para baixo e volte controlado até estender os braços.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "V-Bar_Pulldown",
+  "nome_en": "V-Bar Pulldown",
+  "grupo": "Costas",
+  "musculoPrimario": "Dorsal",
+  "musculosSecundarios": [
+   "Bíceps",
+   "Deltoide",
+   "Dorsal"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Puxada com Barra V",
+  "instrucao_pt": "Sentado com as coxas travadas, barra em V presa à polia alta. Puxe até a parte alta do peito com os cotovelos rentes ao corpo e volte controlado até o alongamento.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Full_Range-Of-Motion_Lat_Pulldown",
+  "nome_en": "Full Range-Of-Motion Lat Pulldown",
+  "grupo": "Costas",
+  "musculoPrimario": "Dorsal",
+  "musculosSecundarios": [
+   "Bíceps",
+   "Deltoide",
+   "Dorsal"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Puxada com Amplitude Completa",
+  "instrucao_pt": "Sentado com as coxas travadas, pegada aberta. Deixe os ombros subirem por completo no alto antes de puxar, traga a barra até a parte alta do peito e retorne até a extensão total. A subida do ombro no início amplia o alongamento do dorsal.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Barbell_Deadlift",
+  "nome_en": "Barbell Deadlift",
+  "grupo": "Costas",
+  "musculoPrimario": "Lombar",
+  "musculosSecundarios": [
+   "Antebraço",
+   "Dorsal",
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa",
+   "Quadríceps",
+   "Trapézio"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Levantamento Terra com Barra",
+  "instrucao_pt": "Barra no chão rente à canela, pés na largura do quadril, pegada pouco além das pernas. Suba estendendo joelhos e quadril ao mesmo tempo, com a coluna neutra e a barra rente ao corpo, e desça pelo mesmo caminho. Perder a curvatura da lombar é o critério para interromper a série.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Bent_Over_Two-Dumbbell_Row",
+  "nome_en": "Bent Over Two-Dumbbell Row",
+  "grupo": "Costas",
+  "musculoPrimario": "Dorsal",
+  "musculosSecundarios": [
+   "Bíceps",
+   "Deltoide",
+   "Dorsal"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Remada Curvada com Halteres",
+  "instrucao_pt": "Tronco inclinado próximo de 45 graus, joelhos levemente flexionados, coluna neutra. Puxe os halteres em direção ao quadril levando os cotovelos para trás e desça até o alongamento.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Reverse_Grip_Bent-Over_Rows",
+  "nome_en": "Reverse Grip Bent-Over Rows",
+  "grupo": "Costas",
+  "musculoPrimario": "Dorsal",
+  "musculosSecundarios": [
+   "Bíceps",
+   "Deltoide",
+   "Dorsal"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Remada Curvada Supinada",
+  "instrucao_pt": "Tronco inclinado, pegada supinada na largura dos ombros. Puxe a barra em direção ao abdômen com os cotovelos rentes ao tronco e desça controlado. A pegada supinada aumenta a participação da parte baixa do dorsal e do bíceps.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Lying_T-Bar_Row",
+  "nome_en": "Lying T-Bar Row",
+  "grupo": "Costas",
+  "musculoPrimario": "Dorsal",
+  "musculosSecundarios": [
+   "Bíceps",
+   "Dorsal"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Remada Cavalinho Deitado",
+  "instrucao_pt": "Deitado de bruços no banco inclinado do aparelho, pegada na barra abaixo do peito. Puxe até aproximar a barra do apoio e desça controlado. O apoio do tronco elimina a exigência sobre a lombar.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Seated_One-arm_Cable_Pulley_Rows",
+  "nome_en": "Seated One-arm Cable Pulley Rows",
+  "grupo": "Costas",
+  "musculoPrimario": "Dorsal",
+  "musculosSecundarios": [
+   "Bíceps",
+   "Dorsal",
+   "Trapézio"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Remada Unilateral Sentada na Polia",
+  "instrucao_pt": "Sentado com os pés no apoio, uma manopla por vez. Puxe em direção ao quadril levando o cotovelo rente ao tronco e volte até o alongamento, sem girar o tronco para acompanhar.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Bent-Arm_Barbell_Pullover",
+  "nome_en": "Bent-Arm Barbell Pullover",
+  "grupo": "Costas",
+  "musculoPrimario": "Dorsal",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Dorsal",
+   "Peitoral",
+   "Tríceps"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Pullover com Barra",
+  "instrucao_pt": "Deitado no banco horizontal, barra acima do peito com os cotovelos flexionados. Leve a barra para trás da cabeça até sentir alongamento e traga de volta pelo mesmo caminho.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Incline_Row",
+  "nome_en": "Dumbbell Incline Row",
+  "grupo": "Costas",
+  "musculoPrimario": "Dorsal",
+  "musculosSecundarios": [
+   "Antebraço",
+   "Bíceps",
+   "Deltoide",
+   "Dorsal"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Remada Inclinada com Halteres",
+  "instrucao_pt": "Deitado de bruços em banco inclinado, halteres pendendo com os braços estendidos. Puxe em direção ao quadril levando os cotovelos para trás e desça até o alongamento.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Arnold_Dumbbell_Press",
+  "nome_en": "Arnold Dumbbell Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Arnold",
+  "instrucao_pt": "Sentado com as costas apoiadas, halteres à frente do rosto com as palmas voltadas para dentro. Empurre acima da cabeça girando as palmas para fora ao longo da subida e desfaça o giro na descida.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Barbell_Shoulder_Press",
+  "nome_en": "Barbell Shoulder Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Peitoral",
+   "Tríceps"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento com Barra",
+  "instrucao_pt": "Sentado ou em pé, barra na altura das clavículas com pegada pouco além dos ombros. Empurre acima da cabeça até estender os cotovelos e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Seated_Barbell_Military_Press",
+  "nome_en": "Seated Barbell Military Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Militar Sentado",
+  "instrucao_pt": "Sentado com as costas apoiadas, barra na altura das clavículas. Empurre acima da cabeça até estender os cotovelos e desça até a altura do queixo. O encosto reduz a compensação de tronco que costuma aparecer em pé.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Shoulder_Press",
+  "nome_en": "Dumbbell Shoulder Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento com Halteres",
+  "instrucao_pt": "Sentado ou em pé, halteres na altura das orelhas com as palmas à frente. Empurre acima da cabeça e desça controlado até a altura inicial.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Face_Pull",
+  "nome_en": "Face Pull",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Dorsal"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Face Pull na Polia",
+  "instrucao_pt": "Em pé diante da polia na altura do rosto, corda com pegada neutra. Puxe em direção à testa abrindo os cotovelos para fora e para cima, separando as pontas da corda, e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Barbell_Press_Behind_Neck",
+  "nome_en": "Standing Barbell Press Behind Neck",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento por Trás da Nuca",
+  "instrucao_pt": "Em pé, barra apoiada atrás da nuca com pegada aberta. Empurre acima da cabeça até estender os cotovelos e desça até a altura das orelhas. Exige boa mobilidade de ombro — quem não tem deve ficar no desenvolvimento à frente.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Leverage_Shoulder_Press",
+  "nome_en": "Leverage Shoulder Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento em Máquina Articulada",
+  "instrucao_pt": "Sentado com as costas apoiadas, pegadores na altura dos ombros. Empurre acima da cabeça e volte controlado até a altura inicial.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Seated_Cable_Shoulder_Press",
+  "nome_en": "Seated Cable Shoulder Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Sentado na Polia",
+  "instrucao_pt": "Sentado entre duas polias baixas com o banco encostado, manoplas na altura dos ombros. Empurre acima da cabeça e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Cuban_Press",
+  "nome_en": "Cuban Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Trapézio"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Press Cubano",
+  "instrucao_pt": "Em pé, halteres à frente das coxas. Puxe até a altura do peito em remada alta, gire os antebraços para cima até as palmas ficarem à frente, empurre acima da cabeça e desfaça a sequência na volta. Carga baixa — o trecho de rotação é o limitante.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Palms-In_Dumbbell_Press",
+  "nome_en": "Standing Palms-In Dumbbell Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento com Pegada Neutra",
+  "instrucao_pt": "Em pé, halteres na altura dos ombros com as palmas voltadas uma para a outra. Empurre acima da cabeça mantendo a pegada neutra e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Front_Barbell_Squat",
+  "nome_en": "Front Barbell Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Frontal",
+  "instrucao_pt": "Barra apoiada à frente, sobre os deltoides, cotovelos altos. Desça flexionando quadril e joelhos mantendo o tronco o mais vertical possível e suba empurrando o piso. A posição frontal da barra exige tronco mais ereto e aumenta a demanda sobre o quadríceps.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Romanian_Deadlift",
+  "nome_en": "Romanian Deadlift",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Panturrilha"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Levantamento Terra Romeno",
+  "instrucao_pt": "Em pé, barra à frente das coxas, joelhos levemente flexionados e fixos. Desça a barra rente às pernas empurrando o quadril para trás até sentir alongamento na parte posterior da coxa e suba contraindo o glúteo.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Stiff-Legged_Barbell_Deadlift",
+  "nome_en": "Stiff-Legged Barbell Deadlift",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Stiff com Barra",
+  "instrucao_pt": "Em pé, barra à frente das coxas, joelhos quase estendidos. Desça a barra rente às pernas empurrando o quadril para trás e suba contraindo o glúteo. A amplitude termina onde a lombar começaria a arredondar.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Wide_Stance_Barbell_Squat",
+  "nome_en": "Wide Stance Barbell Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Sumô com Barra",
+  "instrucao_pt": "Barra apoiada no trapézio, pés bem além da largura dos ombros com as pontas para fora. Desça flexionando quadril e joelhos até o paralelo e suba empurrando o piso. A base aberta aumenta a participação de adutores e glúteo.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Narrow_Stance_Squats",
+  "nome_en": "Narrow Stance Squats",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento com Base Estreita",
+  "instrucao_pt": "Barra apoiada no trapézio, pés na largura do quadril ou menos. Desça até as coxas ficarem paralelas ao chão e suba empurrando o piso. A base fechada concentra o esforço no quadríceps.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Zercher_Squats",
+  "nome_en": "Zercher Squats",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Zercher",
+  "instrucao_pt": "Barra apoiada na dobra dos cotovelos, à frente do corpo, braços cruzados sobre ela. Desça mantendo o tronco ereto até o paralelo e suba empurrando o piso. Carga limitada pelo desconforto no antebraço, não pela perna.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Squat",
+  "nome_en": "Dumbbell Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento com Halteres",
+  "instrucao_pt": "Em pé, um halter em cada mão ao lado do corpo, pés na largura dos ombros. Desça flexionando quadril e joelhos até o paralelo e suba empurrando o piso.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Rear_Lunge",
+  "nome_en": "Dumbbell Rear Lunge",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Afundo para Trás com Halteres",
+  "instrucao_pt": "Em pé, halteres ao lado do corpo. Dê um passo longo para trás e desça até o joelho de trás quase tocar o chão, depois suba empurrando o calcanhar da perna da frente. A passada para trás costuma poupar mais o joelho que a passada à frente.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Step_Ups",
+  "nome_en": "Dumbbell Step Ups",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Subida no Banco com Halteres",
+  "instrucao_pt": "Halteres ao lado do corpo, de frente para um banco na altura do joelho. Suba apoiando o pé inteiro e estendendo o quadril, e desça controlado sem se impulsionar com a perna de trás.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Split_Squat_with_Dumbbells",
+  "nome_en": "Split Squat with Dumbbells",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Unilateral com Halteres",
+  "instrucao_pt": "Halteres ao lado do corpo, um pé à frente e outro atrás em posição fixa. Desça flexionando os dois joelhos até o de trás quase tocar o chão e suba sem trocar os pés de lugar até terminar a série.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Smith_Single-Leg_Split_Squat",
+  "nome_en": "Smith Single-Leg Split Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Unilateral no Smith",
+  "instrucao_pt": "Barra guiada apoiada no trapézio, um pé à frente e outro atrás em posição fixa. Desça flexionando os dois joelhos e suba empurrando o calcanhar da frente. O trajeto fixo dispensa o equilíbrio e permite carga maior que a versão livre.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Narrow_Stance_Leg_Press",
+  "nome_en": "Narrow Stance Leg Press",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Leg Press com Base Estreita",
+  "instrucao_pt": "Sentado no aparelho, pés juntos ou na largura do quadril, no centro da plataforma. Desça flexionando os joelhos até próximo de 90 graus e empurre sem travar os joelhos. A base fechada desloca o esforço para a porção externa do quadríceps.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Smith_Machine_Leg_Press",
+  "nome_en": "Smith Machine Leg Press",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Leg Press no Smith",
+  "instrucao_pt": "Deitado sob a barra guiada com os pés apoiados nela, quadril alinhado. Empurre estendendo os joelhos e desça controlado até a flexão confortável.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Barbell_Side_Split_Squat",
+  "nome_en": "Barbell Side Split Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Lombar",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Lateral com Barra",
+  "instrucao_pt": "Barra apoiada no trapézio, pés bem afastados na lateral. Desloque o peso para uma perna flexionando o joelho daquele lado enquanto a outra permanece estendida, e volte ao centro. Trabalha adutores junto com quadríceps e glúteo.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Close-Grip_Dumbbell_Press",
+  "nome_en": "Close-Grip Dumbbell Press",
+  "grupo": "Tríceps",
+  "musculoPrimario": "Tríceps",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Peitoral"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Supino Fechado com Halteres",
+  "instrucao_pt": "Deitado no banco horizontal, halteres juntos sobre o peito com as palmas voltadas para dentro. Empurre até estender os cotovelos mantendo-os rentes ao tronco e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Decline_Close-Grip_Bench_To_Skull_Crusher",
+  "nome_en": "Decline Close-Grip Bench To Skull Crusher",
+  "grupo": "Tríceps",
+  "musculoPrimario": "Tríceps",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Peitoral"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Tríceps Testa Declinado com Barra",
+  "instrucao_pt": "Banco declinado, pegada na largura dos ombros. Desça a barra flexionando apenas os cotovelos até a altura da testa e estenda de volta, mantendo os braços parados. A inclinação declinada mantém tensão no tríceps também no fim do movimento.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Reverse_Triceps_Bench_Press",
+  "nome_en": "Reverse Triceps Bench Press",
+  "grupo": "Tríceps",
+  "musculoPrimario": "Tríceps",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Peitoral"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Supino Fechado com Pegada Supinada",
+  "instrucao_pt": "Deitado no banco horizontal, pegada supinada na largura dos ombros. Desça a barra até a parte baixa do peito com os cotovelos rentes ao tronco e empurre até estender.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Barbell_Ab_Rollout",
+  "nome_en": "Barbell Ab Rollout",
+  "grupo": "Abdômen",
+  "musculoPrimario": "Abdômen",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Lombar"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Rollout com Barra em Pé",
+  "instrucao_pt": "Em pé, curvado com as mãos na barra apoiada no chão à frente dos pés. Role a barra à frente estendendo o corpo o quanto conseguir sem deixar a lombar arredondar e volte contraindo o abdômen. Versão avançada — quem não sustenta a lombar deve ficar na versão ajoelhada.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Press_Sit-Up",
+  "nome_en": "Press Sit-Up",
+  "grupo": "Abdômen",
+  "musculoPrimario": "Abdômen",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Peitoral",
+   "Tríceps"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": false,
+  "nome_pt": "Abdominal com Elevação de Barra",
+  "instrucao_pt": "Deitado com os joelhos flexionados e uma barra segurada acima do peito. Suba o tronco até sentar mantendo a barra estendida acima da cabeça e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Plate_Twist",
+  "nome_en": "Plate Twist",
+  "grupo": "Abdômen",
+  "musculoPrimario": "Abdômen",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Rotação com Anilha",
+  "instrucao_pt": "Sentado com o tronco inclinado para trás e os pés no chão ou elevados, anilha segurada à frente do peito. Gire o tronco levando a anilha de um lado ao outro, controlando a passagem pelo centro.",
+  "instrucao_en": null
+ }
+]

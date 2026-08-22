@@ -4,7 +4,10 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "catalogo:exercicios": "node scripts/gerar-catalogo-exercicios.mjs",
+    "carga:exercicios": "node scripts/carregar-exercicios.mjs",
+    "catalogo:filtrar": "node scripts/filtrar-catalogo.mjs"
   },
   "devDependencies": {
     "sharp": "^0.35.3",
