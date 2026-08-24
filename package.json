@@ -8,7 +8,8 @@
     "catalogo:exercicios": "node scripts/gerar-catalogo-exercicios.mjs",
     "carga:exercicios": "node scripts/carregar-exercicios.mjs",
     "catalogo:filtrar": "node scripts/filtrar-catalogo.mjs",
-    "conferir:exercicios": "node scripts/conferir-exercicios.mjs"
+    "conferir:exercicios": "node scripts/conferir-exercicios.mjs",
+    "demo:filtrar": "node scripts/filtrar-demo.mjs"
   },
   "devDependencies": {
     "sharp": "^0.35.3",

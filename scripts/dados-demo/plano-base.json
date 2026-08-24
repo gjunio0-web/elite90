@@ -1,0 +1,945 @@
+{
+  "order": [
+    "A",
+    "B",
+    "C"
+  ],
+  "days": {
+    "A": {
+      "label": "Dia A — Peito e Tríceps",
+      "exercises": [
+        {
+          "name": "Supino Reto",
+          "group": "Peito",
+          "equip": "Barra",
+          "pr": 100,
+          "last": "100kg × 6 · há 6 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 80,
+              "reps": "8",
+              "date": "2026-03-24"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 82.5,
+              "reps": "8",
+              "date": "2026-03-31"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 85,
+              "reps": "8",
+              "date": "2026-04-07"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 87.5,
+              "reps": "8",
+              "date": "2026-04-14"
+            },
+            {
+              "semana": "S5",
+              "maxLoad": 90,
+              "reps": "7",
+              "date": "2026-04-21"
+            },
+            {
+              "semana": "S6",
+              "maxLoad": 92.5,
+              "reps": "7",
+              "date": "2026-04-28"
+            },
+            {
+              "semana": "S7",
+              "maxLoad": 95,
+              "reps": "7",
+              "date": "2026-05-05"
+            },
+            {
+              "semana": "S8",
+              "maxLoad": 97.5,
+              "reps": "7",
+              "date": "2026-05-12"
+            },
+            {
+              "semana": "S9",
+              "maxLoad": 98,
+              "reps": "6",
+              "date": "2026-05-19"
+            },
+            {
+              "semana": "S10",
+              "maxLoad": 99,
+              "reps": "6",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S11",
+              "maxLoad": 100,
+              "reps": "6",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S12",
+              "maxLoad": 100,
+              "reps": "6",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S13",
+              "maxLoad": 100,
+              "reps": "6",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "6-8",
+              "load": 100,
+              "rest": 90,
+              "obs": ""
+            },
+            {
+              "reps": "6-8",
+              "load": 100,
+              "rest": 90,
+              "obs": ""
+            },
+            {
+              "reps": "8-10",
+              "load": 90,
+              "rest": 90,
+              "obs": ""
+            },
+            {
+              "reps": "8-10",
+              "load": 90,
+              "rest": 90,
+              "obs": "drop"
+            }
+          ]
+        },
+        {
+          "name": "Supino Inclinado com Halteres",
+          "group": "Peito",
+          "equip": "Halteres",
+          "pr": 40,
+          "last": "40kg × 8 · há 6 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 34,
+              "reps": "10",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 36,
+              "reps": "10",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 38,
+              "reps": "8",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 40,
+              "reps": "8",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "8-10",
+              "load": 38,
+              "rest": 75,
+              "obs": ""
+            },
+            {
+              "reps": "8-10",
+              "load": 38,
+              "rest": 75,
+              "obs": ""
+            },
+            {
+              "reps": "10-12",
+              "load": 34,
+              "rest": 75,
+              "obs": ""
+            }
+          ]
+        },
+        {
+          "name": "Crucifixo na Polia",
+          "group": "Peito",
+          "equip": "Polia",
+          "pr": 25,
+          "last": "25kg × 10 · há 6 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 20,
+              "reps": "12",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 22,
+              "reps": "12",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 22,
+              "reps": "12",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 25,
+              "reps": "10",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "12-15",
+              "load": 22,
+              "rest": 60,
+              "obs": ""
+            },
+            {
+              "reps": "12-15",
+              "load": 22,
+              "rest": 60,
+              "obs": ""
+            },
+            {
+              "reps": "12-15",
+              "load": 22,
+              "rest": 60,
+              "obs": ""
+            }
+          ]
+        },
+        {
+          "name": "Tríceps Testa",
+          "group": "Tríceps",
+          "equip": "Barra",
+          "pr": 45,
+          "last": "45kg × 8 · há 6 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 38,
+              "reps": "10",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 40,
+              "reps": "10",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 42,
+              "reps": "8",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 45,
+              "reps": "8",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "8-10",
+              "load": 42,
+              "rest": 60,
+              "obs": ""
+            },
+            {
+              "reps": "8-10",
+              "load": 42,
+              "rest": 60,
+              "obs": ""
+            },
+            {
+              "reps": "10-12",
+              "load": 38,
+              "rest": 60,
+              "obs": ""
+            }
+          ]
+        },
+        {
+          "name": "Tríceps Corda",
+          "group": "Tríceps",
+          "equip": "Polia",
+          "pr": 35,
+          "last": "35kg × 12 · há 6 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 28,
+              "reps": "15",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 30,
+              "reps": "15",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 32,
+              "reps": "12",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 35,
+              "reps": "12",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "12-15",
+              "load": 32,
+              "rest": 45,
+              "obs": ""
+            },
+            {
+              "reps": "12-15",
+              "load": 32,
+              "rest": 45,
+              "obs": ""
+            },
+            {
+              "reps": "15-20",
+              "load": 28,
+              "rest": 45,
+              "obs": "falha"
+            }
+          ]
+        }
+      ]
+    },
+    "B": {
+      "label": "Dia B — Costas e Bíceps",
+      "exercises": [
+        {
+          "name": "Puxada Frontal",
+          "group": "Costas",
+          "equip": "Polia",
+          "pr": 80,
+          "last": "80kg × 6 · há 4 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 70,
+              "reps": "8",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 75,
+              "reps": "8",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 77.5,
+              "reps": "7",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 80,
+              "reps": "6",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "6-8",
+              "load": 78,
+              "rest": 90,
+              "obs": ""
+            },
+            {
+              "reps": "6-8",
+              "load": 78,
+              "rest": 90,
+              "obs": ""
+            },
+            {
+              "reps": "8-10",
+              "load": 70,
+              "rest": 90,
+              "obs": ""
+            },
+            {
+              "reps": "8-10",
+              "load": 70,
+              "rest": 90,
+              "obs": ""
+            }
+          ]
+        },
+        {
+          "name": "Remada Curvada",
+          "group": "Costas",
+          "equip": "Barra",
+          "pr": 90,
+          "last": "90kg × 8 · há 4 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 80,
+              "reps": "10",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 82,
+              "reps": "10",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 85,
+              "reps": "8",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 90,
+              "reps": "8",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "8-10",
+              "load": 85,
+              "rest": 90,
+              "obs": ""
+            },
+            {
+              "reps": "8-10",
+              "load": 85,
+              "rest": 90,
+              "obs": ""
+            },
+            {
+              "reps": "10-12",
+              "load": 75,
+              "rest": 90,
+              "obs": ""
+            }
+          ]
+        },
+        {
+          "name": "Remada Unilateral",
+          "group": "Costas",
+          "equip": "Halteres",
+          "pr": 44,
+          "last": "44kg × 8 · há 4 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 38,
+              "reps": "10",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 40,
+              "reps": "10",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 42,
+              "reps": "8",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 44,
+              "reps": "8",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "8-10",
+              "load": 42,
+              "rest": 75,
+              "obs": ""
+            },
+            {
+              "reps": "8-10",
+              "load": 42,
+              "rest": 75,
+              "obs": ""
+            },
+            {
+              "reps": "10-12",
+              "load": 38,
+              "rest": 75,
+              "obs": ""
+            }
+          ]
+        },
+        {
+          "name": "Rosca Direta",
+          "group": "Bíceps",
+          "equip": "Barra",
+          "pr": 42,
+          "last": "42kg × 8 · há 4 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 36,
+              "reps": "10",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 38,
+              "reps": "10",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 40,
+              "reps": "8",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 42,
+              "reps": "8",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "8-10",
+              "load": 40,
+              "rest": 60,
+              "obs": ""
+            },
+            {
+              "reps": "8-10",
+              "load": 40,
+              "rest": 60,
+              "obs": ""
+            },
+            {
+              "reps": "10-12",
+              "load": 35,
+              "rest": 60,
+              "obs": ""
+            }
+          ]
+        },
+        {
+          "name": "Rosca Martelo",
+          "group": "Bíceps",
+          "equip": "Halteres",
+          "pr": 26,
+          "last": "26kg × 10 · há 4 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 22,
+              "reps": "12",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 24,
+              "reps": "12",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 25,
+              "reps": "10",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 26,
+              "reps": "10",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "10-12",
+              "load": 24,
+              "rest": 45,
+              "obs": ""
+            },
+            {
+              "reps": "10-12",
+              "load": 24,
+              "rest": 45,
+              "obs": ""
+            },
+            {
+              "reps": "12-15",
+              "load": 22,
+              "rest": 45,
+              "obs": ""
+            }
+          ]
+        }
+      ]
+    },
+    "C": {
+      "label": "Dia C — Pernas",
+      "exercises": [
+        {
+          "name": "Agachamento Livre",
+          "group": "Pernas",
+          "equip": "Barra",
+          "pr": 140,
+          "last": "135kg × 6 · há 2 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 100,
+              "reps": "8",
+              "date": "2026-03-24"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 105,
+              "reps": "8",
+              "date": "2026-03-31"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 110,
+              "reps": "8",
+              "date": "2026-04-07"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 115,
+              "reps": "8",
+              "date": "2026-04-14"
+            },
+            {
+              "semana": "S5",
+              "maxLoad": 120,
+              "reps": "7",
+              "date": "2026-04-21"
+            },
+            {
+              "semana": "S6",
+              "maxLoad": 122.5,
+              "reps": "7",
+              "date": "2026-04-28"
+            },
+            {
+              "semana": "S7",
+              "maxLoad": 125,
+              "reps": "7",
+              "date": "2026-05-05"
+            },
+            {
+              "semana": "S8",
+              "maxLoad": 127.5,
+              "reps": "7",
+              "date": "2026-05-12"
+            },
+            {
+              "semana": "S9",
+              "maxLoad": 130,
+              "reps": "6",
+              "date": "2026-05-19"
+            },
+            {
+              "semana": "S10",
+              "maxLoad": 132.5,
+              "reps": "6",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S11",
+              "maxLoad": 132.5,
+              "reps": "6",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S12",
+              "maxLoad": 135,
+              "reps": "6",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S13",
+              "maxLoad": 135,
+              "reps": "6",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "6-8",
+              "load": 135,
+              "rest": 120,
+              "obs": ""
+            },
+            {
+              "reps": "6-8",
+              "load": 135,
+              "rest": 120,
+              "obs": ""
+            },
+            {
+              "reps": "8-10",
+              "load": 120,
+              "rest": 120,
+              "obs": ""
+            },
+            {
+              "reps": "8-10",
+              "load": 120,
+              "rest": 120,
+              "obs": ""
+            }
+          ]
+        },
+        {
+          "name": "Leg Press 45°",
+          "group": "Pernas",
+          "equip": "Máquina",
+          "pr": 300,
+          "last": "300kg × 10 · há 2 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 260,
+              "reps": "12",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 280,
+              "reps": "12",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 290,
+              "reps": "10",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 300,
+              "reps": "10",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "10-12",
+              "load": 290,
+              "rest": 90,
+              "obs": ""
+            },
+            {
+              "reps": "10-12",
+              "load": 290,
+              "rest": 90,
+              "obs": ""
+            },
+            {
+              "reps": "12-15",
+              "load": 260,
+              "rest": 90,
+              "obs": ""
+            }
+          ]
+        },
+        {
+          "name": "Cadeira Extensora",
+          "group": "Pernas",
+          "equip": "Máquina",
+          "pr": 90,
+          "last": "90kg × 12 · há 2 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 75,
+              "reps": "15",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 80,
+              "reps": "15",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 85,
+              "reps": "12",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 90,
+              "reps": "12",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "12-15",
+              "load": 85,
+              "rest": 60,
+              "obs": ""
+            },
+            {
+              "reps": "12-15",
+              "load": 85,
+              "rest": 60,
+              "obs": ""
+            },
+            {
+              "reps": "15-20",
+              "load": 75,
+              "rest": 60,
+              "obs": "falha"
+            }
+          ]
+        },
+        {
+          "name": "Mesa Flexora",
+          "group": "Pernas",
+          "equip": "Máquina",
+          "pr": 75,
+          "last": "75kg × 10 · há 2 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 62,
+              "reps": "12",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 68,
+              "reps": "12",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 70,
+              "reps": "10",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 75,
+              "reps": "10",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "10-12",
+              "load": 70,
+              "rest": 60,
+              "obs": ""
+            },
+            {
+              "reps": "10-12",
+              "load": 70,
+              "rest": 60,
+              "obs": ""
+            },
+            {
+              "reps": "12-15",
+              "load": 62,
+              "rest": 60,
+              "obs": ""
+            }
+          ]
+        },
+        {
+          "name": "Panturrilha em Pé",
+          "group": "Pernas",
+          "equip": "Máquina",
+          "pr": 120,
+          "last": "120kg × 15 · há 2 dias",
+          "loadHistory": [
+            {
+              "semana": "S1",
+              "maxLoad": 100,
+              "reps": "20",
+              "date": "2026-05-26"
+            },
+            {
+              "semana": "S2",
+              "maxLoad": 110,
+              "reps": "20",
+              "date": "2026-06-02"
+            },
+            {
+              "semana": "S3",
+              "maxLoad": 115,
+              "reps": "15",
+              "date": "2026-06-09"
+            },
+            {
+              "semana": "S4",
+              "maxLoad": 120,
+              "reps": "15",
+              "date": "2026-06-16"
+            }
+          ],
+          "sets": [
+            {
+              "reps": "15-20",
+              "load": 115,
+              "rest": 45,
+              "obs": ""
+            },
+            {
+              "reps": "15-20",
+              "load": 115,
+              "rest": 45,
+              "obs": ""
+            },
+            {
+              "reps": "20-25",
+              "load": 100,
+              "rest": 45,
+              "obs": ""
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

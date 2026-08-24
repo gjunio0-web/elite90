@@ -2,8 +2,8 @@
   "name": "@elite90/site",
   "type": "module",
   "scripts": {
-    "dev": "node ../../scripts/filtrar-catalogo.mjs && astro dev",
-    "build": "node ../../scripts/filtrar-catalogo.mjs && astro build",
+    "dev": "node ../../scripts/filtrar-catalogo.mjs && node ../../scripts/filtrar-demo.mjs && astro dev",
+    "build": "node ../../scripts/filtrar-catalogo.mjs && node ../../scripts/filtrar-demo.mjs && astro build",
     "preview": "astro preview"
   },
   "dependencies": {
