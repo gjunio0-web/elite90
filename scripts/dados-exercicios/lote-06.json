@@ -1,0 +1,1174 @@
+[
+ {
+  "idOrigem": "Bodyweight_Squat",
+  "nome_en": "Bodyweight Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Livre sem Carga",
+  "instrucao_pt": "Em pé, pés na largura dos ombros e pontas levemente para fora, braços à frente para equilíbrio. Desça flexionando quadril e joelhos até as coxas ficarem paralelas ao chão e suba empurrando o piso.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Weighted_Squat",
+  "nome_en": "Weighted Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento com Carga no Peito",
+  "instrucao_pt": "Em pé, uma anilha ou halter segurado junto ao peito. Desça flexionando quadril e joelhos até o paralelo e suba empurrando o piso, mantendo o tronco ereto.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Barbell_Squat_To_A_Bench",
+  "nome_en": "Barbell Squat To A Bench",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento com Barra até o Banco",
+  "instrucao_pt": "Barra apoiada no trapézio, banco posicionado atrás. Desça até tocar o banco de leve com o glúteo e suba sem se sentar de fato. O banco padroniza a profundidade entre as repetições.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Front_Barbell_Squat_To_A_Bench",
+  "nome_en": "Front Barbell Squat To A Bench",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Frontal até o Banco",
+  "instrucao_pt": "Barra apoiada à frente sobre os deltoides, cotovelos altos, banco atrás. Desça até tocar o banco e suba mantendo o tronco vertical.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Squat_To_A_Bench",
+  "nome_en": "Dumbbell Squat To A Bench",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento com Halteres até o Banco",
+  "instrucao_pt": "Halteres ao lado do corpo, banco atrás. Desça até tocar o banco de leve e suba empurrando o piso.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Front_Squat_Clean_Grip",
+  "nome_en": "Front Squat (Clean Grip)",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Abdômen",
+   "Glúteo",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Frontal com Pegada de Clean",
+  "instrucao_pt": "Barra apoiada sobre os deltoides com os dedos por baixo e cotovelos bem altos. Desça mantendo o tronco vertical até o paralelo e suba empurrando o piso. A pegada exige mobilidade de punho e ombro.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Barbell_Hack_Squat",
+  "nome_en": "Barbell Hack Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Antebraço",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Hack com Barra",
+  "instrucao_pt": "Em pé com a barra no chão atrás das pernas, pegada pronada ao lado do corpo. Desça flexionando joelhos e quadril e suba estendendo, com a barra rente às panturrilhas.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Narrow_Stance_Hack_Squats",
+  "nome_en": "Narrow Stance Hack Squats",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Hack com Base Estreita",
+  "instrucao_pt": "No aparelho hack, pés juntos ou na largura do quadril, no centro da plataforma. Desça até o paralelo e empurre de volta, o que concentra o esforço na porção externa do quadríceps.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Jefferson_Squats",
+  "nome_en": "Jefferson Squats",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Posterior de Coxa",
+   "Trapézio"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Jefferson",
+  "instrucao_pt": "Em pé com a barra no chão entre as pernas, uma perna à frente e outra atrás, pegada com uma mão de cada lado. Suba estendendo quadril e joelhos e desça controlado, alternando o lado a cada série.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Plie_Dumbbell_Squat",
+  "nome_en": "Plie Dumbbell Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Abdômen",
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Plié com Halter",
+  "instrucao_pt": "Em pé com os pés bem afastados e pontas voltadas para fora, um halter segurado com as duas mãos entre as pernas. Desça até o paralelo e suba empurrando o piso, tronco ereto.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Goblet_Squat",
+  "nome_en": "Goblet Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Goblet",
+  "instrucao_pt": "Em pé, kettlebell segurado junto ao peito pelas alças. Desça entre os joelhos até o paralelo ou abaixo e suba empurrando o piso. O peso à frente ajuda a manter o tronco ereto.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Front_Squats_With_Two_Kettlebells",
+  "nome_en": "Front Squats With Two Kettlebells",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Frontal com Kettlebells",
+  "instrucao_pt": "Em pé, kettlebells apoiados na frente dos ombros. Desça até o paralelo mantendo o tronco vertical e suba empurrando o piso.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Overhead_Kettlebell_Squats",
+  "nome_en": "One-Arm Overhead Kettlebell Squats",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento com Kettlebell Acima da Cabeça",
+  "instrucao_pt": "Em pé com um kettlebell sustentado acima da cabeça, braço travado na vertical. Desça até o paralelo mantendo o peso na linha do ombro e suba controlado. Exige mobilidade de ombro e tornozelo.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Kettlebell_Pistol_Squat",
+  "nome_en": "Kettlebell Pistol Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Pistol com Kettlebell",
+  "instrucao_pt": "Em pé sobre uma perna, kettlebell junto ao peito e a outra perna estendida à frente. Desça o quanto conseguir controlar e suba empurrando o piso. Movimento avançado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Smith_Machine_Pistol_Squat",
+  "nome_en": "Smith Machine Pistol Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Pistol no Smith",
+  "instrucao_pt": "Em pé sob a barra guiada, apoiado em uma perna com a outra estendida à frente. Desça controlado e suba empurrando o calcanhar. A barra guiada dispensa o equilíbrio.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Single-Leg_High_Box_Squat",
+  "nome_en": "Single-Leg High Box Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Unilateral no Caixote Alto",
+  "instrucao_pt": "Em pé sobre uma perna de frente para um caixote alto, a outra perna estendida à frente. Desça até tocar o caixote e suba empurrando o calcanhar.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Chair_Squat",
+  "nome_en": "Chair Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento na Cadeira",
+  "instrucao_pt": "Em pé de costas para uma cadeira, pés na largura dos ombros. Desça até sentar de leve e levante empurrando o piso, sem usar as mãos.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Lying_Machine_Squat",
+  "nome_en": "Lying Machine Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Deitado na Máquina",
+  "instrucao_pt": "Deitado no aparelho com os pés apoiados na plataforma acima do quadril. Desça flexionando os joelhos e empurre até quase estender, sem travar.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Weighted_Sissy_Squat",
+  "nome_en": "Weighted Sissy Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Sissy com Carga",
+  "instrucao_pt": "Em pé com uma anilha junto ao peito e apoio para os tornozelos. Incline o tronco para trás flexionando os joelhos à frente, mantendo quadril e tronco alinhados, e volte controlado. Exige joelho saudável.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Squat_with_Plate_Movers",
+  "nome_en": "Squat with Plate Movers",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Abdutor",
+   "Adutor",
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento com Deslocamento de Anilha",
+  "instrucao_pt": "Barra apoiada no trapézio, anilha no chão ao lado. Agache, desloque a anilha de um lado ao outro entre as repetições e siga a série.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Freehand_Jump_Squat",
+  "nome_en": "Freehand Jump Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento com Salto",
+  "instrucao_pt": "Em pé, pés na largura dos ombros. Desça até meio agachamento e suba com um salto, aterrissando com os joelhos flexionados para amortecer. Movimento de impacto — usar com critério em joelho sensível.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One_Leg_Barbell_Squat",
+  "nome_en": "One Leg Barbell Squat",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Agachamento Unilateral com Barra",
+  "instrucao_pt": "Barra apoiada no trapézio, um pé apoiado atrás em um banco. Desça flexionando o joelho da frente até o paralelo e suba empurrando o calcanhar.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Elevated_Back_Lunge",
+  "nome_en": "Elevated Back Lunge",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Afundo para Trás em Plataforma",
+  "instrucao_pt": "Em pé sobre uma plataforma com a barra no trapézio. Dê um passo longo para trás descendo além da linha da plataforma e suba empurrando o calcanhar da frente. A amplitude é maior que no afundo no chão.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Bodyweight_Walking_Lunge",
+  "nome_en": "Bodyweight Walking Lunge",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Afundo Caminhando sem Carga",
+  "instrucao_pt": "Em pé, mãos na cintura. Avance uma perna em passada longa até o joelho de trás quase tocar o chão, suba trazendo a perna de trás à frente e siga alternando.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Lunge_Sprint",
+  "nome_en": "Lunge Sprint",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Afundo com Troca Saltada",
+  "instrucao_pt": "A partir da posição de afundo, salte trocando as pernas no ar e aterrisse na posição oposta. Movimento de impacto, com carga apenas do peso do corpo.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Lunge_Pass_Through",
+  "nome_en": "Lunge Pass Through",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha",
+   "Quadríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Afundo com Passagem de Kettlebell",
+  "instrucao_pt": "Desça à posição de afundo com um kettlebell em uma das mãos. No ponto mais baixo, passe o peso por baixo da coxa da frente para a outra mão e suba, alternando a perna a cada repetição.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Side_Deadlift",
+  "nome_en": "One-Arm Side Deadlift",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Abdômen",
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Posterior de Coxa",
+   "Trapézio"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Levantamento Terra Lateral Unilateral",
+  "instrucao_pt": "Em pé ao lado da barra no chão, pegada com uma das mãos no centro. Suba estendendo quadril e joelhos com a coluna neutra e desça controlado, sem inclinar o tronco para o lado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Leverage_Deadlift",
+  "nome_en": "Leverage Deadlift",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Levantamento Terra em Máquina Articulada",
+  "instrucao_pt": "Em pé no aparelho com os pegadores ao lado do corpo. Suba estendendo quadril e joelhos ao mesmo tempo, coluna neutra, e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Cable_Deadlifts",
+  "nome_en": "Cable Deadlifts",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [
+   "Antebraço",
+   "Glúteo",
+   "Lombar",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Levantamento Terra na Polia",
+  "instrucao_pt": "Em pé de frente para a polia baixa, barra segurada com os braços estendidos. Suba estendendo quadril e joelhos e desça empurrando o quadril para trás, com tensão constante.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Kettlebell_One-Legged_Deadlift",
+  "nome_en": "Kettlebell One-Legged Deadlift",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Levantamento Terra Unilateral com Kettlebell",
+  "instrucao_pt": "Em pé sobre uma perna, kettlebell na mão do lado oposto. Incline o tronco à frente estendendo a perna livre para trás até o tronco ficar quase paralelo ao chão, e volte contraindo o glúteo.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Kettlebell_Swings",
+  "nome_en": "One-Arm Kettlebell Swings",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Glúteo",
+   "Lombar",
+   "Panturrilha"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Balanço Unilateral com Kettlebell",
+  "instrucao_pt": "Em pé com o kettlebell entre as pernas, tronco inclinado. Estenda o quadril com força projetando o peso até a altura do peito e deixe-o voltar entre as pernas. O movimento é de quadril, não de braço.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Kettlebell_Dead_Clean",
+  "nome_en": "Kettlebell Dead Clean",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Quadríceps",
+   "Trapézio"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Clean do Chão com Kettlebell",
+  "instrucao_pt": "Em pé com o kettlebell no chão entre os pés. Estenda o quadril puxando o peso até a frente do ombro em um só movimento e desça controlado até o chão a cada repetição.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Kettlebell_Hang_Clean",
+  "nome_en": "Kettlebell Hang Clean",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Trapézio"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Clean Suspenso com Kettlebell",
+  "instrucao_pt": "Em pé com o kettlebell pendendo à frente das coxas. Estenda o quadril puxando o peso até a frente do ombro e desça controlado sem tocar o chão.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Kettlebell_Clean",
+  "nome_en": "One-Arm Kettlebell Clean",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Glúteo",
+   "Lombar",
+   "Trapézio"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Clean Unilateral com Kettlebell",
+  "instrucao_pt": "Em pé com o kettlebell entre as pernas. Estenda o quadril levando o peso até a frente do ombro, com o punho firme, e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Open_Palm_Kettlebell_Clean",
+  "nome_en": "Open Palm Kettlebell Clean",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Deltoide",
+   "Glúteo",
+   "Lombar",
+   "Quadríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Clean com Palma Aberta",
+  "instrucao_pt": "Mesma execução do clean, recebendo o kettlebell com a palma aberta apoiando o peso no antebraço. Exige acomodação suave, sem bater no punho.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Open_Palm_Kettlebell_Clean",
+  "nome_en": "One-Arm Open Palm Kettlebell Clean",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Antebraço",
+   "Deltoide",
+   "Glúteo",
+   "Lombar",
+   "Quadríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Clean Unilateral com Palma Aberta",
+  "instrucao_pt": "Clean unilateral em que o kettlebell é recebido com a palma aberta, apoiado no antebraço. Desça controlado a cada repetição.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Alternating_Hang_Clean",
+  "nome_en": "Alternating Hang Clean",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Antebraço",
+   "Bíceps",
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Trapézio"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Clean Suspenso Alternado",
+  "instrucao_pt": "Em pé com um kettlebell em cada mão pendendo à frente. Puxe um por vez até a frente do ombro, alternando os lados.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Double_Kettlebell_Alternating_Hang_Clean",
+  "nome_en": "Double Kettlebell Alternating Hang Clean",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Antebraço",
+   "Bíceps",
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Quadríceps",
+   "Trapézio"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Clean Suspenso Alternado com Dois Kettlebells",
+  "instrucao_pt": "Em pé com dois kettlebells pendendo. Puxe um até o ombro enquanto o outro desce, mantendo o movimento contínuo.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Leg_Extensions",
+  "nome_en": "Leg Extensions",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Cadeira Extensora",
+  "instrucao_pt": "Sentado no aparelho com o rolo sobre os tornozelos e as costas apoiadas. Estenda os joelhos até o fim da amplitude e desça controlado, sem deixar o peso bater na pilha.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Single-Leg_Leg_Extension",
+  "nome_en": "Single-Leg Leg Extension",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Cadeira Extensora Unilateral",
+  "instrucao_pt": "Sentado no aparelho com apenas uma perna sob o rolo. Estenda o joelho até o fim e desça controlado, o que expõe diferenças de força entre os lados.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Lying_Leg_Curls",
+  "nome_en": "Lying Leg Curls",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Mesa Flexora",
+  "instrucao_pt": "Deitado de bruços no aparelho com o rolo logo acima dos calcanhares. Flexione os joelhos trazendo os calcanhares em direção ao glúteo e desça controlado, sem levantar o quadril.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Seated_Leg_Curl",
+  "nome_en": "Seated Leg Curl",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Cadeira Flexora",
+  "instrucao_pt": "Sentado no aparelho com o rolo sobre a parte baixa da panturrilha e a almofada travando as coxas. Flexione os joelhos até o fim da amplitude e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Leg_Curl",
+  "nome_en": "Standing Leg Curl",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Flexora em Pé",
+  "instrucao_pt": "Em pé no aparelho, uma perna por vez com o rolo atrás da panturrilha. Flexione o joelho trazendo o calcanhar ao glúteo e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Reverse_Hyperextension",
+  "nome_en": "Reverse Hyperextension",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": null,
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Extensão Reversa de Quadril",
+  "instrucao_pt": "De bruços no aparelho com o tronco apoiado e as pernas pendendo. Eleve as pernas até a linha do tronco contraindo glúteo e posterior, e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Thigh_Adductor",
+  "nome_en": "Thigh Adductor",
+  "grupo": "Pernas",
+  "musculoPrimario": "Adutor",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Cadeira Adutora",
+  "instrucao_pt": "Sentado no aparelho com as pernas abertas e as almofadas na face interna das coxas. Feche as pernas contra a resistência e abra controlado até sentir alongamento.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Thigh_Abductor",
+  "nome_en": "Thigh Abductor",
+  "grupo": "Pernas",
+  "musculoPrimario": "Abdutor",
+  "musculosSecundarios": [
+   "Glúteo"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Cadeira Abdutora",
+  "instrucao_pt": "Sentado no aparelho com as almofadas na face externa das coxas. Abra as pernas contra a resistência e feche controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Cable_Hip_Adduction",
+  "nome_en": "Cable Hip Adduction",
+  "grupo": "Pernas",
+  "musculoPrimario": "Quadríceps",
+  "musculosSecundarios": [],
+  "equipamento": "Polia",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Adução de Quadril na Polia",
+  "instrucao_pt": "Em pé de lado para a polia baixa, tornozeleira na perna mais distante do aparelho. Traga a perna cruzando à frente da outra e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Butt_Lift_Bridge",
+  "nome_en": "Butt Lift (Bridge)",
+  "grupo": "Pernas",
+  "musculoPrimario": "Glúteo",
+  "musculosSecundarios": [
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Ponte de Glúteo",
+  "instrucao_pt": "Deitado de costas com os joelhos flexionados e os pés no chão. Eleve o quadril até alinhar tronco e coxas contraindo o glúteo, e desça controlado sem encostar por completo.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Single_Leg_Glute_Bridge",
+  "nome_en": "Single Leg Glute Bridge",
+  "grupo": "Pernas",
+  "musculoPrimario": "Glúteo",
+  "musculosSecundarios": [
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Ponte de Glúteo Unilateral",
+  "instrucao_pt": "Deitado de costas com um joelho flexionado e a outra perna estendida à frente. Eleve o quadril apoiado em uma perna só e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Glute_Kickback",
+  "nome_en": "Glute Kickback",
+  "grupo": "Pernas",
+  "musculoPrimario": "Glúteo",
+  "musculosSecundarios": [
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Coice de Glúteo",
+  "instrucao_pt": "Apoiado sobre as mãos e joelhos. Estenda uma perna para trás e para cima até a linha do tronco contraindo o glúteo, e volte controlado sem arquear a lombar.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Legged_Cable_Kickback",
+  "nome_en": "One-Legged Cable Kickback",
+  "grupo": "Pernas",
+  "musculoPrimario": "Glúteo",
+  "musculosSecundarios": [
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Coice de Glúteo na Polia",
+  "instrucao_pt": "Em pé de frente para a polia baixa com a tornozeleira em uma perna. Estenda a perna para trás contraindo o glúteo e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Leg_Lift",
+  "nome_en": "Leg Lift",
+  "grupo": "Pernas",
+  "musculoPrimario": "Glúteo",
+  "musculosSecundarios": [
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação de Perna em Quatro Apoios",
+  "instrucao_pt": "Apoiado sobre as mãos e joelhos, uma perna estendida. Eleve a perna até a linha do tronco e desça controlado, mantendo o quadril alinhado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Flutter_Kicks",
+  "nome_en": "Flutter Kicks",
+  "grupo": "Pernas",
+  "musculoPrimario": "Glúteo",
+  "musculosSecundarios": [
+   "Posterior de Coxa"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Tesoura de Pernas de Bruços",
+  "instrucao_pt": "Deitado de bruços com as pernas estendidas. Eleve as pernas do chão e alterne movimentos curtos para cima e para baixo, contraindo o glúteo.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Step-up_with_Knee_Raise",
+  "nome_en": "Step-up with Knee Raise",
+  "grupo": "Pernas",
+  "musculoPrimario": "Glúteo",
+  "musculosSecundarios": [
+   "Posterior de Coxa",
+   "Quadríceps"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Subida no Banco com Elevação de Joelho",
+  "instrucao_pt": "De frente para um banco na altura do joelho. Suba apoiando o pé inteiro e, no topo, eleve o joelho da perna livre à frente, descendo controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Floor_Glute-Ham_Raise",
+  "nome_en": "Floor Glute-Ham Raise",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Panturrilha"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Flexão Nórdica no Solo",
+  "instrucao_pt": "Ajoelhado com os tornozelos travados por um apoio ou parceiro. Desça o tronco à frente resistindo com o posterior da coxa o quanto conseguir e volte contraindo. Movimento avançado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Natural_Glute_Ham_Raise",
+  "nome_en": "Natural Glute Ham Raise",
+  "grupo": "Pernas",
+  "musculoPrimario": "Posterior de Coxa",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Panturrilha"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Flexão Nórdica",
+  "instrucao_pt": "Ajoelhado com os tornozelos travados, corpo alinhado do joelho à cabeça. Desça à frente controlando com o posterior da coxa e volte sem flexionar o quadril.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Calf_Raises",
+  "nome_en": "Standing Calf Raises",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha em Pé na Máquina",
+  "instrucao_pt": "Em pé no aparelho com as almofadas sobre os ombros e a ponta dos pés na plataforma. Suba na ponta dos pés até o fim da amplitude e desça até sentir alongamento no calcanhar.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Barbell_Calf_Raise",
+  "nome_en": "Standing Barbell Calf Raise",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Barra",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha em Pé com Barra",
+  "instrucao_pt": "Em pé com a barra apoiada no trapézio e a ponta dos pés sobre uma plataforma. Suba na ponta dos pés e desça até o alongamento completo.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Dumbbell_Calf_Raise",
+  "nome_en": "Standing Dumbbell Calf Raise",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha em Pé com Halteres",
+  "instrucao_pt": "Em pé com halteres ao lado do corpo e a ponta dos pés sobre uma plataforma. Suba na ponta dos pés e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Calf_Raise_On_A_Dumbbell",
+  "nome_en": "Calf Raise On A Dumbbell",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha sobre Halter",
+  "instrucao_pt": "Em pé com a ponta dos pés apoiada sobre um halter deitado no chão, mãos em um apoio para equilíbrio. Suba na ponta dos pés e desça até o alongamento.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Rocking_Standing_Calf_Raise",
+  "nome_en": "Rocking Standing Calf Raise",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Barra",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha em Pé Alternando Ponta e Calcanhar",
+  "instrucao_pt": "Em pé com a barra no trapézio. Suba na ponta dos pés, desça e continue apoiando os calcanhares levantando a ponta dos pés, alternando os dois extremos.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Smith_Machine_Calf_Raise",
+  "nome_en": "Smith Machine Calf Raise",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha no Smith",
+  "instrucao_pt": "Em pé sob a barra guiada apoiada no trapézio, ponta dos pés sobre uma plataforma. Suba na ponta dos pés e desça até o alongamento.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Smith_Machine_Reverse_Calf_Raises",
+  "nome_en": "Smith Machine Reverse Calf Raises",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha Invertida no Smith",
+  "instrucao_pt": "Em pé sob a barra guiada com os calcanhares apoiados na plataforma e a ponta dos pés livre. Levante a ponta dos pés e desça controlado, trabalhando a face anterior da perna.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Seated_Calf_Raise",
+  "nome_en": "Seated Calf Raise",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha Sentado na Máquina",
+  "instrucao_pt": "Sentado no aparelho com as almofadas sobre as coxas e a ponta dos pés na plataforma. Suba na ponta dos pés e desça até o alongamento. Sentado enfatiza o sóleo.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Barbell_Seated_Calf_Raise",
+  "nome_en": "Barbell Seated Calf Raise",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Barra",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha Sentado com Barra",
+  "instrucao_pt": "Sentado no banco com a barra apoiada sobre as coxas e a ponta dos pés sobre uma plataforma. Suba na ponta dos pés e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Seated_One-Leg_Calf_Raise",
+  "nome_en": "Dumbbell Seated One-Leg Calf Raise",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha Sentado Unilateral com Halter",
+  "instrucao_pt": "Sentado com um halter apoiado sobre a coxa e a ponta do pé sobre uma plataforma. Suba na ponta do pé e desça até o alongamento, uma perna por vez.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Donkey_Calf_Raises",
+  "nome_en": "Donkey Calf Raises",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha Burrinho",
+  "instrucao_pt": "Com o tronco inclinado à frente e apoiado, ponta dos pés sobre uma plataforma e carga sobre o quadril. Suba na ponta dos pés e desça até o alongamento.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Calf_Press",
+  "nome_en": "Calf Press",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha no Aparelho de Pressão",
+  "instrucao_pt": "Sentado no aparelho com a ponta dos pés na borda inferior da plataforma e os joelhos quase estendidos. Empurre com a ponta dos pés e volte até o alongamento.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Calf_Press_On_The_Leg_Press_Machine",
+  "nome_en": "Calf Press On The Leg Press Machine",
+  "grupo": "Pernas",
+  "musculoPrimario": "Panturrilha",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Panturrilha no Leg Press",
+  "instrucao_pt": "Sentado no leg press com a ponta dos pés na borda inferior da plataforma e os joelhos quase estendidos. Empurre a plataforma com a ponta dos pés e volte controlado.",
+  "instrucao_en": null
+ }
+]

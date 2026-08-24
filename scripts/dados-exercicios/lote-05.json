@@ -1,0 +1,1221 @@
+[
+ {
+  "idOrigem": "Standing_Bradford_Press",
+  "nome_en": "Standing Bradford Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Bradford",
+  "instrucao_pt": "Em pé, barra na altura das clavículas com pegada aberta. Empurre até pouco acima da cabeça, passe a barra para trás da nuca sem estender os cotovelos, e desfaça o caminho. A barra nunca chega à extensão completa — a tensão no deltoide não some.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Bradford_Rocky_Presses",
+  "nome_en": "Bradford/Rocky Presses",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Bradford Alternado",
+  "instrucao_pt": "Em pé ou sentado, barra na altura das clavículas. Empurre até acima da cabeça e desça atrás da nuca, depois suba e desça à frente, alternando os lados a cada repetição.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Anti-Gravity_Press",
+  "nome_en": "Anti-Gravity Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Dorsal",
+   "Trapézio",
+   "Tríceps"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Antigravidade",
+  "instrucao_pt": "Em pé com o tronco inclinado à frente, barra na altura do peito. Empurre a barra para cima e à frente da cabeça, acompanhando a linha do tronco inclinado, e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Front_Barbell_Raise_Over_Head",
+  "nome_en": "Standing Front Barbell Raise Over Head",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Barra",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Frontal com Barra Acima da Cabeça",
+  "instrucao_pt": "Em pé, barra à frente das coxas com pegada pronada e cotovelos quase estendidos. Eleve a barra em arco até acima da cabeça e desça controlado pelo mesmo caminho.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Barbell_Incline_Shoulder_Raise",
+  "nome_en": "Barbell Incline Shoulder Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Peitoral"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação de Ombros no Banco Inclinado com Barra",
+  "instrucao_pt": "Deitado em banco inclinado, barra segurada acima do peito com os cotovelos estendidos. Sem flexionar os cotovelos, empurre a barra alguns centímetros para cima projetando os ombros, e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Smith_Incline_Shoulder_Raise",
+  "nome_en": "Smith Incline Shoulder Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Peitoral"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação de Ombros no Banco Inclinado no Smith",
+  "instrucao_pt": "Banco inclinado sob a barra guiada, braços estendidos. Projete os ombros para cima sem flexionar os cotovelos e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Straight_Raises_on_Incline_Bench",
+  "nome_en": "Straight Raises on Incline Bench",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Trapézio"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação com Braços Estendidos no Banco Inclinado",
+  "instrucao_pt": "Deitado de bruços em banco inclinado, barra pendendo com os braços estendidos. Eleve a barra à frente até a altura dos ombros sem flexionar os cotovelos e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Car_Drivers",
+  "nome_en": "Car Drivers",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Antebraço"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Volante com Anilha",
+  "instrucao_pt": "Em pé, uma anilha segurada com as duas mãos pelas bordas, braços estendidos à frente na altura dos ombros. Gire a anilha para um lado e para o outro como um volante, mantendo os braços parados.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Landmine_Linear_Jammer",
+  "nome_en": "Landmine Linear Jammer",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Abdômen",
+   "Panturrilha",
+   "Peitoral",
+   "Posterior de Coxa",
+   "Quadríceps",
+   "Tríceps"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Jammer no Landmine",
+  "instrucao_pt": "Em pé segurando a ponta da barra com as duas mãos na altura do peito, a outra extremidade encaixada no chão. Empurre a barra à frente e para cima estendendo os braços e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Single-Arm_Linear_Jammer",
+  "nome_en": "Single-Arm Linear Jammer",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Peitoral",
+   "Tríceps"
+  ],
+  "equipamento": "Barra",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Jammer Unilateral no Landmine",
+  "instrucao_pt": "Em pé segurando a ponta da barra com uma das mãos na altura do ombro. Empurre à frente e para cima estendendo o braço e volte controlado, com o tronco firme.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Dumbbell_Press",
+  "nome_en": "Standing Dumbbell Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento em Pé com Halteres",
+  "instrucao_pt": "Em pé, halteres na altura das orelhas com as palmas à frente. Empurre acima da cabeça até estender os cotovelos e desça controlado, com o abdômen contraído.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Alternating_Dumbbell_Press",
+  "nome_en": "Standing Alternating Dumbbell Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Alternado com Halteres",
+  "instrucao_pt": "Em pé, halteres na altura das orelhas. Empurre um braço por vez acima da cabeça, alternando os lados, mantendo o outro halter na posição inicial.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_One-Arm_Shoulder_Press",
+  "nome_en": "Dumbbell One-Arm Shoulder Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Unilateral com Halter",
+  "instrucao_pt": "Sentado ou em pé, um halter na altura da orelha com a palma à frente. Empurre acima da cabeça e desça controlado, sem deixar o tronco inclinar para o lado oposto.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Palm-In_One-Arm_Dumbbell_Press",
+  "nome_en": "Standing Palm-In One-Arm Dumbbell Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Unilateral com Pegada Neutra",
+  "instrucao_pt": "Em pé, um halter na altura do ombro com a palma voltada para dentro. Empurre acima da cabeça mantendo a pegada neutra e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "See-Saw_Press_Alternating_Side_Press",
+  "nome_en": "See-Saw Press (Alternating Side Press)",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Abdômen",
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Gangorra",
+  "instrucao_pt": "Em pé, halteres na altura dos ombros. Empurre um braço acima da cabeça enquanto o outro desce, alternando de forma contínua, como uma gangorra.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Side_Lateral_Raise",
+  "nome_en": "Side Lateral Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Lateral",
+  "instrucao_pt": "Em pé, halteres ao lado do corpo com os cotovelos levemente flexionados. Eleve os braços pelas laterais até a altura dos ombros e desça controlado. Subir acima da linha do ombro transfere o esforço para o trapézio.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Seated_Side_Lateral_Raise",
+  "nome_en": "Seated Side Lateral Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Lateral Sentado",
+  "instrucao_pt": "Sentado na ponta do banco, halteres ao lado do corpo com os cotovelos pouco flexionados. Eleve pelas laterais até a altura dos ombros e desça controlado. Sentar elimina o impulso de quadril.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Side_Laterals",
+  "nome_en": "One-Arm Side Laterals",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Lateral Unilateral",
+  "instrucao_pt": "Em pé, uma das mãos apoiada em um suporte e um halter na outra. Eleve o braço pela lateral até a altura do ombro e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Incline_Lateral_Raise",
+  "nome_en": "One-Arm Incline Lateral Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Lateral Unilateral no Banco Inclinado",
+  "instrucao_pt": "Deitado de lado em banco inclinado, halter na mão de cima. Eleve o braço pela lateral até a altura do ombro e desça controlado. A inclinação mantém tensão desde o início.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Lying_One-Arm_Lateral_Raise",
+  "nome_en": "Lying One-Arm Lateral Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Lateral Unilateral Deitado",
+  "instrucao_pt": "Deitado de lado no banco horizontal, halter na mão de cima com o cotovelo pouco flexionado. Eleve o braço até a vertical e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Side_Laterals_to_Front_Raise",
+  "nome_en": "Side Laterals to Front Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Trapézio"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Lateral e Frontal Combinada",
+  "instrucao_pt": "Em pé, halteres ao lado do corpo. Faça uma elevação lateral, desça, e em seguida uma elevação frontal, alternando os planos ao longo da série.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Power_Partials",
+  "nome_en": "Power Partials",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Lateral Parcial",
+  "instrucao_pt": "Em pé, halteres um pouco afastados do corpo. Faça elevações curtas, na parte alta da amplitude, sem deixar os braços voltarem a encostar no tronco. Serve como finalização, com carga baixa.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Alternating_Deltoid_Raise",
+  "nome_en": "Alternating Deltoid Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Lateral Alternada",
+  "instrucao_pt": "Em pé, halteres ao lado do corpo. Eleve um braço por vez pela lateral até a altura do ombro, alternando os lados.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Front_Dumbbell_Raise",
+  "nome_en": "Front Dumbbell Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Frontal com Halteres",
+  "instrucao_pt": "Em pé, halteres à frente das coxas com pegada pronada. Eleve um braço à frente até a altura do ombro e desça controlado, alternando os lados.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Front_Two-Dumbbell_Raise",
+  "nome_en": "Front Two-Dumbbell Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Frontal Bilateral",
+  "instrucao_pt": "Em pé, halteres à frente das coxas. Eleve os dois braços ao mesmo tempo até a altura dos ombros e desça controlado, sem balançar o tronco.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Front_Incline_Dumbbell_Raise",
+  "nome_en": "Front Incline Dumbbell Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Frontal no Banco Inclinado",
+  "instrucao_pt": "Deitado de bruços em banco inclinado, halteres pendendo com os braços quase estendidos. Eleve à frente até a altura dos ombros e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Dumbbell_Straight-Arm_Front_Delt_Raise_Above_Head",
+  "nome_en": "Standing Dumbbell Straight-Arm Front Delt Raise Above Head",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Frontal Acima da Cabeça com Halteres",
+  "instrucao_pt": "Em pé, halteres à frente das coxas com os cotovelos estendidos. Eleve os braços à frente e continue até acima da cabeça, descendo pelo mesmo caminho. Carga baixa — a alavanca é longa.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Single_Dumbbell_Raise",
+  "nome_en": "Single Dumbbell Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Antebraço",
+   "Trapézio"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Frontal com Halter Único",
+  "instrucao_pt": "Em pé, um halter segurado com as duas mãos à frente das coxas. Eleve até a altura dos ombros com os cotovelos quase estendidos e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Raise",
+  "nome_en": "Dumbbell Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Bíceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Frontal Unilateral",
+  "instrucao_pt": "Em pé, um halter em uma das mãos à frente da coxa. Eleve à frente até a altura do ombro e desça controlado, um lado por vez.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Scaption",
+  "nome_en": "Dumbbell Scaption",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Trapézio"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação no Plano da Escápula",
+  "instrucao_pt": "Em pé, halteres à frente das coxas com os polegares para cima. Eleve os braços na diagonal, a cerca de 30 graus da linha frontal, até a altura dos ombros e desça controlado. É o plano mais confortável para o ombro.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Iron_Cross",
+  "nome_en": "Iron Cross",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Peitoral",
+   "Posterior de Coxa",
+   "Quadríceps",
+   "Trapézio"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Cruz de Ferro com Halteres",
+  "instrucao_pt": "Em pé, halteres ao lado do corpo. Eleve os dois braços pelas laterais até a altura dos ombros, sustente a posição pelo tempo determinado e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Incline_Shoulder_Raise",
+  "nome_en": "Dumbbell Incline Shoulder Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação de Ombros no Banco Inclinado com Halteres",
+  "instrucao_pt": "Deitado em banco inclinado, halteres acima do peito com os cotovelos estendidos. Projete os ombros para cima sem flexionar os cotovelos e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Reverse_Flyes",
+  "nome_en": "Reverse Flyes",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Crucifixo Inverso com Halteres",
+  "instrucao_pt": "Tronco inclinado próximo do paralelo ao chão, halteres pendendo com os cotovelos pouco flexionados. Abra os braços pelas laterais até a altura dos ombros e desça controlado. O esforço é do deltoide posterior, não do dorsal.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Reverse_Flyes_With_External_Rotation",
+  "nome_en": "Reverse Flyes With External Rotation",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Crucifixo Inverso com Rotação Externa",
+  "instrucao_pt": "Tronco inclinado, halteres pendendo. Abra os braços pelas laterais girando os polegares para cima no fim do movimento e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Seated_Bent-Over_Rear_Delt_Raise",
+  "nome_en": "Seated Bent-Over Rear Delt Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Crucifixo Inverso Sentado",
+  "instrucao_pt": "Sentado na ponta do banco com o tronco inclinado sobre as coxas, halteres pendendo. Abra os braços pelas laterais até a altura dos ombros e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Bent_Over_Dumbbell_Rear_Delt_Raise_With_Head_On_Bench",
+  "nome_en": "Bent Over Dumbbell Rear Delt Raise With Head On Bench",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Crucifixo Inverso com Testa Apoiada",
+  "instrucao_pt": "Em pé com o tronco inclinado e a testa apoiada na borda de um banco alto, halteres pendendo. Abra os braços pelas laterais e desça controlado. O apoio da cabeça impede o impulso de tronco.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Lying_Rear_Delt_Raise",
+  "nome_en": "Lying Rear Delt Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Crucifixo Inverso Deitado",
+  "instrucao_pt": "Deitado de bruços em banco horizontal, halteres pendendo dos dois lados. Abra os braços pelas laterais até a altura dos ombros e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Lying_Rear_Lateral_Raise",
+  "nome_en": "Dumbbell Lying Rear Lateral Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Posterior Deitado com Halteres",
+  "instrucao_pt": "Deitado de bruços em banco inclinado, halteres pendendo com os cotovelos pouco flexionados. Eleve pelas laterais até a altura dos ombros e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_Lying_One-Arm_Rear_Lateral_Raise",
+  "nome_en": "Dumbbell Lying One-Arm Rear Lateral Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Dorsal"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Posterior Unilateral Deitado",
+  "instrucao_pt": "Deitado de bruços em banco inclinado, um halter por vez. Eleve pela lateral até a altura do ombro e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "External_Rotation",
+  "nome_en": "External Rotation",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Halteres",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Rotação Externa com Halter",
+  "instrucao_pt": "Deitado de lado no banco com o cotovelo flexionado a 90 graus e colado ao tronco, halter na mão de cima. Gire o antebraço para cima e volte controlado. Carga baixa — é trabalho de manguito rotador.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Dumbbell_One-Arm_Upright_Row",
+  "nome_en": "Dumbbell One-Arm Upright Row",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Bíceps",
+   "Trapézio"
+  ],
+  "equipamento": "Halteres",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Remada Alta Unilateral com Halter",
+  "instrucao_pt": "Em pé, um halter à frente da coxa com pegada pronada. Puxe rente ao corpo até a altura do peito, cotovelo acima da mão, e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Two-Arm_Kettlebell_Military_Press",
+  "nome_en": "Two-Arm Kettlebell Military Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Militar com Kettlebells",
+  "instrucao_pt": "Em pé, kettlebells apoiados na frente dos ombros com os punhos firmes. Empurre acima da cabeça até estender os cotovelos e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Kettlebell_Seated_Press",
+  "nome_en": "Kettlebell Seated Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Sentado com Kettlebell",
+  "instrucao_pt": "Sentado com as costas apoiadas, kettlebell na frente do ombro. Empurre acima da cabeça e desça controlado até a posição inicial.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Alternating_Kettlebell_Press",
+  "nome_en": "Alternating Kettlebell Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Alternado com Kettlebells",
+  "instrucao_pt": "Em pé, kettlebells na frente dos ombros. Empurre um braço por vez acima da cabeça, alternando, com o outro sustentando na posição.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Kettlebell_Seesaw_Press",
+  "nome_en": "Kettlebell Seesaw Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Gangorra com Kettlebells",
+  "instrucao_pt": "Em pé, kettlebells na frente dos ombros. Empurre um braço acima da cabeça enquanto o outro desce, de forma contínua.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Kettlebell_Arnold_Press",
+  "nome_en": "Kettlebell Arnold Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Arnold com Kettlebell",
+  "instrucao_pt": "Em pé ou sentado, kettlebell à frente do ombro com a palma voltada para dentro. Empurre acima da cabeça girando a palma para fora ao longo da subida e desfaça o giro na descida.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Kettlebell_Military_Press_To_The_Side",
+  "nome_en": "One-Arm Kettlebell Military Press To The Side",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Militar Lateral com Kettlebell",
+  "instrucao_pt": "Em pé, kettlebell na frente do ombro. Empurre acima da cabeça inclinando levemente o tronco para o lado oposto e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Kettlebell_Para_Press",
+  "nome_en": "One-Arm Kettlebell Para Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Para Press com Kettlebell",
+  "instrucao_pt": "Em pé, kettlebell na frente do ombro e a mão livre apoiada na cabeça ou na nuca. Empurre acima da cabeça e desça controlado, mantendo o tronco imóvel.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Kettlebell_Push_Press",
+  "nome_en": "One-Arm Kettlebell Push Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Panturrilha",
+   "Quadríceps",
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento com Impulso com Kettlebell",
+  "instrucao_pt": "Em pé, kettlebell na frente do ombro. Faça uma leve flexão de joelhos e use o impulso das pernas para empurrar o peso acima da cabeça, descendo controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Double_Kettlebell_Push_Press",
+  "nome_en": "Double Kettlebell Push Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Panturrilha",
+   "Quadríceps",
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento com Impulso com Dois Kettlebells",
+  "instrucao_pt": "Em pé, kettlebells na frente dos ombros. Flexione levemente os joelhos e empurre os dois pesos acima da cabeça com o impulso das pernas, descendo controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Kettlebell_Thruster",
+  "nome_en": "Kettlebell Thruster",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Quadríceps",
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Thruster com Kettlebells",
+  "instrucao_pt": "Em pé, kettlebells na frente dos ombros. Agache até o paralelo e, ao subir, aproveite o impulso para empurrar os pesos acima da cabeça em um só movimento.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Kettlebell_Pirate_Ships",
+  "nome_en": "Kettlebell Pirate Ships",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Abdômen"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Navio Pirata com Kettlebell",
+  "instrucao_pt": "Em pé, kettlebell sustentado acima da cabeça com um braço. Incline o tronco para um lado e para o outro mantendo o braço travado na vertical.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Handstand_Push-Ups",
+  "nome_en": "Handstand Push-Ups",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Peso Corporal",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": false,
+  "nome_pt": "Flexão em Parada de Mão",
+  "instrucao_pt": "De cabeça para baixo, apoiado nas mãos com os pés na parede. Desça flexionando os cotovelos até a cabeça quase tocar o chão e empurre até estender. Movimento avançado, exige ombro preparado e alguém acompanhando.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Reverse_Machine_Flyes",
+  "nome_en": "Reverse Machine Flyes",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Crucifixo Inverso na Máquina",
+  "instrucao_pt": "Sentado de frente para o encosto do voador, braços à frente na altura dos ombros. Abra os braços para trás até a linha do tronco e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Front_Plate_Raise",
+  "nome_en": "Front Plate Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Máquina",
+  "mecanica": "isolado",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Frontal com Anilha",
+  "instrucao_pt": "Em pé, uma anilha segurada pelas bordas com as duas mãos à frente das coxas. Eleve até a altura dos ombros com os cotovelos quase estendidos e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Smith_Machine_One-Arm_Upright_Row",
+  "nome_en": "Smith Machine One-Arm Upright Row",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Bíceps",
+   "Trapézio"
+  ],
+  "equipamento": "Máquina",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Remada Alta Unilateral no Smith",
+  "instrucao_pt": "Em pé sob a barra guiada, segurada com uma das mãos no centro. Puxe rente ao corpo até a altura do peito e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Alternating_Cable_Shoulder_Press",
+  "nome_en": "Alternating Cable Shoulder Press",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Tríceps"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Desenvolvimento Alternado na Polia",
+  "instrucao_pt": "Sentado entre duas polias baixas, manoplas na altura dos ombros. Empurre um braço por vez acima da cabeça, alternando os lados.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Standing_Low-Pulley_Deltoid_Raise",
+  "nome_en": "Standing Low-Pulley Deltoid Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Antebraço"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Lateral na Polia Baixa",
+  "instrucao_pt": "Em pé de lado para a polia baixa, manopla na mão mais distante passando à frente do corpo. Eleve o braço pela lateral até a altura do ombro e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Cable_Seated_Lateral_Raise",
+  "nome_en": "Cable Seated Lateral Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Dorsal",
+   "Trapézio"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Lateral Sentado na Polia",
+  "instrucao_pt": "Sentado entre duas polias baixas, manoplas cruzadas à frente do corpo. Eleve os braços pelas laterais até a altura dos ombros e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Bent_Over_Low-Pulley_Side_Lateral",
+  "nome_en": "Bent Over Low-Pulley Side Lateral",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Dorsal",
+   "Lombar",
+   "Trapézio"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Lateral Curvado na Polia Baixa",
+  "instrucao_pt": "Tronco inclinado próximo do paralelo ao chão, manopla da polia baixa na mão oposta. Eleve o braço pela lateral até a altura do ombro e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Front_Cable_Raise",
+  "nome_en": "Front Cable Raise",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Polia",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Elevação Frontal na Polia",
+  "instrucao_pt": "Em pé de costas para a polia baixa, barra ou manopla à frente das coxas. Eleve à frente até a altura dos ombros com os cotovelos quase estendidos e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Cable_Rear_Delt_Fly",
+  "nome_en": "Cable Rear Delt Fly",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Polia",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Crucifixo Inverso na Polia",
+  "instrucao_pt": "Em pé entre duas polias altas, manoplas cruzadas à frente do peito. Abra os braços para trás até a linha dos ombros e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Low_Pulley_Row_To_Neck",
+  "nome_en": "Low Pulley Row To Neck",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Bíceps",
+   "Dorsal",
+   "Trapézio"
+  ],
+  "equipamento": "Polia",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": true,
+  "nome_pt": "Remada na Polia até o Pescoço",
+  "instrucao_pt": "Sentado ou em pé de frente para a polia baixa, corda segurada com os braços estendidos. Puxe em direção ao pescoço com os cotovelos altos e abertos, e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "External_Rotation_with_Cable",
+  "nome_en": "External Rotation with Cable",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Polia",
+  "mecanica": "isolado",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Rotação Externa na Polia",
+  "instrucao_pt": "Em pé de lado para a polia na altura do cotovelo, manopla na mão mais distante com o cotovelo colado ao tronco a 90 graus. Gire o antebraço para fora e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Cable_Internal_Rotation",
+  "nome_en": "Cable Internal Rotation",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Polia",
+  "mecanica": "composto",
+  "nivel": "iniciante",
+  "revisarMusculo": false,
+  "nome_pt": "Rotação Interna na Polia",
+  "instrucao_pt": "Em pé de lado para a polia na altura do cotovelo, manopla na mão mais próxima com o cotovelo colado ao tronco. Gire o antebraço para dentro, em direção ao abdômen, e volte controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Kettlebell_Snatch",
+  "nome_en": "One-Arm Kettlebell Snatch",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Posterior de Coxa",
+   "Trapézio",
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Arranco Unilateral com Kettlebell",
+  "instrucao_pt": "Em pé com o kettlebell entre as pernas, tronco inclinado. Estenda o quadril com força levando o peso até acima da cabeça em um só movimento, e desça controlado. Técnica exigente — aprender com acompanhamento presente.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Double_Kettlebell_Snatch",
+  "nome_en": "Double Kettlebell Snatch",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Posterior de Coxa",
+   "Quadríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Arranco com Dois Kettlebells",
+  "instrucao_pt": "Em pé com os kettlebells entre as pernas. Estenda o quadril levando os dois pesos até acima da cabeça em um movimento contínuo, e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Kettlebell_Split_Snatch",
+  "nome_en": "One-Arm Kettlebell Split Snatch",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Posterior de Coxa",
+   "Quadríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "avancado",
+  "revisarMusculo": true,
+  "nome_pt": "Arranco com Afundo com Kettlebell",
+  "instrucao_pt": "A partir do arranco unilateral, receba o peso acima da cabeça avançando uma perna à frente em passada longa. Estabilize e volte à posição em pé.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Kettlebell_Jerk",
+  "nome_en": "One-Arm Kettlebell Jerk",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Panturrilha",
+   "Quadríceps",
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Arremesso Unilateral com Kettlebell",
+  "instrucao_pt": "Em pé, kettlebell na frente do ombro. Flexione os joelhos e estenda com força, recebendo o peso acima da cabeça com os braços travados, e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Two-Arm_Kettlebell_Jerk",
+  "nome_en": "Two-Arm Kettlebell Jerk",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Panturrilha",
+   "Quadríceps",
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Arremesso com Dois Kettlebells",
+  "instrucao_pt": "Em pé, kettlebells na frente dos ombros. Flexione os joelhos e estenda com força, recebendo os dois pesos acima da cabeça, e desça controlado.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Double_Kettlebell_Jerk",
+  "nome_en": "Double Kettlebell Jerk",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Panturrilha",
+   "Quadríceps",
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Arremesso Duplo com Kettlebells",
+  "instrucao_pt": "Em pé, kettlebells na frente dos ombros. Use o impulso das pernas para levar os pesos acima da cabeça e receba com uma segunda flexão de joelhos, estabilizando antes de descer.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Kettlebell_Split_Jerk",
+  "nome_en": "One-Arm Kettlebell Split Jerk",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Posterior de Coxa",
+   "Quadríceps",
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": false,
+  "nome_pt": "Arremesso com Afundo com Kettlebell",
+  "instrucao_pt": "A partir do arremesso unilateral, receba o peso acima da cabeça avançando uma perna à frente em passada longa. Estabilize e volte à posição em pé.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "One-Arm_Kettlebell_Clean_and_Jerk",
+  "nome_en": "One-Arm Kettlebell Clean and Jerk",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Clean e Arremesso com Kettlebell",
+  "instrucao_pt": "Em pé com o kettlebell entre as pernas. Puxe até a frente do ombro em um movimento, e em seguida empurre acima da cabeça com impulso das pernas.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Two-Arm_Kettlebell_Clean",
+  "nome_en": "Two-Arm Kettlebell Clean",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Glúteo",
+   "Lombar",
+   "Panturrilha",
+   "Posterior de Coxa",
+   "Trapézio"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Clean com Dois Kettlebells",
+  "instrucao_pt": "Em pé com os kettlebells entre as pernas, tronco inclinado. Estenda o quadril puxando os pesos até a frente dos ombros e desça controlado entre as pernas.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Kettlebell_Turkish_Get-Up_Squat_style",
+  "nome_en": "Kettlebell Turkish Get-Up (Squat style)",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Abdômen",
+   "Panturrilha",
+   "Posterior de Coxa",
+   "Quadríceps",
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Turkish Get-Up com Agachamento",
+  "instrucao_pt": "Deitado de costas com o kettlebell sustentado acima do peito com um braço. Levante-se até ficar em pé mantendo o peso sempre na vertical, passando pela posição de agachamento, e desfaça o caminho.",
+  "instrucao_en": null
+ },
+ {
+  "idOrigem": "Kettlebell_Turkish_Get-Up_Lunge_style",
+  "nome_en": "Kettlebell Turkish Get-Up (Lunge style)",
+  "grupo": "Ombros",
+  "musculoPrimario": "Deltoide",
+  "musculosSecundarios": [
+   "Abdômen",
+   "Posterior de Coxa",
+   "Quadríceps",
+   "Tríceps"
+  ],
+  "equipamento": "Kettlebell",
+  "mecanica": "composto",
+  "nivel": "intermediario",
+  "revisarMusculo": true,
+  "nome_pt": "Turkish Get-Up com Afundo",
+  "instrucao_pt": "Deitado de costas com o kettlebell acima do peito. Levante-se até ficar em pé passando pela posição de afundo, com o braço sempre travado na vertical, e desfaça o caminho.",
+  "instrucao_en": null
+ }
+]

@@ -50,14 +50,17 @@
 //   npm run catalogo:exercicios
 // -----------------------------------------------------------------------------
 
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import admin from 'firebase-admin';
+
+const RAIZ_PROJETO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 // Arquivo-fonte VERSIONADO no Git. Não é o que o painel consome: é a entrada
 // do filtro. Versioná-lo torna cada publicação de catálogo auditável no
 // histórico do repositório.
-const SAIDA = resolve(process.cwd(), 'scripts/dados-exercicios/catalogo-fonte.json');
+const SAIDA = resolve(RAIZ_PROJETO, 'scripts/dados-exercicios/catalogo-fonte.json');
 const COLECAO = 'exercises';
 
 function abortar(msg) {
@@ -65,9 +68,35 @@ function abortar(msg) {
   process.exit(1);
 }
 
+// Carrega .env.local da raiz do projeto, sem dependência de dotenv.
+// Mesmo mecanismo de scripts/set-admin-claim.js — dois comportamentos
+// diferentes para a mesma coisa seria pior que qualquer um dos dois: quem roda
+// um script espera que o outro funcione igual. Variável já presente no
+// ambiente tem precedência sobre o arquivo.
+function carregarEnvLocal() {
+  const caminho = resolve(RAIZ_PROJETO, '.env.local');
+  if (!existsSync(caminho)) return;
+  for (const linha of readFileSync(caminho, 'utf8').split('\n')) {
+    const eq = linha.indexOf('=');
+    if (eq === -1) continue;
+    const chave = linha.slice(0, eq).trim();
+    if (!chave || chave.startsWith('#') || process.env[chave] !== undefined) continue;
+    let valor = linha.slice(eq + 1).trim();
+    if ((valor.startsWith('"') && valor.endsWith('"')) || (valor.startsWith("'") && valor.endsWith("'"))) {
+      valor = valor.slice(1, -1);
+    }
+    process.env[chave] = valor;
+  }
+}
+
+
 function conectar() {
+  carregarEnvLocal();
   const bruto = (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? '').trim();
-  if (!bruto) abortar('FIREBASE_SERVICE_ACCOUNT_JSON não definida.');
+  if (!bruto) {
+    abortar('FIREBASE_SERVICE_ACCOUNT_JSON não encontrada.\n'
+      + '  Confira se existe .env.local na raiz do repositório com essa variável.');
+  }
   let credencial;
   try {
     credencial = JSON.parse(bruto.startsWith('"') && bruto.endsWith('"') ? bruto.slice(1, -1) : bruto);
@@ -77,7 +106,21 @@ function conectar() {
   if (typeof credencial.private_key === 'string') {
     credencial.private_key = credencial.private_key.replace(/\\n/g, '\n');
   }
-  if (!admin.apps.length) admin.initializeApp({ credential: admin.credential.cert(credencial) });
+  // Credencial malformada é a falha mais provável na primeira execução. Deixar
+  // o erro subir cru devolve um rastreamento de pilha do firebase-admin, que
+  // não diz a quem lê o que fazer a respeito.
+  try {
+    if (!admin.apps.length) admin.initializeApp({ credential: admin.credential.cert(credencial) });
+  } catch (e) {
+    abortar('a credencial foi lida, mas o Firebase a recusou.\n'
+      + `  Motivo: ${e?.message ?? e}\n`
+      + '  Causa provável: a chave privada perdeu as quebras de linha na colagem.\n'
+      + '  Confira também se project_id é "elite90-c716b".');
+  }
+  if (credencial.project_id && credencial.project_id !== 'elite90-c716b') {
+    console.warn(`\n  AVISO: o projeto da credencial é "${credencial.project_id}", não "elite90-c716b".`);
+    console.warn('  Confirme que é o banco certo antes de usar --commit.\n');
+  }
   return admin.firestore();
 }
 

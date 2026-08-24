@@ -7,7 +7,8 @@
     "lint": "turbo lint",
     "catalogo:exercicios": "node scripts/gerar-catalogo-exercicios.mjs",
     "carga:exercicios": "node scripts/carregar-exercicios.mjs",
-    "catalogo:filtrar": "node scripts/filtrar-catalogo.mjs"
+    "catalogo:filtrar": "node scripts/filtrar-catalogo.mjs",
+    "conferir:exercicios": "node scripts/conferir-exercicios.mjs"
   },
   "devDependencies": {
     "sharp": "^0.35.3",

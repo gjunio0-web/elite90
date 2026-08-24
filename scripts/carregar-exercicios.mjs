@@ -37,12 +37,15 @@
 // -----------------------------------------------------------------------------
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { resolve, join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import admin from 'firebase-admin';
 
-const RAIZ = process.cwd();
-const DIR_LOTES = resolve(RAIZ, 'scripts/dados-exercicios');
+// Ancorado na localização deste arquivo, não no diretório de trabalho: rodar
+// de dentro de apps/site não pode mudar onde o script procura os lotes.
+const RAIZ_PROJETO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const DIR_LOTES = resolve(RAIZ_PROJETO, 'scripts/dados-exercicios');
 const COLECAO = 'exercises';
 const AUTOR_SISTEMA = 'sistema:carga-inicial';
 
@@ -69,6 +72,28 @@ function abortar(msg) {
   console.error(`\n  ERRO: ${msg}\n`);
   process.exit(1);
 }
+
+// Carrega .env.local da raiz do projeto, sem dependência de dotenv.
+// Mesmo mecanismo de scripts/set-admin-claim.js — dois comportamentos
+// diferentes para a mesma coisa seria pior que qualquer um dos dois: quem roda
+// um script espera que o outro funcione igual. Variável já presente no
+// ambiente tem precedência sobre o arquivo.
+function carregarEnvLocal() {
+  const caminho = resolve(RAIZ_PROJETO, '.env.local');
+  if (!existsSync(caminho)) return;
+  for (const linha of readFileSync(caminho, 'utf8').split('\n')) {
+    const eq = linha.indexOf('=');
+    if (eq === -1) continue;
+    const chave = linha.slice(0, eq).trim();
+    if (!chave || chave.startsWith('#') || process.env[chave] !== undefined) continue;
+    let valor = linha.slice(eq + 1).trim();
+    if ((valor.startsWith('"') && valor.endsWith('"')) || (valor.startsWith("'") && valor.endsWith("'"))) {
+      valor = valor.slice(1, -1);
+    }
+    process.env[chave] = valor;
+  }
+}
+
 
 // ── Leitura dos lotes ────────────────────────────────────────────────────────
 // Só entram exercícios com nome_pt e instrucao_pt preenchidos. Um exercício sem
@@ -116,8 +141,14 @@ function lerLotes() {
 
 // ── Firestore ────────────────────────────────────────────────────────────────
 function conectar() {
+  carregarEnvLocal();
   const bruto = (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? '').trim();
-  if (!bruto) abortar('FIREBASE_SERVICE_ACCOUNT_JSON não definida. Em ambiente local, carregue o .env.local antes de rodar.');
+  if (!bruto) {
+    abortar('FIREBASE_SERVICE_ACCOUNT_JSON não encontrada.\n'
+      + '  Confira se existe .env.local na raiz do repositório com essa variável.\n'
+      + '  Ela já deve existir: os scripts set-admin-claim.js e emulate-fn08.js usam a mesma.\n'
+      + '  NÃO gere uma chave nova sem antes verificar — chave a mais é segredo a mais para controlar.');
+  }
   let credencial;
   try {
     credencial = JSON.parse(bruto.startsWith('"') && bruto.endsWith('"') ? bruto.slice(1, -1) : bruto);
@@ -127,7 +158,21 @@ function conectar() {
   if (typeof credencial.private_key === 'string') {
     credencial.private_key = credencial.private_key.replace(/\\n/g, '\n');
   }
-  if (!admin.apps.length) admin.initializeApp({ credential: admin.credential.cert(credencial) });
+  // Credencial malformada é a falha mais provável na primeira execução. Deixar
+  // o erro subir cru devolve um rastreamento de pilha do firebase-admin, que
+  // não diz a quem lê o que fazer a respeito.
+  try {
+    if (!admin.apps.length) admin.initializeApp({ credential: admin.credential.cert(credencial) });
+  } catch (e) {
+    abortar('a credencial foi lida, mas o Firebase a recusou.\n'
+      + `  Motivo: ${e?.message ?? e}\n`
+      + '  Causa provável: a chave privada perdeu as quebras de linha na colagem.\n'
+      + '  Confira também se project_id é "elite90-c716b".');
+  }
+  if (credencial.project_id && credencial.project_id !== 'elite90-c716b') {
+    console.warn(`\n  AVISO: o projeto da credencial é "${credencial.project_id}", não "elite90-c716b".`);
+    console.warn('  Confirme que é o banco certo antes de usar --commit.\n');
+  }
   return admin.firestore();
 }
 
