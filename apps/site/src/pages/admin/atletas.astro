@@ -569,6 +569,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .wke-search-input:focus { outline: none; border-color: var(--c-lime); box-shadow: 0 0 0 2px rgba(166, 195, 0, 0.12); }
     .wke-search-results { max-height: 320px; overflow-y: auto; }
     .wke-search-result { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: 11px var(--space-4); cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 120ms ease; }
+    /* Pendência como TARJA, não como texto na linha. O estado é o mesmo para
+       centenas de resultados: dizê-lo por extenso em cada um custava largura
+       (e rolagem horizontal) para repetir o que a legenda diz uma vez.
+       box-shadow interno em vez de border-left: borda empurraria o conteúdo
+       3px e desalinharia a linha pendente das demais. */
+    .wke-search-result--pendente { box-shadow: inset 3px 0 0 var(--c-pending); }
+    .wke-search-legenda { position: sticky; top: 0; z-index: 1; background: var(--c-darkbg); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 9px var(--space-4); font-family: var(--font-body); font-size: 11px; line-height: 1.45; color: var(--c-textsub); }
     .wke-search-result:hover, .wke-search-result.active { background: rgba(166, 195, 0, 0.12); }
     .wke-search-result-name { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-white); }
     .wke-search-result-tags { display: flex; gap: 5px; flex-shrink: 0; }
@@ -3413,11 +3420,19 @@ import AdminHeader from '../../components/AdminHeader.astro';
         res.innerHTML = '<div class="wke-search-hint">Nenhum exercício encontrado para "' + q + '".</div>';
         return;
       }
-      res.innerHTML = wkeSearchResults.map(function(e, i) {
-        return '<div class="wke-search-result" data-i="' + i + '" onclick="wkePickExercise(' + i + ')">' +
+      // A frase inteira sobre pendência é dita UMA vez, aqui, em vez de repetida
+      // em cada linha: eram 29 caracteres em caixa alta por resultado, e era o
+      // que estourava a largura da caixa e forçava rolagem horizontal.
+      const pendentes = wkeSearchResults.filter(function(e) { return !e.revisado; }).length;
+      const legenda = pendentes
+        ? '<div class="wke-search-legenda">A tarja laranja marca exercício ainda não validado pelo Coach. Não aparece em produção.</div>'
+        : '';
+      res.innerHTML = legenda + wkeSearchResults.map(function(e, i) {
+        return '<div class="wke-search-result' + (e.revisado ? '' : ' wke-search-result--pendente') + '" data-i="' + i + '" onclick="wkePickExercise(' + i + ')"' +
+          (e.revisado ? '' : ' title="Nome e instrução ainda não validados pelo Coach. Não aparece em produção."') + '>' +
           '<span class="wke-search-result-name">' + e.name + '</span>' +
           '<span class="wke-search-result-tags"><span class="wke-ex-tag">' + e.group + '</span><span class="wke-ex-tag">' + e.equip + '</span>' +
-          (e.revisado ? '' : '<span class="wke-ex-tag wke-ex-tag--pending" title="Nome e instrução ainda não validados pelo Coach Fernando. Não aparece em produção.">aguardando validação do Coach</span>') +
+          (e.revisado ? '' : '<span class="wke-ex-tag wke-ex-tag--pending">pendente</span>') +
           '</span>' +
         '</div>';
       }).join('');
