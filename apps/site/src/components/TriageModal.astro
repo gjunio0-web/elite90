@@ -576,11 +576,16 @@ const isEn = locale === "en";
               />
               <span>
                 {isEn
-                  ? "I authorize the ELITE90 PRO Program to process my health data (medical conditions, use of medication/TRT, injuries, and physical activity history) provided in this form, for the exclusive purpose of preparing my personalized physical assessment and training plan. I know I can request deletion of this data at any time by emailing contato@coachruiz.com.br."
-                  : "Autorizo o Programa ELITE90 PRO a tratar meus dados de saúde (condições médicas, uso de medicamentos/TRT, lesões e histórico de atividade física) informados nesta ficha, com a finalidade exclusiva de elaborar minha avaliação física e plano de treino personalizado. Sei que posso solicitar a exclusão desses dados a qualquer momento pelo e-mail contato@coachruiz.com.br."
+                  ? "I authorize the ELITE90 PRO Program to process my health data (medical conditions, use of medication/TRT, injuries, and physical activity history) and the body photographs I submit in this form, in order to prepare my personalized physical assessment and training plan and to conduct my follow-up during the program. I may withdraw this consent or request deletion of my data by emailing contato@coachruiz.com.br."
+                  : "Autorizo o Programa ELITE90 PRO a tratar meus dados de saúde (condições médicas, uso de medicamentos/TRT, lesões e histórico de atividade física) e as fotografias corporais que envio nesta ficha, para elaborar minha avaliação física e meu plano de treino personalizado e conduzir meu acompanhamento durante o programa. Posso revogar este consentimento ou solicitar a exclusão dos meus dados pelo e-mail contato@coachruiz.com.br."
                 }
               </span>
             </label>
+            <p class="field__consent-note">
+              {isEn
+                ? "The remaining data in this form is processed for my registration and for the delivery of the contracted program."
+                : "Os demais dados desta ficha são tratados para meu cadastro e para a execução do programa contratado."}
+            </p>
             <p class="field__error" id="f-consent-health-error" hidden>
               {isEn
                 ? "You must consent to the processing of health data to submit this form."
@@ -1565,6 +1570,14 @@ formEl?.addEventListener("submit", async e => {
     transform: rotate(45deg);
   }
   .field__consent-check:focus { outline: 2px solid var(--c-lime); outline-offset: 2px; }
+  .field__consent-note {
+    margin-top: var(--space-2);
+    padding-left: calc(18px + var(--space-3));
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    color: var(--c-textsub);
+    line-height: 1.5;
+  }
   .form-submit    { width:100%; }
   .form-error     { font-size:var(--fs-body-sm); color:#E74C3C; text-align:center; }
 
