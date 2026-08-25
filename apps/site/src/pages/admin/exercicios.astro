@@ -135,6 +135,31 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-recado--ok { color: var(--c-lime); background: rgba(166,195,0,0.08); border: 1px solid rgba(166,195,0,0.3); }
   .exc-recado--erro { color: var(--c-pending); background: rgba(230,126,34,0.08); border: 1px solid rgba(230,126,34,0.35); }
 
+  /* ── Janela de confirmação — mesmas classes e medidas de fichas.astro,
+       onde ela já serve a confirmar, excluir e promover. Reconstruir um
+       diálogo próprio aqui seria criar um segundo padrão para a mesma coisa.
+
+       POR QUE JANELA, E NÃO CONFIRMAÇÃO NA PRÓPRIA FAIXA
+       A primeira versão confirmava em linha: a faixa trocava de conteúdo e o
+       "Sim, marcar 68" nascia no MESMO lugar do botão recém-clicado. Um duplo
+       clique, ou um clique apressado, cairia no confirmar. Para uma ação que
+       libera até 96 exercícios aos atletas e não tem desfazer, isso é pouco.
+       A janela tira o botão de baixo do cursor e ocupa a tela inteira. */
+  .confirm-overlay { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); padding: var(--space-4); }
+  .confirm-overlay[hidden] { display: none; }
+  .confirm-box { background: var(--c-darkbg); border: var(--border-lime); border-radius: var(--radius-card); max-width: 520px; width: 100%; padding: var(--space-5); max-height: 85vh; overflow-y: auto; }
+  .confirm-title { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 var(--space-3); }
+  .confirm-title span { color: var(--c-pending); }
+  .confirm-summary { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: 1.7; margin-bottom: var(--space-4); }
+  .confirm-summary strong { color: var(--c-textbody); }
+  .confirm-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: flex-end; }
+  .btn-sm { font-family: var(--font-label); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 20px; border-radius: var(--radius-card); cursor: pointer; border: none; transition: background var(--transition-base), color var(--transition-base); }
+  .btn-outline { background: transparent; color: var(--c-lime); border: 1px solid rgba(166,195,0,0.3); }
+  .btn-outline:hover { background: rgba(166,195,0,0.05); border-color: var(--c-lime); }
+  .btn-perigo { background: transparent; color: var(--c-pending); border: 1px solid var(--c-pending); }
+  .btn-perigo:hover { background: rgba(230,126,34,0.1); }
+  .btn-perigo:disabled { opacity: 0.5; cursor: default; }
+
   @media (max-width: 900px) {
     .exc-cab { display: none; }
     .exc-linha { grid-template-columns: 1fr; gap: 4px; }
@@ -176,6 +201,17 @@ import AdminHeader from '../../components/AdminHeader.astro';
     </span>
   </div>
 </main>
+
+<div class="confirm-overlay" id="exc-lote-janela" hidden>
+  <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="exc-lote-titulo">
+    <h3 class="confirm-title" id="exc-lote-titulo">Marcar como <span>revisados</span></h3>
+    <p class="confirm-summary" id="exc-lote-texto"></p>
+    <div class="confirm-actions">
+      <button class="btn-sm btn-outline" id="exc-lote-nao" type="button">Cancelar</button>
+      <button class="btn-sm btn-perigo" id="exc-lote-sim" type="button"></button>
+    </div>
+  </div>
+</div>
 
 <div class="exc-gaveta" id="exc-gaveta" hidden>
   <aside class="exc-painel" role="dialog" aria-modal="true" aria-labelledby="exc-painel-nome">
@@ -334,30 +370,44 @@ import AdminHeader from '../../components/AdminHeader.astro';
   // Estado da confirmação. A spec exige confirmar com o número explícito: são
   // até 96 exercícios liberados de uma vez para os atletas, e um clique acidental
   // não deve bastar.
-  let confirmandoLote = false;
+  let ultimoLote = 0;
 
   function pintarLote(dados) {
     const faixa = $('exc-lote');
-    const n = dados.encontrados;
+    ultimoLote = dados.encontrados;
     // Só em "aguardando": nos outros estados não há pendência para aprovar, e a
     // faixa seria um botão sem sentido — ou pior, um que recarimbaria revisados.
-    if (estado.estado !== 'aguardando' || !n) { faixa.innerHTML = ''; confirmandoLote = false; return; }
-
-    const oQue = estado.grupo ? `de ${esc(estado.grupo)}` : estado.busca ? 'deste filtro' : 'do catálogo';
-    faixa.innerHTML = confirmandoLote
-      ? `<div class="exc-lote exc-lote--confirmando">
-           <span><strong>Marcar ${n} exercício${n > 1 ? 's' : ''} ${oQue} como revisado${n > 1 ? 's' : ''}?</strong>
-           Isso os libera para os atletas na próxima publicação.</span>
-           <span>
-             <button type="button" class="exc-lote-btn" id="exc-lote-sim">Sim, marcar ${n}</button>
-             <button type="button" class="exc-lote-btn" id="exc-lote-nao">Cancelar</button>
-           </span>
-         </div>`
-      : `<div class="exc-lote">
-           <span>${n} exercício${n > 1 ? 's' : ''} ${oQue} aguardando sua revisão</span>
-           <button type="button" class="exc-lote-btn" id="exc-lote-abrir">Marcar ${n === 1 ? 'o' : `os ${n}`} como revisado${n > 1 ? 's' : ''}</button>
-         </div>`;
+    if (estado.estado !== 'aguardando' || !dados.encontrados) { faixa.innerHTML = ''; return; }
+    const n = dados.encontrados;
+    faixa.innerHTML = `<div class="exc-lote">
+        <span>${n} exercício${n > 1 ? 's' : ''} ${escopoLote()} aguardando sua revisão</span>
+        <button type="button" class="exc-lote-btn" id="exc-lote-abrir">Marcar ${n === 1 ? 'o' : `os ${n}`} como revisado${n > 1 ? 's' : ''}</button>
+      </div>`;
   }
+
+  function escopoLote() {
+    return estado.grupo ? `de ${esc(estado.grupo)}`
+      : estado.equipamento ? `de ${esc(estado.equipamento)}`
+      : estado.busca ? 'deste filtro' : 'do catálogo';
+  }
+
+  function abrirJanelaLote() {
+    const n = ultimoLote;
+    if (!n) return;
+    $('exc-lote-texto').innerHTML =
+      `Você está prestes a marcar <strong>${n} exercício${n > 1 ? 's' : ''} ${escopoLote()}</strong> como revisado${n > 1 ? 's' : ''}. ` +
+      `Isso ${n > 1 ? 'os libera' : 'o libera'} para os atletas na próxima publicação do site.<br><br>` +
+      `Esta ação é <strong>irreversível pela tela</strong>: não há como desmarcar depois, ` +
+      `nem individualmente nem em bloco. Reverter exigiria alterar o banco de dados à mão.`;
+    $('exc-lote-sim').textContent = n > 1 ? `Confirmar ${n} revisões` : 'Confirmar a revisão';
+    $('exc-lote-sim').disabled = false;
+    $('exc-lote-janela').hidden = false;
+    // O foco vai para Cancelar, não para Confirmar: quem chegou aqui por engano
+    // sai com um Enter, e quem quer mesmo confirmar dá um Tab a mais.
+    $('exc-lote-nao').focus();
+  }
+
+  function fecharJanelaLote() { $('exc-lote-janela').hidden = true; }
 
   async function aplicarLote(n) {
     const btn = $('exc-lote-sim');
@@ -371,12 +421,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
         filtro: { grupo: estado.grupo, equipamento: estado.equipamento, busca: estado.busca },
         esperados: n,
       });
-      confirmandoLote = false;
+      fecharJanelaLote();
       await carregar();
       $('exc-lote').insertAdjacentHTML('afterbegin',
         `<div class="exc-recado exc-recado--ok" style="margin:0 0 12px">${r.revisados} exercício(s) marcado(s) como revisado(s).</div>`);
     } catch (e) {
-      confirmandoLote = false;
+      fecharJanelaLote();
       $('exc-lote').innerHTML = `<div class="exc-recado exc-recado--erro" style="margin:0 0 12px">${esc(e.message)}</div>`;
     }
   }
@@ -521,11 +571,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
     pintarEstados(); carregar();
   });
   $('exc-lote').addEventListener('click', (ev) => {
-    if (ev.target.closest('#exc-lote-abrir')) { confirmandoLote = true; carregar(); return; }
-    if (ev.target.closest('#exc-lote-nao')) { confirmandoLote = false; carregar(); return; }
-    const sim = ev.target.closest('#exc-lote-sim');
-    if (sim) aplicarLote(Number(sim.textContent.replace(/\D/g, '')));
+    if (ev.target.closest('#exc-lote-abrir')) abrirJanelaLote();
   });
+  $('exc-lote-nao').addEventListener('click', fecharJanelaLote);
+  $('exc-lote-sim').addEventListener('click', () => aplicarLote(ultimoLote));
+  $('exc-lote-janela').addEventListener('click', (ev) => { if (ev.target.id === 'exc-lote-janela') fecharJanelaLote(); });
   $('exc-linhas').addEventListener('click', (ev) => {
     const b = ev.target.closest('.exc-linha');
     if (b) abrir(Number(b.dataset.i));
@@ -534,7 +584,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
   $('exc-proxima').addEventListener('click', () => { estado.pagina++; carregar(); });
   $('exc-fechar').addEventListener('click', fechar);
   $('exc-gaveta').addEventListener('click', (ev) => { if (ev.target.id === 'exc-gaveta') fechar(); });
-  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !$('exc-gaveta').hidden) fechar(); });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Escape') return;
+    if (!$('exc-lote-janela').hidden) { fecharJanelaLote(); return; }
+    if (!$('exc-gaveta').hidden) fechar();
+  });
   $('exc-f-secundarios').addEventListener('click', (ev) => {
     const b = ev.target.closest('[data-rm]');
     if (!b) return;
