@@ -10,6 +10,15 @@
 //     Fica em todas as telas do painel de propósito: a dúvida sobre o que um
 //     aviso significa nasce com a ficha aberta, não no Hub. Desligar apenas na
 //     própria página do guia, onde o atalho apontaria para ela mesma.
+//
+// Slot "primeiro" — entra ANTES do atalho do guia, dentro do mesmo contêiner.
+//   Existe porque a especificação do catálogo (seção 6.3) pede um item próprio
+//   no topo deste menu, e proíbe substituir o gatilho "⋮": em telas estreitas
+//   ele é quem agrupa guia, voltar e encerrar sessão, e trocá-lo esconderia os
+//   três. Slot em vez de prop: o item é da tela que o usa — o cabeçalho não
+//   precisa saber o que ele faz, só onde ele fica. Quem preencher deve usar as
+//   classes .adm-btn-icon e .adm-btn-icon__label para herdar o comportamento
+//   de ícone solto no desktop e linha rotulada dentro do menu no celular.
 
 interface Props {
   badge: string;
@@ -39,6 +48,7 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
       </svg>
     </button>
     <div class="adm-actions" id="adm-actions">
+      <slot name="primeiro" />
       {showGuide && (
         <a
           class="adm-btn-icon adm-btn-icon--guide"

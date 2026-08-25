@@ -1,10 +1,18 @@
 ---
 // ELITE90 PRO · /admin/exercicios — Catálogo de Exercícios
 //
-// Passo 2 da ordem de execução da especificação (24/08/2026): lista, filtros e
-// painel de edição. Ficam para os passos seguintes a revisão em bloco (3), a
-// faixa no hub e o atalho do construtor (4), a versão de celular (5) e o
-// cadastro de exercício novo (6).
+// Passos 2 a 5 da ordem de execução da especificação (24/08/2026): lista,
+// filtros e painel de edição (2), revisão em bloco (3), faixa no hub e atalho
+// do construtor (4) e versão de celular (5). Fica para o passo 6 o cadastro de
+// exercício novo — e, com ele, a operação `arquivar`, que consta do contrato da
+// seção 7 e ainda não existe nem na função nem aqui: o filtro "Arquivados" já
+// lista, mas nada arquiva.
+//
+// CELULAR (spec 6) — as regras estreitas vivem em três lugares, de propósito:
+// no bloco @media de 600px (o que some), na função aplicarCorte (o que muda de
+// comportamento, não só de aparência) e nas duas camadas de comunicação —
+// avisarDoQueFicaNoComputador, ao salvar, e a janela #exc-limites. A terceira
+// camada é o guia, no passo 8.
 //
 // POR QUE ESTA TELA EXISTE
 // Os campos revisadoPor e revisadoEm estão no esquema e nada os preenchia com
@@ -64,6 +72,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-campo:focus { outline: none; border-color: var(--c-lime); box-shadow: var(--glow-lime-sm); }
   #exc-busca { flex: 1; min-width: 220px; }
 
+  /* Faixa deslizante de grupos: nasce oculta e só o corte de celular a acende.
+     Rola no eixo x sem barra visível — o corte do último item na borda é o que
+     conta que há mais para o lado. */
+  .exc-grupos-faixa { display: none; gap: var(--space-2); margin-bottom: var(--space-3);
+    overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity; }
+  .exc-grupos-faixa::-webkit-scrollbar { display: none; }
+  .exc-grupos-faixa .exc-estado { flex: 0 0 auto; scroll-snap-align: start; }
+
   .exc-estados { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-5); }
   .exc-estado { font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; padding: 6px 14px; border-radius: var(--radius-pill); background: transparent; border: 1px solid var(--c-line-muted); color: var(--c-textsub); cursor: pointer; transition: color var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std); }
   .exc-estado:hover { color: var(--c-textbody); }
@@ -116,6 +133,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-painel-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
   .exc-painel-nome { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); letter-spacing: var(--tracking-display); line-height: var(--lh-tight); }
   .exc-fechar { background: transparent; border: 0; color: var(--c-textsub); font-size: 1.25rem; cursor: pointer; line-height: 1; padding: 0 4px; }
+  /* Os dois glifos moram no HTML e trocam por CSS: no computador o painel é
+     gaveta e fecha com "×"; no celular ele é a tela inteira, e ali "×" mente —
+     não há nada por baixo para revelar, o gesto é voltar. */
+  .exc-fechar-x { display: inline; }
+  .exc-fechar-voltar { display: none; }
   .exc-rotulo { display: block; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); margin: var(--space-4) 0 6px; }
   .exc-input, .exc-select, .exc-area { width: 100%; background: var(--c-black); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 10px 12px; }
   .exc-area { line-height: var(--lh-body); resize: vertical; min-height: 96px; }
@@ -126,6 +148,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-chip button { background: transparent; border: 0; color: var(--c-textsub); cursor: pointer; font-size: 0.8125rem; line-height: 1; padding: 0; }
   .exc-proc { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid rgba(255,255,255,0.07); font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.85; }
   .exc-proc b { color: var(--c-textbody); font-weight: var(--fw-body); }
+  /* No computador o bloco nasce aberto e o triângulo de <details> seria um
+     controle que não controla nada — some, e o resumo volta a ser rótulo. */
+  .exc-proc-resumo { list-style: none; cursor: default; }
+  .exc-proc-resumo::-webkit-details-marker { display: none; }
+  .exc-proc-resumo::marker { content: ""; }
   .exc-acoes { display: flex; gap: var(--space-2); margin-top: var(--space-5); }
   .exc-btn-lime { flex: 1; background: var(--grad-cta); color: var(--c-black); border: 0; border-radius: var(--radius-card); padding: 12px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-cta); text-transform: uppercase; cursor: pointer; }
   .exc-btn-vazado { background: transparent; border: 1px solid rgba(255,255,255,0.18); color: var(--c-textbody); border-radius: var(--radius-card); padding: 12px 16px; font-family: var(--font-label); font-size: var(--fs-label); cursor: pointer; }
@@ -165,15 +192,118 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .btn-perigo:hover { background: rgba(230,126,34,0.1); }
   .btn-perigo:disabled { opacity: 0.5; cursor: default; }
 
+  /* ── Janela "O que fica no computador" (camada 2 da spec 6.3) ──
+     Reaproveita a mesma janela da confirmação em bloco. A lista não nomeia
+     recursos, nomeia resultados: "revisão em lote" não diz nada a quem está
+     parado na academia; "aprovar os 68 de Costas de uma vez" diz. */
+  .exc-limites-lista { list-style: none; padding: 0; margin: 0 0 var(--space-4); }
+  .exc-limites-lista li { padding: var(--space-3) 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .exc-limites-lista li:last-child { border-bottom: 0; }
+  .exc-limites-lista b { display: block; color: var(--c-textbody); font-weight: var(--fw-body-bold); font-size: var(--fs-body-sm); margin-bottom: 3px; }
+  .exc-limites-lista span { display: block; font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.65; }
+  /* Fecha dizendo o que DÁ para fazer aqui. Sem isso a janela lê como lista de
+     amputações, e a tela de celular passa a parecer versão capenga da outra. */
+  .exc-limites-pode { background: rgba(166,195,0,0.07); border-left: 2px solid var(--c-lime);
+    padding: 10px 12px; font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.7; margin-bottom: var(--space-4); }
+  .exc-limites-pode b { color: var(--c-lime); font-weight: var(--fw-body-bold); }
+
+  /* Aviso da camada 1: nasce ABAIXO da confirmação de salvamento e separado
+     dela. Juntas, as duas frases deixariam dúvida sobre se a gravação deu
+     certo; separadas, a primeira confirma o ato e a segunda informa o estado. */
+  .exc-aviso-desktop { margin-top: var(--space-3); border: 1px dashed rgba(230,126,34,0.4);
+    border-radius: var(--radius-card); padding: 10px 12px; font-size: 0.6875rem;
+    color: var(--c-textsub); line-height: 1.7; }
+  .exc-aviso-desktop b { color: var(--c-pending); font-weight: var(--fw-body-bold); }
+  .exc-aviso-desktop button { display: inline; background: none; border: 0; padding: 0;
+    color: var(--c-lime); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+  /* O item de menu da camada 2 só existe abaixo do corte: no computador não há
+     restrição nenhuma a explicar, e o ícone seria ruído entre guia e sair. */
+  #exc-limites-abrir { display: none; }
+
+  /* Entre 600 e 900px cai só a coluna de músculo — quatro colunas fixas não
+     cabem. Continua sendo a tela de computador: revisar, revisar em bloco e
+     todos os filtros seguem no lugar. */
   @media (max-width: 900px) {
+    .exc-cab, .exc-linha { grid-template-columns: 1fr 120px 130px; }
+    .exc-cab--musculo, .exc-col--musculo { display: none; }
+  }
+
+  /* ─────────────────────────── CELULAR · spec 6 ───────────────────────────
+     Corte em 600px, o mesmo do hub.
+
+     O que sai daqui não sai por caber mal. Marcar como revisado é o ato que
+     libera o exercício aos atletas, e a revisão em bloco faz isso com dezenas
+     de uma vez: num aparelho de toque, o custo de um encostão é alto demais
+     para o ganho. Cadastrar exige redigir instrução, que é trabalho de
+     teclado. Fica o que justifica abrir o catálogo no celular — encontrar um
+     exercício e corrigir o que está errado nele.
+
+     A ausência é EXPLICADA no ponto onde é sentida, não num aviso no topo:
+     ver .exc-aviso-desktop (ao salvar) e a janela #exc-limites. */
+  @media (max-width: 600px) {
+    .exc-main { padding: var(--space-4) var(--space-3) var(--space-6); }
+
+    /* Filtro por estado sai (spec 6.1). Sem ele a tela precisa mostrar TODOS os
+       ativos, não só os aguardando: o exercício que o Coach quer corrigir pode
+       já estar revisado, e sem filtro para trocar ele ficaria inalcançável.
+       Quem força o estado é o script, no mesmo ponto que lê o corte. */
+    #exc-estados { display: none; }
+    /* Revisão em bloco sai — e some por completo, para não deixar a faixa
+       laranja anunciando uma ação que não existe aqui. */
+    #exc-lote { display: none; }
+    /* Só o filtro por grupo, e em faixa deslizante (spec 6.1). O equipamento e
+       o <select> de grupo saem; a busca fica com a linha inteira, porque é ela
+       que encontra o exercício a corrigir. */
+    #exc-equipamento, #exc-grupo { display: none; }
+    #exc-busca { flex: 1 1 100%; min-width: 0; }
+    .exc-grupos-faixa { display: flex; }
+
+    /* A tabela vira cartões empilhados, com toda a largura para o nome. */
     .exc-cab { display: none; }
-    .exc-linha { grid-template-columns: 1fr; gap: 4px; }
-    .exc-painel { width: 100%; border-left: 0; }
+    /* Respiro lateral menor que no computador: a 412px de tela, 24px de cada
+       lado comem 12% da largura que a spec manda dar ao nome. */
+    .exc-linha { display: block; padding: var(--space-3); }
+    .exc-nome { display: block; font-size: var(--fs-body-md); line-height: var(--lh-tight); }
+    .exc-col { font-size: 0.6875rem; }
+    .exc-col--grupo, .exc-col--equip { display: inline; }
+    .exc-col--equip::before { content: " · "; }
+
+    /* Painel em tela cheia, com seta de voltar no lugar do "×" (spec 6.2). */
+    .exc-painel { width: 100%; border-left: 0; padding: var(--space-4) var(--space-3) var(--space-6); }
+    .exc-painel-topo { flex-direction: row-reverse; justify-content: flex-end; align-items: center; }
+    .exc-fechar { font-size: 1.5rem; padding: 0 8px 0 0; }
+    .exc-fechar-x { display: none; }
+    .exc-fechar-voltar { display: inline; }
+
+    /* Um único botão (spec 6.2). "Salvar e marcar como revisado" some, e o que
+       resta assume o peso de ação principal — o rótulo troca no script. */
+    #exc-salvar-revisar { display: none; }
+    #exc-desrevisar { display: none; }
+    .exc-acoes .exc-btn-vazado { flex: 1; background: var(--grad-cta); color: var(--c-black);
+      border: 0; font-weight: var(--fw-label); letter-spacing: var(--tracking-cta); text-transform: uppercase; }
+
+    /* Aqui o resumo vira controle de verdade, e ganha o afordance de tal. */
+    .exc-proc-resumo { cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; }
+    .exc-proc-resumo::after { content: "▾"; color: var(--c-textsub); transition: transform var(--dur-fast) var(--ease-std); }
+    #exc-proc[open] .exc-proc-resumo::after { transform: rotate(180deg); }
+
+    #exc-limites-abrir { display: inline-flex; }
   }
 </style>
 </head>
 <body>
-<AdminHeader badge="Exercícios" backHref="/admin" />
+<!-- O item entra DENTRO do menu "⋮" e como primeiro da lista, acima de "Como o
+     painel funciona" (spec 6.3). O gatilho de três pontos não pode ser trocado:
+     é ele que, em tela estreita, agrupa guia, voltar e encerrar sessão. -->
+<AdminHeader badge="Exercícios" backHref="/admin">
+  <button slot="primeiro" class="adm-btn-icon adm-btn-icon--guide" id="exc-limites-abrir" type="button" aria-label="O que fica no computador">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>
+    </svg>
+    <span class="adm-btn-icon__label">O que fica no computador</span>
+  </button>
+</AdminHeader>
 
 <main class="exc-main">
   <div class="exc-topo">
@@ -189,12 +319,19 @@ import AdminHeader from '../../components/AdminHeader.astro';
     <select class="exc-campo" id="exc-equipamento"><option value="">Todos os equipamentos</option></select>
   </div>
 
+  <!-- Faixa de grupos — só existe no celular (spec 6.1). Lá o <select> nativo
+       abre uma roleta que esconde a tela inteira para escolher entre oito
+       valores; a faixa mostra os oito e resolve com um toque. No computador o
+       <select> continua sendo o certo, porque convive com os outros filtros
+       numa linha só. Os dois espelham o MESMO estado.grupo. -->
+  <div class="exc-grupos-faixa" id="exc-grupos-faixa" role="group" aria-label="Filtrar por grupo"></div>
+
   <div class="exc-estados" id="exc-estados" role="group" aria-label="Filtrar por estado"></div>
 
   <div id="exc-lote"></div>
 
   <div class="exc-tabela">
-    <div class="exc-cab"><span>Exercício</span><span>Grupo</span><span>Equipamento</span><span>Músculo</span></div>
+    <div class="exc-cab"><span>Exercício</span><span>Grupo</span><span>Equipamento</span><span class="exc-cab--musculo">Músculo</span></div>
     <div id="exc-linhas"><div class="exc-carregando">Carregando o catálogo…</div></div>
   </div>
 
@@ -218,11 +355,39 @@ import AdminHeader from '../../components/AdminHeader.astro';
   </div>
 </div>
 
+<!-- Camada 2 da spec 6.3. Os números não são ilustrativos: Costas tem mesmo 68
+     exercícios e Pernas, 96 — conferidos contra scripts/dados-exercicios/
+     catalogo-fonte.json em 25/08/2026. Se o acervo mudar muito, conferir. -->
+<div class="confirm-overlay" id="exc-limites" hidden>
+  <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="exc-limites-titulo">
+    <h3 class="confirm-title" id="exc-limites-titulo">O que fica no <span>computador</span></h3>
+    <p class="confirm-summary">Três coisas o catálogo só faz na tela grande. Não é limitação do aparelho — é que o custo de um toque errado, nas três, é alto:</p>
+    <ul class="exc-limites-lista">
+      <li>
+        <b>Liberar um exercício para os atletas</b>
+        <span>Marcar como revisado é o que tira o exercício da fila e o coloca no construtor de treino. É o ato que muda o que o atleta vê, e um encostão no bolso não deveria bastar para ele acontecer.</span>
+      </li>
+      <li>
+        <b>Aprovar os 68 de Costas de uma vez</b>
+        <span>A revisão em bloco libera o grupo inteiro numa ação — até 96, que é o tamanho de Pernas. Desfazer é possível, mas o registro de quem aprovou se perde no caminho.</span>
+      </li>
+      <li>
+        <b>Cadastrar um exercício que não existe no acervo</b>
+        <span>Todo exercício novo precisa de instrução de execução escrita. É trabalho de teclado, e digitar isso no celular produz instrução curta demais para servir ao atleta.</span>
+      </li>
+    </ul>
+    <p class="exc-limites-pode"><b>Aqui você corrige.</b> Buscar pelo nome, ajustar nome, instrução, grupo, equipamento, músculo e nível, e salvar — que é o que resolve o erro percebido na hora, com o aparelho na mão.</p>
+    <div class="confirm-actions">
+      <button class="btn-sm btn-outline" id="exc-limites-fechar" type="button">Entendi</button>
+    </div>
+  </div>
+</div>
+
 <div class="exc-gaveta" id="exc-gaveta" hidden>
   <aside class="exc-painel" role="dialog" aria-modal="true" aria-labelledby="exc-painel-nome">
     <div class="exc-painel-topo">
       <div class="exc-painel-nome" id="exc-painel-nome"></div>
-      <button class="exc-fechar" id="exc-fechar" type="button" aria-label="Fechar">✕</button>
+      <button class="exc-fechar" id="exc-fechar" type="button" aria-label="Fechar"><span class="exc-fechar-x" aria-hidden="true">✕</span><span class="exc-fechar-voltar" aria-hidden="true">←</span></button>
     </div>
     <div id="exc-painel-selo"></div>
 
@@ -251,10 +416,14 @@ import AdminHeader from '../../components/AdminHeader.astro';
       <span>Classificação de músculo a conferir</span>
     </label>
 
-    <div class="exc-proc">
-      <span class="exc-rotulo" style="margin:0 0 8px">Procedência · somente leitura</span>
+    <!-- Procedência recolhida no celular (spec 6.2). <details> nativo em vez de
+         div com script: o navegador já dá o teclado, o leitor de tela e o
+         estado. Quem abre e fecha conforme o corte é o script — CSS sozinho não
+         alcança o atributo open — e no computador ele nasce aberto, como era. -->
+    <details class="exc-proc" id="exc-proc">
+      <summary class="exc-proc-resumo"><span class="exc-rotulo" style="margin:0">Procedência · somente leitura</span></summary>
       <div id="exc-proc-corpo"></div>
-    </div>
+    </details>
 
     <div class="exc-acoes">
       <button class="exc-btn-lime" id="exc-salvar-revisar" type="button">Salvar e marcar como revisado</button>
@@ -335,6 +504,26 @@ import AdminHeader from '../../components/AdminHeader.astro';
     ).join('');
   }
 
+  /** Faixa de grupos do celular. Reusa a ficha de .exc-estado — é o mesmo gesto
+   *  (escolher um entre poucos) e merece a mesma forma; um segundo desenho para
+   *  a mesma coisa só faria a tela parecer costurada de retalhos. */
+  function pintarGrupos() {
+    $('exc-grupos-faixa').innerHTML = [{ valor: '', rotulo: 'Todos' }, ...GRUPOS.map((g) => ({ valor: g, rotulo: g }))]
+      .map((g) => `<button type="button" class="exc-estado" data-grupo="${esc(g.valor)}" aria-pressed="${g.valor === estado.grupo}">${esc(g.rotulo)}</button>`)
+      .join('');
+  }
+
+  /** Um só caminho para trocar de grupo, venha do <select> ou da faixa: os dois
+   *  espelham estado.grupo, e deixar cada um com sua própria atualização é como
+   *  se perde a sincronia quando o aparelho gira no meio da filtragem. */
+  function trocarGrupo(valor) {
+    estado.grupo = valor;
+    estado.pagina = 1;
+    $('exc-grupo').value = valor;
+    pintarGrupos();
+    carregar();
+  }
+
   function pintarLinhas(dados) {
     itens = dados.itens;
     const c = dados.contadores;
@@ -354,11 +543,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
         const aviso = e.revisarMusculo
           ? '<span class="exc-aviso-musculo" title="Classificação de músculo herdada da origem — conferir ao revisar">▲</span>'
           : '';
+        // As colunas levam modificador porque o celular esconde a de músculo e
+        // junta grupo e equipamento numa linha só (spec 6.2). Sem nome próprio,
+        // a única forma de alcançá-las no CSS seria por :nth-child, que quebra
+        // silenciosamente na primeira vez que alguém reordenar as colunas.
         return `<button type="button" class="exc-linha" data-i="${i}">
           <span class="exc-nome">${esc(e.nome_pt)}${aviso}<br>${selo}</span>
-          <span class="exc-col">${esc(e.grupo)}</span>
-          <span class="exc-col">${esc(e.equipamento)}</span>
-          <span class="exc-col">${esc(e.musculoPrimario)}</span>
+          <span class="exc-col exc-col--grupo">${esc(e.grupo)}</span>
+          <span class="exc-col exc-col--equip">${esc(e.equipamento)}</span>
+          <span class="exc-col exc-col--musculo">${esc(e.musculoPrimario)}</span>
         </button>`;
       }).join('');
     }
@@ -508,6 +701,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
       `Criado por · <b>${esc(e.criadoPor ?? '—')}</b><br>` +
       `Última alteração · <b>${e.atualizadoEm ? esc(new Date(e.atualizadoEm).toLocaleString('pt-BR')) : '—'}</b>`;
     $('exc-recado').innerHTML = '';
+    // Recolhe a procedência de novo a cada abertura no celular: deixá-la aberta
+    // porque o exercício anterior foi expandido empurraria os campos para fora
+    // da primeira tela justamente em quem já mostrou não se importar com ela.
+    $('exc-proc').open = !noCelular();
     $('exc-salvar-revisar').hidden = e.revisado;
     // Desfazer individual só aparece no que está revisado, e é ligação discreta
     // e não botão: é conserto de engano, não parte do fluxo de trabalho.
@@ -554,6 +751,53 @@ import AdminHeader from '../../components/AdminHeader.astro';
     $('exc-recado').innerHTML = `<div class="exc-recado exc-recado--${tipo}">${esc(texto)}</div>`;
   }
 
+  // ── Corte de celular (spec 6) ──
+  // Uma fonte só de verdade para "estamos no celular". O CSS corta em 600px e o
+  // script precisa do MESMO número, porque aqui a decisão não é de aparência:
+  // é quais operações existem. matchMedia, e não innerWidth, para que girar o
+  // aparelho reavalie sozinho — sem isso, quem abrisse em retrato e deitasse o
+  // telefone ficaria com a tela larga e as regras estreitas.
+  const CORTE = window.matchMedia('(max-width: 600px)');
+  const noCelular = () => CORTE.matches;
+
+  function aplicarCorte(recarregar) {
+    const m = noCelular();
+    // No computador o painel é gaveta e fecha; no celular ele é a tela toda, e
+    // o gesto é voltar. O rótulo acessível acompanha o glifo.
+    $('exc-fechar').setAttribute('aria-label', m ? 'Voltar' : 'Fechar');
+    // Um único botão no celular (spec 6.2) — o que sobra herda o peso do que saiu.
+    $('exc-salvar').textContent = m ? 'Salvar alterações' : 'Salvar';
+    $('exc-proc').open = !m;
+    // Sem filtro por estado, a tela PRECISA mostrar todos os ativos. O exercício
+    // que o Coach quer corrigir pode já estar revisado, e com o filtro preso em
+    // "aguardando" ele seria inalcançável — a tela de celular existe para
+    // corrigir, e não poderia esconder metade do que há para corrigir.
+    // Ao voltar para a tela grande o estado fica onde está: o filtro reaparece
+    // marcado em "Todos", e trocar volta a ser escolha de quem usa.
+    if (m && estado.estado !== 'todos') {
+      estado.estado = 'todos';
+      estado.pagina = 1;
+      pintarEstados();
+      if (recarregar) carregar();
+    }
+  }
+
+  // ── Camada 2 (spec 6.3): a janela "O que fica no computador" ──
+  function abrirLimites() { $('exc-limites').hidden = false; $('exc-limites-fechar').focus(); }
+  function fecharLimites() { $('exc-limites').hidden = true; }
+
+  // ── Camada 1 (spec 6.3) ──
+  // Entra ABAIXO da confirmação de salvamento e separada dela. Misturar as duas
+  // frases deixaria ambíguo se a gravação funcionou; separadas, a primeira
+  // confirma o ato e a segunda informa o estado em que o exercício ficou.
+  function avisarDoQueFicaNoComputador() {
+    $('exc-recado').insertAdjacentHTML('beforeend',
+      `<div class="exc-aviso-desktop">
+         <b>Este exercício continua aguardando validação.</b> Marcar como revisado é o que o libera para os atletas, e essa ação fica no computador.
+         <button type="button" data-abrir-limites>Ver o que fica no computador</button>
+       </div>`);
+  }
+
   async function salvar(tambemRevisar) {
     if (!emEdicao) return;
     const botoes = [$('exc-salvar'), $('exc-salvar-revisar')];
@@ -571,6 +815,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
           : Object.keys(diff).length ? 'Alterações salvas.' : 'Nada havia mudado.',
         'ok',
       );
+      // Só no celular, e só enquanto o exercício continuar aguardando: no que já
+      // está revisado não há nada a avisar, e repetir o aviso ali o transformaria
+      // em ruído que se aprende a ignorar (decisão 8 da spec).
+      if (noCelular() && !tambemRevisar && !emEdicao.revisado) avisarDoQueFicaNoComputador();
       await carregar();
       if (tambemRevisar) setTimeout(fechar, 900);
     } catch (e) {
@@ -589,13 +837,18 @@ import AdminHeader from '../../components/AdminHeader.astro';
   opcoes($('exc-f-nivel'), NIVEIS);
   opcoes($('exc-f-musculo'), MUSCULOS);
   pintarEstados();
+  pintarGrupos();
 
   let debounce;
   $('exc-busca').addEventListener('input', (ev) => {
     clearTimeout(debounce);
     debounce = setTimeout(() => { estado.busca = ev.target.value.trim(); estado.pagina = 1; carregar(); }, 250);
   });
-  $('exc-grupo').addEventListener('change', (ev) => { estado.grupo = ev.target.value; estado.pagina = 1; carregar(); });
+  $('exc-grupo').addEventListener('change', (ev) => trocarGrupo(ev.target.value));
+  $('exc-grupos-faixa').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-grupo]');
+    if (b) trocarGrupo(b.dataset.grupo);
+  });
   $('exc-equipamento').addEventListener('change', (ev) => { estado.equipamento = ev.target.value; estado.pagina = 1; carregar(); });
   $('exc-estados').addEventListener('click', (ev) => {
     const b = ev.target.closest('[data-estado]');
@@ -605,6 +858,14 @@ import AdminHeader from '../../components/AdminHeader.astro';
   });
   $('exc-lote').addEventListener('click', (ev) => {
     if (ev.target.closest('#exc-lote-abrir')) abrirJanelaLote();
+  });
+  $('exc-limites-abrir').addEventListener('click', abrirLimites);
+  $('exc-limites-fechar').addEventListener('click', fecharLimites);
+  $('exc-limites').addEventListener('click', (ev) => { if (ev.target.id === 'exc-limites') fecharLimites(); });
+  // A ligação da camada 1 nasce dentro de #exc-recado, que é reescrito a cada
+  // salvamento — por isso a escuta fica no contêiner, e não no botão.
+  $('exc-recado').addEventListener('click', (ev) => {
+    if (ev.target.closest('[data-abrir-limites]')) abrirLimites();
   });
   $('exc-lote-nao').addEventListener('click', fecharJanelaLote);
   $('exc-lote-sim').addEventListener('click', () => aplicarLote(ultimoLote));
@@ -617,8 +878,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
   $('exc-proxima').addEventListener('click', () => { estado.pagina++; carregar(); });
   $('exc-fechar').addEventListener('click', fechar);
   $('exc-gaveta').addEventListener('click', (ev) => { if (ev.target.id === 'exc-gaveta') fechar(); });
+  // Escape fecha a camada mais alta primeiro: janelas antes da gaveta.
   document.addEventListener('keydown', (ev) => {
     if (ev.key !== 'Escape') return;
+    if (!$('exc-limites').hidden) { fecharLimites(); return; }
     if (!$('exc-lote-janela').hidden) { fecharJanelaLote(); return; }
     if (!$('exc-gaveta').hidden) fechar();
   });
@@ -650,6 +913,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
   });
   $('exc-salvar').addEventListener('click', () => salvar(false));
   $('exc-salvar-revisar').addEventListener('click', () => salvar(true));
+
+  // Aplica o corte antes de qualquer carga: assim o primeiro carregar() já sai
+  // com o estado certo, em vez de buscar "aguardando" e refazer o pedido.
+  CORTE.addEventListener('change', () => aplicarCorte(true));
+  aplicarCorte(false);
 
   // Guarda de autenticação, no padrão de fichas.astro: sessão E claim de admin.
   // "Autenticado" não é "autorizado" — qualquer pessoa consegue criar conta
