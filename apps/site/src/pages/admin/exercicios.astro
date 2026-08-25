@@ -1,18 +1,26 @@
 ---
 // ELITE90 PRO · /admin/exercicios — Catálogo de Exercícios
 //
-// Passos 2 a 5 da ordem de execução da especificação (24/08/2026): lista,
+// Passos 2 a 6 da ordem de execução da especificação (24/08/2026): lista,
 // filtros e painel de edição (2), revisão em bloco (3), faixa no hub e atalho
-// do construtor (4) e versão de celular (5). Fica para o passo 6 o cadastro de
-// exercício novo — e, com ele, a operação `arquivar`, que consta do contrato da
-// seção 7 e ainda não existe nem na função nem aqui: o filtro "Arquivados" já
-// lista, mas nada arquiva.
+// do construtor (4), versão de celular (5) e cadastro de exercício novo, com
+// arquivar (6). Ficam para os passos 7 e 8 o bloco nomeado em firestore.rules
+// e a seção no guia — nenhum dos dois bloqueia o uso: a coleção já está
+// fechada pela negação genérica do fim do arquivo, e a ausência no celular já
+// se explica sozinha nas duas camadas descritas abaixo.
 //
 // CELULAR (spec 6) — as regras estreitas vivem em três lugares, de propósito:
 // no bloco @media de 600px (o que some), na função aplicarCorte (o que muda de
 // comportamento, não só de aparência) e nas duas camadas de comunicação —
 // avisarDoQueFicaNoComputador, ao salvar, e a janela #exc-limites. A terceira
 // camada é o guia, no passo 8.
+//
+// CADASTRO E ARQUIVAR (spec 5.4, 5.5) — abrirNovo() reusa a gaveta de edição em
+// vez de duplicar o formulário; a variável `modo` distingue os dois caminhos
+// de salvar. `alternarArquivo()` é o par arquivar/desarquivar — a especificação
+// só nomeia o primeiro, mas a decisão 14 dispensou exclusão definitiva
+// justamente por arquivar ser reversível, e sem o par inverso essa reversão
+// não existiria de fato.
 //
 // POR QUE ESTA TELA EXISTE
 // Os campos revisadoPor e revisadoEm estão no esquema e nada os preenchia com
@@ -66,6 +74,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-titulo { font-family: var(--font-display); font-size: var(--fs-display-md); color: var(--c-white); letter-spacing: var(--tracking-display); line-height: var(--lh-display); margin: 0; }
   .exc-contadores { font-size: var(--fs-body-sm); color: var(--c-textsub); margin-top: var(--space-1); }
   .exc-contadores strong { color: var(--c-textbody); font-weight: var(--fw-body-bold); }
+  /* Vazado, e não lima: cadastrar é o ato raro desta tela — o acervo veio de
+     fora e o que se faz aqui é curar. O botão cheio disputaria atenção com a
+     faixa de revisão em bloco, que é a peça central. */
+  .exc-btn-novo { background: transparent; border: 1px solid rgba(166,195,0,0.35); color: var(--c-lime);
+    border-radius: var(--radius-card); padding: 10px 16px; font-family: var(--font-label);
+    font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-cta);
+    text-transform: uppercase; cursor: pointer; white-space: nowrap;
+    transition: background var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std); }
+  .exc-btn-novo:hover { background: rgba(166,195,0,0.08); border-color: var(--c-lime); }
 
   .exc-filtros { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-3); }
   .exc-campo { background: var(--c-darkbg); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-textbody); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 9px 12px; }
@@ -139,6 +156,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-fechar-x { display: inline; }
   .exc-fechar-voltar { display: none; }
   .exc-rotulo { display: block; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); margin: var(--space-4) 0 6px; }
+  .exc-rotulo--musculo { display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; }
+  .exc-rotulo--musculo[hidden] { display: none; }
   .exc-input, .exc-select, .exc-area { width: 100%; background: var(--c-black); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 10px 12px; }
   .exc-area { line-height: var(--lh-body); resize: vertical; min-height: 96px; }
   .exc-input:focus, .exc-select:focus, .exc-area:focus { outline: none; border-color: var(--c-lime); box-shadow: var(--glow-lime-sm); }
@@ -276,6 +295,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .exc-fechar-x { display: none; }
     .exc-fechar-voltar { display: inline; }
 
+    /* Cadastrar exige redigir instrução — trabalho de teclado (spec 6.1). */
+    #exc-novo { display: none; }
+
     /* Um único botão (spec 6.2). "Salvar e marcar como revisado" some, e o que
        resta assume o peso de ação principal — o rótulo troca no script. */
     #exc-salvar-revisar { display: none; }
@@ -311,6 +333,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       <h1 class="exc-titulo">Catálogo de Exercícios</h1>
       <div class="exc-contadores" id="exc-contadores">Carregando…</div>
     </div>
+    <button class="exc-btn-novo" id="exc-novo" type="button">+ Novo exercício</button>
   </div>
 
   <div class="exc-filtros">
@@ -411,7 +434,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
     <div class="exc-secundarios" id="exc-f-secundarios"></div>
     <select class="exc-select" id="exc-f-add-secundario" style="margin-top:8px"></select>
 
-    <label class="exc-rotulo" for="exc-f-revisar-musculo" style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0">
+    <!-- display:flex vive em classe, não em style inline: inline venceria a
+         regra [hidden] do navegador, e abrirNovo() precisa esconder este rótulo
+         de verdade quando não há acervo de origem para justificar o aviso. -->
+    <label class="exc-rotulo exc-rotulo--musculo" for="exc-f-revisar-musculo">
       <input type="checkbox" id="exc-f-revisar-musculo" />
       <span>Classificação de músculo a conferir</span>
     </label>
@@ -430,7 +456,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
       <button class="exc-btn-vazado" id="exc-salvar" type="button">Salvar</button>
     </div>
     <div id="exc-recado"></div>
+    <!-- Os dois desfazeres são ligação discreta, não botão: consertam engano e
+         não fazem parte do fluxo de trabalho, que é revisar e corrigir. -->
     <button class="exc-desfazer" id="exc-desrevisar" type="button" hidden>Devolver à fila de revisão</button>
+    <button class="exc-desfazer" id="exc-arquivar" type="button" hidden>Arquivar exercício</button>
 
     <p class="exc-nota">A alteração é gravada no banco imediatamente. A chegada ao portal acontece na próxima publicação do site, que leva alguns minutos — se a busca do construtor de treino ainda mostrar o valor antigo, não é falha do salvamento.</p>
   </aside>
@@ -471,6 +500,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
   let itens = [];
   let emEdicao = null;
   let secundarios = [];
+  // 'editar' ou 'criar'. A gaveta é a mesma nos dois: são os mesmos nove campos,
+  // com o mesmo vocabulário fechado e a mesma validação do outro lado. Um
+  // segundo formulário só duplicaria a chance de os dois divergirem.
+  let modo = 'editar';
 
   // Token sempre fresco: o SDK renova sozinho, e guardar o valor numa variável
   // daria erro de sessão uma hora depois — mesma nota de fichas.astro.
@@ -680,12 +713,19 @@ import AdminHeader from '../../components/AdminHeader.astro';
   function abrir(i) {
     const e = itens[i];
     if (!e) return;
+    modo = 'editar';
     emEdicao = e;
     secundarios = [...(e.musculosSecundarios || [])];
     $('exc-painel-nome').textContent = e.nome_pt;
-    $('exc-painel-selo').innerHTML = e.revisado
-      ? `<span class="exc-selo exc-selo--ok">revisado${e.revisadoEm ? ' em ' + new Date(e.revisadoEm).toLocaleDateString('pt-BR') : ''}</span>`
-      : '<span class="exc-selo exc-selo--pend">aguardando validação do Coach</span>';
+    $('exc-painel-selo').innerHTML = !e.ativo
+      ? '<span class="exc-selo exc-selo--arq">arquivado</span>'
+      : e.revisado
+        ? `<span class="exc-selo exc-selo--ok">revisado${e.revisadoEm ? ' em ' + new Date(e.revisadoEm).toLocaleDateString('pt-BR') : ''}</span>`
+        : '<span class="exc-selo exc-selo--pend">aguardando validação do Coach</span>';
+    // O que abrirNovo esconde, abrir() devolve — os dois compartilham a mesma
+    // gaveta e cada um deixa a marca do modo anterior se não desfizer.
+    $('exc-proc').hidden = false;
+    $('exc-f-revisar-musculo').closest('label').hidden = false;
     $('exc-f-nome').value = e.nome_pt ?? '';
     $('exc-f-instrucao').value = e.instrucao_pt ?? '';
     $('exc-f-grupo').value = e.grupo ?? '';
@@ -709,6 +749,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
     // Desfazer individual só aparece no que está revisado, e é ligação discreta
     // e não botão: é conserto de engano, não parte do fluxo de trabalho.
     $('exc-desrevisar').hidden = !e.revisado;
+    // Revisão e arquivamento são eixos independentes (ver o comentário da
+    // função no servidor): um exercício arquivado pode estar revisado ou não, e
+    // o rótulo segue o estado ATUAL, não o que a ação vai produzir invertido.
+    $('exc-arquivar').hidden = false;
+    $('exc-arquivar').textContent = e.ativo === false ? 'Desarquivar exercício' : 'Arquivar exercício';
     const g = $('exc-gaveta');
     g.hidden = false;
     requestAnimationFrame(() => g.classList.add('aberta'));
@@ -720,12 +765,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
     setTimeout(() => { g.hidden = true; emEdicao = null; }, 250);
   }
 
-  /** Só o que mudou. Mandar o documento inteiro faria toda edição carregar
-   *  campos que ninguém tocou, multiplicando a chance de sobrescrever com dado
-   *  velho — a função aceita parcial justamente por isso. */
-  function alterados() {
-    const e = emEdicao;
-    const novo = {
+  /** O formulário inteiro, como valores. */
+  function valores() {
+    return {
       nome_pt: $('exc-f-nome').value.trim(),
       instrucao_pt: $('exc-f-instrucao').value.trim(),
       grupo: $('exc-f-grupo').value,
@@ -736,6 +778,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
       musculosSecundarios: secundarios,
       revisarMusculo: $('exc-f-revisar-musculo').checked,
     };
+  }
+
+  /** Só o que mudou. Mandar o documento inteiro faria toda edição carregar
+   *  campos que ninguém tocou, multiplicando a chance de sobrescrever com dado
+   *  velho — a função aceita parcial justamente por isso. Criar não tem esse
+   *  problema nem essa saída: lá vai o conjunto inteiro, porque não há
+   *  documento anterior de onde o que faltar possa vir. */
+  function alterados() {
+    const e = emEdicao;
+    const novo = valores();
     const diff = {};
     for (const [k, v] of Object.entries(novo)) {
       const atual = e[k];
@@ -799,6 +851,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   }
 
   async function salvar(tambemRevisar) {
+    if (modo === 'criar') return criarExercicio(tambemRevisar);
     if (!emEdicao) return;
     const botoes = [$('exc-salvar'), $('exc-salvar-revisar')];
     botoes.forEach((b) => (b.disabled = true));
@@ -826,6 +879,106 @@ import AdminHeader from '../../components/AdminHeader.astro';
     } finally {
       botoes.forEach((b) => (b.disabled = false));
     }
+  }
+
+  // ── Cadastro (spec 5.5) ──
+  // Abre a MESMA gaveta em modo de criação. O que muda é o que não faz sentido
+  // num documento que ainda não existe: não há procedência para mostrar, não há
+  // selo de revisão para exibir e não há o que arquivar nem desrevisar.
+  function abrirNovo() {
+    modo = 'criar';
+    emEdicao = null;
+    secundarios = [];
+    $('exc-painel-nome').textContent = 'Novo exercício';
+    $('exc-painel-selo').innerHTML =
+      '<span class="exc-selo exc-selo--ok">curadoria do Coach</span>';
+    $('exc-f-nome').value = '';
+    $('exc-f-instrucao').value = '';
+    // Vazio, e não pré-escolhido: um grupo sugerido é o grupo que a metade
+    // apressada dos cadastros vai herdar sem ninguém ter decidido nada.
+    $('exc-f-grupo').value = '';
+    $('exc-f-equipamento').value = '';
+    $('exc-f-mecanica').value = '';
+    $('exc-f-nivel').value = '';
+    $('exc-f-musculo').value = '';
+    $('exc-f-revisar-musculo').checked = false;
+    pintarSecundarios();
+    $('exc-recado').innerHTML = '';
+    $('exc-proc').hidden = true;
+    $('exc-desrevisar').hidden = true;
+    $('exc-arquivar').hidden = true;
+    // A marca de "músculo a conferir" fala de classificação herdada de acervo.
+    // Num exercício que o Coach está classificando agora ela não tem sentido, e
+    // o servidor a grava como falsa de qualquer forma.
+    $('exc-f-revisar-musculo').closest('label').hidden = true;
+    $('exc-salvar-revisar').hidden = false;
+    const g = $('exc-gaveta');
+    g.hidden = false;
+    requestAnimationFrame(() => g.classList.add('aberta'));
+    $('exc-f-nome').focus();
+  }
+
+  async function criarExercicio(revisar) {
+    const botoes = [$('exc-salvar'), $('exc-salvar-revisar')];
+    botoes.forEach((b) => (b.disabled = true));
+    try {
+      const campos = valores();
+      // Validação de tela é conveniência; a garantia é do servidor. Ela existe
+      // aqui só para não gastar uma ida à rede num formulário obviamente
+      // incompleto — e para apontar o campo, que o erro do servidor não faz.
+      const faltando = [
+        ['nome_pt', 'o nome em português'], ['instrucao_pt', 'a instrução'],
+        ['grupo', 'o grupo'], ['musculoPrimario', 'o músculo principal'],
+        ['equipamento', 'o equipamento'], ['nivel', 'o nível'],
+      ].filter(([k]) => !campos[k]).map(([, r]) => r);
+      if (faltando.length) {
+        recado(`Falta preencher ${faltando.join(', ')}.`, 'erro');
+        return;
+      }
+      const r = await chamar('atualizar-exercicio', { operacao: 'criar', campos, revisar });
+      recado(revisar
+        ? 'Exercício criado e marcado como revisado.'
+        : 'Exercício criado. Ele entra na fila aguardando sua revisão.', 'ok');
+      // Leva o filtro para onde o exercício novo de fato está, senão o Coach
+      // cria algo e volta para uma lista onde ele não aparece — e conclui que a
+      // gravação falhou.
+      estado.estado = revisar ? 'revisados' : 'aguardando';
+      estado.busca = campos.nome_pt;
+      $('exc-busca').value = campos.nome_pt;
+      estado.pagina = 1;
+      pintarEstados();
+      await carregar();
+      setTimeout(fechar, 1100);
+      return r;
+    } catch (e) {
+      recado(e.message, 'erro');
+    } finally {
+      botoes.forEach((b) => (b.disabled = false));
+    }
+  }
+
+  // ── Arquivar e desarquivar (spec 5.4) ──
+  async function alternarArquivo() {
+    if (!emEdicao) return;
+    const b = $('exc-arquivar');
+    const arquivando = emEdicao.ativo !== false;
+    b.disabled = true;
+    try {
+      await chamar('atualizar-exercicio', {
+        operacao: arquivando ? 'arquivar' : 'desarquivar',
+        exerciseId: emEdicao.id,
+      });
+      recado(arquivando
+        ? 'Arquivado. Some do seletor de planos novos; quem já o tem num plano continua com ele.'
+        : 'Desarquivado. Volta a aparecer no seletor de planos novos.', 'ok');
+      await carregar();
+      // Fecha: o exercício saiu do filtro em que a lista está, e deixar a gaveta
+      // aberta sobre um item que não está mais na tela convida a salvar em cima
+      // de um documento que ninguém está vendo.
+      setTimeout(fechar, 1100);
+    } catch (e) {
+      recado(e.message, 'erro');
+    } finally { b.disabled = false; }
   }
 
   // ── Ligações ──
@@ -913,6 +1066,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
   });
   $('exc-salvar').addEventListener('click', () => salvar(false));
   $('exc-salvar-revisar').addEventListener('click', () => salvar(true));
+  $('exc-novo').addEventListener('click', abrirNovo);
+  $('exc-arquivar').addEventListener('click', alternarArquivo);
 
   // Aplica o corte antes de qualquer carga: assim o primeiro carregar() já sai
   // com o estado certo, em vez de buscar "aguardando" e refazer o pedido.

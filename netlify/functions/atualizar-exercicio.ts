@@ -12,10 +12,11 @@
 // real é o claim admin, e quem o confere aqui é o Admin SDK, que ignora as
 // regras por ser servidor.
 //
-// O QUE ESTA VERSÃO FAZ, E O QUE AINDA NÃO FAZ
-// Autenticação, `editar`, `revisar`, `revisar-lote` e os dois desfazeres —
-// `desrevisar` e `desrevisar-lote`. Ficam para os passos seguintes `arquivar` e
-// `criar`.
+// OPERAÇÕES
+// `criar`, `editar`, `revisar`, `desrevisar`, `revisar-lote`, `desrevisar-lote`,
+// `arquivar` e `desarquivar`. A operação `excluir` do rascunho inicial do
+// contrato NÃO existe e não deve ser adicionada: a decisão 14 a removeu porque
+// arquivar cobre o caso e é reversível.
 //
 // POR QUE DESFAZER EXISTE
 // A especificação decidiu que exclusão definitiva não existe porque arquivar
@@ -45,7 +46,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
-import { CAMPOS_EDITAVEIS, validarCampos, dobraBusca, GRUPOS, EQUIPAMENTOS } from "./_vocabulario-exercicios";
+import { CAMPOS_EDITAVEIS, validarCampos, validarNovo, dobraBusca, GRUPOS, EQUIPAMENTOS } from "./_vocabulario-exercicios";
 
 const COLECAO = "exercises";
 
@@ -133,6 +134,88 @@ async function revisarLote(corpo: Record<string, any>, uid: string, marcar: bool
   });
 }
 
+/**
+ * Cadastro de exercício que o acervo externo não tem — agachamento búlgaro,
+ * abdução de quadril, elevação de quadril bem classificada (spec 5.5).
+ *
+ * PROCEDÊNCIA É ESCRITA AQUI, NUNCA RECEBIDA
+ * origem.fonte, criadoPor e os carimbos não saem do corpo da requisição: são o
+ * registro de onde o documento veio, e um registro que a própria requisição
+ * pode ditar não registra nada. Vem do token o uid, e do servidor a hora.
+ *
+ * POR QUE PODE NASCER JÁ REVISADO
+ * A especificação separa editar de atestar porque "corrigir uma vírgula não é
+ * atestar que o exercício está pronto" (5.3) — e está certa para edição. Na
+ * criação o texto inteiro é do Coach, e obrigá-lo a procurar na fila o que
+ * acabou de escrever seria pedir que ele revisasse a si mesmo. Ainda assim a
+ * escolha fica com ele, nos mesmos dois botões da edição: quem cria um rascunho
+ * para conferir depois usa `criar` puro e o exercício entra aguardando.
+ *
+ * DUPLICATA
+ * Nome repetido não quebra gravação nenhuma — e é exatamente por isso que
+ * precisa de barreira aqui. Dois "Agachamento Búlgaro" no catálogo aparecem
+ * lado a lado no buscador do construtor, indistinguíveis, e o Coach escolhe um
+ * ao acaso; meses depois o histórico do atleta está partido entre os dois. A
+ * comparação usa a mesma dobra da busca: acento e caixa não fazem exercício
+ * diferente.
+ */
+async function criar(corpo: Record<string, any>, uid: string) {
+  const campos = corpo.campos;
+  if (!campos || typeof campos !== "object" || Array.isArray(campos)) {
+    return json(400, { erro: "campos obrigatório para 'criar'." });
+  }
+
+  const erros = validarNovo(campos);
+  if (erros.length) return json(422, { erro: "Campos inválidos.", detalhes: erros });
+
+  const db = getFirestore();
+  const alvo = dobraBusca(campos.nome_pt);
+  const snap = await db.collection(COLECAO).get();
+  const igual = snap.docs.find((d) => dobraBusca((d.data() as Record<string, any>).nome_pt) === alvo);
+  if (igual) {
+    const d = igual.data() as Record<string, any>;
+    return json(409, {
+      erro: "Já existe um exercício com esse nome.",
+      detalhe: `"${d.nome_pt}" (${d.grupo} · ${d.equipamento})${d.ativo === false ? " — está arquivado; desarquive em vez de criar outro." : ""}`,
+      exerciseId: igual.id,
+    });
+  }
+
+  const revisar = corpo.revisar === true;
+  const agora = FieldValue.serverTimestamp();
+
+  const documento: Record<string, any> = {
+    nome_pt: String(campos.nome_pt).trim(),
+    // Sem nome de origem: não veio de acervo nenhum. O campo existe para a
+    // busca em inglês e para o bloco de procedência, e mentir um valor aqui
+    // faria o exercício parecer importado.
+    nome_en: null,
+    instrucao_pt: String(campos.instrucao_pt).trim(),
+    instrucao_en: campos.instrucao_en ?? null,
+    grupo: campos.grupo,
+    musculoPrimario: campos.musculoPrimario,
+    musculosSecundarios: campos.musculosSecundarios ?? [],
+    equipamento: campos.equipamento,
+    mecanica: campos.mecanica ?? null,
+    nivel: campos.nivel,
+    // Falso, e não copiado do corpo: a marca significa "a classificação veio da
+    // base de origem e merece um olhar". Aqui a classificação é do Coach.
+    revisarMusculo: false,
+    publicado: true,
+    ativo: true,
+    origem: { fonte: "curadoria-coach", idOrigem: null },
+    revisadoPor: revisar ? uid : null,
+    revisadoEm: revisar ? agora : null,
+    criadoPor: uid,
+    criadoEm: agora,
+    atualizadoPor: uid,
+    atualizadoEm: agora,
+  };
+
+  const ref = await db.collection(COLECAO).add(documento);
+  return json(201, { ok: true, operacao: "criar", exerciseId: ref.id, revisado: revisar });
+}
+
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -167,13 +250,20 @@ export const handler = async (event: any) => {
   }
 
   const { operacao, exerciseId, campos } = corpo;
-  if (operacao !== "revisar-lote" && (!exerciseId || typeof exerciseId !== "string")) {
-    return json(400, { erro: "exerciseId obrigatório." });
-  }
+
+  // As que não trabalham sobre um documento existente saem antes da exigência
+  // de exerciseId: criar ainda não tem id, e as de lote resolvem o conjunto
+  // pelo filtro.
+  if (operacao === "criar") return criar(corpo, uid);
   if (operacao === "revisar-lote") return revisarLote(corpo, uid, true);
   if (operacao === "desrevisar-lote") return revisarLote(corpo, uid, false);
-  if (operacao !== "editar" && operacao !== "revisar" && operacao !== "desrevisar") {
-    return json(400, { erro: `Operação não reconhecida: ${String(operacao)}. Aceitas: 'editar', 'revisar', 'desrevisar', 'revisar-lote', 'desrevisar-lote'.` });
+
+  const SOBRE_UM = ["editar", "revisar", "desrevisar", "arquivar", "desarquivar"];
+  if (!SOBRE_UM.includes(operacao)) {
+    return json(400, { erro: `Operação não reconhecida: ${String(operacao)}. Aceitas: 'criar', 'editar', 'revisar', 'desrevisar', 'arquivar', 'desarquivar', 'revisar-lote', 'desrevisar-lote'.` });
+  }
+  if (!exerciseId || typeof exerciseId !== "string") {
+    return json(400, { erro: "exerciseId obrigatório." });
   }
 
   try {
@@ -214,6 +304,29 @@ export const handler = async (event: any) => {
         alterados: chaves,
         revisado: Boolean(doc.data()?.revisadoPor),
       });
+    }
+
+    // ── Arquivar e desarquivar ──
+    // `ativo: false` tira o exercício do seletor de planos novos e o mantém
+    // resolvendo o nome nos planos antigos (spec 5.4). O par inverso não está
+    // na tabela da seção 7, mas a decisão 14 dispensou a exclusão definitiva
+    // JUSTAMENTE por arquivar ser reversível — sem desarquivar, o argumento
+    // que dispensou a exclusão não se sustentaria.
+    //
+    // Revisão e arquivamento são eixos independentes de propósito: arquivar um
+    // exercício revisado e depois desarquivá-lo devolve o registro de quem o
+    // aprovou intacto, porque revisadoPor nunca foi tocado. Fossem o mesmo
+    // eixo, guardar um exercício por uma temporada custaria a autoria da
+    // aprovação.
+    if (operacao === "arquivar" || operacao === "desarquivar") {
+      const arquivando = operacao === "arquivar";
+      const d = doc.data() ?? {};
+      const jaEstavaArquivado = d.ativo === false;
+      if (jaEstavaArquivado === arquivando) {
+        return json(200, { ok: true, operacao, exerciseId, jaEstava: true });
+      }
+      await ref.update({ ativo: !arquivando, atualizadoPor: uid, atualizadoEm: agora });
+      return json(200, { ok: true, operacao, exerciseId, ativo: !arquivando });
     }
 
     if (operacao === "desrevisar") {

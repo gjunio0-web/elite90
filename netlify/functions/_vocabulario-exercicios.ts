@@ -117,3 +117,32 @@ export function validarCampos(campos: Record<string, unknown>): string[] {
 
   return erros;
 }
+
+/** Campos sem os quais um exercício novo não serve a ninguém.
+ *
+ *  Não é a mesma lista de CAMPOS_EDITAVEIS: editar aceita parcial de propósito,
+ *  porque o documento já existe e o que não veio permanece. Criar não tem esse
+ *  "permanece" — o que faltar nasce vazio, e um exercício sem instrução ou sem
+ *  grupo entra no catálogo como linha morta: aparece no seletor, não diz como
+ *  executar e não é achável por filtro. */
+export const CAMPOS_OBRIGATORIOS_NOVO = ['nome_pt', 'instrucao_pt', 'grupo',
+  'musculoPrimario', 'equipamento', 'nivel'] as const;
+
+/**
+ * Valida o corpo de um exercício novo. Devolve a lista de problemas.
+ *
+ * Primeiro cobra o que é obrigatório, depois passa o conjunto inteiro pela
+ * mesma validarCampos da edição — o vocabulário fechado é o mesmo nos dois
+ * caminhos, e duplicá-lo aqui seria criar uma segunda verdade que envelhece
+ * sozinha.
+ */
+export function validarNovo(campos: Record<string, unknown>): string[] {
+  const erros: string[] = [];
+  for (const chave of CAMPOS_OBRIGATORIOS_NOVO) {
+    const v = campos[chave];
+    if (v == null || (typeof v === 'string' && v.trim() === '')) {
+      erros.push(`${chave} é obrigatório em exercício novo`);
+    }
+  }
+  return [...erros, ...validarCampos(campos)];
+}
