@@ -152,6 +152,48 @@ import AdminHeader from '../../components/AdminHeader.astro';
        idêntico faria a tela parecer ter quatro módulos quando tem dois.
        Daí a diferença deliberada: largura inteira, sem barra colorida no topo,
        fundo transparente com borda tracejada, ícone à esquerda. */
+    /* ── BASES DE DOMÍNIO ──
+       Ficam ENTRE os módulos e o cartão do guia, e são visualmente
+       subordinadas de propósito (decisão 4 da spec do catálogo): não são um
+       quarto módulo. Um módulo é uma área do produto; uma base é o insumo que
+       as áreas consomem. Daí nome em Raleway e não em Bebas Neue, barra oliva
+       em vez das cores de módulo, e borda sólida — o cartão do guia fica com a
+       tracejada que já tinha, e assim os três níveis não se confundem. */
+    .bases { margin-top: var(--space-6); }
+    .bases__titulo {
+      font-family: var(--font-label); font-weight: var(--fw-label);
+      font-size: var(--fs-label); letter-spacing: var(--tracking-label);
+      text-transform: uppercase; color: var(--c-textsub); margin: 0 0 var(--space-3);
+    }
+    .base-card {
+      display: flex; align-items: center; gap: var(--space-4);
+      background: var(--c-darkbg); border: 1px solid var(--c-line-muted);
+      border-left: 3px solid var(--c-olive);
+      border-radius: 0 var(--radius-card) var(--radius-card) 0;
+      padding: var(--space-4) var(--space-5); margin-bottom: var(--space-2);
+      text-decoration: none;
+      transition: border-color var(--transition-base), background var(--transition-base);
+    }
+    .base-card:hover { border-left-color: var(--c-lime); background: rgba(166,195,0,0.04); }
+    .base-card--futura { opacity: 0.45; pointer-events: none; }
+    .base-card__icone { color: var(--c-lime); flex-shrink: 0; display: flex; }
+    .base-card--futura .base-card__icone { color: var(--c-textsub); }
+    .base-card__corpo { flex: 1; min-width: 0; }
+    .base-card__nome { font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-body-md); color: var(--c-white); display: block; }
+    .base-card__sub { font-size: var(--fs-body-sm); color: var(--c-textsub); display: block; margin-top: 2px; }
+    .base-card__selo {
+      font-family: var(--font-label); font-weight: var(--fw-label); font-size: 10px;
+      letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+      padding: 4px 10px; border-radius: var(--radius-pill);
+      color: var(--c-pending); border: 1px solid rgba(230,126,34,0.45); background: rgba(230,126,34,0.12);
+    }
+    .base-card__selo--neutro { color: var(--c-textsub); border-color: var(--c-line-muted); background: transparent; }
+    .base-card__seta { color: var(--c-lime); flex-shrink: 0; display: flex; }
+    @media (max-width: 600px) {
+      .base-card { flex-wrap: wrap; gap: var(--space-3); }
+      .base-card__corpo { flex-basis: 100%; order: 2; }
+    }
+
     .guide-card {
       margin-top: var(--space-4);
       background: transparent;
@@ -303,6 +345,35 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     </div>
 
+    <section class="bases" aria-labelledby="bases-titulo">
+      <h2 class="bases__titulo" id="bases-titulo">Bases de domínio</h2>
+
+      <a class="base-card" href="/admin/exercicios">
+        <span class="base-card__icone" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v16M18 4v16M2 8v8M22 8v8M6 12h12"/></svg>
+        </span>
+        <span class="base-card__corpo">
+          <span class="base-card__nome">Catálogo de Exercícios</span>
+          <span class="base-card__sub" id="bases-ex-sub">Nomes, instruções e classificação dos exercícios</span>
+        </span>
+        <span class="base-card__selo base-card__selo--neutro" id="bases-ex-selo">carregando…</span>
+        <span class="base-card__seta" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
+
+      <div class="base-card base-card--futura" aria-disabled="true">
+        <span class="base-card__icone" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M17 3c-1.7 0-3 2-3 5s1 4 3 4v9"/></svg>
+        </span>
+        <span class="base-card__corpo">
+          <span class="base-card__nome">Base de Alimentos</span>
+          <span class="base-card__sub">TACO e curadoria própria</span>
+        </span>
+        <span class="base-card__selo base-card__selo--neutro">Em desenvolvimento</span>
+      </div>
+    </section>
+
     <a class="guide-card" href="/admin/guia">
       <div class="guide-card__icon" aria-hidden="true">
         <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -344,7 +415,36 @@ import AdminHeader from '../../components/AdminHeader.astro';
       if (!user) { window.location.href = "/admin/login"; return; }
       const el = document.getElementById("adm-email");
       if (el) el.textContent = user.email ?? "";
+      contarExercicios(user);
     });
+
+    // Selo de pendências da base de exercícios. Falha em SILÊNCIO de propósito:
+    // o hub é a porta de entrada do painel, e uma base de domínio fora do ar não
+    // pode encher a tela de erro nem atrasar o resto. Sem resposta, o selo some
+    // — ausente é melhor que número inventado, e o caminho para a tela continua.
+    async function contarExercicios(user) {
+      const selo = document.getElementById("bases-ex-selo");
+      const sub  = document.getElementById("bases-ex-sub");
+      if (!selo) return;
+      try {
+        const resp = await fetch("/.netlify/functions/listar-exercicios", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${await user.getIdToken(false)}` },
+          body: JSON.stringify({ estado: "aguardando", porPagina: 1 }),
+        });
+        if (!resp.ok) throw new Error(String(resp.status));
+        const { contadores: c } = await resp.json();
+        if (sub) sub.textContent = `${c.total} exercícios · 8 grupos musculares`;
+        if (c.aguardando > 0) {
+          selo.textContent = `${c.aguardando} aguardando revisão`;
+          selo.classList.remove("base-card__selo--neutro");
+        } else {
+          selo.textContent = "tudo revisado";
+        }
+      } catch {
+        selo.remove();
+      }
+    }
 
     document.getElementById("btn-logout")?.addEventListener("click", async () => {
       await signOut(auth);

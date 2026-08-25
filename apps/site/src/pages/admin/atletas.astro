@@ -568,6 +568,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .wke-search-input { width: 100%; background: var(--c-black); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-md); padding: 11px 12px 11px 38px; }
     .wke-search-input:focus { outline: none; border-color: var(--c-lime); box-shadow: 0 0 0 2px rgba(166, 195, 0, 0.12); }
     .wke-search-results { max-height: 320px; overflow-y: auto; }
+    .wke-search-catalogo { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px; border-top: 1px solid rgba(255,255,255,0.08); font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); text-decoration: none; transition: color var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std); }
+    .wke-search-catalogo:hover { color: var(--c-lime); background: rgba(166,195,0,0.06); }
+    .wke-search-catalogo [data-lucide] { width: 13px; height: 13px; }
     .wke-search-result { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: 11px var(--space-4); cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 120ms ease; }
     /* Pendência como TARJA, não como texto na linha. O estado é o mesmo para
        centenas de resultados: dizê-lo por extenso em cada um custava largura
@@ -1489,6 +1492,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <div class="wke-search-results" id="wke-search-results">
             <div class="wke-search-hint">Digite ao menos 3 letras para buscar.</div>
           </div>
+          <!-- Atalho para o catálogo. A especificação o chama de entrada de uso
+               diário, e com razão: a vontade de corrigir um nome ou de procurar
+               um exercício que não existe nasce AQUI, com o plano aberto — não
+               no hub. Abre em ABA NOVA de propósito: o plano em edição vive só
+               na memória da página (wkePlanCache; o auto-salvamento ainda é um
+               comentário), e sair da página o perderia. -->
+          <a class="wke-search-catalogo" href="/admin/exercicios" target="_blank" rel="noopener">
+            Gerenciar catálogo
+            <span data-lucide="external-link"></span>
+          </a>
         </div>
       </div>
 
