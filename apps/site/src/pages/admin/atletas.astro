@@ -1911,6 +1911,23 @@ import AdminHeader from '../../components/AdminHeader.astro';
     }
 </script>
 <script is:inline>
+    // ── DOBRA DE BUSCA: minúsculas E sem acento ──
+    // As três buscas do painel (exercícios, alimentos e atletas) comparavam com
+    // .toLowerCase() apenas. Acento não é removido por lowercase, então "tric"
+    // e "tríc" eram cadeias diferentes: 39% dos 519 exercícios têm diacrítico
+    // no nome, e metade dos grupos (Abdômen, Antebraço, Tríceps, Bíceps)
+    // também. Buscar "biceps" devolvia zero resultado — e "tric" devolvia UM,
+    // "Flexão Pliométrica sobre Kettlebells", que casou por acaso dentro de
+    // "Pliométrica". Resposta errada com cara de resposta certa.
+    //
+    // NFD separa a letra do sinal ("í" vira "i" + acento agudo combinante); o
+    // intervalo U+0300–U+036F é o bloco desses sinais, e removê-lo deixa a
+    // letra base. Vale para os dois lados da comparação: quem digita com
+    // acento continua encontrando o mesmo, e quem digita sem para de ser punido.
+    function dobraBusca(texto) {
+      return String(texto ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    }
+
     // ── PONTE COM O SCRIPT type="module" (Firebase) ──
     // O módulo Firebase (import ESM) roda em escopo separado; ele chama
     // estas duas funções, expostas aqui em window, quando a auth guard
@@ -3395,7 +3412,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       wkeSearchTimer = setTimeout(wkeRunExerciseSearch, 200); // debounce 200ms
     }
     function wkeRunExerciseSearch() {
-      const q = document.getElementById('wke-search-input').value.trim().toLowerCase();
+      const q = dobraBusca(document.getElementById('wke-search-input').value.trim());
       const res = document.getElementById('wke-search-results');
       wkeSearchSelIdx = -1;
       if (q.length < 3) {
@@ -3418,7 +3435,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         return;
       }
       wkeSearchResults = WKE_EXERCISE_DB.filter(function(e) {
-        return e.name.toLowerCase().includes(q) || e.group.toLowerCase().includes(q);
+        return dobraBusca(e.name).includes(q) || dobraBusca(e.group).includes(q);
       }).slice(0, 10); // top 10
       if (!wkeSearchResults.length) {
         res.innerHTML = '<div class="wke-search-hint">Nenhum exercício encontrado para "' + q + '".</div>';
@@ -4504,7 +4521,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       nteSearchTimer = setTimeout(nteRunFoodSearch, 200); // debounce 200ms
     }
     function nteRunFoodSearch() {
-      const q = document.getElementById('nte-search-input').value.trim().toLowerCase();
+      const q = dobraBusca(document.getElementById('nte-search-input').value.trim());
       const res = document.getElementById('nte-search-results');
       nteSearchSelIdx = -1;
       if (q.length < 3) {
@@ -4513,7 +4530,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         return;
       }
       nteSearchResults = NTE_FOOD_DB.filter(function(f) {
-        return f.name.toLowerCase().includes(q);
+        return dobraBusca(f.name).includes(q);
       }).slice(0, 10); // top 10
       if (!nteSearchResults.length) {
         res.innerHTML = '<div class="wke-search-hint">Nenhum alimento encontrado para "' + q + '".</div>';
@@ -4738,9 +4755,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
     });
 
     document.getElementById('search-input').addEventListener('input', (e) => {
-      const query = e.target.value.toLowerCase();
+      const query = dobraBusca(e.target.value);
       filteredAthletes = athletes.filter(a => 
-        a.name.toLowerCase().includes(query) || a.email.toLowerCase().includes(query)
+        dobraBusca(a.name).includes(query) || dobraBusca(a.email).includes(query)
       );
       renderTable();
     });
