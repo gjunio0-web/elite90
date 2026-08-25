@@ -13,8 +13,22 @@
 // regras por ser servidor.
 //
 // O QUE ESTA VERSÃO FAZ, E O QUE AINDA NÃO FAZ
-// Autenticação, `editar`, `revisar` e `revisar-lote`. Ficam para os passos
-// seguintes `arquivar` e `criar`.
+// Autenticação, `editar`, `revisar`, `revisar-lote` e os dois desfazeres —
+// `desrevisar` e `desrevisar-lote`. Ficam para os passos seguintes `arquivar` e
+// `criar`.
+//
+// POR QUE DESFAZER EXISTE
+// A especificação decidiu que exclusão definitiva não existe porque arquivar
+// cobre o caso e é reversível. Não tratou da revisão, que ficou sendo o único
+// ato definitivo do catálogo — e o mais fácil de errar em massa, já que aprova
+// um grupo inteiro de uma vez. Desfazer devolve o exercício a "aguardando" e
+// não destrói nada: quem já tem o exerciseId num plano continua resolvendo o
+// nome, exatamente como no arquivamento.
+//
+// O QUE SE PERDE AO DESFAZER: o registro de quem aprovou e quando, naquela
+// aprovação. Nada no sistema lê esse histórico — revisadoPor responde "está
+// aprovado agora?", não "quem aprovou em março?". Se um dia precisar responder
+// a segunda pergunta, isso vira coleção de eventos, não campo.
 //
 // SOBRE A CHEGADA AO PORTAL
 // Nada aqui regenera arquivo nem dispara publicação, e isso é consequência da
@@ -63,7 +77,7 @@ const LOTE_MAX_POR_GRAVACAO = 400;
  * é dividida em blocos de 400 apenas porque é o teto do Firestore, não como
  * política.
  */
-async function revisarLote(corpo: Record<string, any>, uid: string) {
+async function revisarLote(corpo: Record<string, any>, uid: string, marcar: boolean) {
   const filtro = corpo.filtro ?? {};
   const esperados = Number(corpo.esperados);
   if (!Number.isInteger(esperados) || esperados < 1) {
@@ -80,11 +94,13 @@ async function revisarLote(corpo: Record<string, any>, uid: string) {
   const snap = await db.collection(COLECAO).get();
   const busca = dobraBusca(filtro.busca).trim();
 
-  // Só entra o que está ATIVO e AINDA NÃO revisado: revisar em bloco é sobre
-  // pendências, e recarimbar quem já foi revisado apagaria quem o revisou.
+  // Ao marcar, só entra o que está ATIVO e AINDA NÃO revisado — recarimbar quem
+  // já foi revisado apagaria quem o revisou. Ao desfazer, o espelho: só o que
+  // está revisado. Nos dois casos, arquivado fica de fora.
   const alvos = snap.docs.filter((d) => {
     const x = d.data() as Record<string, any>;
-    if (x.ativo === false || x.revisadoPor) return false;
+    if (x.ativo === false) return false;
+    if (marcar ? Boolean(x.revisadoPor) : !x.revisadoPor) return false;
     if (filtro.grupo && x.grupo !== filtro.grupo) return false;
     if (filtro.equipamento && x.equipamento !== filtro.equipamento) return false;
     if (busca && !dobraBusca(x.nome_pt).includes(busca) && !dobraBusca(x.nome_en).includes(busca)) return false;
@@ -103,12 +119,18 @@ async function revisarLote(corpo: Record<string, any>, uid: string) {
   for (let i = 0; i < alvos.length; i += LOTE_MAX_POR_GRAVACAO) {
     const bloco = db.batch();
     for (const d of alvos.slice(i, i + LOTE_MAX_POR_GRAVACAO)) {
-      bloco.update(d.ref, { revisadoPor: uid, revisadoEm: agora, atualizadoPor: uid, atualizadoEm: agora });
+      bloco.update(d.ref, marcar
+        ? { revisadoPor: uid, revisadoEm: agora, atualizadoPor: uid, atualizadoEm: agora }
+        : { revisadoPor: null, revisadoEm: null, atualizadoPor: uid, atualizadoEm: agora });
     }
     await bloco.commit();
   }
 
-  return json(200, { ok: true, operacao: "revisar-lote", revisados: alvos.length });
+  return json(200, {
+    ok: true,
+    operacao: marcar ? "revisar-lote" : "desrevisar-lote",
+    [marcar ? "revisados" : "desrevisados"]: alvos.length,
+  });
 }
 
 export const handler = async (event: any) => {
@@ -148,9 +170,10 @@ export const handler = async (event: any) => {
   if (operacao !== "revisar-lote" && (!exerciseId || typeof exerciseId !== "string")) {
     return json(400, { erro: "exerciseId obrigatório." });
   }
-  if (operacao === "revisar-lote") return revisarLote(corpo, uid);
-  if (operacao !== "editar" && operacao !== "revisar") {
-    return json(400, { erro: `Operação não reconhecida: ${String(operacao)}. Esta versão aceita 'editar', 'revisar' e 'revisar-lote'.` });
+  if (operacao === "revisar-lote") return revisarLote(corpo, uid, true);
+  if (operacao === "desrevisar-lote") return revisarLote(corpo, uid, false);
+  if (operacao !== "editar" && operacao !== "revisar" && operacao !== "desrevisar") {
+    return json(400, { erro: `Operação não reconhecida: ${String(operacao)}. Aceitas: 'editar', 'revisar', 'desrevisar', 'revisar-lote', 'desrevisar-lote'.` });
   }
 
   try {
@@ -191,6 +214,20 @@ export const handler = async (event: any) => {
         alterados: chaves,
         revisado: Boolean(doc.data()?.revisadoPor),
       });
+    }
+
+    if (operacao === "desrevisar") {
+      const d = doc.data() ?? {};
+      if (!d.revisadoPor) {
+        return json(200, { ok: true, operacao: "desrevisar", exerciseId, jaEstavaPendente: true });
+      }
+      await ref.update({
+        revisadoPor: null,
+        revisadoEm: null,
+        atualizadoPor: uid,
+        atualizadoEm: agora,
+      });
+      return json(200, { ok: true, operacao: "desrevisar", exerciseId, revisadoPorAnterior: d.revisadoPor });
     }
 
     // operacao === "revisar"

@@ -130,6 +130,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-btn-lime { flex: 1; background: var(--grad-cta); color: var(--c-black); border: 0; border-radius: var(--radius-card); padding: 12px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-cta); text-transform: uppercase; cursor: pointer; }
   .exc-btn-vazado { background: transparent; border: 1px solid rgba(255,255,255,0.18); color: var(--c-textbody); border-radius: var(--radius-card); padding: 12px 16px; font-family: var(--font-label); font-size: var(--fs-label); cursor: pointer; }
   .exc-btn-lime[disabled], .exc-btn-vazado[disabled] { opacity: 0.45; cursor: default; }
+  .exc-desfazer { margin-top: var(--space-3); background: transparent; border: 0; padding: 0; color: var(--c-textsub); font-family: var(--font-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .exc-desfazer:hover { color: var(--c-pending); }
+  .exc-lote--desfazer { background: rgba(255,255,255,0.03); border-color: var(--c-line-muted); color: var(--c-textsub); }
+  .exc-lote--desfazer .exc-lote-btn { border-color: var(--c-textsub); color: var(--c-textbody); }
+  .exc-lote--desfazer .exc-lote-btn:hover { background: rgba(255,255,255,0.06); }
   .exc-nota { margin-top: var(--space-3); background: rgba(255,255,255,0.03); border-left: 2px solid var(--c-olive); padding: 10px 12px; font-size: 11px; color: var(--c-textsub); line-height: 1.65; }
   .exc-recado { margin-top: var(--space-3); font-size: var(--fs-body-sm); padding: 10px 12px; border-radius: var(--radius-card); }
   .exc-recado--ok { color: var(--c-lime); background: rgba(166,195,0,0.08); border: 1px solid rgba(166,195,0,0.3); }
@@ -256,6 +261,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       <button class="exc-btn-vazado" id="exc-salvar" type="button">Salvar</button>
     </div>
     <div id="exc-recado"></div>
+    <button class="exc-desfazer" id="exc-desrevisar" type="button" hidden>Devolver à fila de revisão</button>
 
     <p class="exc-nota">A alteração é gravada no banco imediatamente. A chegada ao portal acontece na próxima publicação do site, que leva alguns minutos — se a busca do construtor de treino ainda mostrar o valor antigo, não é falha do salvamento.</p>
   </aside>
@@ -377,12 +383,21 @@ import AdminHeader from '../../components/AdminHeader.astro';
     ultimoLote = dados.encontrados;
     // Só em "aguardando": nos outros estados não há pendência para aprovar, e a
     // faixa seria um botão sem sentido — ou pior, um que recarimbaria revisados.
-    if (estado.estado !== 'aguardando' || !dados.encontrados) { faixa.innerHTML = ''; return; }
+    // Em "aguardando" a faixa aprova; em "revisados" ela desfaz. Nos demais
+    // estados não há nada em bloco a fazer e ela some.
+    const sentido = estado.estado === 'aguardando' ? 'marcar'
+      : estado.estado === 'revisados' ? 'desfazer' : null;
+    if (!sentido || !dados.encontrados) { faixa.innerHTML = ''; return; }
     const n = dados.encontrados;
-    faixa.innerHTML = `<div class="exc-lote">
-        <span>${n} exercício${n > 1 ? 's' : ''} ${escopoLote()} aguardando sua revisão</span>
-        <button type="button" class="exc-lote-btn" id="exc-lote-abrir">Marcar ${n === 1 ? 'o' : `os ${n}`} como revisado${n > 1 ? 's' : ''}</button>
-      </div>`;
+    faixa.innerHTML = sentido === 'marcar'
+      ? `<div class="exc-lote">
+           <span>${n} exercício${n > 1 ? 's' : ''} ${escopoLote()} aguardando sua revisão</span>
+           <button type="button" class="exc-lote-btn" id="exc-lote-abrir">Marcar ${n === 1 ? 'o' : `os ${n}`} como revisado${n > 1 ? 's' : ''}</button>
+         </div>`
+      : `<div class="exc-lote exc-lote--desfazer">
+           <span>${n} exercício${n > 1 ? 's' : ''} ${escopoLote()} revisado${n > 1 ? 's' : ''}</span>
+           <button type="button" class="exc-lote-btn" id="exc-lote-abrir">Desfazer ${n === 1 ? 'a revisão' : `as ${n} revisões`}</button>
+         </div>`;
   }
 
   function escopoLote() {
@@ -394,12 +409,23 @@ import AdminHeader from '../../components/AdminHeader.astro';
   function abrirJanelaLote() {
     const n = ultimoLote;
     if (!n) return;
-    $('exc-lote-texto').innerHTML =
-      `Você está prestes a marcar <strong>${n} exercício${n > 1 ? 's' : ''} ${escopoLote()}</strong> como revisado${n > 1 ? 's' : ''}. ` +
-      `Isso ${n > 1 ? 'os libera' : 'o libera'} para os atletas na próxima publicação do site.<br><br>` +
-      `Esta ação é <strong>irreversível pela tela</strong>: não há como desmarcar depois, ` +
-      `nem individualmente nem em bloco. Reverter exigiria alterar o banco de dados à mão.`;
-    $('exc-lote-sim').textContent = n > 1 ? `Confirmar ${n} revisões` : 'Confirmar a revisão';
+    const desfazendo = estado.estado === 'revisados';
+    $('exc-lote-titulo').innerHTML = desfazendo
+      ? 'Desfazer <span>revisões</span>'
+      : 'Marcar como <span>revisados</span>';
+    $('exc-lote-texto').innerHTML = desfazendo
+      ? `Você está prestes a devolver <strong>${n} exercício${n > 1 ? 's' : ''} ${escopoLote()}</strong> ` +
+        `à fila de revisão. ${n > 1 ? 'Eles saem' : 'Ele sai'} do catálogo dos atletas na próxima publicação, ` +
+        `e ${n > 1 ? 'voltam' : 'volta'} a aparecer aqui como aguardando.<br><br>` +
+        `Nada é apagado — quem já tem ${n > 1 ? 'esses exercícios' : 'esse exercício'} num plano ` +
+        `continua com ${n > 1 ? 'eles' : 'ele'}. O que se perde é o registro de quem aprovou e quando.`
+      : `Você está prestes a marcar <strong>${n} exercício${n > 1 ? 's' : ''} ${escopoLote()}</strong> como revisado${n > 1 ? 's' : ''}. ` +
+        `Isso ${n > 1 ? 'os libera' : 'o libera'} para os atletas na próxima publicação do site.<br><br>` +
+        `Dá para desfazer depois, pelo filtro <strong>Revisados</strong> ou exercício a exercício — ` +
+        `mas o registro de quem aprovou se perde ao desfazer.`;
+    $('exc-lote-sim').textContent = desfazendo
+      ? (n > 1 ? `Desfazer ${n} revisões` : 'Desfazer a revisão')
+      : (n > 1 ? `Confirmar ${n} revisões` : 'Confirmar a revisão');
     $('exc-lote-sim').disabled = false;
     $('exc-lote-janela').hidden = false;
     // O foco vai para Cancelar, não para Confirmar: quem chegou aqui por engano
@@ -417,14 +443,18 @@ import AdminHeader from '../../components/AdminHeader.astro';
       // por página e a faixa promete o conjunto inteiro. O servidor refaz o
       // filtro e recusa se o número não bater — ver o comentário da função.
       const r = await chamar('atualizar-exercicio', {
-        operacao: 'revisar-lote',
+        operacao: estado.estado === 'revisados' ? 'desrevisar-lote' : 'revisar-lote',
         filtro: { grupo: estado.grupo, equipamento: estado.equipamento, busca: estado.busca },
         esperados: n,
       });
       fecharJanelaLote();
       await carregar();
       $('exc-lote').insertAdjacentHTML('afterbegin',
-        `<div class="exc-recado exc-recado--ok" style="margin:0 0 12px">${r.revisados} exercício(s) marcado(s) como revisado(s).</div>`);
+        `<div class="exc-recado exc-recado--ok" style="margin:0 0 12px">${
+          r.desrevisados != null
+            ? `${r.desrevisados} exercício(s) devolvido(s) à fila de revisão.`
+            : `${r.revisados} exercício(s) marcado(s) como revisado(s).`
+        }</div>`);
     } catch (e) {
       fecharJanelaLote();
       $('exc-lote').innerHTML = `<div class="exc-recado exc-recado--erro" style="margin:0 0 12px">${esc(e.message)}</div>`;
@@ -479,6 +509,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
       `Última alteração · <b>${e.atualizadoEm ? esc(new Date(e.atualizadoEm).toLocaleString('pt-BR')) : '—'}</b>`;
     $('exc-recado').innerHTML = '';
     $('exc-salvar-revisar').hidden = e.revisado;
+    // Desfazer individual só aparece no que está revisado, e é ligação discreta
+    // e não botão: é conserto de engano, não parte do fluxo de trabalho.
+    $('exc-desrevisar').hidden = !e.revisado;
     const g = $('exc-gaveta');
     g.hidden = false;
     requestAnimationFrame(() => g.classList.add('aberta'));
@@ -599,6 +632,21 @@ import AdminHeader from '../../components/AdminHeader.astro';
     if (!ev.target.value) return;
     secundarios.push(ev.target.value);
     pintarSecundarios();
+  });
+  $('exc-desrevisar').addEventListener('click', async () => {
+    if (!emEdicao) return;
+    const b = $('exc-desrevisar');
+    b.disabled = true;
+    try {
+      await chamar('atualizar-exercicio', { operacao: 'desrevisar', exerciseId: emEdicao.id });
+      recado('Devolvido à fila de revisão.', 'ok');
+      await carregar();
+      b.hidden = true;
+      $('exc-salvar-revisar').hidden = false;
+      $('exc-painel-selo').innerHTML = '<span class="exc-selo exc-selo--pend">aguardando validação do Coach</span>';
+    } catch (e) {
+      recado(e.message, 'erro');
+    } finally { b.disabled = false; }
   });
   $('exc-salvar').addEventListener('click', () => salvar(false));
   $('exc-salvar-revisar').addEventListener('click', () => salvar(true));
