@@ -123,6 +123,7 @@ function lerLotes() {
       if (!EQUIPAMENTOS.includes(item.equipamento)) abortar(`${onde}: equipamento fora do vocabulário: ${item.equipamento}`);
       if (!NIVEIS.includes(item.nivel)) abortar(`${onde}: nível fora do vocabulário: ${item.nivel}`);
       if (item.mecanica != null && !MECANICAS.includes(item.mecanica)) abortar(`${onde}: mecânica fora do vocabulário: ${item.mecanica}`);
+      if (item.revisarMusculo != null && typeof item.revisarMusculo !== 'boolean') abortar(`${onde}: revisarMusculo deve ser booleano, veio: ${typeof item.revisarMusculo}`);
       for (const m of item.musculosSecundarios ?? []) {
         if (!MUSCULOS.includes(m)) abortar(`${onde}: músculo secundário fora do vocabulário: ${m}`);
       }
@@ -188,6 +189,11 @@ function documentoDe(item, agora) {
     equipamento: item.equipamento,
     mecanica: item.mecanica ?? null,
     nivel: item.nivel,
+    // Marca de procedência duvidosa do músculo, herdada da base de origem. Não
+    // é estado de revisão: é aviso ao Coach de que ESTE campo merece um olhar
+    // quando ele revisar. Ausente vira false para que a consulta no painel não
+    // precise distinguir "false" de "campo inexistente".
+    revisarMusculo: item.revisarMusculo === true,
     publicado: true,
     ativo: true,
     origem: {
@@ -212,7 +218,7 @@ function documentoDe(item, agora) {
 // estado de revisão e de autoria — reexecutar a carga não pode desfazer o
 // trabalho que o Coach já fez.
 const CAMPOS_ATUALIZAVEIS = ['nome_pt', 'nome_en', 'instrucao_pt', 'instrucao_en', 'grupo',
-  'musculoPrimario', 'musculosSecundarios', 'equipamento', 'mecanica', 'nivel', '_lote'];
+  'musculoPrimario', 'musculosSecundarios', 'equipamento', 'mecanica', 'nivel', 'revisarMusculo', '_lote'];
 
 function igual(a, b) {
   if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every((v, i) => v === b[i]);
@@ -232,6 +238,7 @@ function snapshotDe(item) {
     equipamento: item.equipamento,
     mecanica: item.mecanica ?? null,
     nivel: item.nivel,
+    revisarMusculo: item.revisarMusculo === true,
     _lote: item._lote,
   };
   return d;

@@ -67,7 +67,7 @@ const NIVEIS = ['iniciante', 'intermediario', 'avancado'];
 // Campos comparados entre redação e banco. Fora daqui, de propósito: publicado,
 // ativo, revisadoPor, revisadoEm e os carimbos — são estado, não conteúdo.
 const CAMPOS = ['nome_pt', 'nome_en', 'instrucao_pt', 'grupo', 'musculoPrimario',
-  'musculosSecundarios', 'equipamento', 'mecanica', 'nivel'];
+  'musculosSecundarios', 'equipamento', 'mecanica', 'nivel', 'revisarMusculo'];
 
 const achados = [];
 function apontar(categoria, detalhe) { achados.push({ categoria, detalhe }); }

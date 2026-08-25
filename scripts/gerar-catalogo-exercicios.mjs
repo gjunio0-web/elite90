@@ -149,6 +149,9 @@ async function principal() {
       equipamento: d.equipamento,
       mecanica: d.mecanica ?? null,
       nivel: d.nivel ?? null,
+      // Sinaliza classificação de músculo herdada da origem, que o Coach deve
+      // conferir ao revisar. Viaja até o painel para virar o aviso na lista.
+      revisarMusculo: d.revisarMusculo === true,
     });
   });
 
