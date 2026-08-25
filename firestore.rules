@@ -81,6 +81,18 @@ service cloud.firestore {
       }
     }
 
+    // ── EXERCÍCIOS (catálogo) — nenhum acesso direto do navegador.
+    // A leitura é por listar-exercicios.ts, a escrita por atualizar-exercicio.ts
+    // — as duas usam o Admin SDK, que ignora estas regras. O portal público lê
+    // o arquivo estático gerado em build, não a coleção.
+    // Bloco nomeado por clareza (spec do catálogo, seção 8): a negação genérica
+    // abaixo já cobria esta coleção antes deste bloco existir. Não é correção
+    // de falha — é o mesmo comentário que os blocos vizinhos já têm, para quem
+    // olhar as regras não precisar confiar no padrão implícito do fim do arquivo.
+    match /exercises/{exerciseId} {
+      allow read, write: if false;
+    }
+
     // ── Tudo o mais: negado. Explícito, para não depender do padrão.
     match /{document=**} {
       allow read, write: if false;
