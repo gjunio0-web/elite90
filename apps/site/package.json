@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "node ../../scripts/filtrar-catalogo.mjs && node ../../scripts/filtrar-demo.mjs && astro dev",
-    "build": "node ../../scripts/filtrar-catalogo.mjs && node ../../scripts/filtrar-demo.mjs && astro build",
+    "build": "node ../../scripts/gerar-catalogo-exercicios.mjs --se-possivel && node ../../scripts/filtrar-catalogo.mjs && node ../../scripts/filtrar-demo.mjs && astro build",
     "preview": "astro preview"
   },
   "dependencies": {

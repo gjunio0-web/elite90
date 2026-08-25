@@ -63,7 +63,28 @@ const RAIZ_PROJETO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SAIDA = resolve(RAIZ_PROJETO, 'scripts/dados-exercicios/catalogo-fonte.json');
 const COLECAO = 'exercises';
 
+// MODO DE BUILD (--se-possivel) — a opção C, decidida em 25/08/2026.
+//
+// Sem a bandeira, este script é ferramenta de linha de comando: falta de
+// credencial é erro de quem digitou, e abortar é a resposta certa.
+//
+// COM a bandeira, ele roda dentro do build do Netlify, e a régua muda: o
+// catálogo é uma base de domínio, não o site inteiro. Derrubar a publicação
+// porque o Firestore piscou seria desproporcional. Então toda falha vira aviso
+// e saída zero, e o arquivo-fonte COMMITADO permanece como estava — que é a
+// reserva. O build segue com o último catálogo bom conhecido.
+//
+// É isso que dissolve o impasse da seção 7 da especificação: a frescura vem do
+// banco quando ele responde, e a resiliência vem do arquivo versionado quando
+// ele não responde. Nenhuma das duas opções originais dava as duas coisas.
+const SE_POSSIVEL = process.argv.includes('--se-possivel');
+
 function abortar(msg) {
+  if (SE_POSSIVEL) {
+    console.warn(`\n[catálogo-fonte] ${msg}`);
+    console.warn('[catálogo-fonte] seguindo com o arquivo-fonte versionado.\n');
+    process.exit(0);
+  }
   console.error(`\n  ERRO: ${msg}\n`);
   process.exit(1);
 }
@@ -162,6 +183,21 @@ async function principal() {
     total: itens.length,
     exercicios: itens,
   };
+
+  // GUARDA CONTRA APAGAR O CATÁLOGO EM SILÊNCIO
+  // Consulta que volta vazia não é sinônimo de catálogo vazio: pode ser coleção
+  // errada, regra nova, credencial de outro projeto. Sobrescrever 519 registros
+  // bons por zero deixaria o site sem catálogo sem nada acusar, e o arquivo
+  // versionado — a reserva — teria sido destruído junto.
+  if (itens.length === 0 && existsSync(SAIDA)) {
+    let anterior = 0;
+    try { anterior = (JSON.parse(readFileSync(SAIDA, 'utf8')).exercicios ?? []).length; } catch { /* ilegível conta como vazio */ }
+    if (anterior > 0) {
+      const recado = `consulta devolveu 0 exercícios, mas o arquivo-fonte tem ${anterior}. NÃO sobrescrito.`;
+      if (SE_POSSIVEL) { console.warn(`\n[catálogo-fonte] ${recado}\n`); process.exit(0); }
+      abortar(`${recado}\n  Confira a coleção e o projeto da credencial antes de repetir.`);
+    }
+  }
 
   mkdirSync(dirname(SAIDA), { recursive: true });
   writeFileSync(SAIDA, JSON.stringify(saida), 'utf8');
