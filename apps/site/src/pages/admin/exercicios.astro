@@ -69,6 +69,21 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-estado:hover { color: var(--c-textbody); }
   .exc-estado[aria-pressed="true"] { background: rgba(166,195,0,0.12); border-color: rgba(166,195,0,0.4); color: var(--c-lime); }
 
+  /* Faixa de revisão em bloco. Só existe com o filtro em "aguardando" e com
+     resultado — é a peça central da tela, mas some quando não há o que aprovar
+     para não virar mais um aviso que se aprende a ignorar. */
+  .exc-lote { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap;
+    background: rgba(230,126,34,0.09); border: 1px solid rgba(230,126,34,0.3);
+    border-radius: var(--radius-card); padding: 12px var(--space-4); margin-bottom: var(--space-3);
+    font-size: var(--fs-body-sm); color: var(--c-pending); }
+  .exc-lote-btn { background: transparent; border: 1px solid var(--c-pending); color: var(--c-pending);
+    border-radius: var(--radius-card); padding: 7px 14px; font-family: var(--font-label);
+    font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label);
+    text-transform: uppercase; cursor: pointer; white-space: nowrap; }
+  .exc-lote-btn:hover { background: rgba(230,126,34,0.14); }
+  .exc-lote-btn[disabled] { opacity: 0.5; cursor: default; }
+  .exc-lote--confirmando { background: rgba(230,126,34,0.16); border-color: var(--c-pending); }
+
   .exc-tabela { border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); overflow: hidden; }
   .exc-cab, .exc-linha { display: grid; grid-template-columns: 1fr 130px 140px 150px; gap: var(--space-3); padding: 11px var(--space-4); align-items: center; }
   .exc-cab { background: var(--c-darkbg); font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); }
@@ -145,6 +160,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
   </div>
 
   <div class="exc-estados" id="exc-estados" role="group" aria-label="Filtrar por estado"></div>
+
+  <div id="exc-lote"></div>
 
   <div class="exc-tabela">
     <div class="exc-cab"><span>Exercício</span><span>Grupo</span><span>Equipamento</span><span>Músculo</span></div>
@@ -314,6 +331,56 @@ import AdminHeader from '../../components/AdminHeader.astro';
     $('exc-proxima').disabled = dados.pagina >= dados.paginas;
   }
 
+  // Estado da confirmação. A spec exige confirmar com o número explícito: são
+  // até 96 exercícios liberados de uma vez para os atletas, e um clique acidental
+  // não deve bastar.
+  let confirmandoLote = false;
+
+  function pintarLote(dados) {
+    const faixa = $('exc-lote');
+    const n = dados.encontrados;
+    // Só em "aguardando": nos outros estados não há pendência para aprovar, e a
+    // faixa seria um botão sem sentido — ou pior, um que recarimbaria revisados.
+    if (estado.estado !== 'aguardando' || !n) { faixa.innerHTML = ''; confirmandoLote = false; return; }
+
+    const oQue = estado.grupo ? `de ${esc(estado.grupo)}` : estado.busca ? 'deste filtro' : 'do catálogo';
+    faixa.innerHTML = confirmandoLote
+      ? `<div class="exc-lote exc-lote--confirmando">
+           <span><strong>Marcar ${n} exercício${n > 1 ? 's' : ''} ${oQue} como revisado${n > 1 ? 's' : ''}?</strong>
+           Isso os libera para os atletas na próxima publicação.</span>
+           <span>
+             <button type="button" class="exc-lote-btn" id="exc-lote-sim">Sim, marcar ${n}</button>
+             <button type="button" class="exc-lote-btn" id="exc-lote-nao">Cancelar</button>
+           </span>
+         </div>`
+      : `<div class="exc-lote">
+           <span>${n} exercício${n > 1 ? 's' : ''} ${oQue} aguardando sua revisão</span>
+           <button type="button" class="exc-lote-btn" id="exc-lote-abrir">Marcar ${n === 1 ? 'o' : `os ${n}`} como revisado${n > 1 ? 's' : ''}</button>
+         </div>`;
+  }
+
+  async function aplicarLote(n) {
+    const btn = $('exc-lote-sim');
+    if (btn) { btn.disabled = true; btn.textContent = 'Marcando…'; }
+    try {
+      // Manda o FILTRO e o número prometido, não a lista de ids: a tela mostra 25
+      // por página e a faixa promete o conjunto inteiro. O servidor refaz o
+      // filtro e recusa se o número não bater — ver o comentário da função.
+      const r = await chamar('atualizar-exercicio', {
+        operacao: 'revisar-lote',
+        filtro: { grupo: estado.grupo, equipamento: estado.equipamento, busca: estado.busca },
+        esperados: n,
+      });
+      confirmandoLote = false;
+      await carregar();
+      $('exc-lote').insertAdjacentHTML('afterbegin',
+        `<div class="exc-recado exc-recado--ok" style="margin:0 0 12px">${r.revisados} exercício(s) marcado(s) como revisado(s).</div>`);
+    } catch (e) {
+      confirmandoLote = false;
+      $('exc-lote').innerHTML = `<div class="exc-recado exc-recado--erro" style="margin:0 0 12px">${esc(e.message)}</div>`;
+    }
+  }
+
   let pedido = 0;
   async function carregar() {
     const meu = ++pedido;
@@ -323,6 +390,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       // várias, e a lenta pode chegar depois da rápida e repintar dado velho.
       if (meu !== pedido) return;
       pintarLinhas(dados);
+      pintarLote(dados);
     } catch (e) {
       if (meu !== pedido) return;
       $('exc-linhas').innerHTML = `<div class="exc-erro">Não foi possível carregar o catálogo. ${esc(e.message)}</div>`;
@@ -451,6 +519,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
     if (!b) return;
     estado.estado = b.dataset.estado; estado.pagina = 1;
     pintarEstados(); carregar();
+  });
+  $('exc-lote').addEventListener('click', (ev) => {
+    if (ev.target.closest('#exc-lote-abrir')) { confirmandoLote = true; carregar(); return; }
+    if (ev.target.closest('#exc-lote-nao')) { confirmandoLote = false; carregar(); return; }
+    const sim = ev.target.closest('#exc-lote-sim');
+    if (sim) aplicarLote(Number(sim.textContent.replace(/\D/g, '')));
   });
   $('exc-linhas').addEventListener('click', (ev) => {
     const b = ev.target.closest('.exc-linha');

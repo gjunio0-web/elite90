@@ -13,8 +13,8 @@
 // regras por ser servidor.
 //
 // O QUE ESTA VERSÃO FAZ, E O QUE AINDA NÃO FAZ
-// Passo 1 da ordem de execução: autenticação, `editar` e `revisar`. Ficam para
-// os passos seguintes `revisar-lote`, `arquivar` e `criar`.
+// Autenticação, `editar`, `revisar` e `revisar-lote`. Ficam para os passos
+// seguintes `arquivar` e `criar`.
 //
 // SOBRE A CHEGADA AO PORTAL
 // Nada aqui regenera arquivo nem dispara publicação, e isso é consequência da
@@ -31,7 +31,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
-import { CAMPOS_EDITAVEIS, validarCampos } from "./_vocabulario-exercicios";
+import { CAMPOS_EDITAVEIS, validarCampos, dobraBusca, GRUPOS, EQUIPAMENTOS } from "./_vocabulario-exercicios";
 
 const COLECAO = "exercises";
 
@@ -40,6 +40,76 @@ const json = (statusCode: number, corpo: unknown) => ({
   headers: { "Content-Type": "application/json; charset=utf-8" },
   body: JSON.stringify(corpo),
 });
+
+const LOTE_MAX_POR_GRAVACAO = 400;
+
+/**
+ * Revisão em bloco. A peça central da tela: sem ela o Coach clicaria 519 vezes
+ * e o catálogo nunca sairia do lugar.
+ *
+ * POR QUE O SERVIDOR REFAZ O FILTRO, EM VEZ DE RECEBER UMA LISTA DE IDs
+ * Receber ids seria mais simples e menos seguro de outra maneira: a tela mostra
+ * 25 por página, e a faixa promete aprovar os 68 do grupo — os outros 43 o Coach
+ * nunca teve na mão. Ou a tela buscaria todos os ids só para devolvê-los, ou
+ * aprovaria menos do que anunciou.
+ *
+ * E POR QUE ELE EXIGE O NÚMERO ESPERADO
+ * Refazer o filtro no servidor tem o risco oposto: entre a tela carregar e o
+ * Coach clicar, o conjunto pode ter mudado, e ele aprovaria em silêncio algo que
+ * não leu. Por isso a tela manda quantos ela prometeu, e divergência vira recusa
+ * com os dois números à vista — não uma aprovação a mais.
+ *
+ * SEM LIMITE ARTIFICIAL (decisão 13): o maior grupo é Pernas, com 96. A gravação
+ * é dividida em blocos de 400 apenas porque é o teto do Firestore, não como
+ * política.
+ */
+async function revisarLote(corpo: Record<string, any>, uid: string) {
+  const filtro = corpo.filtro ?? {};
+  const esperados = Number(corpo.esperados);
+  if (!Number.isInteger(esperados) || esperados < 1) {
+    return json(400, { erro: "esperados deve ser um inteiro positivo — é o número que a tela prometeu ao Coach." });
+  }
+  if (filtro.grupo && !(GRUPOS as readonly string[]).includes(filtro.grupo)) {
+    return json(400, { erro: `grupo fora do vocabulário: ${String(filtro.grupo)}` });
+  }
+  if (filtro.equipamento && !(EQUIPAMENTOS as readonly string[]).includes(filtro.equipamento)) {
+    return json(400, { erro: `equipamento fora do vocabulário: ${String(filtro.equipamento)}` });
+  }
+
+  const db = getFirestore();
+  const snap = await db.collection(COLECAO).get();
+  const busca = dobraBusca(filtro.busca).trim();
+
+  // Só entra o que está ATIVO e AINDA NÃO revisado: revisar em bloco é sobre
+  // pendências, e recarimbar quem já foi revisado apagaria quem o revisou.
+  const alvos = snap.docs.filter((d) => {
+    const x = d.data() as Record<string, any>;
+    if (x.ativo === false || x.revisadoPor) return false;
+    if (filtro.grupo && x.grupo !== filtro.grupo) return false;
+    if (filtro.equipamento && x.equipamento !== filtro.equipamento) return false;
+    if (busca && !dobraBusca(x.nome_pt).includes(busca) && !dobraBusca(x.nome_en).includes(busca)) return false;
+    return true;
+  });
+
+  if (alvos.length !== esperados) {
+    return json(409, {
+      erro: "O conjunto mudou desde que a tela carregou.",
+      detalhe: `A tela prometeu ${esperados} e o filtro encontra ${alvos.length} agora. Recarregue e confira antes de aprovar.`,
+      esperados, encontrados: alvos.length,
+    });
+  }
+
+  const agora = FieldValue.serverTimestamp();
+  for (let i = 0; i < alvos.length; i += LOTE_MAX_POR_GRAVACAO) {
+    const bloco = db.batch();
+    for (const d of alvos.slice(i, i + LOTE_MAX_POR_GRAVACAO)) {
+      bloco.update(d.ref, { revisadoPor: uid, revisadoEm: agora, atualizadoPor: uid, atualizadoEm: agora });
+    }
+    await bloco.commit();
+  }
+
+  return json(200, { ok: true, operacao: "revisar-lote", revisados: alvos.length });
+}
 
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
@@ -75,11 +145,12 @@ export const handler = async (event: any) => {
   }
 
   const { operacao, exerciseId, campos } = corpo;
-  if (!exerciseId || typeof exerciseId !== "string") {
+  if (operacao !== "revisar-lote" && (!exerciseId || typeof exerciseId !== "string")) {
     return json(400, { erro: "exerciseId obrigatório." });
   }
+  if (operacao === "revisar-lote") return revisarLote(corpo, uid);
   if (operacao !== "editar" && operacao !== "revisar") {
-    return json(400, { erro: `Operação não reconhecida: ${String(operacao)}. Esta versão aceita 'editar' e 'revisar'.` });
+    return json(400, { erro: `Operação não reconhecida: ${String(operacao)}. Esta versão aceita 'editar', 'revisar' e 'revisar-lote'.` });
   }
 
   try {

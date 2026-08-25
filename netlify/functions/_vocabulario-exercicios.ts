@@ -45,6 +45,20 @@ export const CAMPOS_EDITAVEIS = ['nome_pt', 'instrucao_pt', 'instrucao_en', 'gru
 const inclui = (lista: readonly string[], v: unknown) => typeof v === 'string' && lista.includes(v);
 
 /**
+ * Dobra de busca: minúsculas E sem acento, dos dois lados da comparação.
+ *
+ * Mora aqui porque listar-exercicios e atualizar-exercicio precisam da MESMA
+ * dobra: a primeira decide o que o Coach vê ao filtrar, a segunda decide o que
+ * a revisão em bloco carimba a partir do mesmo filtro. Se as duas divergissem,
+ * o Coach aprovaria um conjunto diferente do que leu na tela — e o erro seria
+ * silencioso, porque os dois números pareceriam plausíveis.
+ *
+ * NFD separa a letra do sinal; U+0300–U+036F é o bloco desses sinais.
+ */
+export const dobraBusca = (texto: unknown) =>
+  String(texto ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+/**
  * Valida um conjunto parcial de campos editáveis.
  * Devolve a lista de problemas — vazia quer dizer válido.
  *

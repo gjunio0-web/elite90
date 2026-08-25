@@ -36,7 +36,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
-import { GRUPOS, EQUIPAMENTOS } from "./_vocabulario-exercicios";
+import { GRUPOS, EQUIPAMENTOS, dobraBusca } from "./_vocabulario-exercicios";
 
 const COLECAO = "exercises";
 const POR_PAGINA_PADRAO = 25;
@@ -51,11 +51,9 @@ const json = (statusCode: number, corpo: unknown) => ({
   body: JSON.stringify(corpo),
 });
 
-// Mesma dobra usada na busca do construtor de treino (dobraBusca, em
-// atletas.astro): minúsculas E sem acento. Sem isso, "biceps" não encontra
-// "Bíceps", e 200 dos 519 nomes têm diacrítico.
-const dobra = (texto: unknown) =>
-  String(texto ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+// A dobra vive em _vocabulario-exercicios para que a revisão em bloco use
+// exatamente a mesma — ver o comentário lá.
+const dobra = dobraBusca;
 
 /** Item do catálogo como esta função o devolve. */
 export type ItemCatalogo = {
