@@ -938,7 +938,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
       #athlete-drawer.open { background: rgba(0,0,0,0.6); }
       .drawer-panel {
         width: 100%;
+        /* svh = viewport PEQUENO, medido como se a barra do navegador estivesse
+           à mostra. Com vh, a conta é feita contra o viewport grande e não é
+           refeita quando a barra aparece: a folga de 8% no topo passava a ser
+           exatamente o que a barra ocupava, e a gaveta parecia cobrir a tela
+           inteira. Com svh a folga sobrevive aos dois estados — fica maior com
+           a barra recolhida, o que é preferível a sumir.
+           A linha vh acima fica de reserva para navegador sem suporte a svh. */
         height: 92vh;
+        height: 92svh;
         border-left: none;
         border-top: none;
         border-radius: 20px 20px 0 0;
@@ -957,8 +965,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
       .drawer-sidenav { display: none; }
       .drawer-body { flex-direction: column; }
       .drawer-content-wrap { overflow-y: auto; padding: var(--space-4); }
-      /* Cabeçalho compacto no mobile */
-      .drawer-header { padding: var(--space-3) var(--space-4) var(--space-3); }
+      /* Cabeçalho compacto no mobile. touch-action: none pelo mesmo motivo do
+         puxador: sem isso o navegador podia reivindicar o gesto como rolagem
+         antes de o touchmove chegar a cancelá-lo — o touchstart é passivo e não
+         pode cancelar nada. Arrastar pelo puxador sempre funcionou; pelo
+         cabeçalho, era sorteio. */
+      .drawer-header { padding: var(--space-3) var(--space-4) var(--space-3); touch-action: none; }
       .drawer-tab-indicator { display: flex !important; }
 
       /* ── AVALIAÇÃO: Blocos bilaterais em pares no mobile ── */
@@ -2246,24 +2258,46 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
       function getPanel() { return document.querySelector('#athlete-drawer .drawer-panel'); }
 
-      function onTouchStart(e) {
+      // Quando o arrasto nasce no CONTEÚDO (e não no puxador), ele é provisório:
+      // vale enquanto o dedo desce, e é devolvido ao navegador assim que sobe,
+      // para a rolagem seguir normal. Sem essa distinção, habilitar o arrasto
+      // pelo conteúdo mataria a rolagem da gaveta.
+      let origemConteudo = false;
+
+      function onTouchStart(e, doConteudo) {
         const panel = getPanel();
         if (!panel) return;
         startY = e.touches[0].clientY;
         currentY = 0;
         isDragging = true;
+        origemConteudo = !!doConteudo;
         startTime = Date.now();
         panel.style.transition = 'none';
       }
 
-      function onTouchMove(e) {
-        if (!isDragging) return;
+      function cancelarArrasto() {
+        isDragging = false;
+        origemConteudo = false;
+        currentY = 0;
         const panel = getPanel();
-        if (!panel) return;
+        if (panel) { panel.style.transition = ''; panel.style.transform = ''; }
+      }
+
+      // Devolve true quando o gesto foi consumido como arrasto — só aí o
+      // chamador cancela o comportamento padrão. Devolver false deixa o
+      // navegador rolar.
+      function onTouchMove(e) {
+        if (!isDragging) return false;
+        const panel = getPanel();
+        if (!panel) return false;
         const dy = e.touches[0].clientY - startY;
-        if (dy < 0) return;
+        if (dy < 0) {
+          if (origemConteudo) cancelarArrasto();
+          return false;
+        }
         currentY = dy;
         panel.style.transform = 'translateY(' + dy + 'px)';
+        return true;
       }
 
       function onTouchEnd() {
@@ -2299,15 +2333,22 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
       // Delegar no documento — funciona mesmo se drawer abrir depois
       document.addEventListener('touchstart', function(e) {
-        const handle = e.target.closest('.drawer-handle, .drawer-header');
         const drawer = document.getElementById('athlete-drawer');
-        if (handle && drawer && drawer.classList.contains('open')) {
-          onTouchStart(e);
-        }
+        if (!drawer || !drawer.classList.contains('open')) return;
+
+        // Puxador e cabeçalho: arrasto sempre, não há o que rolar ali.
+        if (e.target.closest('.drawer-handle, .drawer-header')) { onTouchStart(e, false); return; }
+
+        // Conteúdo: só quando já está no topo. Fora do topo o gesto para baixo
+        // é rolagem, e roubá-lo seria pior que não ter arrasto nenhum. Este é o
+        // caminho que faltava — puxar a gaveta pelo corpo dela não iniciava
+        // gesto algum, que é como a maioria tenta fechá-la.
+        const wrap = e.target.closest('.drawer-content-wrap');
+        if (wrap && wrap.scrollTop <= 0) onTouchStart(e, true);
       }, { passive: true });
 
       document.addEventListener('touchmove', function(e) {
-        if (isDragging) { onTouchMove(e); e.preventDefault(); }
+        if (isDragging && onTouchMove(e)) e.preventDefault();
       }, { passive: false });
 
       document.addEventListener('touchend', function() {
