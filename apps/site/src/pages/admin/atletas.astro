@@ -577,8 +577,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .wke-search-result--pendente { box-shadow: inset 3px 0 0 var(--c-pending); }
     .wke-search-legenda { position: sticky; top: 0; z-index: 1; background: var(--c-darkbg); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 9px var(--space-4); font-family: var(--font-body); font-size: 11px; line-height: 1.45; color: var(--c-textsub); }
     .wke-search-result:hover, .wke-search-result.active { background: rgba(166, 195, 0, 0.12); }
-    .wke-search-result-name { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-white); }
-    .wke-search-result-tags { display: flex; gap: 5px; flex-shrink: 0; }
+    /* O nome é a informação que o Coach procura; as etiquetas são contexto.
+       Antes a prioridade era a inversa: as etiquetas tinham flex-shrink 0 e o
+       nome era o único que cedia, quebrando em três linhas. */
+    .wke-search-result-name { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-white); flex: 1 1 auto; min-width: 0; }
+    .wke-search-result-tags { display: flex; gap: 5px; flex: 0 1 auto; min-width: 0; }
+    .wke-search-result-tags .wke-ex-tag { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .wke-search-hint { padding: var(--space-4); text-align: center; font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); }
 
     /* Toast (auto-save / PR feedback) */
@@ -3429,9 +3433,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
         : '';
       res.innerHTML = legenda + wkeSearchResults.map(function(e, i) {
         return '<div class="wke-search-result' + (e.revisado ? '' : ' wke-search-result--pendente') + '" data-i="' + i + '" onclick="wkePickExercise(' + i + ')"' +
-          (e.revisado ? '' : ' title="Nome e instrução ainda não validados pelo Coach. Não aparece em produção."') + '>' +
+          ' title="' + e.equip + (e.revisado ? '' : ' · Nome e instrução ainda não validados pelo Coach. Não aparece em produção.') + '">' +
           '<span class="wke-search-result-name">' + e.name + '</span>' +
-          '<span class="wke-search-result-tags"><span class="wke-ex-tag">' + e.group + '</span><span class="wke-ex-tag">' + e.equip + '</span>' +
+          '<span class="wke-search-result-tags"><span class="wke-ex-tag">' + e.group + '</span>' +
           (e.revisado ? '' : '<span class="wke-ex-tag wke-ex-tag--pending">pendente</span>') +
           '</span>' +
         '</div>';
