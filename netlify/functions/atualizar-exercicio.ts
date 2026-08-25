@@ -32,21 +32,27 @@
 // a segunda pergunta, isso vira coleção de eventos, não campo.
 //
 // SOBRE A CHEGADA AO PORTAL
-// Nada aqui regenera arquivo nem dispara publicação, e isso é consequência da
-// opção C escolhida em 25/08/2026: o build passa a ler o Firestore, com o
-// arquivo commitado como reserva quando o banco não responde. Com isso a
-// revisão alcança o portal na próxima publicação, seja ela qual for, sem que a
-// função precise escrever no repositório nem acumular disparos. O gatilho de
-// build com acúmulo continua desejável por prontidão — não por correção — e é
-// item próprio.
+// Nada aqui regenera arquivo nem dispara publicação diretamente — consequência
+// da opção C (25/08/2026, generalizada em scripts/gerar-base.mjs): todo build
+// já lê o Firestore direto, com o arquivo commitado como reserva quando o banco
+// não responde. Isso resolveu a metade "atualizar o arquivo" da decisão 11 da
+// especificação: a função não precisa escrever no repositório, porque qualquer
+// build já busca o estado atual sozinho.
 //
-// ENQUANTO A OPÇÃO C NÃO ESTIVER IMPLEMENTADA, o que esta função grava fica no
-// banco e não chega ao portal. Ver o item aberto na especificação.
+// A metade que sobrava — algo precisa CAUSAR um build depois de uma revisão
+// pura, sem código mudando junto — foi fechada em 26/08/2026: toda operação
+// que grava de verdade chama marcarPendente("exercicios") (ver _publicacao.ts).
+// Quem lê esse carimbo e decide a hora certa de publicar é
+// publicar-bases-pendentes.ts, Netlify Scheduled Function, no mesmo padrão de
+// purge-rejected-leads. O acúmulo da decisão 12 vive lá, não aqui: cada
+// chamada só AVANÇA o carimbo, e é a função agendada que decide se já passou
+// tempo suficiente desde o último avanço para valer a pena publicar.
 
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
 import { CAMPOS_EDITAVEIS, validarCampos, validarNovo, dobraBusca, GRUPOS, EQUIPAMENTOS } from "./_vocabulario-exercicios";
+import { marcarPendente } from "./_publicacao";
 
 const COLECAO = "exercises";
 
@@ -127,6 +133,7 @@ async function revisarLote(corpo: Record<string, any>, uid: string, marcar: bool
     await bloco.commit();
   }
 
+  await marcarPendente("exercicios");
   return json(200, {
     ok: true,
     operacao: marcar ? "revisar-lote" : "desrevisar-lote",
@@ -213,6 +220,7 @@ async function criar(corpo: Record<string, any>, uid: string) {
   };
 
   const ref = await db.collection(COLECAO).add(documento);
+  await marcarPendente("exercicios");
   return json(201, { ok: true, operacao: "criar", exerciseId: ref.id, revisado: revisar });
 }
 
@@ -296,6 +304,7 @@ export const handler = async (event: any) => {
       // está pronto para o atleta — a especificação separa os dois atos de
       // propósito, e por isso revisadoPor/revisadoEm não são tocados aqui.
       await ref.update(patch);
+      await marcarPendente("exercicios");
 
       return json(200, {
         ok: true,
@@ -326,6 +335,7 @@ export const handler = async (event: any) => {
         return json(200, { ok: true, operacao, exerciseId, jaEstava: true });
       }
       await ref.update({ ativo: !arquivando, atualizadoPor: uid, atualizadoEm: agora });
+      await marcarPendente("exercicios");
       return json(200, { ok: true, operacao, exerciseId, ativo: !arquivando });
     }
 
@@ -340,6 +350,7 @@ export const handler = async (event: any) => {
         atualizadoPor: uid,
         atualizadoEm: agora,
       });
+      await marcarPendente("exercicios");
       return json(200, { ok: true, operacao: "desrevisar", exerciseId, revisadoPorAnterior: d.revisadoPor });
     }
 
@@ -368,6 +379,7 @@ export const handler = async (event: any) => {
       // Limpar a marca junto apagaria em silêncio o único sinal de onde ainda
       // falta conferência. Quem confere, desmarca — pela operação 'editar'.
     });
+    await marcarPendente("exercicios");
 
     return json(200, { ok: true, operacao: "revisar", exerciseId, revisadoPor: uid });
   } catch (e: any) {

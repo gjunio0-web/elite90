@@ -16,6 +16,14 @@
 [functions."purge-rejected-leads"]
   schedule = "0 3 * * *"
 
+# A cada 5 minutos, confere se alguma base de domínio (netlify/functions/
+# _publicacao.ts) tem alteração pendente com pelo menos DEBOUNCE_MS de
+# "silêncio" desde a última gravação, e aciona o build hook se sim. Ver o
+# cabeçalho de publicar-bases-pendentes.ts para o desenho completo — inclusive
+# por que o intervalo aqui casa com o DEBOUNCE_MS de lá.
+[functions."publicar-bases-pendentes"]
+  schedule = "*/5 * * * *"
+
 [[redirects]]
   from = "/app/*"
   to = "/app/index.html"

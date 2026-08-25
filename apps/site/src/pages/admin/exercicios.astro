@@ -461,7 +461,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
     <button class="exc-desfazer" id="exc-desrevisar" type="button" hidden>Devolver à fila de revisão</button>
     <button class="exc-desfazer" id="exc-arquivar" type="button" hidden>Arquivar exercício</button>
 
-    <p class="exc-nota">A alteração é gravada no banco imediatamente. A chegada ao portal acontece na próxima publicação do site, que leva alguns minutos — se a busca do construtor de treino ainda mostrar o valor antigo, não é falha do salvamento.</p>
+    <!-- Sem prometer prazo: nada dispara publicação sozinho hoje (ver o
+         cabeçalho de atualizar-exercicio.ts, "SOBRE A CHEGADA AO PORTAL"). Dizer
+         "leva alguns minutos" seria uma garantia que a arquitetura não cumpre —
+         o próximo build é que traz a mudança, e o próximo build depende de
+         alguém publicar código, não desta gravação. -->
+    <p class="exc-nota">A alteração é gravada no banco imediatamente. A chegada ao portal acontece na próxima publicação do site — se a busca do construtor de treino ainda mostrar o valor antigo, não é falha do salvamento; é que o site ainda não foi publicado de novo.</p>
   </aside>
 </div>
 
