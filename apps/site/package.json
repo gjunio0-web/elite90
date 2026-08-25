@@ -2,8 +2,8 @@
   "name": "@elite90/site",
   "type": "module",
   "scripts": {
-    "dev": "node ../../scripts/filtrar-catalogo.mjs && node ../../scripts/filtrar-demo.mjs && astro dev",
-    "build": "node ../../scripts/gerar-catalogo-exercicios.mjs --se-possivel && node ../../scripts/filtrar-catalogo.mjs && node ../../scripts/filtrar-demo.mjs && astro build",
+    "dev": "node ../../scripts/filtrar-bases.mjs && node ../../scripts/filtrar-demo.mjs && astro dev",
+    "build": "node ../../scripts/gerar-base.mjs --se-possivel && node ../../scripts/filtrar-bases.mjs && node ../../scripts/filtrar-demo.mjs && astro build",
     "preview": "astro preview"
   },
   "dependencies": {

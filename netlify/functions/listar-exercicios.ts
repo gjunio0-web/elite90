@@ -7,7 +7,7 @@
 // POR QUE ESTA FUNÇÃO EXISTE — e por que a tela NÃO lê o arquivo estático
 // A especificação (seção 7) dizia "a tela lê o arquivo estático e escreve pela
 // função". Isso não fecha: o arquivo estático passa pelo portão de contexto de
-// filtrar-catalogo.mjs, que em PRODUÇÃO emite somente os exercícios já
+// filtrar-bases.mjs, que em PRODUÇÃO emite somente os exercícios já
 // revisados. Hoje são zero de 519.
 //
 // A tela de catálogo existe justamente para revisar o que ainda não foi

@@ -34,9 +34,10 @@ Thumbs.db
 # Netlify
 .netlify
 
-# Catálogo de exercícios: artefato de build, gerado por scripts/filtrar-catalogo.mjs
-# a partir de scripts/dados-exercicios/catalogo-fonte.json (esse sim, versionado).
+# Bases de domínio: artefatos de build, gerados por scripts/filtrar-bases.mjs
+# a partir dos arquivos-fonte versionados em scripts/dados-*/.
 apps/site/public/dados/exercicios.json
+apps/site/public/dados/alimentos.json
 
 # Maquete de demonstração: artefato de build, emitido por scripts/filtrar-demo.mjs
 # só fora de produção, a partir de scripts/dados-demo/ (esse sim, versionado).

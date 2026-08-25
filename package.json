@@ -5,11 +5,12 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
-    "catalogo:exercicios": "node scripts/gerar-catalogo-exercicios.mjs",
+    "catalogo:exercicios": "node scripts/gerar-base.mjs --base=exercicios",
     "carga:exercicios": "node scripts/carregar-exercicios.mjs",
-    "catalogo:filtrar": "node scripts/filtrar-catalogo.mjs",
     "conferir:exercicios": "node scripts/conferir-exercicios.mjs",
-    "demo:filtrar": "node scripts/filtrar-demo.mjs"
+    "demo:filtrar": "node scripts/filtrar-demo.mjs",
+    "catalogo:alimentos": "node scripts/gerar-base.mjs --base=alimentos",
+    "bases:filtrar": "node scripts/filtrar-bases.mjs"
   },
   "devDependencies": {
     "sharp": "^0.35.3",
