@@ -802,8 +802,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .photo-modal-compare-btn { touch-action: manipulation; background: rgba(13,13,13,0.72); border: 0.75px solid rgba(166,195,0,0.45); color: var(--c-lime); font-family: var(--font-label); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 5px 14px; border-radius: 40px; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std); white-space: nowrap; }
     .photo-modal-compare-btn:hover { background: rgba(13,13,13,0.92); border-color: var(--c-lime); }
     /* ── FAB: CAPTURA PASSIVA + NOTA RÁPIDA ── */
-    .drawer-fab { position: fixed; bottom: var(--space-5); right: var(--space-5); z-index: 250; display: flex; flex-direction: column-reverse; align-items: flex-end; gap: var(--space-3); }
-    .fab-main { width: 52px; height: 52px; border-radius: 50%; background: var(--grad-cta); border: none; color: #000; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.5); transition: transform var(--dur-fast) var(--ease-std), box-shadow var(--dur-fast) var(--ease-std); }
+    /* pointer-events: none no CONTÊINER, auto só nos botões de verdade.
+       O contêiner se dimensiona pelo filho mais largo, e o filho mais largo é
+       .fab-actions — a lista recolhida, que guarda os rótulos e mede 187px.
+       O círculo visível tem 52px e fica na ponta direita, então sobravam ~135px
+       de caixa transparente à esquerda dele, com pointer-events auto, deitados
+       sobre o botão "Adicionar exercício": da metade dele para a direita, o
+       toque ia para o FAB. Transparente não quer dizer atravessável — a caixa
+       recebe o toque igual, e só pointer-events resolve. */
+    .drawer-fab { position: fixed; bottom: var(--space-5); right: var(--space-5); z-index: 250; display: flex; flex-direction: column-reverse; align-items: flex-end; gap: var(--space-3); pointer-events: none; }
+    .fab-main { pointer-events: auto; width: 52px; height: 52px; border-radius: 50%; background: var(--grad-cta); border: none; color: #000; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.5); transition: transform var(--dur-fast) var(--ease-std), box-shadow var(--dur-fast) var(--ease-std); }
     .fab-main:hover { transform: scale(1.08); box-shadow: var(--glow-lime); }
     .fab-main.open { transform: rotate(45deg); }
     .fab-actions { display: flex; flex-direction: column; gap: var(--space-3); align-items: flex-end; overflow: hidden; max-height: 0; transition: max-height var(--dur-med) var(--ease-out), opacity var(--dur-med) var(--ease-out); opacity: 0; pointer-events: none; }
