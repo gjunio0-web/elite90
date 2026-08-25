@@ -92,13 +92,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-linha:focus-visible { box-shadow: inset 0 0 0 1px var(--c-lime); }
   .exc-nome { font-size: var(--fs-body-sm); color: var(--c-white); }
   .exc-col { font-size: var(--fs-body-sm); color: var(--c-textsub); }
-  .exc-selo { display: inline-block; margin-top: 5px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 9px; border-radius: var(--radius-pill); }
+  .exc-selo { display: inline-block; margin-top: 5px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: 0.625rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 9px; border-radius: var(--radius-pill); }
   .exc-selo--pend { color: var(--c-pending); border: 1px solid rgba(230,126,34,0.45); background: rgba(230,126,34,0.12); }
   .exc-selo--ok { color: var(--c-lime); border: 1px solid rgba(166,195,0,0.4); background: rgba(166,195,0,0.12); }
   .exc-selo--arq { color: var(--c-textsub); border: 1px solid var(--c-line-muted); }
   /* Triângulo de músculo a conferir (spec 5.1). Marca herdada da base de origem;
      não é estado de revisão, e por isso não vira selo. */
-  .exc-aviso-musculo { color: var(--c-pending); margin-left: 6px; font-size: 12px; }
+  .exc-aviso-musculo { color: var(--c-pending); margin-left: 6px; font-size: var(--fs-label); }
 
   .exc-vazio, .exc-carregando { padding: var(--space-6); text-align: center; font-size: var(--fs-body-sm); color: var(--c-textsub); }
   .exc-erro { padding: var(--space-4); border: 1px solid rgba(230,126,34,0.4); background: rgba(230,126,34,0.08); border-radius: var(--radius-card); color: var(--c-pending); font-size: var(--fs-body-sm); }
@@ -115,16 +115,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-gaveta.aberta .exc-painel { transform: translateX(0); }
   .exc-painel-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
   .exc-painel-nome { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); letter-spacing: var(--tracking-display); line-height: var(--lh-tight); }
-  .exc-fechar { background: transparent; border: 0; color: var(--c-textsub); font-size: 20px; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .exc-fechar { background: transparent; border: 0; color: var(--c-textsub); font-size: 1.25rem; cursor: pointer; line-height: 1; padding: 0 4px; }
   .exc-rotulo { display: block; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); margin: var(--space-4) 0 6px; }
   .exc-input, .exc-select, .exc-area { width: 100%; background: var(--c-black); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 10px 12px; }
   .exc-area { line-height: var(--lh-body); resize: vertical; min-height: 96px; }
   .exc-input:focus, .exc-select:focus, .exc-area:focus { outline: none; border-color: var(--c-lime); box-shadow: var(--glow-lime-sm); }
   .exc-dupla { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
   .exc-secundarios { display: flex; gap: 6px; flex-wrap: wrap; }
-  .exc-chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-label); font-size: 11px; padding: 5px 10px; border-radius: var(--radius-pill); border: 1px solid var(--c-line-muted); background: rgba(255,255,255,0.04); color: var(--c-textbody); }
-  .exc-chip button { background: transparent; border: 0; color: var(--c-textsub); cursor: pointer; font-size: 13px; line-height: 1; padding: 0; }
-  .exc-proc { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid rgba(255,255,255,0.07); font-size: 11px; color: var(--c-textsub); line-height: 1.85; }
+  .exc-chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-label); font-size: 0.6875rem; padding: 5px 10px; border-radius: var(--radius-pill); border: 1px solid var(--c-line-muted); background: rgba(255,255,255,0.04); color: var(--c-textbody); }
+  .exc-chip button { background: transparent; border: 0; color: var(--c-textsub); cursor: pointer; font-size: 0.8125rem; line-height: 1; padding: 0; }
+  .exc-proc { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid rgba(255,255,255,0.07); font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.85; }
   .exc-proc b { color: var(--c-textbody); font-weight: var(--fw-body); }
   .exc-acoes { display: flex; gap: var(--space-2); margin-top: var(--space-5); }
   .exc-btn-lime { flex: 1; background: var(--grad-cta); color: var(--c-black); border: 0; border-radius: var(--radius-card); padding: 12px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-cta); text-transform: uppercase; cursor: pointer; }
@@ -135,7 +135,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-lote--desfazer { background: rgba(255,255,255,0.03); border-color: var(--c-line-muted); color: var(--c-textsub); }
   .exc-lote--desfazer .exc-lote-btn { border-color: var(--c-textsub); color: var(--c-textbody); }
   .exc-lote--desfazer .exc-lote-btn:hover { background: rgba(255,255,255,0.06); }
-  .exc-nota { margin-top: var(--space-3); background: rgba(255,255,255,0.03); border-left: 2px solid var(--c-olive); padding: 10px 12px; font-size: 11px; color: var(--c-textsub); line-height: 1.65; }
+  .exc-nota { margin-top: var(--space-3); background: rgba(255,255,255,0.03); border-left: 2px solid var(--c-olive); padding: 10px 12px; font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.65; }
   .exc-recado { margin-top: var(--space-3); font-size: var(--fs-body-sm); padding: 10px 12px; border-radius: var(--radius-card); }
   .exc-recado--ok { color: var(--c-lime); background: rgba(166,195,0,0.08); border: 1px solid rgba(166,195,0,0.3); }
   .exc-recado--erro { color: var(--c-pending); background: rgba(230,126,34,0.08); border: 1px solid rgba(230,126,34,0.35); }
@@ -480,7 +480,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   function pintarSecundarios() {
     $('exc-f-secundarios').innerHTML = secundarios.length
       ? secundarios.map((m, i) => `<span class="exc-chip">${esc(m)}<button type="button" data-rm="${i}" aria-label="Remover ${esc(m)}">✕</button></span>`).join('')
-      : '<span style="font-size:11px;color:var(--c-textsub)">nenhum</span>';
+      : '<span style="font-size:0.6875rem;color:var(--c-textsub)">nenhum</span>';
     opcoes($('exc-f-add-secundario'), MUSCULOS.filter((m) => !secundarios.includes(m)), '+ adicionar auxiliar');
   }
 
