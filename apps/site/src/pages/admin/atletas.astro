@@ -358,7 +358,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .wke-daytab-x { position: absolute; top: -5px; right: -5px; width: 17px; height: 17px; border-radius: 50%; background: var(--c-surface-2); border: 1px solid rgba(255, 255, 255, 0.14); color: var(--c-textsub); display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 2; padding: 0; }
     .wke-daytab-wrap:hover .wke-daytab-x { display: inline-flex; }
     .wke-daytab-x:hover { color: var(--c-status-rejected); border-color: var(--c-status-rejected); }
+    /* O SVG injetado por renderIcons() vem com width/height="16" fixos no
+       próprio atributo — redimensionar só o <span> não é suficiente, porque
+       o SVG continua 16x16 por dentro dele, ancorado no canto superior-
+       esquerdo, e transborda para baixo/direita em vez de encolher junto.
+       Por isso o svg também precisa da regra, não só o span que o envolve. */
     .wke-daytab-x [data-lucide] { width: 10px; height: 10px; }
+    /* display:block evita o alinhamento de baseline que um SVG inline usa por
+       padrão — sem isso, o svg fica alguns pixels mais baixo que o span que
+       o contém, mesmo já do tamanho certo. */
+    .wke-daytab-x [data-lucide] svg { width: 10px; height: 10px; display: block; }
     .wke-daytab-rename { padding: 8px 16px; border-radius: var(--radius-pill); border: 1px solid var(--c-lime); background: var(--c-black); color: var(--c-white); font-family: var(--font-label); font-size: var(--fs-label); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); width: 150px; }
     .wke-daytab-rename:focus { outline: none; box-shadow: 0 0 0 2px rgba(166,195,0,0.2); }
 
