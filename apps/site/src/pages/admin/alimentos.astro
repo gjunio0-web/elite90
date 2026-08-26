@@ -1,0 +1,463 @@
+---
+// ELITE90 PRO · /admin/alimentos — Base de Alimentos
+//
+// Passos 1 a 3 da ordem de execução do repasse "tela de revisão da base de
+// alimentos" (26/08/2026): vocabulário e leitura (1), escrita com editar e
+// revisar (2), e esta tela em versão de computador — lista, filtros e gaveta
+// de edição (3). Ficam para depois: revisão em bloco por categoria (4), a
+// linha no hub e o atalho no construtor nutricional (5), versão de celular
+// (6), arquivar/desarquivar (7), o filtro "sem macros completos" (8), o
+// cadastro de item próprio com validação de coerência calórica (9) e o bloco
+// nomeado em firestore.rules (10). Nenhum bloqueia o uso: a coleção já está
+// fechada pela negação genérica, e os passos 1 a 3 já entregam o essencial —
+// o Coach revisa e preenche medida caseira.
+//
+// ESPELHA apps/site/src/pages/admin/exercicios.astro, "espelhe, não redesenhe"
+// (mesmo repasse). Onde diverge, é diferença do dado, não de gosto:
+//   • Um filtro de classificação, não dois — categoria no lugar de
+//     grupo+equipamento, porque alimento tem uma dimensão, exercício tem duas.
+//   • macros é somente leitura nesta rodada: até o passo 9 existir, todo
+//     documento vem da TACO (fonte 'taco-4ed-2011'), e editar macro de item
+//     da TACO quebraria a procedência citável — ver _vocabulario-alimentos.ts.
+//   • Sem faixa de revisão em bloco, sem botão de cadastro, sem arquivar e
+//     sem recorte de celular: são os passos 4, 9, 7 e 6, ainda não chegados.
+//
+// POR QUE ESTA TELA EXISTE
+// Nenhum dos 582 alimentos tem caminho para sair de revisadoPor: nulo — nada
+// preenchia esse campo, e é ele, não publicado, que separa homologação de
+// produção. Em produção a busca de alimentos mostra zero itens até esta peça
+// existir. E a TACO não traz medida caseira: os 582 nasceram com o campo
+// vazio, e é aqui que o Coach o preenche.
+//
+// DE ONDE VÊM OS DADOS — e por que não do arquivo estático
+// A leitura é pela função listar-alimentos, não por /dados/alimentos.json. O
+// arquivo passa pelo portão de contexto de filtrar-bases.mjs, que em PRODUÇÃO
+// só emite os alimentos já revisados — hoje zero de 582. Esta tela precisa do
+// complemento disso. O cabeçalho de listar-alimentos.ts detalha.
+export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../../styles/tokens.css';
+import '../../styles/global.css';
+import AdminHeader from '../../components/AdminHeader.astro';
+---
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+<meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+<meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+<meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
+<meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
+<meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
+<title>Base de Alimentos · ELITE90 PRO</title>
+<!-- is:global pela mesma razão de exercicios.astro: as linhas da tabela nascem
+     de innerHTML, e o escopo do Astro só marca o que estava no template. -->
+<style is:global>
+  body { background: var(--c-black); color: var(--c-textbody); font-family: var(--font-body); }
+  .alm-main { max-width: var(--max-w-content); margin: 0 auto; padding: var(--space-5) var(--space-5) var(--space-8); }
+
+  .alm-topo { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
+  .alm-titulo { font-family: var(--font-display); font-size: var(--fs-display-md); color: var(--c-white); letter-spacing: var(--tracking-display); line-height: var(--lh-display); margin: 0; }
+  .alm-contadores { font-size: var(--fs-body-sm); color: var(--c-textsub); margin-top: var(--space-1); }
+  .alm-contadores strong { color: var(--c-textbody); font-weight: var(--fw-body-bold); }
+
+  .alm-filtros { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-3); }
+  .alm-campo { background: var(--c-darkbg); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-textbody); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 9px 12px; }
+  .alm-campo:focus { outline: none; border-color: var(--c-lime); box-shadow: var(--glow-lime-sm); }
+  #alm-busca { flex: 1; min-width: 220px; }
+
+  .alm-estados { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-5); }
+  .alm-estado { font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; padding: 6px 14px; border-radius: var(--radius-pill); background: transparent; border: 1px solid var(--c-line-muted); color: var(--c-textsub); cursor: pointer; transition: color var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std); }
+  .alm-estado:hover { color: var(--c-textbody); }
+  .alm-estado[aria-pressed="true"] { background: rgba(166,195,0,0.12); border-color: rgba(166,195,0,0.4); color: var(--c-lime); }
+
+  .alm-tabela { border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); overflow: hidden; }
+  .alm-cab, .alm-linha { display: grid; grid-template-columns: 1fr 200px 90px 220px; gap: var(--space-3); padding: 11px var(--space-4); align-items: center; }
+  .alm-cab { background: var(--c-darkbg); font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); }
+  .alm-linha { border-top: 1px solid rgba(255,255,255,0.05); cursor: pointer; background: transparent; border-left: 0; border-right: 0; border-bottom: 0; width: 100%; text-align: left; font: inherit; color: inherit; }
+  .alm-linha:hover, .alm-linha:focus-visible { background: rgba(166,195,0,0.06); outline: none; }
+  .alm-linha:focus-visible { box-shadow: inset 0 0 0 1px var(--c-lime); }
+  .alm-nome { font-size: var(--fs-body-sm); color: var(--c-white); }
+  .alm-col { font-size: var(--fs-body-sm); color: var(--c-textsub); }
+  .alm-selo { display: inline-block; margin-top: 5px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: 0.625rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 9px; border-radius: var(--radius-pill); }
+  .alm-selo--pend { color: var(--c-pending); border: 1px solid rgba(230,126,34,0.45); background: rgba(230,126,34,0.12); }
+  .alm-selo--ok { color: var(--c-lime); border: 1px solid rgba(166,195,0,0.4); background: rgba(166,195,0,0.12); }
+  .alm-selo--arq { color: var(--c-textsub); border: 1px solid var(--c-line-muted); }
+
+  .alm-vazio, .alm-carregando { padding: var(--space-6); text-align: center; font-size: var(--fs-body-sm); color: var(--c-textsub); }
+  .alm-erro { padding: var(--space-4); border: 1px solid rgba(230,126,34,0.4); background: rgba(230,126,34,0.08); border-radius: var(--radius-card); color: var(--c-pending); font-size: var(--fs-body-sm); }
+
+  .alm-paginacao { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-3); font-size: var(--fs-body-sm); color: var(--c-textsub); }
+  .alm-pag-btn { background: transparent; border: 1px solid var(--c-line-muted); color: var(--c-textbody); border-radius: var(--radius-card); padding: 6px 12px; font-family: var(--font-label); font-size: var(--fs-label); cursor: pointer; }
+  .alm-pag-btn[disabled] { opacity: 0.35; cursor: default; }
+
+  /* ── Painel de edição — mesmo padrão de gaveta lateral de exercicios.astro ── */
+  .alm-gaveta { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: flex-end; background: rgba(0,0,0,0); transition: background var(--dur-med) var(--ease-std); }
+  .alm-gaveta[hidden] { display: none !important; }
+  .alm-gaveta.aberta { background: rgba(0,0,0,0.6); }
+  .alm-painel { width: min(440px, 100%); height: 100%; background: var(--c-darkbg); border-left: 1px solid var(--c-line-muted); padding: var(--space-5); overflow-y: auto; transform: translateX(100%); transition: transform var(--dur-med) var(--ease-out); }
+  .alm-gaveta.aberta .alm-painel { transform: translateX(0); }
+  .alm-painel-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+  .alm-painel-nome { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); letter-spacing: var(--tracking-display); line-height: var(--lh-tight); }
+  .alm-fechar { background: transparent; border: 0; color: var(--c-textsub); font-size: 1.25rem; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .alm-rotulo { display: block; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); margin: var(--space-4) 0 6px; }
+  .alm-input { width: 100%; background: var(--c-black); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 10px 12px; }
+  .alm-input:focus { outline: none; border-color: var(--c-lime); box-shadow: var(--glow-lime-sm); }
+  .alm-somente-leitura { font-size: var(--fs-body-sm); color: var(--c-textbody); line-height: 1.7; }
+  .alm-proc { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid rgba(255,255,255,0.07); font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.85; }
+  .alm-proc b { color: var(--c-textbody); font-weight: var(--fw-body); }
+  .alm-acoes { display: flex; gap: var(--space-2); margin-top: var(--space-5); }
+  .alm-btn-lime { flex: 1; background: var(--grad-cta); color: var(--c-black); border: 0; border-radius: var(--radius-card); padding: 12px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-cta); text-transform: uppercase; cursor: pointer; }
+  .alm-btn-vazado { background: transparent; border: 1px solid rgba(255,255,255,0.18); color: var(--c-textbody); border-radius: var(--radius-card); padding: 12px 16px; font-family: var(--font-label); font-size: var(--fs-label); cursor: pointer; }
+  .alm-btn-lime[disabled], .alm-btn-vazado[disabled] { opacity: 0.45; cursor: default; }
+  .alm-desfazer { margin-top: var(--space-3); background: transparent; border: 0; padding: 0; color: var(--c-textsub); font-family: var(--font-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .alm-desfazer:hover { color: var(--c-pending); }
+  .alm-nota { margin-top: var(--space-3); background: rgba(255,255,255,0.03); border-left: 2px solid var(--c-olive); padding: 10px 12px; font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.65; }
+  .alm-recado { margin-top: var(--space-3); font-size: var(--fs-body-sm); padding: 10px 12px; border-radius: var(--radius-card); }
+  .alm-recado--ok { color: var(--c-lime); background: rgba(166,195,0,0.08); border: 1px solid rgba(166,195,0,0.3); }
+  .alm-recado--erro { color: var(--c-pending); background: rgba(230,126,34,0.08); border: 1px solid rgba(230,126,34,0.35); }
+
+  /* Entre 600 e 900px cai só a coluna de macros — quatro colunas fixas não
+     cabem. Segue sendo a tela de computador: nenhuma regra de celular (passo
+     6) chega antes de 600px. */
+  @media (max-width: 900px) {
+    .alm-cab, .alm-linha { grid-template-columns: 1fr 150px 90px; }
+    .alm-cab--macros, .alm-col--macros { display: none; }
+  }
+</style>
+</head>
+<body>
+<AdminHeader badge="Alimentos" backHref="/admin" />
+
+<main class="alm-main">
+  <div class="alm-topo">
+    <div>
+      <h1 class="alm-titulo">Base de Alimentos</h1>
+      <div class="alm-contadores" id="alm-contadores">Carregando…</div>
+    </div>
+  </div>
+
+  <div class="alm-filtros">
+    <input class="alm-campo" id="alm-busca" type="search" placeholder="Buscar por nome…" autocomplete="off" />
+    <select class="alm-campo" id="alm-categoria"><option value="">Todas as categorias</option></select>
+  </div>
+
+  <div class="alm-estados" id="alm-estados" role="group" aria-label="Filtrar por estado"></div>
+
+  <div class="alm-tabela">
+    <div class="alm-cab"><span>Alimento</span><span>Categoria</span><span>Kcal</span><span class="alm-cab--macros">Macros (P·C·G)</span></div>
+    <div id="alm-linhas"><div class="alm-carregando">Carregando a base…</div></div>
+  </div>
+
+  <div class="alm-paginacao">
+    <span id="alm-resumo"></span>
+    <span>
+      <button class="alm-pag-btn" id="alm-anterior" type="button" disabled>Anterior</button>
+      <button class="alm-pag-btn" id="alm-proxima" type="button" disabled>Próxima</button>
+    </span>
+  </div>
+</main>
+
+<div class="alm-gaveta" id="alm-gaveta" hidden>
+  <aside class="alm-painel" role="dialog" aria-modal="true" aria-labelledby="alm-painel-nome">
+    <div class="alm-painel-topo">
+      <div class="alm-painel-nome" id="alm-painel-nome"></div>
+      <button class="alm-fechar" id="alm-fechar" type="button" aria-label="Fechar">✕</button>
+    </div>
+    <div id="alm-painel-selo"></div>
+
+    <label class="alm-rotulo" for="alm-f-nome">Nome de exibição</label>
+    <input class="alm-input" id="alm-f-nome" type="text" />
+
+    <label class="alm-rotulo" for="alm-f-medida">Medida caseira</label>
+    <input class="alm-input" id="alm-f-medida" type="text" placeholder="Ex.: 6 colheres de sopa (150 g)" />
+
+    <label class="alm-rotulo">Categoria · somente leitura</label>
+    <div class="alm-somente-leitura" id="alm-categoria-corpo"></div>
+
+    <!-- Macros somente leitura nesta rodada: até o passo 9 (cadastro de item
+         próprio) existir, todo documento vem da TACO, e editar o macro de um
+         item da TACO quebraria a procedência citável — ver o cabeçalho de
+         _vocabulario-alimentos.ts sobre a divergência 2 do repasse. -->
+    <label class="alm-rotulo">Macronutrientes (por 100 g) · somente leitura</label>
+    <div class="alm-somente-leitura" id="alm-macros-corpo"></div>
+
+    <div class="alm-proc" id="alm-proc-corpo"></div>
+
+    <div class="alm-acoes">
+      <button class="alm-btn-lime" id="alm-salvar-revisar" type="button">Salvar e marcar como revisado</button>
+      <button class="alm-btn-vazado" id="alm-salvar" type="button">Salvar</button>
+    </div>
+    <div id="alm-recado"></div>
+    <button class="alm-desfazer" id="alm-desrevisar" type="button" hidden>Devolver à fila de revisão</button>
+
+    <p class="alm-nota">A alteração é gravada no banco imediatamente. A chegada ao portal acontece na próxima publicação do site — se a busca do construtor nutricional ainda mostrar o valor antigo, não é falha do salvamento; é que o site ainda não foi publicado de novo.</p>
+  </aside>
+</div>
+
+<script type="module" is:inline>
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const meta = (n) => document.querySelector(`meta[name="${n}"]`)?.content;
+  const app = initializeApp({
+    apiKey: meta('fb-api'), authDomain: meta('fb-auth'), projectId: meta('fb-proj'),
+    storageBucket: meta('fb-bucket'), messagingSenderId: meta('fb-sender'), appId: meta('fb-appid'),
+  });
+  const auth = getAuth(app);
+
+  // Vocabulário fechado. Espelha netlify/functions/_vocabulario-alimentos.ts,
+  // que é quem de fato valida — aqui é conveniência de formulário.
+  const CATEGORIAS = ['Alimentos preparados', 'Bebidas (alcoólicas e não alcoólicas)', 'Carnes e derivados',
+    'Cereais e derivados', 'Frutas e derivados', 'Gorduras e óleos', 'Leguminosas e derivados',
+    'Leite e derivados', 'Miscelâneas', 'Nozes e sementes', 'Outros alimentos industrializados',
+    'Ovos e derivados', 'Pescados e frutos do mar', 'Produtos açucarados', 'Verduras, hortaliças e derivados'];
+
+  const ESTADOS = [
+    { valor: 'aguardando', rotulo: 'Aguardando revisão' },
+    { valor: 'revisados',  rotulo: 'Revisados' },
+    { valor: 'arquivados', rotulo: 'Arquivados' },
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const numero = (n, casas = 0) => (typeof n === 'number' ? n.toFixed(casas).replace('.', ',') : '—');
+
+  let estado = { estado: 'aguardando', categoria: '', busca: '', pagina: 1 };
+  let itens = [];
+  let emEdicao = null;
+
+  async function token() {
+    const u = auth.currentUser;
+    if (!u) throw new Error('Sessão expirada. Recarregue a página.');
+    return u.getIdToken(false);
+  }
+
+  async function chamar(rota, corpo) {
+    const resp = await fetch(`/.netlify/functions/${rota}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await token()}` },
+      body: JSON.stringify(corpo),
+    });
+    const texto = await resp.text();
+    let dados = {};
+    try { dados = texto ? JSON.parse(texto) : {}; } catch { dados = { erro: texto }; }
+    if (!resp.ok) throw new Error(dados.erro || dados.detalhes?.join('; ') || `Falha ${resp.status}`);
+    return dados;
+  }
+
+  function opcoes(sel, lista, vazio) {
+    sel.innerHTML = (vazio ? `<option value="">${vazio}</option>` : '') +
+      lista.map((v) => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+  }
+
+  function pintarEstados() {
+    $('alm-estados').innerHTML = ESTADOS.map((e) =>
+      `<button type="button" class="alm-estado" data-estado="${e.valor}" aria-pressed="${e.valor === estado.estado}">${e.rotulo}</button>`
+    ).join('');
+  }
+
+  function macrosLinha(m) {
+    if (!m) return '—';
+    return `P ${numero(m.proteinaG, 1)}g · C ${numero(m.carboidratoG, 1)}g · G ${numero(m.lipideosG, 1)}g`;
+  }
+
+  function pintarLinhas(dados) {
+    itens = dados.itens;
+    const c = dados.contadores;
+    $('alm-contadores').innerHTML =
+      `<strong>${c.total}</strong> alimentos · <strong>${c.revisados}</strong> revisados · <strong>${c.aguardando}</strong> aguardando` +
+      (c.arquivados ? ` · <strong>${c.arquivados}</strong> arquivados` : '');
+
+    if (!itens.length) {
+      $('alm-linhas').innerHTML = '<div class="alm-vazio">Nenhum alimento para este filtro.</div>';
+    } else {
+      $('alm-linhas').innerHTML = itens.map((a, i) => {
+        const selo = !a.ativo
+          ? '<span class="alm-selo alm-selo--arq">arquivado</span>'
+          : a.revisado
+            ? '<span class="alm-selo alm-selo--ok">revisado</span>'
+            : '<span class="alm-selo alm-selo--pend">aguardando</span>';
+        return `<button type="button" class="alm-linha" data-i="${i}">
+          <span class="alm-nome">${esc(a.nomeExibicao)}<br>${selo}</span>
+          <span class="alm-col">${esc(a.categoria)}</span>
+          <span class="alm-col">${numero(a.macros?.kcal)}</span>
+          <span class="alm-col alm-col--macros">${macrosLinha(a.macros)}</span>
+        </button>`;
+      }).join('');
+    }
+
+    const de = dados.encontrados ? (dados.pagina - 1) * dados.porPagina + 1 : 0;
+    const ate = Math.min(dados.pagina * dados.porPagina, dados.encontrados);
+    $('alm-resumo').textContent = dados.encontrados
+      ? `Mostrando ${de}–${ate} de ${dados.encontrados}`
+      : 'Nenhum resultado';
+    estado.pagina = dados.pagina;
+    $('alm-anterior').disabled = dados.pagina <= 1;
+    $('alm-proxima').disabled = dados.pagina >= dados.paginas;
+  }
+
+  let pedido = 0;
+  async function carregar() {
+    const meu = ++pedido;
+    try {
+      const dados = await chamar('listar-alimentos', estado);
+      // Descarta resposta de pedido antigo — mesma razão de exercicios.astro:
+      // digitar rápido na busca dispara várias, e a lenta pode chegar depois.
+      if (meu !== pedido) return;
+      pintarLinhas(dados);
+    } catch (e) {
+      if (meu !== pedido) return;
+      $('alm-linhas').innerHTML = `<div class="alm-erro">Não foi possível carregar a base. ${esc(e.message)}</div>`;
+    }
+  }
+
+  function abrir(i) {
+    const a = itens[i];
+    if (!a) return;
+    emEdicao = a;
+    $('alm-painel-nome').textContent = a.nomeExibicao;
+    $('alm-painel-selo').innerHTML = !a.ativo
+      ? '<span class="alm-selo alm-selo--arq">arquivado</span>'
+      : a.revisado
+        ? `<span class="alm-selo alm-selo--ok">revisado${a.revisadoEm ? ' em ' + new Date(a.revisadoEm).toLocaleDateString('pt-BR') : ''}</span>`
+        : '<span class="alm-selo alm-selo--pend">aguardando validação do Coach</span>';
+    $('alm-f-nome').value = a.nomeExibicao ?? '';
+    $('alm-f-medida').value = a.medidaCaseira ?? '';
+    $('alm-categoria-corpo').textContent = a.categoria ?? '—';
+    $('alm-macros-corpo').innerHTML = a.macros
+      ? `Calorias · <b>${numero(a.macros.kcal)} kcal</b><br>` +
+        `Proteína · <b>${numero(a.macros.proteinaG, 1)} g</b><br>` +
+        `Carboidrato · <b>${numero(a.macros.carboidratoG, 1)} g</b><br>` +
+        `Lipídeos · <b>${numero(a.macros.lipideosG, 1)} g</b>`
+      : 'Sem os quatro macronutrientes completos — este item não aparece na busca do construtor nutricional.';
+    $('alm-proc-corpo').innerHTML =
+      `Nome de origem · <b>${esc(a.nome ?? '—')}</b><br>` +
+      `Fonte · <b>${esc(a.fonte ?? '—')}</b><br>` +
+      `Criado por · <b>${esc(a.criadoPor ?? '—')}</b><br>` +
+      `Última alteração · <b>${a.atualizadoEm ? esc(new Date(a.atualizadoEm).toLocaleString('pt-BR')) : '—'}</b>`;
+    $('alm-recado').innerHTML = '';
+    $('alm-salvar-revisar').hidden = a.revisado;
+    $('alm-desrevisar').hidden = !a.revisado;
+    const g = $('alm-gaveta');
+    g.hidden = false;
+    requestAnimationFrame(() => g.classList.add('aberta'));
+  }
+
+  function fechar() {
+    const g = $('alm-gaveta');
+    g.classList.remove('aberta');
+    setTimeout(() => { g.hidden = true; emEdicao = null; }, 250);
+  }
+
+  /** Só o que mudou, mesma razão de exercicios.astro: mandar o documento
+   *  inteiro faria toda edição carregar campos que ninguém tocou. */
+  function alterados() {
+    const a = emEdicao;
+    const novo = { nomeExibicao: $('alm-f-nome').value.trim(), medidaCaseira: $('alm-f-medida').value.trim() || null };
+    const diff = {};
+    if (novo.nomeExibicao !== (a.nomeExibicao ?? '')) diff.nomeExibicao = novo.nomeExibicao;
+    if (novo.medidaCaseira !== (a.medidaCaseira ?? null)) diff.medidaCaseira = novo.medidaCaseira;
+    return diff;
+  }
+
+  function recado(texto, tipo) {
+    $('alm-recado').innerHTML = `<div class="alm-recado alm-recado--${tipo}">${esc(texto)}</div>`;
+  }
+
+  async function salvar(tambemRevisar) {
+    if (!emEdicao) return;
+    const botoes = [$('alm-salvar'), $('alm-salvar-revisar')];
+    botoes.forEach((b) => (b.disabled = true));
+    try {
+      const diff = alterados();
+      if (Object.keys(diff).length) {
+        await chamar('atualizar-alimento', { operacao: 'editar', foodId: emEdicao.id, campos: diff });
+      }
+      if (tambemRevisar) {
+        await chamar('atualizar-alimento', { operacao: 'revisar', foodId: emEdicao.id });
+      }
+      recado(
+        tambemRevisar ? 'Salvo e marcado como revisado.'
+          : Object.keys(diff).length ? 'Alterações salvas.' : 'Nada havia mudado.',
+        'ok',
+      );
+      await carregar();
+      if (tambemRevisar) setTimeout(fechar, 900);
+    } catch (e) {
+      recado(e.message, 'erro');
+    } finally {
+      botoes.forEach((b) => (b.disabled = false));
+    }
+  }
+
+  // ── Ligações ──
+  opcoes($('alm-categoria'), CATEGORIAS, 'Todas as categorias');
+  pintarEstados();
+
+  let debounce;
+  $('alm-busca').addEventListener('input', (ev) => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => { estado.busca = ev.target.value.trim(); estado.pagina = 1; carregar(); }, 250);
+  });
+  $('alm-categoria').addEventListener('change', (ev) => { estado.categoria = ev.target.value; estado.pagina = 1; carregar(); });
+  $('alm-estados').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-estado]');
+    if (!b) return;
+    estado.estado = b.dataset.estado; estado.pagina = 1;
+    pintarEstados(); carregar();
+  });
+  $('alm-linhas').addEventListener('click', (ev) => {
+    const b = ev.target.closest('.alm-linha');
+    if (b) abrir(Number(b.dataset.i));
+  });
+  $('alm-anterior').addEventListener('click', () => { estado.pagina--; carregar(); });
+  $('alm-proxima').addEventListener('click', () => { estado.pagina++; carregar(); });
+  $('alm-fechar').addEventListener('click', fechar);
+  $('alm-gaveta').addEventListener('click', (ev) => { if (ev.target.id === 'alm-gaveta') fechar(); });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && !$('alm-gaveta').hidden) fechar();
+  });
+  $('alm-desrevisar').addEventListener('click', async () => {
+    if (!emEdicao) return;
+    const b = $('alm-desrevisar');
+    b.disabled = true;
+    try {
+      await chamar('atualizar-alimento', { operacao: 'desrevisar', foodId: emEdicao.id });
+      recado('Devolvido à fila de revisão.', 'ok');
+      await carregar();
+      b.hidden = true;
+      $('alm-salvar-revisar').hidden = false;
+      $('alm-painel-selo').innerHTML = '<span class="alm-selo alm-selo--pend">aguardando validação do Coach</span>';
+    } catch (e) {
+      recado(e.message, 'erro');
+    } finally { b.disabled = false; }
+  });
+  $('alm-salvar').addEventListener('click', () => salvar(false));
+  $('alm-salvar-revisar').addEventListener('click', () => salvar(true));
+
+  // Guarda de autenticação, no padrão de exercicios.astro: sessão E claim de
+  // admin. "Autenticado" não é "autorizado".
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '/admin/login'; return; }
+    try {
+      const r = await user.getIdTokenResult(true);
+      if (!r.claims.admin) { await signOut(auth); window.location.href = '/admin/login?erro=acesso-negado'; return; }
+    } catch {
+      await signOut(auth); window.location.href = '/admin/login'; return;
+    }
+    const el = document.getElementById('adm-email');
+    if (el) el.textContent = user.email ?? '';
+    carregar();
+  });
+</script>
+</body>
+</html>
