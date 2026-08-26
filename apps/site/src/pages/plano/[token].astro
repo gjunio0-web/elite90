@@ -1,0 +1,153 @@
+---
+// ELITE90 PRO · /plano/[token] — protocolo publicado do atleta (treino ou
+// nutricional), acessado pelo link que o Coach compartilha por mensagem.
+//
+// ESPELHA /avaliacao/[token].astro: SSR, Admin SDK, busca por token, três
+// estados (não encontrado, expirado, documento). Onde diverge:
+//   • Token pode ser de treino OU de nutrição — cada atleta tem os dois,
+//     independentes (ver o cabeçalho de compartilhar-plano.ts). Por isso a
+//     busca tenta os dois campos e usa o que encontrar; um token nunca serve
+//     para os dois ao mesmo tempo.
+//   • Reenvio nunca é recusado por expiração (decisão do Coach, 26/08/2026) —
+//     mas o LINK JÁ ABERTO, se ninguém pediu por 90 dias, ainda mostra "link
+//     expirado" aqui. É a mesma expiração, olhada de dois ângulos: quem clica
+//     um link parado vê a tela de expirado; quem pede um link novo ao Coach
+//     (compartilhar-plano.ts) sempre recebe um que funciona, porque aquela
+//     função renova a validade antes de devolver a URL.
+//   • Sem inglês. /avaliacao/[token] atende candidato internacional vindo da
+//     landing page pública; esta é a página de um atleta já matriculado, e o
+//     resto do M2 (atletas.astro) é só em português — sem motivo para esta
+//     ser diferente.
+//   • O documento em si (logo, título, seções) vem de
+//     apps/site/src/lib/plano-documento.ts, não de marcação própria desta
+//     página — é o mesmo "envelope" que "Ver como o atleta recebe" mostra
+//     dentro do painel. Ver o cabeçalho daquele módulo para a duplicação com
+//     atletas.astro (obrigatória por causa de <script is:inline>) e para a
+//     diferença real entre os dois (aqui lê o retrato CONGELADO da
+//     publicação; o preview do painel lê ao vivo).
+export const prerender = false;
+
+import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../../styles/tokens.css';
+import '../../styles/global.css';
+import { renderPlanDocument, DOC_CSS, type TrainingPlan, type NutritionPlan } from '../../lib/plano-documento';
+
+function getDb() {
+  if (!getApps().length) {
+    const sa = JSON.parse(import.meta.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? "{}");
+    initializeApp({ credential: cert(sa) });
+  }
+  return getFirestore();
+}
+
+const CAMPO_TOKEN = { training: "trainingPlanToken", nutrition: "nutritionPlanToken" } as const;
+const CAMPO_EXPIRA = { training: "trainingPlanTokenExpiresAt", nutrition: "nutritionPlanTokenExpiresAt" } as const;
+const CAMPO_PLANO = { training: "trainingPlan", nutrition: "nutritionPlan" } as const;
+const ROTULO = { training: "Plano de Treino", nutrition: "Plano Nutricional" } as const;
+
+const { token } = Astro.params;
+
+let athlete: Record<string, any> | null = null;
+let kind: "training" | "nutrition" | null = null;
+let notFound = false;
+let isExpired = false;
+let semPlano = false;
+
+try {
+  const db = getDb();
+
+  for (const candidato of ["training", "nutrition"] as const) {
+    const snap = await db.collection("athletes").where(CAMPO_TOKEN[candidato], "==", token).limit(1).get();
+    if (!snap.empty) {
+      athlete = snap.docs[0].data();
+      kind = candidato;
+      break;
+    }
+  }
+
+  if (!athlete || !kind) {
+    notFound = true;
+  } else {
+    const expiraEm = athlete[CAMPO_EXPIRA[kind]];
+    if (expiraEm) {
+      const exp: Date = expiraEm.toDate ? expiraEm.toDate() : new Date(expiraEm._seconds * 1000);
+      if (exp < new Date()) isExpired = true;
+    }
+    if (!isExpired) {
+      const plano = athlete[CAMPO_PLANO[kind]];
+      if (!plano || plano.status !== "publicado") semPlano = true;
+    }
+  }
+} catch (e) {
+  notFound = true;
+}
+
+const documentoHtml =
+  athlete && kind && !notFound && !isExpired && !semPlano
+    ? renderPlanDocument(
+        kind,
+        athlete.name ?? null,
+        athlete[CAMPO_PLANO[kind]] as TrainingPlan | NutritionPlan,
+      )
+    : null;
+
+const tituloAba = notFound
+  ? "Protocolo não encontrado"
+  : isExpired
+  ? "Link expirado"
+  : semPlano
+  ? "Nada publicado ainda"
+  : `${ROTULO[kind!]} · ${athlete?.name ?? ""}`;
+---
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELITE90 PRO - {tituloAba}</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <style set:html={DOC_CSS}></style>
+  <style>
+    body { background: var(--c-black); padding: 40px 20px 64px; }
+    main { max-width: 880px; margin: 0 auto; }
+    .plano-vazio { text-align: center; padding: 80px 24px; }
+    .plano-vazio h2 {
+      font-family: var(--font-display); font-size: 3rem; color: var(--c-lime);
+      text-transform: uppercase; margin-bottom: 16px;
+    }
+    .plano-vazio p { font-family: var(--font-body); font-size: 14px; color: var(--c-textbody); line-height: 1.7; }
+  </style>
+</head>
+<body>
+  <main>
+    {notFound && (
+      <div class="plano-vazio">
+        <h2>Protocolo não encontrado</h2>
+        <p>O link pode estar incorreto. Confira a mensagem recebida ou entre em contato com o Coach Ruiz.</p>
+      </div>
+    )}
+    {!notFound && isExpired && (
+      <div class="plano-vazio">
+        <h2>Link expirado</h2>
+        <p>Este link de acesso expirou após 90 dias. Peça ao Coach Ruiz para reenviar — o mesmo link volta a funcionar.</p>
+      </div>
+    )}
+    {!notFound && !isExpired && semPlano && (
+      <div class="plano-vazio">
+        <h2>Nada publicado ainda</h2>
+        <p>Este link é válido, mas o Coach Ruiz ainda não publicou este protocolo. Volte a checar em breve.</p>
+      </div>
+    )}
+    {documentoHtml && <div set:html={documentoHtml} />}
+  </main>
+</body>
+</html>

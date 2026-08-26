@@ -893,8 +893,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
       .nte-previewbtn { margin-left: 0; width: 100%; justify-content: center; }
       /* Mobile: engrenagem de fórmula sobe para a linha do título "Plano Nutricional", à direita */
       #nu-pubheader { position: relative; }
-      #nu-pubheader .pub-titlewrap { padding-right: 40px; order: 1; }
-      #nu-pubheader .nte-formula-gear-btn { position: absolute; top: 0; right: 0; margin: 0; }
+      /* 76px, não 40px: cabem dois ícones flutuantes agora (compartilhar +
+         fórmula), não um só — ver #nu-sharebtn/#nu-formulabtn abaixo. */
+      #nu-pubheader .pub-titlewrap { padding-right: 76px; order: 1; }
+      #nu-pubheader .nte-formula-gear-btn { position: absolute; top: 0; margin: 0; }
+      #nu-pubheader #nu-formulabtn { right: 0; }
+      #nu-pubheader #nu-sharebtn { right: 36px; }
       /* Mobile: dissolve o agrupador pub-actions para reordenar ts/painel/publicar via flex order */
       #nu-pubheader .pub-actions { display: contents; }
       #nu-pubheader .pub-ts { order: 2; }
@@ -1455,6 +1459,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
             </div>
             <div class="pub-actions">
               <span class="pub-ts" id="tr-pubts"></span>
+              <button class="nte-formula-gear-btn" id="tr-sharebtn" onclick="compartilharPlano('training')" title="Compartilhar link do plano" hidden><span data-lucide="share-2"></span></button>
               <button class="btn-protocol" id="tr-pubbtn" onclick="wkePublish()"></button>
             </div>
           </div>
@@ -1515,7 +1520,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
             </div>
             <div class="pub-actions">
               <span class="pub-ts" id="nu-pubts"></span>
-              <button class="nte-formula-gear-btn" onclick="nteToggleFormulaPanel()" title="Configurar fórmula de macros"><span data-lucide="sliders-horizontal"></span></button>
+              <button class="nte-formula-gear-btn" id="nu-sharebtn" onclick="compartilharPlano('nutrition')" title="Compartilhar link do plano" hidden><span data-lucide="share-2"></span></button>
+              <button class="nte-formula-gear-btn" id="nu-formulabtn" onclick="nteToggleFormulaPanel()" title="Configurar fórmula de macros"><span data-lucide="sliders-horizontal"></span></button>
               <button class="btn-protocol" id="nu-pubbtn" onclick="ntePublish()"></button>
             </div>
             <div id="nte-formula-panel" hidden>
@@ -3600,7 +3606,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const badge = document.getElementById(pfx + '-pubbadge');
       const ts = document.getElementById(pfx + '-pubts');
       const btn = document.getElementById(pfx + '-pubbtn');
+      const shareBtn = document.getElementById(pfx + '-sharebtn');
       if (!badge || !ts || !btn) return;
+      // Compartilhar só faz sentido quando existe algo publicado para
+      // mostrar — a garantia real é o servidor (compartilhar-plano.ts
+      // recusa nesse caso); aqui é só não oferecer o botão à toa.
+      if (shareBtn) shareBtn.hidden = p.status !== 'publicado';
       if (p.status === 'publicado' && !p.hasUnpublishedChanges) {
         badge.className = 'pub-badge pub';
         badge.innerHTML = '<span class="pub-dot live"></span>Publicado';
@@ -3703,6 +3714,52 @@ import AdminHeader from '../../components/AdminHeader.astro';
     function notifyAthletePublish(athleteId, kind) {
       // mock: substituir por POST à Netlify Function (Resend) — não tocar na lógica do editor
       console.log('[notifyAthletePublish]', { athleteId: athleteId, kind: kind });
+    }
+
+    // ── Compartilhar protocolo por WhatsApp ──
+    // window.__getFreshToken vem do script de módulo mais abaixo (mesma ponte
+    // que já existe para renderAthletePhotos) — este script é clássico
+    // (<script is:inline>, sem type="module") e não enxerga o `auth` local de
+    // lá diretamente.
+    async function compartilharPlano(kind) {
+      if (!wke04CurrentAthlete) return;
+      const pfx = kind === 'training' ? 'tr' : 'nu';
+      const btn = document.getElementById(pfx + '-sharebtn');
+      if (btn) btn.disabled = true;
+      try {
+        const idToken = await window.__getFreshToken();
+        const resp = await fetch('/.netlify/functions/compartilhar-plano', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+          body: JSON.stringify({ athleteId: wke04CurrentAthlete.id, kind: kind }),
+        });
+        const texto = await resp.text();
+        let dados = {};
+        try { dados = texto ? JSON.parse(texto) : {}; } catch { dados = {}; }
+        if (!resp.ok) {
+          wkeToast(dados.erro || 'Não foi possível gerar o link do protocolo.', { type: 'error' });
+          return;
+        }
+        if (dados.whatsappUrl) {
+          // Aba nova: abrir o WhatsApp por cima do painel perderia o atleta em
+          // edição sem salvar nada — o link de compartilhar não é um formulário.
+          window.open(dados.whatsappUrl, '_blank', 'noopener');
+        } else {
+          // Sem telefone cadastrado (atleta promovido antes do backfill, ou
+          // celular que a validação da ficha não conseguiu normalizar) — copia
+          // o link em vez de travar numa ação que não tem para onde ir.
+          try {
+            await navigator.clipboard.writeText(dados.url);
+            wkeToast('Atleta sem telefone cadastrado — link copiado para a área de transferência.', { type: 'info' });
+          } catch {
+            wkeToast('Atleta sem telefone cadastrado. Link do protocolo: ' + dados.url, { type: 'info' });
+          }
+        }
+      } catch (e) {
+        wkeToast('Falha ao gerar o link do protocolo.', { type: 'error' });
+      } finally {
+        if (btn) btn.disabled = false;
+      }
     }
 
     // ════════════════════════════════════════════════════════
@@ -4418,6 +4475,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
     // A marcação abaixo é gêmea da que está em pages/avaliacao/[token].astro —
     // alterar os dois juntos. Aqui ela é string porque este documento é montado
     // dentro de <script is:inline>, que não aceita import de componente.
+    //
+    // SEGUNDO GÊMEO, mais recente: docEnvelope e as funções vizinhas (até
+    // docMacrosBlock, mais abaixo) são a origem de
+    // apps/site/src/lib/plano-documento.ts, que /plano/[token].astro usa
+    // para o link público do protocolo ("compartilhar plano"). Mesma restrição
+    // de is:inline, mesma solução: duplicado lá, não importado. SE MEXER NA
+    // APARÊNCIA DO DOCUMENTO AQUI (ou no CSS .doc-* do <style> deste arquivo),
+    // mexa lá também — ver o cabeçalho de plano-documento.ts para a única
+    // diferença real (lá lê o retrato congelado da publicação; aqui lê ao
+    // vivo, de propósito, porque isto é o preview de edição).
     var DOC_LOGO_IMG = '<img src="/images/brand/logo-emblema.webp" srcset="/images/brand/logo-emblema.webp 1x, /images/brand/logo-emblema@2x.webp 2x" alt="" width="51" height="56" decoding="async" aria-hidden="true"/>';
     function docEnvelope(badgeText, title, athleteName, summaryExtra, innerHtml) {
       return '<div class="doc-sheet">' +
