@@ -461,12 +461,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
     <button class="exc-desfazer" id="exc-desrevisar" type="button" hidden>Devolver à fila de revisão</button>
     <button class="exc-desfazer" id="exc-arquivar" type="button" hidden>Arquivar exercício</button>
 
-    <!-- Sem prometer prazo: nada dispara publicação sozinho hoje (ver o
-         cabeçalho de atualizar-exercicio.ts, "SOBRE A CHEGADA AO PORTAL"). Dizer
-         "leva alguns minutos" seria uma garantia que a arquitetura não cumpre —
-         o próximo build é que traz a mudança, e o próximo build depende de
-         alguém publicar código, não desta gravação. -->
-    <p class="exc-nota">A alteração é gravada no banco imediatamente. A chegada ao portal acontece na próxima publicação do site — se a busca do construtor de treino ainda mostrar o valor antigo, não é falha do salvamento; é que o site ainda não foi publicado de novo.</p>
+    <!-- "Em até 10 minutos" NÃO é arredondamento — é o pior caso do mecanismo
+         de publicar-bases-pendentes.ts: DEBOUNCE_MS = 5 minutos, checado a
+         cada 5 minutos (netlify.toml), e o desencontro entre o instante da
+         gravação e o tick seguinte pode custar quase um ciclo inteiro a mais.
+         SE DEBOUNCE_MS OU O SCHEDULE MUDAREM, ATUALIZE O NÚMERO AQUI — mesma
+         obrigação de manutenção que os números reais da janela #exc-limites
+         (68 de Costas, 96 de Pernas). Não cobre o tempo de build da própria
+         Netlify em cima disso, que não é garantia nossa. -->
+    <p class="exc-nota">A alteração é gravada no banco imediatamente. A publicação no portal acontece sozinha, em até 10 minutos — se a busca do construtor de treino ainda mostrar o valor antigo logo depois de salvar, não é falha do salvamento; é que a publicação automática ainda não rodou.</p>
   </aside>
 </div>
 
