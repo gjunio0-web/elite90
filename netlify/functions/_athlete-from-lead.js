@@ -14,6 +14,8 @@
 //
 //   LISTA (tabela + KPIs + CSV)
 //   - name, email, status ("active"|"checkin_sent"|"awaiting_checkin")
+//   - phone -> NÃO lido pelo M2 hoje; existe para o compartilhamento de plano
+//             por mensagem. Normalizado em E.164 sem "+" (ver toPhoneE164).
 //   - startDate  (DD/MM/YYYY -- parseDate faz str.split("/"))
 //   - week, day, phase ("Bulking"|"Cutting"|"Diet Break")
 //   - weight_init, weight_now, weight_change
@@ -78,6 +80,36 @@ function fmtNum(n) {
 }
 
 /**
+ * Normaliza o celular do lead para E.164 SEM o sinal de mais (ex.: 5511999999999),
+ * que é o formato esperado por links de mensagem e por futuras integrações.
+ *
+ * O campo chega em DOIS formatos, porque o TriageModal tem duas variantes:
+ *   - pt-BR: máscara "(11) 99999-9999". A validação aceita 10 dígitos (fixo com
+ *     DDD) ou 11 (celular com DDD), e o campo NÃO comporta código de país — a
+ *     máscara descarta qualquer dígito além do 11º. Logo, o 55 é DEDUZIDO.
+ *     Não é dado do formulário: é o que a própria validação pressupõe. Um
+ *     número estrangeiro digitado na ficha em português sairia errado daqui.
+ *   - en: exige começar com "+" e ter de 8 a 15 dígitos, com espaçamento livre.
+ *     O código de país JÁ vem incluído, então nada é acrescentado.
+ *
+ * Fora dessas faixas (inclusive nas fichas importadas da planilha de anamnese,
+ * que não passaram pela máscara), devolve null em vez de adivinhar o país.
+ *
+ * @param {*} celular - lead.celular
+ * @param {*} idioma  - lead.idioma ("pt-br" | "en"); ausente é tratado como pt-BR
+ * @returns {string|null}
+ */
+function toPhoneE164(celular, idioma) {
+  if (celular === null || celular === undefined) return null;
+  const d = String(celular).replace(/\D/g, '');
+  if (!d) return null;
+  if (idioma === 'en') {
+    return d.length >= 8 && d.length <= 15 ? d : null;
+  }
+  return d.length === 10 || d.length === 11 ? `55${d}` : null;
+}
+
+/**
  * Idade a partir de data_nascimento no formato DD/MM/AAAA (formato do
  * TriageModal). Retorna null se ausente ou inválida.
  * @param {string} dob
@@ -123,6 +155,10 @@ function athleteFromLead(lead, avaliacao, opts = {}) {
     // -- Identificação (lista + cabeçalho do drawer) --
     name:   String(lead.nome  || '').trim(),
     email:  String(lead.email || '').trim().toLowerCase(),
+    // Guardado NORMALIZADO (só dígitos, com país), não com a máscara do
+    // formulário — ao contrário de height/freq/duration, que ficaram como texto
+    // de exibição e são a ressalva registrada no topo deste arquivo.
+    phone:  toPhoneE164(lead.celular, lead.idioma),
     // PONTO DE DECISÃO DE NEGÓCIO: "awaiting_checkin" é o estado inicial
     // recomendado (conta criada, nenhum check-in ainda). Confirmar com o
     // Coach Fernando se esta semântica é a adequada antes de usar em produção.
