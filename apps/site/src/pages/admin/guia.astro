@@ -27,6 +27,34 @@ const isSafeAdminPath = (p: string | null): p is string =>
 const isSafeLeadId = (v: string | null): v is string => !!v && /^[A-Za-z0-9_-]{1,64}$/.test(v);
 const isSafeDrawer = (v: string | null): v is 'detail' | 'eval' => v === 'detail' || v === 'eval';
 
+// Índice do guia — fonte única dos destinos, consumida duas vezes: pela coluna
+// lateral e pelo bloco que vai ao menu "⋮" do cabeçalho. Duplicar a lista no
+// HTML seria garantir que uma das duas envelhecesse.
+//
+// "chave" é o rótulo curto à esquerda do título. Só existe onde informa algo:
+// os números 01–05 são os mesmos desenhados nos círculos das etapas, e "Base"
+// repetido é o que revela que aquelas duas seções formam um par. Nas demais
+// linhas fica vazio de propósito — a coluna segue reservada, para o alinhamento
+// não quebrar, mas não se inventa rótulo onde o título já diz tudo.
+//
+// "etapa" marca as cinco fases da jornada, que aparecem recuadas sob o grupo.
+const indice = [
+  { id: 'inicio',    titulo: 'Início',                  chave: '',     etapa: false },
+  { id: 'papeis',    titulo: 'Três papéis',             chave: '',     etapa: false },
+  { id: 'chegada',   titulo: 'Chega uma candidatura',   chave: '01',   etapa: true  },
+  { id: 'triagem',   titulo: 'A triagem',               chave: '02',   etapa: true  },
+  { id: 'avaliacao', titulo: 'A avaliação estratégica', chave: '03',   etapa: true  },
+  { id: 'promocao',  titulo: 'Aceitar no programa',     chave: '04',   etapa: true  },
+  { id: 'retencao',  titulo: 'A rotina da madrugada',   chave: '05',   etapa: true  },
+  { id: 'catalogo',  titulo: 'O catálogo de exercícios', chave: 'Base', etapa: false },
+  { id: 'alimentos', titulo: 'A base de alimentos',     chave: 'Base', etapa: false },
+  { id: 'seguranca', titulo: 'As fechaduras do painel', chave: '',     etapa: false },
+  { id: 'regras',    titulo: 'Quatro regras',           chave: '',     etapa: false },
+];
+const antesDaJornada = indice.filter((s) => !s.etapa && ['inicio', 'papeis'].includes(s.id));
+const etapasDaJornada = indice.filter((s) => s.etapa);
+const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].includes(s.id));
+
 const basePath = isSafeAdminPath(fromParam) ? fromParam : '/admin';
 const backHref =
   basePath === '/admin/fichas' && isSafeLeadId(leadParam) && isSafeDrawer(drawerParam)
@@ -244,6 +272,71 @@ const backHref =
   footer .marca span{color:var(--c-lime)}
   footer p{font-size:.8rem; color:var(--c-textsub); max-width:60ch; margin-top:var(--space-2)}
 
+  /* ── Índice ──────────────────────────────────
+     Compensação de rolagem: o cabeçalho do painel é fixo e tem 64px em
+     qualquer largura. Sem isto, TODO salto de âncora — inclusive os quatro
+     links que fichas.astro já traz hoje — deposita o alvo atrás dele. */
+  [id]{scroll-margin-top:80px}
+
+  .idx-g{
+    font-family:var(--font-label); font-size:.62rem; font-weight:700;
+    letter-spacing:var(--tracking-label); text-transform:uppercase;
+    color:var(--c-textsub);
+  }
+  .idx-a{
+    display:flex; gap:10px; align-items:baseline; text-decoration:none;
+    color:var(--c-textbody); font-size:.8rem; line-height:1.3;
+    transition:color var(--transition-base), background var(--transition-base);
+  }
+  .idx-a:hover{color:var(--c-white); background:rgba(255,255,255,.03)}
+  .idx-k{
+    font-family:var(--font-label); font-size:.58rem; font-weight:700;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--c-textsub);
+    min-width:30px;
+  }
+  .idx-a[aria-current="true"]{color:var(--c-lime); background:rgba(166,195,0,.08)}
+  .idx-a[aria-current="true"] .idx-k{color:var(--c-lime)}
+
+  /* Coluna lateral — aparece onde o gatilho "⋮" NÃO aparece. As duas faixas
+     são complementares por construção: ver o @media no fim deste bloco. */
+  .idx--coluna{
+    position:fixed; left:0; top:64px; bottom:0; width:264px; z-index:90;
+    overflow-y:auto; background:var(--c-black);
+    border-right:var(--line); padding:var(--space-5) var(--space-3) var(--space-6);
+  }
+  .idx--coluna .idx-g{margin:0 0 var(--space-3) 10px}
+  .idx--coluna .idx-g--jornada{margin-top:var(--space-4); margin-bottom:var(--space-2)}
+  .idx--coluna .idx-a{
+    padding:7px 10px; border-left:2px solid transparent; border-radius:0 3px 3px 0;
+  }
+  .idx--coluna .idx-a[aria-current="true"]{border-left-color:var(--c-lime)}
+  .idx-sub{border-left:1px solid rgba(166,195,0,.18); margin-left:16px}
+  .idx-sub .idx-a{padding-left:12px}
+  .doc{padding-left:264px}
+
+  /* Bloco do menu "⋮" — herda a moldura do painel do cabeçalho, que já traz
+     fundo, borda e raio; aqui só as linhas. O separador de baixo encosta nas
+     ações (voltar, encerrar sessão), que continuam sendo as últimas. */
+  .idx--menu .idx-g{
+    padding:12px var(--space-4) 6px; background:rgba(255,255,255,.02);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .idx--menu .idx-a{
+    padding:11px var(--space-4);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .idx--menu .idx-a--sub{padding-left:calc(var(--space-4) + 12px)}
+  .idx--menu .idx-a[aria-current="true"]{box-shadow:inset 2px 0 0 var(--c-lime)}
+
+  /* A regra de faixas, num lugar só: onde o gatilho "⋮" existe, o índice mora
+     no menu e a coluna some. Fora daí, o inverso. A condição é copiada de
+     AdminHeader.astro de propósito — se lá mudar, muda aqui junto, e é por
+     isso que está escrita igual em vez de aproximada por outro valor. */
+  @media (max-width:760px) and (orientation:portrait){
+    .idx--coluna{display:none}
+    .doc{padding-left:0}
+  }
+
   @media (max-width:640px){
     .etapa{padding-left:0}
     .etapa::before{display:none}
@@ -255,7 +348,51 @@ const backHref =
   </style>
 </head>
 <body>
-  <AdminHeader badge="Guia" backHref={backHref} showGuide={false} />
+  <AdminHeader badge="Guia" backHref={backHref} showGuide={false}>
+    <nav slot="navegacao" class="idx idx--menu" aria-label="Índice do guia">
+      <div class="idx-g">Neste guia</div>
+      {antesDaJornada.map((s) => (
+        <a class="idx-a" href={`#${s.id}`} data-idx={s.id}>
+          <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+        </a>
+      ))}
+      <div class="idx-g">Do formulário ao atleta</div>
+      {etapasDaJornada.map((s) => (
+        <a class="idx-a idx-a--sub" href={`#${s.id}`} data-idx={s.id}>
+          <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+        </a>
+      ))}
+      {depoisDaJornada.map((s) => (
+        <a class="idx-a" href={`#${s.id}`} data-idx={s.id}>
+          <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+        </a>
+      ))}
+    </nav>
+  </AdminHeader>
+
+  <nav class="idx idx--coluna" aria-label="Índice do guia">
+    <div class="idx-g">Neste guia</div>
+    {antesDaJornada.map((s) => (
+      <a class="idx-a" href={`#${s.id}`} data-idx={s.id}>
+        <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+      </a>
+    ))}
+    <div class="idx-g idx-g--jornada">Do formulário ao atleta</div>
+    <div class="idx-sub">
+      {etapasDaJornada.map((s) => (
+        <a class="idx-a idx-a--sub" href={`#${s.id}`} data-idx={s.id}>
+          <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+        </a>
+      ))}
+    </div>
+    {depoisDaJornada.map((s) => (
+      <a class="idx-a" href={`#${s.id}`} data-idx={s.id}>
+        <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+      </a>
+    ))}
+  </nav>
+
+  <div class="doc">
 
 
 <header class="top" id="inicio">
@@ -271,7 +408,7 @@ const backHref =
 <section>
   <div class="wrap">
     <h3>Comece por aqui</h3>
-    <h2>Três papéis, sem sobreposição</h2>
+    <h2 id="papeis">Três papéis, sem sobreposição</h2>
     <p class="lead" style="margin-bottom:var(--space-5)">Este código de cores acompanha o guia
       inteiro. Em cada etapa, a etiqueta indica quem age — e a separação não é uma promessa de
       conduta, é a forma como o sistema foi construído.</p>
@@ -305,8 +442,8 @@ const backHref =
     <h2>Do formulário ao atleta</h2>
 
     <!-- 1 -->
-    <div class="etapa">
-      <div class="num" id="chegada">01</div>
+    <div class="etapa" id="chegada">
+      <div class="num">01</div>
       <div class="etapa-hd">
         <h2 style="font-size:clamp(1.4rem,3vw,2rem)">Chega uma candidatura</h2>
         <span class="chip c-sis">Automático</span>
@@ -337,8 +474,8 @@ const backHref =
     </div>
 
     <!-- 2 -->
-    <div class="etapa">
-      <div class="num" id="triagem">02</div>
+    <div class="etapa" id="triagem">
+      <div class="num">02</div>
       <div class="etapa-hd">
         <h2 style="font-size:clamp(1.4rem,3vw,2rem)">A triagem</h2>
         <span class="chip c-ia">Leitura por IA</span>
@@ -457,8 +594,8 @@ const backHref =
     </div>
 
     <!-- 3 -->
-    <div class="etapa">
-      <div class="num" id="avaliacao">03</div>
+    <div class="etapa" id="avaliacao">
+      <div class="num">03</div>
       <div class="etapa-hd">
         <h2 style="font-size:clamp(1.4rem,3vw,2rem)">A avaliação estratégica</h2>
         <span class="chip c-ia">Rascunho por IA</span>
@@ -545,8 +682,8 @@ const backHref =
     </div>
 
     <!-- 4 -->
-    <div class="etapa">
-      <div class="num" id="promocao">04</div>
+    <div class="etapa" id="promocao">
+      <div class="num">04</div>
       <div class="etapa-hd">
         <h2 style="font-size:clamp(1.4rem,3vw,2rem)">Aceitar no programa</h2>
         <span class="chip c-coach">Decisão do Coach</span>
@@ -602,8 +739,8 @@ const backHref =
     </div>
 
     <!-- 5 -->
-    <div class="etapa">
-      <div class="num" id="retencao">05</div>
+    <div class="etapa" id="retencao">
+      <div class="num">05</div>
       <div class="etapa-hd">
         <h2 style="font-size:clamp(1.4rem,3vw,2rem)">A rotina da madrugada</h2>
         <span class="chip c-sis">Automático</span>
@@ -828,7 +965,7 @@ const backHref =
 <section>
   <div class="wrap">
     <h3>Para levar na memória</h3>
-    <h2>Quatro regras que não mudam</h2>
+    <h2 id="regras">Quatro regras que não mudam</h2>
     <div class="garantias">
       <div class="g">
         <div class="k">01</div>
@@ -853,10 +990,79 @@ const backHref =
     </div>
   </div>
 </section>
+  </div>
 
 
+<script>
+  // Destaque da seção corrente. Progressivo de propósito: se o navegador não
+  // tiver IntersectionObserver, ou se algum alvo sumir do documento, os onze
+  // itens seguem funcionando como links comuns. O índice não depende disto
+  // para servir — o destaque é orientação, não navegação.
+  //
+  // Fica FORA do script que importa o Firebase de propósito: orientação dentro
+  // do documento não deve depender de autenticação. Se aquele módulo falhar
+  // (rede, bloqueio, indisponibilidade), o destaque continua funcionando.
+  if ("IntersectionObserver" in window) {
+    const marcas = document.querySelectorAll<HTMLElement>("[data-idx]");
+    const ids = [...new Set([...marcas].map((m) => m.dataset.idx))]
+      .filter((id): id is string => !!id);
 
+    // Observa-se o BLOCO que contém a âncora, não a âncora. Três das onze são
+    // títulos de altura mínima; sozinhas, elas entram e saem da faixa de
+    // observação num piscar, e a última do documento nunca chega a entrar,
+    // porque a rolagem acaba antes. O bloco tem altura de verdade.
+    const alvos: HTMLElement[] = [];
+    for (const id of ids) {
+      const ancora = document.getElementById(id);
+      if (!ancora) continue;
+      const bloco = (ancora.closest("section, .etapa") as HTMLElement | null) ?? ancora;
+      bloco.dataset.secao = id;
+      alvos.push(bloco);
+    }
 
+    const visiveis = new Set<string>();
+    const pintar = () => {
+      // Entre as seções visíveis, vence a que está mais acima na página —
+      // é a que o leitor acabou de alcançar ao rolar para baixo.
+      let corrente: string | null = null;
+      for (const alvo of alvos) {
+        const secao = alvo.dataset.secao;
+        if (secao && visiveis.has(secao)) { corrente = secao; break; }
+      }
+      // No fim do documento a regra acima não alcança a última seção: a
+      // rolagem termina antes de ela subir ao topo, e a anterior continua
+      // sendo a mais alta visível. Quem clica no último item do índice veria
+      // o penúltimo aceso. Chegando ao fim, a última vence.
+      const noFim = window.innerHeight + window.scrollY
+        >= document.documentElement.scrollHeight - 2;
+      if (noFim && alvos.length) {
+        corrente = alvos[alvos.length - 1].dataset.secao ?? corrente;
+      }
+      marcas.forEach((m) => {
+        if (m.dataset.idx === corrente) m.setAttribute("aria-current", "true");
+        else m.removeAttribute("aria-current");
+      });
+    };
+
+    const observador = new IntersectionObserver((entradas) => {
+      entradas.forEach((e) => {
+        const secao = (e.target as HTMLElement).dataset.secao;
+        if (!secao) return;
+        if (e.isIntersecting) visiveis.add(secao);
+        else visiveis.delete(secao);
+      });
+      pintar();
+    }, { rootMargin: "-80px 0px -55% 0px" });
+
+    alvos.forEach((alvo) => observador.observe(alvo));
+
+    // A regra de fim de documento depende da posição de rolagem, que o
+    // observador não reporta sozinho: chegar ao fim pode não cruzar nenhuma
+    // fronteira de seção. Daí o ouvinte, passivo e sem trabalho por quadro
+    // além de repintar onze itens.
+    window.addEventListener("scroll", pintar, { passive: true });
+  }
+</script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";

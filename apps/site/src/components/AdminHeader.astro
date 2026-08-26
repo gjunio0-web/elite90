@@ -19,6 +19,15 @@
 //   precisa saber o que ele faz, só onde ele fica. Quem preencher deve usar as
 //   classes .adm-btn-icon e .adm-btn-icon__label para herdar o comportamento
 //   de ícone solto no desktop e linha rotulada dentro do menu no celular.
+//
+// Slot "navegacao" — entra no TOPO do menu "⋮", acima de tudo, e só existe
+//   onde o gatilho "⋮" existe (≤760px em retrato). Contrato DIFERENTE do slot
+//   "primeiro": aquele recebe uma AÇÃO, que no desktop vira ícone solto; este
+//   recebe NAVEGAÇÃO da própria página, que no desktop não vem para o
+//   cabeçalho — a página a exibe onde lhe convier (no guia, uma coluna
+//   lateral). Por isso o conteúdo daqui fica oculto fora do corte, em vez de
+//   herdar .adm-btn-icon. Preenchido hoje só por /admin/guia; com o slot
+//   vazio, o wrapper nem é renderizado e as demais telas não mudam em nada.
 
 interface Props {
   badge: string;
@@ -48,6 +57,9 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
       </svg>
     </button>
     <div class="adm-actions" id="adm-actions">
+      {Astro.slots.has("navegacao") && (
+        <div class="adm-nav"><slot name="navegacao" /></div>
+      )}
       <slot name="primeiro" />
       {showGuide && (
         <a
@@ -111,6 +123,9 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
   .adm-header__right { display: flex; align-items: center; gap: var(--space-2); position: relative; }
   .adm-actions { display: flex; align-items: center; gap: var(--space-2); }
   .adm-btn-icon__label { display: none; }
+  /* Navegação da página: só aparece onde o gatilho "⋮" aparece. Fora do corte
+     ela é responsabilidade da própria página, que a exibe do jeito dela. */
+  .adm-nav { display: none; }
 
   /* Gatilho "⋮" — some no desktop, onde os três ícones cabem soltos.
      Some também em landscape: mesmo abaixo de 760px de largura, a altura
@@ -148,14 +163,24 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
       flex-direction: column;
       align-items: stretch;
       gap: 0;
-      min-width: 230px;
+      /* Piso, não largura fixa: o painel continua se ajustando ao conteúdo de
+         cada tela. Subiu de 230px porque o índice do guia traz títulos de
+         seção, não rótulos de ação — a 230px quatro deles quebravam em duas
+         linhas e o painel crescia 100px em altura. Nas telas que só têm ações
+         nada muda: os rótulos delas já cabiam. */
+      min-width: 288px;
+      /* Teto de altura + rolagem interna: sem isso, um menu alto demais
+         esconderia justamente as últimas linhas — voltar e encerrar sessão.
+         Só o eixo vertical rola; o horizontal segue recortado pelo raio. */
+      max-height: calc(100vh - 96px);
       background: var(--c-darkbg);
       border: 1px solid rgba(166, 195, 0, 0.25);
       border-radius: var(--radius-card);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-      overflow: hidden;
+      overflow: hidden auto;
     }
     .adm-actions.is-open { display: flex; }
+    .adm-nav { display: block; }
     .adm-actions .adm-btn-icon {
       width: auto;
       height: auto;
