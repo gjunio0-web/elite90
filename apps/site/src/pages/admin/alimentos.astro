@@ -1,26 +1,40 @@
 ---
 // ELITE90 PRO · /admin/alimentos — Base de Alimentos
 //
-// Passos 1 a 3 da ordem de execução do repasse "tela de revisão da base de
-// alimentos" (26/08/2026): vocabulário e leitura (1), escrita com editar e
-// revisar (2), e esta tela em versão de computador — lista, filtros e gaveta
-// de edição (3). Ficam para depois: revisão em bloco por categoria (4), a
-// linha no hub e o atalho no construtor nutricional (5), versão de celular
-// (6), arquivar/desarquivar (7), o filtro "sem macros completos" (8), o
-// cadastro de item próprio com validação de coerência calórica (9) e o bloco
-// nomeado em firestore.rules (10). Nenhum bloqueia o uso: a coleção já está
-// fechada pela negação genérica, e os passos 1 a 3 já entregam o essencial —
-// o Coach revisa e preenche medida caseira.
+// Passos 1 a 10 da ordem de execução do repasse "tela de revisão da base de
+// alimentos" (26/08/2026), completos: vocabulário e leitura (1), escrita com
+// editar e revisar (2), lista/filtros/gaveta em computador (3), revisão em
+// bloco por categoria (4), linha no hub e atalho no construtor nutricional
+// (5, ver index.astro e atletas.astro), versão de celular (6), arquivar e
+// desarquivar (7), filtro "sem macros completos" com indicação do que falta
+// (8), cadastro de item próprio com validação de coerência calórica (9) e
+// bloco nomeado em firestore.rules (10).
 //
 // ESPELHA apps/site/src/pages/admin/exercicios.astro, "espelhe, não redesenhe"
 // (mesmo repasse). Onde diverge, é diferença do dado, não de gosto:
 //   • Um filtro de classificação, não dois — categoria no lugar de
 //     grupo+equipamento, porque alimento tem uma dimensão, exercício tem duas.
-//   • macros é somente leitura nesta rodada: até o passo 9 existir, todo
-//     documento vem da TACO (fonte 'taco-4ed-2011'), e editar macro de item
-//     da TACO quebraria a procedência citável — ver _vocabulario-alimentos.ts.
-//   • Sem faixa de revisão em bloco, sem botão de cadastro, sem arquivar e
-//     sem recorte de celular: são os passos 4, 9, 7 e 6, ainda não chegados.
+//   • Um QUARTO filtro de estado, "sem macros completos" (passo 8), sem
+//     equivalente em exercícios: os 15 itens que a TACO não conseguiu
+//     completar nunca aparecem na busca do painel, revisados ou não, e a
+//     tela precisa deixar isso visível em vez de escondê-los dentro de
+//     "aguardando" — ver o cabeçalho de listar-alimentos.ts.
+//   • macros só é editável em item de curadoria própria (fonte !== TACO) —
+//     editar o macro de um item da TACO quebraria a procedência citável. Por
+//     isso a gaveta troca entre bloco somente-leitura e campos editáveis
+//     conforme a procedência do item, não de forma fixa como em exercícios.
+//   • Medida caseira ganha destaque no celular (divergência 3): primeiro
+//     campo da gaveta, e ganha filtro rápido próprio na faixa mobile — é o
+//     tipo de dado que se descobre longe do computador (olhando o prato, no
+//     mercado), e são 582 campos vazios até algum Coach preenchê-los.
+//   • Validação mais séria na criação (divergência 4): macronutriente errado
+//     gera conta errada no plano do atleta, não texto pobre — o servidor
+//     recusa quando as calorias declaradas não batem com o cálculo a partir
+//     dos outros três macros. Ver _vocabulario-alimentos.ts.
+//   • Arquivar existe por motivo diferente do de exercícios: não para "sumir
+//     com o raro engano de cadastro", mas para os 15 sem macros completos e
+//     para as duplicatas que vão surgir quando produto de marca entrar ao
+//     lado de item da TACO.
 //
 // POR QUE ESTA TELA EXISTE
 // Nenhum dos 582 alimentos tem caminho para sair de revisadoPor: nulo — nada
@@ -67,16 +81,55 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .alm-titulo { font-family: var(--font-display); font-size: var(--fs-display-md); color: var(--c-white); letter-spacing: var(--tracking-display); line-height: var(--lh-display); margin: 0; }
   .alm-contadores { font-size: var(--fs-body-sm); color: var(--c-textsub); margin-top: var(--space-1); }
   .alm-contadores strong { color: var(--c-textbody); font-weight: var(--fw-body-bold); }
+  /* Vazado, e não lima: cadastrar é o ato raro desta tela — o acervo veio de
+     fora e o que se faz aqui é curar. Mesma razão de .exc-btn-novo. */
+  .alm-btn-novo { background: transparent; border: 1px solid rgba(166,195,0,0.35); color: var(--c-lime);
+    border-radius: var(--radius-card); padding: 10px 16px; font-family: var(--font-label);
+    font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-cta);
+    text-transform: uppercase; cursor: pointer; white-space: nowrap;
+    transition: background var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std); }
+  .alm-btn-novo:hover { background: rgba(166,195,0,0.08); border-color: var(--c-lime); }
 
   .alm-filtros { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-3); }
   .alm-campo { background: var(--c-darkbg); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-textbody); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 9px 12px; }
   .alm-campo:focus { outline: none; border-color: var(--c-lime); box-shadow: var(--glow-lime-sm); }
   #alm-busca { flex: 1; min-width: 220px; }
+  /* Base escondido — só existe no celular (regra em @media 600px abaixo). Sem
+     este `display:none` de base o botão apareceria também no computador,
+     onde a faixa de estado já cobre revisão e a medida caseira não tem
+     destaque nenhum (divergência 3 é celular-only). */
+  #alm-sem-medida { display: none; }
+
+  /* Faixa de categorias — só existe no celular (spec 6), mesmo papel de
+     .exc-grupos-faixa: o <select> de 15 valores abre uma roleta que esconde a
+     tela inteira; a faixa mostra e resolve com um toque. */
+  .alm-categorias-faixa { display: none; gap: var(--space-2); margin-bottom: var(--space-3);
+    overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity; }
+  .alm-categorias-faixa::-webkit-scrollbar { display: none; }
+  .alm-categorias-faixa .alm-estado { flex: 0 0 auto; scroll-snap-align: start; }
 
   .alm-estados { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-5); }
   .alm-estado { font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; padding: 6px 14px; border-radius: var(--radius-pill); background: transparent; border: 1px solid var(--c-line-muted); color: var(--c-textsub); cursor: pointer; transition: color var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std); }
   .alm-estado:hover { color: var(--c-textbody); }
   .alm-estado[aria-pressed="true"] { background: rgba(166,195,0,0.12); border-color: rgba(166,195,0,0.4); color: var(--c-lime); }
+
+  /* Faixa de revisão em bloco — mesmo papel de .exc-lote: só existe com o
+     filtro em "aguardando" e com resultado, e some quando não há o que
+     aprovar, para não virar aviso que se aprende a ignorar. */
+  .alm-lote { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap;
+    background: rgba(230,126,34,0.09); border: 1px solid rgba(230,126,34,0.3);
+    border-radius: var(--radius-card); padding: 12px var(--space-4); margin-bottom: var(--space-3);
+    font-size: var(--fs-body-sm); color: var(--c-pending); }
+  .alm-lote-btn { background: transparent; border: 1px solid var(--c-pending); color: var(--c-pending);
+    border-radius: var(--radius-card); padding: 7px 14px; font-family: var(--font-label);
+    font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label);
+    text-transform: uppercase; cursor: pointer; white-space: nowrap; }
+  .alm-lote-btn:hover { background: rgba(230,126,34,0.14); }
+  .alm-lote-btn[disabled] { opacity: 0.5; cursor: default; }
+  .alm-lote--desfazer { background: rgba(255,255,255,0.03); border-color: var(--c-line-muted); color: var(--c-textsub); }
+  .alm-lote--desfazer .alm-lote-btn { border-color: var(--c-textsub); color: var(--c-textbody); }
+  .alm-lote--desfazer .alm-lote-btn:hover { background: rgba(255,255,255,0.06); }
 
   .alm-tabela { border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); overflow: hidden; }
   .alm-cab, .alm-linha { display: grid; grid-template-columns: 1fr 200px 90px 220px; gap: var(--space-3); padding: 11px var(--space-4); align-items: center; }
@@ -90,6 +143,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .alm-selo--pend { color: var(--c-pending); border: 1px solid rgba(230,126,34,0.45); background: rgba(230,126,34,0.12); }
   .alm-selo--ok { color: var(--c-lime); border: 1px solid rgba(166,195,0,0.4); background: rgba(166,195,0,0.12); }
   .alm-selo--arq { color: var(--c-textsub); border: 1px solid var(--c-line-muted); }
+  /* Passo 8: qual macronutriente falta, na própria linha — não é selo, porque
+     não é estado de revisão, e o texto varia por item. */
+  .alm-aviso-macro { display: block; margin-top: 3px; font-size: 0.6875rem; color: var(--c-pending); }
 
   .alm-vazio, .alm-carregando { padding: var(--space-6); text-align: center; font-size: var(--fs-body-sm); color: var(--c-textsub); }
   .alm-erro { padding: var(--space-4); border: 1px solid rgba(230,126,34,0.4); background: rgba(230,126,34,0.08); border-radius: var(--radius-card); color: var(--c-pending); font-size: var(--fs-body-sm); }
@@ -98,43 +154,157 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .alm-pag-btn { background: transparent; border: 1px solid var(--c-line-muted); color: var(--c-textbody); border-radius: var(--radius-card); padding: 6px 12px; font-family: var(--font-label); font-size: var(--fs-label); cursor: pointer; }
   .alm-pag-btn[disabled] { opacity: 0.35; cursor: default; }
 
-  /* ── Painel de edição — mesmo padrão de gaveta lateral de exercicios.astro ── */
+  /* ── Painel de edição — mesmo padrão de gaveta lateral de exercicios.astro.
+       display:flex column com `order` explícito em cada bloco: é o que deixa
+       nome e medida caseira trocarem de posição no celular (divergência 3)
+       sem perturbar a ordem de mais nada na gaveta. ── */
   .alm-gaveta { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: flex-end; background: rgba(0,0,0,0); transition: background var(--dur-med) var(--ease-std); }
   .alm-gaveta[hidden] { display: none !important; }
   .alm-gaveta.aberta { background: rgba(0,0,0,0.6); }
-  .alm-painel { width: min(440px, 100%); height: 100%; background: var(--c-darkbg); border-left: 1px solid var(--c-line-muted); padding: var(--space-5); overflow-y: auto; transform: translateX(100%); transition: transform var(--dur-med) var(--ease-out); }
+  .alm-painel { width: min(440px, 100%); height: 100%; background: var(--c-darkbg); border-left: 1px solid var(--c-line-muted); padding: var(--space-5); overflow-y: auto; transform: translateX(100%); transition: transform var(--dur-med) var(--ease-out); display: flex; flex-direction: column; }
   .alm-gaveta.aberta .alm-painel { transform: translateX(0); }
-  .alm-painel-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+  .alm-painel-topo { order: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
   .alm-painel-nome { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); letter-spacing: var(--tracking-display); line-height: var(--lh-tight); }
   .alm-fechar { background: transparent; border: 0; color: var(--c-textsub); font-size: 1.25rem; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .alm-fechar-x { display: inline; }
+  .alm-fechar-voltar { display: none; }
+  #alm-painel-selo { order: 1; }
+  .alm-campo-nome { order: 2; }
+  .alm-campo-medida { order: 3; }
+  .alm-campo-categoria { order: 4; }
+  .alm-campo-macros { order: 5; }
+  .alm-proc { order: 6; margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid rgba(255,255,255,0.07); font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.85; }
+  .alm-acoes { order: 7; display: flex; gap: var(--space-2); margin-top: var(--space-5); }
+  #alm-recado { order: 8; }
+  #alm-desrevisar { order: 9; }
+  #alm-arquivar { order: 10; }
+  .alm-nota { order: 11; margin-top: var(--space-3); background: rgba(255,255,255,0.03); border-left: 2px solid var(--c-olive); padding: 10px 12px; font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.65; }
+
   .alm-rotulo { display: block; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); margin: var(--space-4) 0 6px; }
-  .alm-input { width: 100%; background: var(--c-black); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 10px 12px; }
-  .alm-input:focus { outline: none; border-color: var(--c-lime); box-shadow: var(--glow-lime-sm); }
+  .alm-input, .alm-select { width: 100%; background: var(--c-black); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 10px 12px; }
+  .alm-input:focus, .alm-select:focus { outline: none; border-color: var(--c-lime); box-shadow: var(--glow-lime-sm); }
+  .alm-dupla { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
   .alm-somente-leitura { font-size: var(--fs-body-sm); color: var(--c-textbody); line-height: 1.7; }
-  .alm-proc { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid rgba(255,255,255,0.07); font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.85; }
   .alm-proc b { color: var(--c-textbody); font-weight: var(--fw-body); }
-  .alm-acoes { display: flex; gap: var(--space-2); margin-top: var(--space-5); }
   .alm-btn-lime { flex: 1; background: var(--grad-cta); color: var(--c-black); border: 0; border-radius: var(--radius-card); padding: 12px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-cta); text-transform: uppercase; cursor: pointer; }
   .alm-btn-vazado { background: transparent; border: 1px solid rgba(255,255,255,0.18); color: var(--c-textbody); border-radius: var(--radius-card); padding: 12px 16px; font-family: var(--font-label); font-size: var(--fs-label); cursor: pointer; }
   .alm-btn-lime[disabled], .alm-btn-vazado[disabled] { opacity: 0.45; cursor: default; }
-  .alm-desfazer { margin-top: var(--space-3); background: transparent; border: 0; padding: 0; color: var(--c-textsub); font-family: var(--font-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .alm-desfazer { background: transparent; border: 0; padding: 0; color: var(--c-textsub); font-family: var(--font-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .alm-desfazer:hover { color: var(--c-pending); }
-  .alm-nota { margin-top: var(--space-3); background: rgba(255,255,255,0.03); border-left: 2px solid var(--c-olive); padding: 10px 12px; font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.65; }
+  #alm-desrevisar, #alm-arquivar { margin-top: var(--space-3); display: block; }
   .alm-recado { margin-top: var(--space-3); font-size: var(--fs-body-sm); padding: 10px 12px; border-radius: var(--radius-card); }
   .alm-recado--ok { color: var(--c-lime); background: rgba(166,195,0,0.08); border: 1px solid rgba(166,195,0,0.3); }
   .alm-recado--erro { color: var(--c-pending); background: rgba(230,126,34,0.08); border: 1px solid rgba(230,126,34,0.35); }
 
+  /* ── Janela de confirmação — mesmas classes e medidas de fichas.astro e
+       exercicios.astro. Reconstruir um diálogo próprio aqui criaria um
+       segundo padrão para a mesma coisa; ver o comentário longo em
+       exercicios.astro sobre por que é janela, e não confirmação em linha. ── */
+  .confirm-overlay { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); padding: var(--space-4); }
+  .confirm-overlay[hidden] { display: none; }
+  .confirm-box { background: var(--c-darkbg); border: var(--border-lime); border-radius: var(--radius-card); max-width: 520px; width: 100%; padding: var(--space-5); max-height: 85vh; overflow-y: auto; }
+  .confirm-title { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 var(--space-3); }
+  .confirm-title span { color: var(--c-pending); }
+  .confirm-summary { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: 1.7; margin-bottom: var(--space-4); }
+  .confirm-summary strong { color: var(--c-textbody); }
+  .confirm-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: flex-end; }
+  .btn-sm { font-family: var(--font-label); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 20px; border-radius: var(--radius-card); cursor: pointer; border: none; transition: background var(--transition-base), color var(--transition-base); }
+  .btn-outline { background: transparent; color: var(--c-lime); border: 1px solid rgba(166,195,0,0.3); }
+  .btn-outline:hover { background: rgba(166,195,0,0.05); border-color: var(--c-lime); }
+  .btn-perigo { background: transparent; color: var(--c-pending); border: 1px solid var(--c-pending); }
+  .btn-perigo:hover { background: rgba(230,126,34,0.1); }
+  .btn-perigo:disabled { opacity: 0.5; cursor: default; }
+
+  /* ── Janela "O que fica no computador" (camada 2, spec 6) ── */
+  .alm-limites-lista { list-style: none; padding: 0; margin: 0 0 var(--space-4); }
+  .alm-limites-lista li { padding: var(--space-3) 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .alm-limites-lista li:last-child { border-bottom: 0; }
+  .alm-limites-lista b { display: block; color: var(--c-textbody); font-weight: var(--fw-body-bold); font-size: var(--fs-body-sm); margin-bottom: 3px; }
+  .alm-limites-lista span { display: block; font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.65; }
+  .alm-limites-pode { background: rgba(166,195,0,0.07); border-left: 2px solid var(--c-lime);
+    padding: 10px 12px; font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.7; margin-bottom: var(--space-4); }
+  .alm-limites-pode b { color: var(--c-lime); font-weight: var(--fw-body-bold); }
+
+  /* Aviso da camada 1: nasce ABAIXO da confirmação de salvamento e separado
+     dela, mesma razão de .exc-aviso-desktop. */
+  .alm-aviso-desktop { margin-top: var(--space-3); border: 1px dashed rgba(230,126,34,0.4);
+    border-radius: var(--radius-card); padding: 10px 12px; font-size: 0.6875rem;
+    color: var(--c-textsub); line-height: 1.7; }
+  .alm-aviso-desktop b { color: var(--c-pending); font-weight: var(--fw-body-bold); }
+  .alm-aviso-desktop button { display: inline; background: none; border: 0; padding: 0;
+    color: var(--c-lime); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+  #alm-limites-abrir { display: none; }
+
   /* Entre 600 e 900px cai só a coluna de macros — quatro colunas fixas não
-     cabem. Segue sendo a tela de computador: nenhuma regra de celular (passo
-     6) chega antes de 600px. */
+     cabem. Continua sendo a tela de computador: revisar, revisar em bloco e
+     todos os filtros seguem no lugar. */
   @media (max-width: 900px) {
     .alm-cab, .alm-linha { grid-template-columns: 1fr 150px 90px; }
     .alm-cab--macros, .alm-col--macros { display: none; }
   }
+
+  /* ─────────────────────────── CELULAR · spec 6 ───────────────────────────
+     Corte em 600px, herdando integralmente as decisões de exercícios.astro:
+     revisar e revisão em bloco saem porque liberam alimento(s) para o
+     construtor nutricional e um encostão custa caro demais; cadastrar sai
+     porque declarar quatro macros com precisão — e a validação de coerência
+     calórica exige atenção — é trabalho de teclado. Arquivar fica: é reverter
+     um engano de duplicata ou tirar um item sem macros do seletor, não
+     liberar nada a ninguém.
+
+     A ausência é explicada no ponto onde é sentida — ver .alm-aviso-desktop e
+     a janela #alm-limites — não num aviso solto no topo. */
+  @media (max-width: 600px) {
+    .alm-main { padding: var(--space-4) var(--space-3) var(--space-6); }
+
+    #alm-estados { display: none; }
+    #alm-lote { display: none; }
+    #alm-categoria { display: none; }
+    #alm-busca { flex: 1 1 100%; min-width: 0; }
+    .alm-categorias-faixa { display: flex; }
+    #alm-sem-medida { display: inline-flex; }
+
+    .alm-cab { display: none; }
+    .alm-linha { display: block; padding: var(--space-3); }
+    .alm-nome { display: block; font-size: var(--fs-body-md); line-height: var(--lh-tight); }
+    .alm-col { font-size: 0.6875rem; }
+    .alm-col--cat { display: inline; }
+    .alm-col--kcal { display: inline; }
+    .alm-col--kcal::before { content: " · "; }
+
+    .alm-painel { width: 100%; border-left: 0; padding: var(--space-4) var(--space-3) var(--space-6); }
+    .alm-painel-topo { flex-direction: row-reverse; justify-content: flex-end; align-items: center; }
+    .alm-fechar { font-size: 1.5rem; padding: 0 8px 0 0; }
+    .alm-fechar-x { display: none; }
+    .alm-fechar-voltar { display: inline; }
+
+    /* Divergência 3: medida caseira antes do nome — é o campo que se
+       preenche longe do computador, e 582 estão vazios. */
+    .alm-campo-nome { order: 3; }
+    .alm-campo-medida { order: 2; }
+
+    #alm-novo { display: none; }
+    #alm-salvar-revisar { display: none; }
+    #alm-desrevisar { display: none; }
+    .alm-acoes .alm-btn-vazado { flex: 1; background: var(--grad-cta); color: var(--c-black);
+      border: 0; font-weight: var(--fw-label); letter-spacing: var(--tracking-cta); text-transform: uppercase; }
+
+    #alm-limites-abrir { display: inline-flex; }
+  }
 </style>
 </head>
 <body>
-<AdminHeader badge="Alimentos" backHref="/admin" />
+<!-- Mesma posição de exercicios.astro: dentro do menu "⋮", primeiro item,
+     acima de "Como o painel funciona" (spec 6). -->
+<AdminHeader badge="Alimentos" backHref="/admin">
+  <button slot="primeiro" class="adm-btn-icon adm-btn-icon--guide" id="alm-limites-abrir" type="button" aria-label="O que fica no computador">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>
+    </svg>
+    <span class="adm-btn-icon__label">O que fica no computador</span>
+  </button>
+</AdminHeader>
 
 <main class="alm-main">
   <div class="alm-topo">
@@ -142,14 +312,22 @@ import AdminHeader from '../../components/AdminHeader.astro';
       <h1 class="alm-titulo">Base de Alimentos</h1>
       <div class="alm-contadores" id="alm-contadores">Carregando…</div>
     </div>
+    <button class="alm-btn-novo" id="alm-novo" type="button">+ Novo alimento</button>
   </div>
 
   <div class="alm-filtros">
     <input class="alm-campo" id="alm-busca" type="search" placeholder="Buscar por nome…" autocomplete="off" />
     <select class="alm-campo" id="alm-categoria"><option value="">Todas as categorias</option></select>
+    <!-- Filtro rápido do celular (divergência 3): ao lado da faixa de
+         categorias, não da busca — é outro eixo de recorte, não texto. -->
+    <button class="alm-campo" id="alm-sem-medida" type="button" aria-pressed="false">Sem medida caseira</button>
   </div>
 
+  <div class="alm-categorias-faixa" id="alm-categorias-faixa" role="group" aria-label="Filtrar por categoria"></div>
+
   <div class="alm-estados" id="alm-estados" role="group" aria-label="Filtrar por estado"></div>
+
+  <div id="alm-lote"></div>
 
   <div class="alm-tabela">
     <div class="alm-cab"><span>Alimento</span><span>Categoria</span><span>Kcal</span><span class="alm-cab--macros">Macros (P·C·G)</span></div>
@@ -165,29 +343,86 @@ import AdminHeader from '../../components/AdminHeader.astro';
   </div>
 </main>
 
+<div class="confirm-overlay" id="alm-lote-janela" hidden>
+  <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="alm-lote-titulo">
+    <h3 class="confirm-title" id="alm-lote-titulo">Marcar como <span>revisados</span></h3>
+    <p class="confirm-summary" id="alm-lote-texto"></p>
+    <div class="confirm-actions">
+      <button class="btn-sm btn-outline" id="alm-lote-nao" type="button">Cancelar</button>
+      <button class="btn-sm btn-perigo" id="alm-lote-sim" type="button"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Camada 2 da spec 6. "Os 123 de Carnes e derivados" é real, conferido
+     contra scripts/dados-alimentos/alimentos-fonte.json em 26/08/2026 — é a
+     maior categoria. Se o acervo mudar muito, conferir de novo. -->
+<div class="confirm-overlay" id="alm-limites" hidden>
+  <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="alm-limites-titulo">
+    <h3 class="confirm-title" id="alm-limites-titulo">O que fica no <span>computador</span></h3>
+    <p class="confirm-summary">Três coisas a base de alimentos só faz na tela grande. Não é limitação do aparelho — é que o custo de um toque errado, nas três, é alto:</p>
+    <ul class="alm-limites-lista">
+      <li>
+        <b>Liberar um alimento para o construtor nutricional</b>
+        <span>Marcar como revisado é o que tira o alimento da fila e o coloca na busca do plano do atleta. É o ato que muda o que o atleta vê, e um encostão no bolso não deveria bastar para ele acontecer.</span>
+      </li>
+      <li>
+        <b>Aprovar os 123 de Carnes e derivados de uma vez</b>
+        <span>A revisão em bloco libera a categoria inteira numa ação. Desfazer é possível, mas o registro de quem aprovou se perde no caminho.</span>
+      </li>
+      <li>
+        <b>Cadastrar um alimento que a TACO não tem</b>
+        <span>Todo alimento novo exige os quatro macronutrientes, com calorias coerentes com proteína, carboidrato e gordura. É trabalho de teclado, e digitar isso com precisão no celular arrisca um erro que vira conta errada no plano do atleta.</span>
+      </li>
+    </ul>
+    <p class="alm-limites-pode"><b>Aqui você corrige.</b> Buscar pelo nome, ajustar nome de exibição e medida caseira, arquivar ou desarquivar, e salvar — que é o que resolve o erro percebido na hora, com o aparelho na mão.</p>
+    <div class="confirm-actions">
+      <button class="btn-sm btn-outline" id="alm-limites-fechar" type="button">Entendi</button>
+    </div>
+  </div>
+</div>
+
 <div class="alm-gaveta" id="alm-gaveta" hidden>
   <aside class="alm-painel" role="dialog" aria-modal="true" aria-labelledby="alm-painel-nome">
     <div class="alm-painel-topo">
       <div class="alm-painel-nome" id="alm-painel-nome"></div>
-      <button class="alm-fechar" id="alm-fechar" type="button" aria-label="Fechar">✕</button>
+      <button class="alm-fechar" id="alm-fechar" type="button" aria-label="Fechar"><span class="alm-fechar-x" aria-hidden="true">✕</span><span class="alm-fechar-voltar" aria-hidden="true">←</span></button>
     </div>
     <div id="alm-painel-selo"></div>
 
-    <label class="alm-rotulo" for="alm-f-nome">Nome de exibição</label>
-    <input class="alm-input" id="alm-f-nome" type="text" />
+    <div class="alm-campo-nome">
+      <label class="alm-rotulo" for="alm-f-nome">Nome de exibição</label>
+      <input class="alm-input" id="alm-f-nome" type="text" />
+    </div>
 
-    <label class="alm-rotulo" for="alm-f-medida">Medida caseira</label>
-    <input class="alm-input" id="alm-f-medida" type="text" placeholder="Ex.: 6 colheres de sopa (150 g)" />
+    <div class="alm-campo-medida">
+      <label class="alm-rotulo" for="alm-f-medida">Medida caseira</label>
+      <input class="alm-input" id="alm-f-medida" type="text" placeholder="Ex.: 6 colheres de sopa (150 g)" />
+    </div>
 
-    <label class="alm-rotulo">Categoria · somente leitura</label>
-    <div class="alm-somente-leitura" id="alm-categoria-corpo"></div>
+    <div class="alm-campo-categoria">
+      <label class="alm-rotulo" id="alm-rotulo-categoria">Categoria · somente leitura</label>
+      <div class="alm-somente-leitura" id="alm-categoria-corpo"></div>
+      <select class="alm-select" id="alm-f-categoria" hidden></select>
+    </div>
 
-    <!-- Macros somente leitura nesta rodada: até o passo 9 (cadastro de item
-         próprio) existir, todo documento vem da TACO, e editar o macro de um
-         item da TACO quebraria a procedência citável — ver o cabeçalho de
-         _vocabulario-alimentos.ts sobre a divergência 2 do repasse. -->
-    <label class="alm-rotulo">Macronutrientes (por 100 g) · somente leitura</label>
-    <div class="alm-somente-leitura" id="alm-macros-corpo"></div>
+    <!-- Macros: bloco somente-leitura ou os quatro campos, conforme a
+         procedência do item — ver abrir()/abrirNovo(). Item da TACO nunca
+         mostra os campos; item de curadoria ou em criação, sim. -->
+    <div class="alm-campo-macros">
+      <label class="alm-rotulo" id="alm-rotulo-macros">Macronutrientes (por 100 g) · somente leitura</label>
+      <div class="alm-somente-leitura" id="alm-macros-corpo"></div>
+      <div id="alm-f-macros-grupo" hidden>
+        <div class="alm-dupla">
+          <div><label class="alm-rotulo" for="alm-f-kcal">Calorias (kcal)</label><input class="alm-input" id="alm-f-kcal" type="number" min="0" step="1" /></div>
+          <div><label class="alm-rotulo" for="alm-f-proteina">Proteína (g)</label><input class="alm-input" id="alm-f-proteina" type="number" min="0" step="0.1" /></div>
+        </div>
+        <div class="alm-dupla">
+          <div><label class="alm-rotulo" for="alm-f-carboidrato">Carboidrato (g)</label><input class="alm-input" id="alm-f-carboidrato" type="number" min="0" step="0.1" /></div>
+          <div><label class="alm-rotulo" for="alm-f-lipideos">Lipídeos (g)</label><input class="alm-input" id="alm-f-lipideos" type="number" min="0" step="0.1" /></div>
+        </div>
+      </div>
+    </div>
 
     <div class="alm-proc" id="alm-proc-corpo"></div>
 
@@ -197,6 +432,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     </div>
     <div id="alm-recado"></div>
     <button class="alm-desfazer" id="alm-desrevisar" type="button" hidden>Devolver à fila de revisão</button>
+    <button class="alm-desfazer" id="alm-arquivar" type="button" hidden>Arquivar alimento</button>
 
     <p class="alm-nota">A alteração é gravada no banco imediatamente. A chegada ao portal acontece na próxima publicação do site — se a busca do construtor nutricional ainda mostrar o valor antigo, não é falha do salvamento; é que o site ainda não foi publicado de novo.</p>
   </aside>
@@ -219,11 +455,14 @@ import AdminHeader from '../../components/AdminHeader.astro';
     'Cereais e derivados', 'Frutas e derivados', 'Gorduras e óleos', 'Leguminosas e derivados',
     'Leite e derivados', 'Miscelâneas', 'Nozes e sementes', 'Outros alimentos industrializados',
     'Ovos e derivados', 'Pescados e frutos do mar', 'Produtos açucarados', 'Verduras, hortaliças e derivados'];
+  const FONTE_TACO = 'taco-4ed-2011';
+  const MACRO_CAMPOS = ['kcal', 'proteinaG', 'carboidratoG', 'lipideosG'];
 
   const ESTADOS = [
     { valor: 'aguardando', rotulo: 'Aguardando revisão' },
     { valor: 'revisados',  rotulo: 'Revisados' },
     { valor: 'arquivados', rotulo: 'Arquivados' },
+    { valor: 'sem-macros', rotulo: 'Sem macros completos' },
   ];
 
   const $ = (id) => document.getElementById(id);
@@ -231,9 +470,17 @@ import AdminHeader from '../../components/AdminHeader.astro';
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const numero = (n, casas = 0) => (typeof n === 'number' ? n.toFixed(casas).replace('.', ',') : '—');
 
-  let estado = { estado: 'aguardando', categoria: '', busca: '', pagina: 1 };
+  let estado = { estado: 'aguardando', categoria: '', busca: '', semMedidaCaseira: false, pagina: 1 };
   let itens = [];
   let emEdicao = null;
+  // 'editar' ou 'criar' — a gaveta é a mesma nos dois, mesmo padrão de
+  // exercicios.astro.
+  let modo = 'editar';
+  // Se os campos de macro estão abertos para edição na gaveta ATUAL — depende
+  // do modo (sempre aberto ao criar) e da procedência (aberto ao editar só se
+  // fonte !== FONTE_TACO). Guardado à parte porque valores()/alterados()
+  // precisam da mesma resposta sem reconsultar o item.
+  let macrosEditavelAtual = false;
 
   async function token() {
     const u = auth.currentUser;
@@ -250,7 +497,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
     const texto = await resp.text();
     let dados = {};
     try { dados = texto ? JSON.parse(texto) : {}; } catch { dados = { erro: texto }; }
-    if (!resp.ok) throw new Error(dados.erro || dados.detalhes?.join('; ') || `Falha ${resp.status}`);
+    // detalhes antes de erro: quando os dois vêm juntos (validarNovo/
+    // validarCampos sempre respondem { erro: "Campos inválidos.", detalhes }),
+    // erro é só o rótulo genérico e detalhes é o motivo de verdade — a razão
+    // pela qual a coerência calórica recusou, por exemplo. Mostrar só "Campos
+    // inválidos." deixaria o Coach sem saber o que corrigir.
+    if (!resp.ok) throw new Error(dados.detalhes?.length ? dados.detalhes.join('; ') : (dados.erro || `Falha ${resp.status}`));
     return dados;
   }
 
@@ -265,6 +517,22 @@ import AdminHeader from '../../components/AdminHeader.astro';
     ).join('');
   }
 
+  /** Faixa de categorias do celular — mesmo papel de pintarGrupos() em
+   *  exercicios.astro: reusa a ficha .alm-estado por ser o mesmo gesto. */
+  function pintarCategorias() {
+    $('alm-categorias-faixa').innerHTML = [{ valor: '', rotulo: 'Todas' }, ...CATEGORIAS.map((c) => ({ valor: c, rotulo: c }))]
+      .map((c) => `<button type="button" class="alm-estado" data-categoria="${esc(c.valor)}" aria-pressed="${c.valor === estado.categoria}">${esc(c.rotulo)}</button>`)
+      .join('');
+  }
+
+  function trocarCategoria(valor) {
+    estado.categoria = valor;
+    estado.pagina = 1;
+    $('alm-categoria').value = valor;
+    pintarCategorias();
+    carregar();
+  }
+
   function macrosLinha(m) {
     if (!m) return '—';
     return `P ${numero(m.proteinaG, 1)}g · C ${numero(m.carboidratoG, 1)}g · G ${numero(m.lipideosG, 1)}g`;
@@ -275,6 +543,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     const c = dados.contadores;
     $('alm-contadores').innerHTML =
       `<strong>${c.total}</strong> alimentos · <strong>${c.revisados}</strong> revisados · <strong>${c.aguardando}</strong> aguardando` +
+      (c.semMacros ? ` · <strong>${c.semMacros}</strong> sem macros completos` : '') +
       (c.arquivados ? ` · <strong>${c.arquivados}</strong> arquivados` : '');
 
     if (!itens.length) {
@@ -285,11 +554,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
           ? '<span class="alm-selo alm-selo--arq">arquivado</span>'
           : a.revisado
             ? '<span class="alm-selo alm-selo--ok">revisado</span>'
-            : '<span class="alm-selo alm-selo--pend">aguardando</span>';
+            : a.publicado
+              ? '<span class="alm-selo alm-selo--pend">aguardando</span>'
+              : '';
+        const faltando = a.macrosFaltando?.length
+          ? `<span class="alm-aviso-macro">Falta: ${esc(a.macrosFaltando.join(', '))}</span>` : '';
         return `<button type="button" class="alm-linha" data-i="${i}">
-          <span class="alm-nome">${esc(a.nomeExibicao)}<br>${selo}</span>
-          <span class="alm-col">${esc(a.categoria)}</span>
-          <span class="alm-col">${numero(a.macros?.kcal)}</span>
+          <span class="alm-nome">${esc(a.nomeExibicao)}<br>${selo}${faltando}</span>
+          <span class="alm-col alm-col--cat">${esc(a.categoria)}</span>
+          <span class="alm-col alm-col--kcal">${numero(a.macros?.kcal)}</span>
           <span class="alm-col alm-col--macros">${macrosLinha(a.macros)}</span>
         </button>`;
       }).join('');
@@ -305,48 +578,174 @@ import AdminHeader from '../../components/AdminHeader.astro';
     $('alm-proxima').disabled = dados.pagina >= dados.paginas;
   }
 
+  // ── Revisão em bloco (passo 4) — mesmo desenho de exercicios.astro ──
+  let ultimoLote = 0;
+
+  function escopoLote() {
+    return estado.categoria ? `de ${esc(estado.categoria)}`
+      : estado.busca ? 'deste filtro' : 'do catálogo';
+  }
+
+  function pintarLote(dados) {
+    const faixa = $('alm-lote');
+    ultimoLote = dados.encontrados;
+    const sentido = estado.estado === 'aguardando' ? 'marcar'
+      : estado.estado === 'revisados' ? 'desfazer' : null;
+    if (!sentido || !dados.encontrados) { faixa.innerHTML = ''; return; }
+    const n = dados.encontrados;
+    faixa.innerHTML = sentido === 'marcar'
+      ? `<div class="alm-lote">
+           <span>${n} alimento${n > 1 ? 's' : ''} ${escopoLote()} aguardando sua revisão</span>
+           <button type="button" class="alm-lote-btn" id="alm-lote-abrir">Marcar ${n === 1 ? 'o' : `os ${n}`} como revisado${n > 1 ? 's' : ''}</button>
+         </div>`
+      : `<div class="alm-lote alm-lote--desfazer">
+           <span>${n} alimento${n > 1 ? 's' : ''} ${escopoLote()} revisado${n > 1 ? 's' : ''}</span>
+           <button type="button" class="alm-lote-btn" id="alm-lote-abrir">Desfazer ${n === 1 ? 'a revisão' : `as ${n} revisões`}</button>
+         </div>`;
+  }
+
+  function abrirJanelaLote() {
+    const n = ultimoLote;
+    if (!n) return;
+    const desfazendo = estado.estado === 'revisados';
+    $('alm-lote-titulo').innerHTML = desfazendo
+      ? 'Desfazer <span>revisões</span>'
+      : 'Marcar como <span>revisados</span>';
+    $('alm-lote-texto').innerHTML = desfazendo
+      ? `Você está prestes a devolver <strong>${n} alimento${n > 1 ? 's' : ''} ${escopoLote()}</strong> ` +
+        `à fila de revisão. ${n > 1 ? 'Eles saem' : 'Ele sai'} da busca do construtor nutricional na próxima publicação, ` +
+        `e ${n > 1 ? 'voltam' : 'volta'} a aparecer aqui como aguardando.<br><br>` +
+        `Nada é apagado — quem já tem ${n > 1 ? 'esses alimentos' : 'esse alimento'} num plano ` +
+        `continua com ${n > 1 ? 'eles' : 'ele'} (o congelamento do plano publicado garante isso). ` +
+        `O que se perde é o registro de quem aprovou e quando.`
+      : `Você está prestes a marcar <strong>${n} alimento${n > 1 ? 's' : ''} ${escopoLote()}</strong> como revisado${n > 1 ? 's' : ''}. ` +
+        `Isso ${n > 1 ? 'os libera' : 'o libera'} para a busca do construtor nutricional na próxima publicação do site.<br><br>` +
+        `Dá para desfazer depois, pelo filtro <strong>Revisados</strong> ou alimento a alimento — ` +
+        `mas o registro de quem aprovou se perde ao desfazer.`;
+    $('alm-lote-sim').textContent = desfazendo
+      ? (n > 1 ? `Desfazer ${n} revisões` : 'Desfazer a revisão')
+      : (n > 1 ? `Confirmar ${n} revisões` : 'Confirmar a revisão');
+    $('alm-lote-sim').disabled = false;
+    $('alm-lote-janela').hidden = false;
+    $('alm-lote-nao').focus();
+  }
+
+  function fecharJanelaLote() { $('alm-lote-janela').hidden = true; }
+
+  async function aplicarLote(n) {
+    const btn = $('alm-lote-sim');
+    if (btn) { btn.disabled = true; btn.textContent = 'Marcando…'; }
+    try {
+      const r = await chamar('atualizar-alimento', {
+        operacao: estado.estado === 'revisados' ? 'desrevisar-lote' : 'revisar-lote',
+        filtro: { categoria: estado.categoria, busca: estado.busca },
+        esperados: n,
+      });
+      fecharJanelaLote();
+      await carregar();
+      $('alm-lote').insertAdjacentHTML('afterbegin',
+        `<div class="alm-recado alm-recado--ok" style="margin:0 0 12px">${
+          r.desrevisados != null
+            ? `${r.desrevisados} alimento(s) devolvido(s) à fila de revisão.`
+            : `${r.revisados} alimento(s) marcado(s) como revisado(s).`
+        }</div>`);
+    } catch (e) {
+      fecharJanelaLote();
+      $('alm-lote').innerHTML = `<div class="alm-recado alm-recado--erro" style="margin:0 0 12px">${esc(e.message)}</div>`;
+    }
+  }
+
   let pedido = 0;
   async function carregar() {
     const meu = ++pedido;
     try {
       const dados = await chamar('listar-alimentos', estado);
-      // Descarta resposta de pedido antigo — mesma razão de exercicios.astro:
-      // digitar rápido na busca dispara várias, e a lenta pode chegar depois.
       if (meu !== pedido) return;
       pintarLinhas(dados);
+      pintarLote(dados);
     } catch (e) {
       if (meu !== pedido) return;
       $('alm-linhas').innerHTML = `<div class="alm-erro">Não foi possível carregar a base. ${esc(e.message)}</div>`;
     }
   }
 
+  function macrosDoFormulario() {
+    return {
+      kcal: Number($('alm-f-kcal').value),
+      proteinaG: Number($('alm-f-proteina').value),
+      carboidratoG: Number($('alm-f-carboidrato').value),
+      lipideosG: Number($('alm-f-lipideos').value),
+    };
+  }
+
+  function pintarMacrosFormulario(m) {
+    $('alm-f-kcal').value = m?.kcal ?? '';
+    $('alm-f-proteina').value = m?.proteinaG ?? '';
+    $('alm-f-carboidrato').value = m?.carboidratoG ?? '';
+    $('alm-f-lipideos').value = m?.lipideosG ?? '';
+  }
+
+  /** Alterna entre o bloco somente-leitura e os quatro campos de macro,
+   *  conforme macrosEditavelAtual — chamado por abrir() e abrirNovo(). */
+  function ajustarVisibilidadeMacros() {
+    $('alm-macros-corpo').hidden = macrosEditavelAtual;
+    $('alm-f-macros-grupo').hidden = !macrosEditavelAtual;
+    $('alm-rotulo-macros').textContent = macrosEditavelAtual
+      ? 'Macronutrientes (por 100 g)'
+      : 'Macronutrientes (por 100 g) · somente leitura';
+  }
+
   function abrir(i) {
     const a = itens[i];
     if (!a) return;
+    modo = 'editar';
     emEdicao = a;
+    macrosEditavelAtual = a.fonte !== FONTE_TACO;
     $('alm-painel-nome').textContent = a.nomeExibicao;
     $('alm-painel-selo').innerHTML = !a.ativo
       ? '<span class="alm-selo alm-selo--arq">arquivado</span>'
       : a.revisado
         ? `<span class="alm-selo alm-selo--ok">revisado${a.revisadoEm ? ' em ' + new Date(a.revisadoEm).toLocaleDateString('pt-BR') : ''}</span>`
-        : '<span class="alm-selo alm-selo--pend">aguardando validação do Coach</span>';
+        : a.publicado
+          ? '<span class="alm-selo alm-selo--pend">aguardando validação do Coach</span>'
+          : '<span class="alm-selo alm-selo--arq">sem macros completos — não revisável</span>';
     $('alm-f-nome').value = a.nomeExibicao ?? '';
     $('alm-f-medida').value = a.medidaCaseira ?? '';
+
+    // Categoria: sempre somente leitura ao editar — nunca fica editável fora
+    // da criação (ver _vocabulario-alimentos.ts).
+    $('alm-rotulo-categoria').textContent = 'Categoria · somente leitura';
+    $('alm-categoria-corpo').hidden = false;
     $('alm-categoria-corpo').textContent = a.categoria ?? '—';
-    $('alm-macros-corpo').innerHTML = a.macros
-      ? `Calorias · <b>${numero(a.macros.kcal)} kcal</b><br>` +
-        `Proteína · <b>${numero(a.macros.proteinaG, 1)} g</b><br>` +
-        `Carboidrato · <b>${numero(a.macros.carboidratoG, 1)} g</b><br>` +
-        `Lipídeos · <b>${numero(a.macros.lipideosG, 1)} g</b>`
-      : 'Sem os quatro macronutrientes completos — este item não aparece na busca do construtor nutricional.';
+    $('alm-f-categoria').hidden = true;
+
+    ajustarVisibilidadeMacros();
+    if (macrosEditavelAtual) {
+      pintarMacrosFormulario(a.macros);
+    } else {
+      $('alm-macros-corpo').innerHTML = a.macros
+        ? `Calorias · <b>${numero(a.macros.kcal)} kcal</b><br>` +
+          `Proteína · <b>${numero(a.macros.proteinaG, 1)} g</b><br>` +
+          `Carboidrato · <b>${numero(a.macros.carboidratoG, 1)} g</b><br>` +
+          `Lipídeos · <b>${numero(a.macros.lipideosG, 1)} g</b>`
+        : 'Sem os quatro macronutrientes completos — este item não aparece na busca do construtor nutricional.' +
+          (a.macrosFaltando?.length ? `<br>Falta: <b>${esc(a.macrosFaltando.join(', '))}</b>` : '');
+    }
+
     $('alm-proc-corpo').innerHTML =
+      `<label class="alm-rotulo" style="margin-top:0">Procedência · somente leitura</label>` +
       `Nome de origem · <b>${esc(a.nome ?? '—')}</b><br>` +
       `Fonte · <b>${esc(a.fonte ?? '—')}</b><br>` +
       `Criado por · <b>${esc(a.criadoPor ?? '—')}</b><br>` +
       `Última alteração · <b>${a.atualizadoEm ? esc(new Date(a.atualizadoEm).toLocaleString('pt-BR')) : '—'}</b>`;
     $('alm-recado').innerHTML = '';
-    $('alm-salvar-revisar').hidden = a.revisado;
+    // Passo 8: item sem macros completos nunca é revisável — nem o botão
+    // aparece (ver _vocabulario-alimentos.ts / atualizar-alimento.ts, que
+    // recusaria a chamada de qualquer forma).
+    $('alm-salvar-revisar').hidden = a.revisado || !a.publicado;
     $('alm-desrevisar').hidden = !a.revisado;
+    $('alm-arquivar').hidden = false;
+    $('alm-arquivar').textContent = a.ativo === false ? 'Desarquivar alimento' : 'Arquivar alimento';
     const g = $('alm-gaveta');
     g.hidden = false;
     requestAnimationFrame(() => g.classList.add('aberta'));
@@ -358,14 +757,30 @@ import AdminHeader from '../../components/AdminHeader.astro';
     setTimeout(() => { g.hidden = true; emEdicao = null; }, 250);
   }
 
-  /** Só o que mudou, mesma razão de exercicios.astro: mandar o documento
-   *  inteiro faria toda edição carregar campos que ninguém tocou. */
+  /** O formulário inteiro, como valores — mesma forma de valores() em
+   *  exercicios.astro. categoria só existe ao criar; macros só quando
+   *  macrosEditavelAtual. */
+  function valores() {
+    const v = {
+      nomeExibicao: $('alm-f-nome').value.trim(),
+      medidaCaseira: $('alm-f-medida').value.trim() || null,
+    };
+    if (modo === 'criar') v.categoria = $('alm-f-categoria').value;
+    if (macrosEditavelAtual) v.macros = macrosDoFormulario();
+    return v;
+  }
+
+  /** Só o que mudou, mesma razão de alterados() em exercicios.astro. */
   function alterados() {
     const a = emEdicao;
-    const novo = { nomeExibicao: $('alm-f-nome').value.trim(), medidaCaseira: $('alm-f-medida').value.trim() || null };
+    const novo = valores();
     const diff = {};
     if (novo.nomeExibicao !== (a.nomeExibicao ?? '')) diff.nomeExibicao = novo.nomeExibicao;
     if (novo.medidaCaseira !== (a.medidaCaseira ?? null)) diff.medidaCaseira = novo.medidaCaseira;
+    if (macrosEditavelAtual) {
+      const atual = a.macros ?? {};
+      if (MACRO_CAMPOS.some((c) => novo.macros[c] !== atual[c])) diff.macros = novo.macros;
+    }
     return diff;
   }
 
@@ -373,7 +788,37 @@ import AdminHeader from '../../components/AdminHeader.astro';
     $('alm-recado').innerHTML = `<div class="alm-recado alm-recado--${tipo}">${esc(texto)}</div>`;
   }
 
+  // ── Corte de celular (spec 6) — mesma fonte única de verdade de
+  // exercicios.astro: matchMedia, não innerWidth, para que girar o aparelho
+  // reavalie sozinho.
+  const CORTE = window.matchMedia('(max-width: 600px)');
+  const noCelular = () => CORTE.matches;
+
+  function aplicarCorte(recarregar) {
+    const m = noCelular();
+    $('alm-fechar').setAttribute('aria-label', m ? 'Voltar' : 'Fechar');
+    $('alm-salvar').textContent = m ? 'Salvar alterações' : 'Salvar';
+    if (m && estado.estado !== 'todos') {
+      estado.estado = 'todos';
+      estado.pagina = 1;
+      pintarEstados();
+      if (recarregar) carregar();
+    }
+  }
+
+  function abrirLimites() { $('alm-limites').hidden = false; $('alm-limites-fechar').focus(); }
+  function fecharLimites() { $('alm-limites').hidden = true; }
+
+  function avisarDoQueFicaNoComputador() {
+    $('alm-recado').insertAdjacentHTML('beforeend',
+      `<div class="alm-aviso-desktop">
+         <b>Este alimento continua aguardando validação.</b> Marcar como revisado é o que libera a busca do construtor nutricional, e essa ação fica no computador.
+         <button type="button" data-abrir-limites>Ver o que fica no computador</button>
+       </div>`);
+  }
+
   async function salvar(tambemRevisar) {
+    if (modo === 'criar') return criarAlimento(tambemRevisar);
     if (!emEdicao) return;
     const botoes = [$('alm-salvar'), $('alm-salvar-revisar')];
     botoes.forEach((b) => (b.disabled = true));
@@ -390,6 +835,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
           : Object.keys(diff).length ? 'Alterações salvas.' : 'Nada havia mudado.',
         'ok',
       );
+      if (noCelular() && !tambemRevisar && !emEdicao.revisado && emEdicao.publicado) avisarDoQueFicaNoComputador();
       await carregar();
       if (tambemRevisar) setTimeout(fechar, 900);
     } catch (e) {
@@ -399,22 +845,131 @@ import AdminHeader from '../../components/AdminHeader.astro';
     }
   }
 
+  // ── Cadastro (passo 9) ──
+  function abrirNovo() {
+    modo = 'criar';
+    emEdicao = null;
+    macrosEditavelAtual = true;
+    $('alm-painel-nome').textContent = 'Novo alimento';
+    $('alm-painel-selo').innerHTML = '<span class="alm-selo alm-selo--ok">curadoria do Coach</span>';
+    $('alm-f-nome').value = '';
+    $('alm-f-medida').value = '';
+
+    $('alm-rotulo-categoria').textContent = 'Categoria';
+    $('alm-categoria-corpo').hidden = true;
+    $('alm-f-categoria').hidden = false;
+    opcoes($('alm-f-categoria'), CATEGORIAS, 'Selecione a categoria');
+
+    ajustarVisibilidadeMacros();
+    pintarMacrosFormulario(null);
+
+    $('alm-recado').innerHTML = '';
+    $('alm-proc-corpo').innerHTML = '';
+    $('alm-desrevisar').hidden = true;
+    $('alm-arquivar').hidden = true;
+    $('alm-salvar-revisar').hidden = false;
+    const g = $('alm-gaveta');
+    g.hidden = false;
+    requestAnimationFrame(() => g.classList.add('aberta'));
+    $('alm-f-nome').focus();
+  }
+
+  async function criarAlimento(revisar) {
+    const botoes = [$('alm-salvar'), $('alm-salvar-revisar')];
+    botoes.forEach((b) => (b.disabled = true));
+    try {
+      const campos = valores();
+      // Validação de tela é conveniência; a garantia é do servidor
+      // (validarNovo, com a coerência calórica). Existe aqui só para não
+      // gastar uma ida à rede num formulário obviamente incompleto.
+      const faltando = [
+        ['nomeExibicao', 'o nome de exibição'], ['categoria', 'a categoria'],
+      ].filter(([k]) => !campos[k]).map(([, r]) => r);
+      const macrosOk = campos.macros && MACRO_CAMPOS.every((c) => Number.isFinite(campos.macros[c]) && campos.macros[c] >= 0);
+      if (!macrosOk) faltando.push('os quatro macronutrientes, com números válidos');
+      if (faltando.length) {
+        recado(`Falta preencher ${faltando.join(', ')}.`, 'erro');
+        return;
+      }
+      const r = await chamar('atualizar-alimento', { operacao: 'criar', campos, revisar });
+      recado(revisar
+        ? 'Alimento criado e marcado como revisado.'
+        : 'Alimento criado. Ele entra na fila aguardando sua revisão.', 'ok');
+      estado.estado = revisar ? 'revisados' : 'aguardando';
+      estado.busca = campos.nomeExibicao;
+      $('alm-busca').value = campos.nomeExibicao;
+      estado.pagina = 1;
+      pintarEstados();
+      await carregar();
+      setTimeout(fechar, 1100);
+      return r;
+    } catch (e) {
+      recado(e.message, 'erro');
+    } finally {
+      botoes.forEach((b) => (b.disabled = false));
+    }
+  }
+
+  // ── Arquivar e desarquivar (passo 7) ──
+  async function alternarArquivo() {
+    if (!emEdicao) return;
+    const b = $('alm-arquivar');
+    const arquivando = emEdicao.ativo !== false;
+    b.disabled = true;
+    try {
+      await chamar('atualizar-alimento', {
+        operacao: arquivando ? 'arquivar' : 'desarquivar',
+        foodId: emEdicao.id,
+      });
+      recado(arquivando
+        ? 'Arquivado. Some do seletor do construtor nutricional; quem já o tem num plano continua com ele.'
+        : 'Desarquivado. Volta a aparecer no seletor de planos novos.', 'ok');
+      await carregar();
+      setTimeout(fechar, 1100);
+    } catch (e) {
+      recado(e.message, 'erro');
+    } finally { b.disabled = false; }
+  }
+
   // ── Ligações ──
   opcoes($('alm-categoria'), CATEGORIAS, 'Todas as categorias');
   pintarEstados();
+  pintarCategorias();
 
   let debounce;
   $('alm-busca').addEventListener('input', (ev) => {
     clearTimeout(debounce);
     debounce = setTimeout(() => { estado.busca = ev.target.value.trim(); estado.pagina = 1; carregar(); }, 250);
   });
-  $('alm-categoria').addEventListener('change', (ev) => { estado.categoria = ev.target.value; estado.pagina = 1; carregar(); });
+  $('alm-categoria').addEventListener('change', (ev) => trocarCategoria(ev.target.value));
+  $('alm-categorias-faixa').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-categoria]');
+    if (b) trocarCategoria(b.dataset.categoria);
+  });
+  $('alm-sem-medida').addEventListener('click', () => {
+    estado.semMedidaCaseira = !estado.semMedidaCaseira;
+    estado.pagina = 1;
+    $('alm-sem-medida').setAttribute('aria-pressed', String(estado.semMedidaCaseira));
+    carregar();
+  });
   $('alm-estados').addEventListener('click', (ev) => {
     const b = ev.target.closest('[data-estado]');
     if (!b) return;
     estado.estado = b.dataset.estado; estado.pagina = 1;
     pintarEstados(); carregar();
   });
+  $('alm-lote').addEventListener('click', (ev) => {
+    if (ev.target.closest('#alm-lote-abrir')) abrirJanelaLote();
+  });
+  $('alm-limites-abrir').addEventListener('click', abrirLimites);
+  $('alm-limites-fechar').addEventListener('click', fecharLimites);
+  $('alm-limites').addEventListener('click', (ev) => { if (ev.target.id === 'alm-limites') fecharLimites(); });
+  $('alm-recado').addEventListener('click', (ev) => {
+    if (ev.target.closest('[data-abrir-limites]')) abrirLimites();
+  });
+  $('alm-lote-nao').addEventListener('click', fecharJanelaLote);
+  $('alm-lote-sim').addEventListener('click', () => aplicarLote(ultimoLote));
+  $('alm-lote-janela').addEventListener('click', (ev) => { if (ev.target.id === 'alm-lote-janela') fecharJanelaLote(); });
   $('alm-linhas').addEventListener('click', (ev) => {
     const b = ev.target.closest('.alm-linha');
     if (b) abrir(Number(b.dataset.i));
@@ -424,7 +979,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
   $('alm-fechar').addEventListener('click', fechar);
   $('alm-gaveta').addEventListener('click', (ev) => { if (ev.target.id === 'alm-gaveta') fechar(); });
   document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Escape' && !$('alm-gaveta').hidden) fechar();
+    if (ev.key !== 'Escape') return;
+    if (!$('alm-limites').hidden) { fecharLimites(); return; }
+    if (!$('alm-lote-janela').hidden) { fecharJanelaLote(); return; }
+    if (!$('alm-gaveta').hidden) fechar();
   });
   $('alm-desrevisar').addEventListener('click', async () => {
     if (!emEdicao) return;
@@ -443,6 +1001,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
   });
   $('alm-salvar').addEventListener('click', () => salvar(false));
   $('alm-salvar-revisar').addEventListener('click', () => salvar(true));
+  $('alm-novo').addEventListener('click', abrirNovo);
+  $('alm-arquivar').addEventListener('click', alternarArquivo);
+
+  CORTE.addEventListener('change', () => aplicarCorte(true));
+  aplicarCorte(false);
 
   // Guarda de autenticação, no padrão de exercicios.astro: sessão E claim de
   // admin. "Autenticado" não é "autorizado".

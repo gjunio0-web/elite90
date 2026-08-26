@@ -93,6 +93,18 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ── ALIMENTOS (base de alimentos) — nenhum acesso direto do navegador.
+    // A leitura é por listar-alimentos.ts, a escrita por atualizar-alimento.ts
+    // — as duas usam o Admin SDK, que ignora estas regras. O portal público lê
+    // o arquivo estático gerado em build, não a coleção.
+    // Bloco nomeado por clareza (passo 10 da especificação da tela de
+    // alimentos), no mesmo padrão do bloco de exercises/ acima: a negação
+    // genérica abaixo já cobria esta coleção antes deste bloco existir. Não é
+    // correção de falha.
+    match /foods/{foodId} {
+      allow read, write: if false;
+    }
+
     // ── Tudo o mais: negado. Explícito, para não depender do padrão.
     match /{document=**} {
       allow read, write: if false;

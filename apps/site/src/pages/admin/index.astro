@@ -362,16 +362,19 @@ import AdminHeader from '../../components/AdminHeader.astro';
         </span>
       </a>
 
-      <div class="base-card base-card--futura" aria-disabled="true">
+      <a class="base-card" href="/admin/alimentos">
         <span class="base-card__icone" aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M17 3c-1.7 0-3 2-3 5s1 4 3 4v9"/></svg>
         </span>
         <span class="base-card__corpo">
           <span class="base-card__nome">Base de Alimentos</span>
-          <span class="base-card__sub">TACO e curadoria própria</span>
+          <span class="base-card__sub" id="bases-al-sub">TACO e curadoria própria</span>
         </span>
-        <span class="base-card__selo base-card__selo--neutro">Em desenvolvimento</span>
-      </div>
+        <span class="base-card__selo base-card__selo--neutro" id="bases-al-selo">carregando…</span>
+        <span class="base-card__seta" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
     </section>
 
     <a class="guide-card" href="/admin/guia">
@@ -416,6 +419,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const el = document.getElementById("adm-email");
       if (el) el.textContent = user.email ?? "";
       contarExercicios(user);
+      contarAlimentos(user);
     });
 
     // Selo de pendências da base de exercícios. Falha em SILÊNCIO de propósito:
@@ -435,6 +439,32 @@ import AdminHeader from '../../components/AdminHeader.astro';
         if (!resp.ok) throw new Error(String(resp.status));
         const { contadores: c } = await resp.json();
         if (sub) sub.textContent = `${c.total} exercícios · 8 grupos musculares`;
+        if (c.aguardando > 0) {
+          selo.textContent = `${c.aguardando} aguardando revisão`;
+          selo.classList.remove("base-card__selo--neutro");
+        } else {
+          selo.textContent = "tudo revisado";
+        }
+      } catch {
+        selo.remove();
+      }
+    }
+
+    // Selo de pendências da base de alimentos — mesmo padrão e mesma razão de
+    // falhar em silêncio de contarExercicios acima.
+    async function contarAlimentos(user) {
+      const selo = document.getElementById("bases-al-selo");
+      const sub  = document.getElementById("bases-al-sub");
+      if (!selo) return;
+      try {
+        const resp = await fetch("/.netlify/functions/listar-alimentos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${await user.getIdToken(false)}` },
+          body: JSON.stringify({ estado: "aguardando", porPagina: 1 }),
+        });
+        if (!resp.ok) throw new Error(String(resp.status));
+        const { contadores: c } = await resp.json();
+        if (sub) sub.textContent = `${c.total} alimentos · TACO e curadoria própria`;
         if (c.aguardando > 0) {
           selo.textContent = `${c.aguardando} aguardando revisão`;
           selo.classList.remove("base-card__selo--neutro");

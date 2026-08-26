@@ -1569,6 +1569,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <div class="wke-search-results" id="nte-search-results">
             <div class="wke-search-hint">Digite ao menos 3 letras para buscar.</div>
           </div>
+          <!-- Atalho para a base de alimentos — mesmo papel e mesma razão do
+               atalho ao catálogo de exercícios logo acima (spec da tela de
+               alimentos, seção 3): a vontade de corrigir um nome ou de
+               preencher uma medida caseira que falta nasce AQUI, com o plano
+               aberto, não no hub. Aba nova pelo mesmo motivo: o plano em
+               edição só vive na memória da página. -->
+          <a class="wke-search-catalogo" href="/admin/alimentos" target="_blank" rel="noopener">
+            Gerenciar base
+            <span data-lucide="external-link"></span>
+          </a>
         </div>
       </div>
 

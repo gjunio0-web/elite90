@@ -17,23 +17,27 @@
 // é uma leitura pequena, e busca por trecho de nome não é filtro de igualdade.
 // Se a base passar de alguns milhares, ver o comentário equivalente lá.
 //
-// ESCOPO DESTA RODADA (passo 1 de 10 da especificação)
-// Os quatro estados aqui são os três de sempre — aguardando, revisados,
-// arquivados — mais 'todos'. O quarto filtro da especificação ("sem macros
-// completos", seção 4.4) é o passo 8, deliberadamente não incluído agora: os
-// 15 itens sem os quatro macros aparecem hoje dentro de 'aguardando', sem
-// distinção. Não é regressão — é a ordem de execução decidida no repasse.
+// PASSO 8 — OS QUATRO ESTADOS SÃO UMA PARTIÇÃO, NÃO TRÊS MAIS UM ADENDO
+// A especificação (4.1) lista "aguardando, revisado, arquivado e sem macros
+// completos" como quatro filtros. Para serem de fato quatro, e não um deles
+// escondido dentro de outro, 'aguardando' agora exige publicado:true — antes
+// deste passo, os 15 itens sem macros completos apareciam ali sem distinção
+// (documentado como escolha deliberada dos passos 1-3, não regressão). Agora
+// têm aba própria, e 'aguardando' deixou de incluí-los. 'todos' continua sendo
+// o superconjunto de tudo ativo, sem esse recorte — é o estado que o celular
+// força (spec 6.1), e ali o Coach precisa achar QUALQUER alimento ativo, sem-
+// -macros incluído, para poder corrigir nome ou medida caseira.
 
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
-import { CATEGORIAS, categoriaValida, dobraBusca } from "./_vocabulario-alimentos";
+import { CATEGORIAS, categoriaValida, dobraBusca, macrosFaltando } from "./_vocabulario-alimentos";
 
 const COLECAO = "foods";
 const POR_PAGINA_PADRAO = 25;
 const POR_PAGINA_MAX = 200;
 
-const ESTADOS = ["aguardando", "revisados", "arquivados", "todos"] as const;
+const ESTADOS = ["aguardando", "revisados", "arquivados", "sem-macros", "todos"] as const;
 type Estado = (typeof ESTADOS)[number];
 
 const json = (statusCode: number, corpo: unknown) => ({
@@ -47,7 +51,7 @@ const dobra = dobraBusca;
 /** Item do catálogo como esta função o devolve. */
 export type ItemCatalogo = {
   nomeExibicao: string; nome: string; categoria: string;
-  ativo: boolean; revisado: boolean; [k: string]: unknown;
+  ativo: boolean; revisado: boolean; publicado: boolean; [k: string]: unknown;
 };
 
 /**
@@ -57,15 +61,20 @@ export type ItemCatalogo = {
  */
 export function filtrarEPaginar<T extends ItemCatalogo>(
   todos: T[],
-  o: { estado: Estado; categoria?: string; busca?: string; pagina: number; porPagina: number },
+  o: { estado: Estado; categoria?: string; busca?: string; semMedidaCaseira?: boolean; pagina: number; porPagina: number },
 ) {
   let itens = todos;
   if (o.estado === "arquivados") itens = itens.filter((a) => !a.ativo);
-  else if (o.estado === "aguardando") itens = itens.filter((a) => a.ativo && !a.revisado);
+  else if (o.estado === "sem-macros") itens = itens.filter((a) => a.ativo && !a.publicado);
+  else if (o.estado === "aguardando") itens = itens.filter((a) => a.ativo && a.publicado && !a.revisado);
   else if (o.estado === "revisados") itens = itens.filter((a) => a.ativo && a.revisado);
-  else itens = itens.filter((a) => a.ativo); // "todos" = todos os ATIVOS
+  else itens = itens.filter((a) => a.ativo); // "todos" = todos os ATIVOS, sem-macros incluído
 
   if (o.categoria) itens = itens.filter((a) => a.categoria === o.categoria);
+  // Filtro rápido do celular (spec 5, divergência 3): medida caseira é o que
+  // se preenche longe do computador, e aqui o Coach quer exatamente os 582
+  // campos ainda vazios, não o inverso de nenhum outro filtro.
+  if (o.semMedidaCaseira) itens = itens.filter((a) => !a.medidaCaseira);
 
   const busca = dobra(o.busca).trim();
   if (busca) {
@@ -119,6 +128,7 @@ export const handler = async (event: any) => {
   const pagina = Math.max(1, Number(corpo.pagina) || 1);
   const porPagina = Math.min(POR_PAGINA_MAX, Math.max(1, Number(corpo.porPagina) || POR_PAGINA_PADRAO));
   const busca = dobra(corpo.busca).trim();
+  const semMedidaCaseira = corpo.semMedidaCaseira === true;
 
   try {
     const db = getFirestore();
@@ -126,6 +136,7 @@ export const handler = async (event: any) => {
 
     const todos = snap.docs.map((d) => {
       const x = d.data() as Record<string, any>;
+      const publicado = x.publicado === true;
       return {
         id: d.id,
         nomeExibicao: x.nomeExibicao,
@@ -133,10 +144,13 @@ export const handler = async (event: any) => {
         categoria: x.categoria,
         macros: x.macros ?? null,
         medidaCaseira: x.medidaCaseira ?? null,
-        publicado: x.publicado === true,
+        publicado,
         ativo: x.ativo !== false,
         revisado: Boolean(x.revisadoPor),
         fonte: x.fonte ?? null,
+        // Passo 8: só computa quando falta algo — item completo não precisa
+        // do bloco bruto de nutrientes, e a maioria dos 582 está completa.
+        macrosFaltando: publicado ? [] : macrosFaltando(x.nutrientes ?? null),
         // Procedência — bloco somente leitura do painel de edição (spec 4.3).
         origem: {
           numeroAlimento: x.origem?.numeroAlimento ?? null,
@@ -154,17 +168,18 @@ export const handler = async (event: any) => {
     });
 
     // Contadores sobre a coleção inteira, não sobre a página nem sobre o
-    // filtro — o "582 · X revisados · Y aguardando" do topo da tela não pode
-    // mudar quando o Coach filtra por categoria.
+    // filtro — o topo da tela não pode mudar quando o Coach filtra por
+    // categoria. Refletem a mesma partição de filtrarEPaginar (passo 8).
     const ativos = todos.filter((a) => a.ativo);
     const contadores = {
       total: todos.length,
       revisados: ativos.filter((a) => a.revisado).length,
-      aguardando: ativos.filter((a) => !a.revisado).length,
+      aguardando: ativos.filter((a) => a.publicado && !a.revisado).length,
       arquivados: todos.filter((a) => !a.ativo).length,
+      semMacros: ativos.filter((a) => !a.publicado).length,
     };
 
-    const recorte = filtrarEPaginar(todos, { estado, categoria: corpo.categoria, busca, pagina, porPagina });
+    const recorte = filtrarEPaginar(todos, { estado, categoria: corpo.categoria, busca, semMedidaCaseira, pagina, porPagina });
 
     return json(200, { ok: true, ...recorte, contadores, categorias: CATEGORIAS });
   } catch (e: any) {
