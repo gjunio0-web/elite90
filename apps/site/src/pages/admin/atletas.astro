@@ -3612,9 +3612,72 @@ import AdminHeader from '../../components/AdminHeader.astro';
       }
       renderIcons();
     }
+    // ── CONGELAMENTO DO VALOR NUTRICIONAL NA PUBLICAÇÃO ──────────────────
+    // Se o plano guardasse só o foodId e recalculasse os macros a cada leitura,
+    // uma correção na base faria o plano impresso divergir do plano na tela — e
+    // a divergência apareceria como erro de conta diante do atleta.
+    //
+    // Por isso cada item da versão publicada carrega um RETRATO, além do
+    // vínculo. O retrato NUNCA é recalculado: versão publicada é imutável, e
+    // correção na base vale para versões futuras, jamais para as publicadas.
+    //
+    // RASCUNHO NÃO CONGELA — lê ao vivo. O congelamento acontece aqui, na
+    // publicação, e só aqui.
+    //
+    // Note a diferença em relação aos exercícios: lá congela-se o NOME, por ser
+    // peça de comunicação. Aqui é preciso congelar o VALOR.
+    function nteCongelarItem(f) {
+      const b = f.base || {};
+      return {
+        foodId: f.foodId || (b.id || null),
+        quantidadeG: f.qty,
+        nomeSnapshot: f.name,
+        medidaCaseiraSnapshot: b.medidaCaseira || null,
+        // Macros por 100 g no instante da publicação.
+        macrosSnapshot: { kcal: b.kcal || 0, p: b.p || 0, c: b.c || 0, g: b.g || 0 },
+        fonteSnapshot: b.categoria ? { base: 'foods', categoria: b.categoria } : { base: 'foods' },
+        // Marca de tempo do servidor quando a persistência existir. Enquanto o
+        // plano vive em memória, o relógio do cliente é o que há — e o campo
+        // fica explicitamente marcado como provisório, para não passar por
+        // registro confiável.
+        congeladoEm: null,
+        _congeladoNoCliente: new Date().toISOString()
+      };
+    }
+
+    function nteCongelarPlano(plan) {
+      if (!plan || !plan.days) return;
+      Object.keys(plan.days).forEach(function(dk) {
+        const dia = plan.days[dk];
+        (dia.meals || []).forEach(function(meal) {
+          (meal.foods || []).forEach(function(f) {
+            f.snapshot = nteCongelarItem(f);
+          });
+        });
+      });
+    }
+
     function doPublish(kind, label) {
       const p = getPlanRef(kind);
       if (!p) return;
+      // AGUARDA A PERSISTÊNCIA DO M2 (Etapa 1, spec v2 no Drive, seção 8.2).
+      // Hoje o congelamento grava numa estrutura em memória que some ao
+      // recarregar a página: a regra está correta, mas nunca foi exercitada de
+      // verdade. Quem implementar a persistência deve mover este bloco para a
+      // função serverless que cria a versão, trocar _congeladoNoCliente pelo
+      // carimbo do servidor em congeladoEm, e gravar o retrato dentro de
+      // versions/{vNNN}.content — que é imutável.
+      //
+      // CORREÇÃO (26/08/2026): `p` é getPlanRef(kind) — só {status, publishedAt,
+      // hasUnpublishedChanges}. NUNCA teve .days; nenhum outro ponto do arquivo
+      // grava .days nele. O plano de verdade que o Coach edita mora em
+      // ntePlanCache[athlete.id] (nteState.plan é a mesma referência, mas só
+      // enquanto a gaveta daquele atleta está aberta — buscar pelo id, não pelo
+      // estado da aba, é o que não depende dessa coincidência). Chamar
+      // nteCongelarPlano(p) congelava o objeto errado: a guarda `!plan.days`
+      // devolvia cedo, e o item que o Coach acabara de adicionar nunca ganhava
+      // .snapshot. Confirmado ao vivo antes desta correção — ver o teste.
+      if (kind === 'nutrition' && wke04CurrentAthlete) nteCongelarPlano(ntePlanCache[wke04CurrentAthlete.id]);
       const now = new Date();
       const dd = String(now.getDate()).padStart(2,'0') + '/' + String(now.getMonth()+1).padStart(2,'0') + '/' + now.getFullYear();
       const hh = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
@@ -4033,44 +4096,70 @@ import AdminHeader from '../../components/AdminHeader.astro';
     //  NTE-01 — NUTRITION EDITOR (Aba 5 · Nutricional)
     //  Valores nutricionais por 100g (kcal, ptn, cho, gord)
     // ════════════════════════════════════════════════════════
-    const NTE_FOOD_DB = [
-      { name: 'Peito de frango grelhado', kcal: 165, p: 31, c: 0, g: 3.6 },
-      { name: 'Patinho moído (95%)', kcal: 187, p: 26, c: 0, g: 9 },
-      { name: 'Tilápia grelhada', kcal: 128, p: 26, c: 0, g: 2.7 },
-      { name: 'Salmão grelhado', kcal: 208, p: 20, c: 0, g: 13 },
-      { name: 'Ovo inteiro', kcal: 143, p: 13, c: 1.1, g: 9.5 },
-      { name: 'Clara de ovo', kcal: 52, p: 11, c: 0.7, g: 0.2 },
-      { name: 'Whey protein (pó)', kcal: 400, p: 80, c: 8, g: 6 },
-      { name: 'Arroz branco cozido', kcal: 128, p: 2.5, c: 28, g: 0.2 },
-      { name: 'Arroz integral cozido', kcal: 124, p: 2.6, c: 26, g: 1 },
-      { name: 'Batata doce cozida', kcal: 86, p: 1.6, c: 20, g: 0.1 },
-      { name: 'Batata inglesa cozida', kcal: 87, p: 1.9, c: 20, g: 0.1 },
-      { name: 'Mandioca cozida', kcal: 125, p: 0.6, c: 30, g: 0.3 },
-      { name: 'Aveia em flocos', kcal: 389, p: 17, c: 66, g: 7 },
-      { name: 'Pão integral', kcal: 247, p: 13, c: 41, g: 3.4 },
-      { name: 'Macarrão cozido', kcal: 158, p: 5.8, c: 31, g: 0.9 },
-      { name: 'Feijão preto cozido', kcal: 132, p: 8.9, c: 24, g: 0.5 },
-      { name: 'Lentilha cozida', kcal: 116, p: 9, c: 20, g: 0.4 },
-      { name: 'Banana', kcal: 89, p: 1.1, c: 23, g: 0.3 },
-      { name: 'Maçã', kcal: 52, p: 0.3, c: 14, g: 0.2 },
-      { name: 'Morango', kcal: 32, p: 0.7, c: 7.7, g: 0.3 },
-      { name: 'Mamão', kcal: 43, p: 0.5, c: 11, g: 0.3 },
-      { name: 'Dextrose (pó)', kcal: 380, p: 0, c: 95, g: 0 },
-      { name: 'Mel', kcal: 304, p: 0.3, c: 82, g: 0 },
-      { name: 'Pasta de amendoim', kcal: 588, p: 25, c: 20, g: 50 },
-      { name: 'Castanha do Pará', kcal: 656, p: 14, c: 12, g: 66 },
-      { name: 'Amêndoas', kcal: 579, p: 21, c: 22, g: 50 },
-      { name: 'Azeite de oliva', kcal: 884, p: 0, c: 0, g: 100 },
-      { name: 'Abacate', kcal: 160, p: 2, c: 9, g: 15 },
-      { name: 'Queijo cottage', kcal: 98, p: 11, c: 3.4, g: 4.3 },
-      { name: 'Iogurte natural integral', kcal: 61, p: 3.5, c: 4.7, g: 3.3 },
-      { name: 'Leite desnatado', kcal: 35, p: 3.4, c: 5, g: 0.1 },
-      { name: 'Brócolis cozido', kcal: 35, p: 2.4, c: 7.2, g: 0.4 },
-      { name: 'Espinafre cru', kcal: 23, p: 2.9, c: 3.6, g: 0.4 },
-      { name: 'Tomate', kcal: 18, p: 0.9, c: 3.9, g: 0.2 },
-      { name: 'Cenoura crua', kcal: 41, p: 0.9, c: 10, g: 0.2 },
-      { name: 'Creatina (pó)', kcal: 0, p: 0, c: 0, g: 0 }
-    ];
+    // Base de alimentos — carregada do arquivo estático publicado em
+    // /dados/alimentos.json, gerado por scripts/gerar-base.mjs --base=alimentos
+    // a partir da coleção foods/ do Firestore (TACO, NEPA/UNICAMP, 4ª edição).
+    //
+    // Antes desta rodada, aqui havia um vetor literal com 36 alimentos de
+    // simulação, e o plano guardava o NOME do alimento como chave. Corrigir a
+    // grafia de um alimento desligava em silêncio o vínculo com todos os planos
+    // que o usavam. Agora o vínculo é o identificador (foodId) e o nome é
+    // apenas campo de exibição — mesma correção já feita nos exercícios.
+    //
+    // O arquivo traz somente os alimentos PUBLICADOS. Item da TACO sem os
+    // quatro macronutrientes analisados entra na coleção com publicado: false e
+    // não chega aqui: a busca não o encontra, e isso é correto.
+    //
+    // FORMA INTERNA: o restante da aba consome { name, kcal, p, c, g } por 100 g.
+    // O arquivo publicado usa nomeExibicao e macros{kcal,proteinaG,...}. A
+    // tradução acontece no carregamento, num lugar só, em vez de espalhar o
+    // formato do banco por toda a tela.
+    let NTE_FOOD_DB = [];
+    let nteCatalogoEstado = 'nao-carregado'; // nao-carregado | carregando | pronto | erro
+    let nteCatalogoMotivo = '';
+    let nteCatalogoSemente = false;
+
+    async function nteCarregarCatalogo() {
+      if (nteCatalogoEstado === 'pronto' || nteCatalogoEstado === 'carregando') return;
+      nteCatalogoEstado = 'carregando';
+      try {
+        const resp = await fetch('/dados/alimentos.json', { cache: 'no-cache' });
+        if (resp.status === 404) throw new Error('ARQUIVO_AUSENTE');
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const dados = await resp.json();
+        // O arquivo emitido sem arquivo-fonte tem geradoEm nulo: distingue
+        // "nunca gerado" de "gerado e legitimamente vazio".
+        nteCatalogoSemente = !dados.geradoEm;
+        NTE_FOOD_DB = (dados.alimentos || []).map(function(a) {
+          const mac = a.macros || {};
+          return {
+            id: a.id,
+            name: a.nomeExibicao,
+            kcal: Number(mac.kcal) || 0,
+            p: Number(mac.proteinaG) || 0,
+            c: Number(mac.carboidratoG) || 0,
+            g: Number(mac.lipideosG) || 0,
+            // Nula em toda a TACO: a fonte não fornece medida caseira, e
+            // preenchê-la é curadoria do Coach. Viaja para virar retrato na
+            // publicação do plano.
+            medidaCaseira: a.medidaCaseira || null,
+            categoria: a.categoria || null,
+            // Em produção o gerador só emite revisados, então vem sempre true.
+            revisado: a.revisado !== false
+          };
+        });
+        nteCatalogoEstado = 'pronto';
+      } catch (err) {
+        NTE_FOOD_DB = [];
+        nteCatalogoEstado = 'erro';
+        // A causa mais provável NÃO é conexão: é o arquivo nunca ter sido
+        // gerado. Culpar a rede mandaria quem lê para o lugar errado.
+        nteCatalogoMotivo = (err && err.message === 'ARQUIVO_AUSENTE')
+          ? 'O arquivo /dados/alimentos.json não existe nesta publicação — o filtro de build não chegou a rodar.'
+          : 'Falha de rede ou arquivo inválido. Feche e abra a busca para tentar de novo.';
+        console.error('[NTE] falha ao carregar a base de alimentos:', err);
+      }
+    }
 
     // ── Fórmula de Macros — configuração parametrizável ──
     const NTE_FORMULA_DEFAULTS = {
@@ -4181,9 +4270,19 @@ import AdminHeader from '../../components/AdminHeader.astro';
         p: Math.round(w * f.p), c: Math.round(w * f.c), g: Math.round(w * f.g)
       };
       target.kcal = Math.round(target.p * 4 + target.c * 4 + target.g * 9);
+      // MOCK AGUARDANDO REFAÇÃO — resolve por NOME num catálogo que já não é
+      // fixo. Com o vetor literal removido, esta busca não encontra nada até o
+      // carregamento assíncrono terminar, e os itens saem sem `base`. As guardas
+      // de renderização absorvem isso exibindo zeros (ver `food.base ||` abaixo),
+      // então a tela não quebra — mas os macros do plano de demonstração
+      // aparecem zerados, e isso é esperado, não defeito.
+      //
+      // Refazer este construtor com foodId reais do catálogo carregado é item
+      // próprio, já combinado, junto com o mock de exercícios. Enquanto isso não
+      // acontece, o plano-base serve para exercitar a interface, não os números.
       const F = function(name, qty) {
         const f = NTE_FOOD_DB.find(function(x){ return x.name === name; });
-        return { name: name, qty: qty, base: f };
+        return { foodId: f ? f.id : null, name: name, qty: qty, base: f };
       };
       return {
         target: target,
@@ -4574,6 +4673,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       nteSearchResults = [];
       res.innerHTML = '<div class="wke-search-hint">Digite ao menos 3 letras para buscar.</div>';
       setTimeout(function() { inp.focus(); }, 30);
+      nteCarregarCatalogo();
     }
     function closeFoodSearch() {
       document.getElementById('nte-search-overlay').hidden = true;
@@ -4589,6 +4689,20 @@ import AdminHeader from '../../components/AdminHeader.astro';
       if (q.length < 3) {
         nteSearchResults = [];
         res.innerHTML = '<div class="wke-search-hint">Digite ao menos 3 letras para buscar.</div>';
+        return;
+      }
+      if (nteCatalogoEstado === 'carregando') {
+        res.innerHTML = '<div class="wke-search-hint">Carregando a base de alimentos…</div>';
+        return;
+      }
+      if (nteCatalogoEstado === 'erro') {
+        res.innerHTML = '<div class="wke-search-hint">Não foi possível carregar a base de alimentos.<br>' + (nteCatalogoMotivo || 'Motivo não identificado.') + '</div>';
+        return;
+      }
+      if (!NTE_FOOD_DB.length) {
+        res.innerHTML = nteCatalogoSemente
+          ? '<div class="wke-search-hint">A base de alimentos ainda não foi gerada a partir do banco. Rode <code>npm run catalogo:alimentos</code>, faça commit do arquivo-fonte e publique o site.</div>'
+          : '<div class="wke-search-hint">Nenhum alimento revisado pelo Coach chegou a esta publicação.</div>';
         return;
       }
       nteSearchResults = NTE_FOOD_DB.filter(function(f) {
@@ -4660,7 +4774,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
         return;
       }
       document.getElementById('nte-qty-input').classList.remove('invalid');
-      nteCurrentDay().meals[ntePendingMeal].foods.push({ name: ntePendingFood.name, qty: qty, base: ntePendingFood });
+      nteCurrentDay().meals[ntePendingMeal].foods.push({
+        // foodId é o vínculo estável com a coleção foods/. O nome é cópia de
+        // exibição: corrigir a grafia na base não desliga o vínculo.
+        foodId: ntePendingFood.id,
+        name: ntePendingFood.name, qty: qty, base: ntePendingFood });
       const added = ntePendingFood.name;
       closeFoodQty();
       renderNutrition();
