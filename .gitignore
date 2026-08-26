@@ -42,3 +42,4 @@ apps/site/public/dados/alimentos.json
 # Maquete de demonstração: artefato de build, emitido por scripts/filtrar-demo.mjs
 # só fora de produção, a partir de scripts/dados-demo/ (esse sim, versionado).
 apps/site/public/dados/plano-demo.json
+scripts/dados-alimentos/*.xlsx
