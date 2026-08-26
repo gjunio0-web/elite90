@@ -353,21 +353,37 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .wke-set-del:disabled { opacity: 0.3; cursor: default; }
     .wke-set-del [data-lucide] { width: 14px; height: 14px; }
 
-    /* Pill de dia: × ao hover + rename inline (C-03) */
+    /* Pill de dia: menu de ações + rename inline (C-03).
+       O × dependia de :hover, estado que só um mouse produz — no celular ele
+       nunca chegava a ser desenhado, e o :hover simulado pelo toque podia
+       fazê-lo surgir sob o dedo no instante do segundo toque, transformando
+       "trocar de dia" em "apagar um dia". As ações passam a viver num menu,
+       alcançável pelos dois tipos de ponteiro. */
     .wke-daytab-wrap { position: relative; display: inline-flex; }
-    .wke-daytab-x { position: absolute; top: -5px; right: -5px; width: 17px; height: 17px; border-radius: 50%; background: var(--c-surface-2); border: 1px solid rgba(255, 255, 255, 0.14); color: var(--c-textsub); display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 2; padding: 0; }
-    .wke-daytab-wrap:hover .wke-daytab-x { display: inline-flex; }
-    .wke-daytab-x:hover { color: var(--c-status-rejected); border-color: var(--c-status-rejected); }
+    .wke-daytab-menubtn { position: absolute; top: -6px; right: -6px; width: 19px; height: 19px; border-radius: 50%; background: var(--c-surface-2); border: 1px solid rgba(255, 255, 255, 0.14); color: var(--c-textsub); display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 2; padding: 0; }
+    /* .always: em ponteiro grosso não existe :hover, então o acionador fica
+       permanentemente visível na aba ativa. */
+    .wke-daytab-wrap:hover .wke-daytab-menubtn,
+    .wke-daytab-menubtn.always { display: inline-flex; }
+    .wke-daytab-menubtn:hover, .wke-daytab-menubtn[aria-expanded="true"] { color: var(--c-lime); border-color: var(--c-lime); }
     /* O SVG injetado por renderIcons() vem com width/height="16" fixos no
        próprio atributo — redimensionar só o <span> não é suficiente, porque
        o SVG continua 16x16 por dentro dele, ancorado no canto superior-
        esquerdo, e transborda para baixo/direita em vez de encolher junto.
-       Por isso o svg também precisa da regra, não só o span que o envolve. */
-    .wke-daytab-x [data-lucide] { width: 10px; height: 10px; }
-    /* display:block evita o alinhamento de baseline que um SVG inline usa por
+       Por isso o svg também precisa da regra, não só o span que o envolve.
+       display:block evita o alinhamento de baseline que um SVG inline usa por
        padrão — sem isso, o svg fica alguns pixels mais baixo que o span que
-       o contém, mesmo já do tamanho certo. */
-    .wke-daytab-x [data-lucide] svg { width: 10px; height: 10px; display: block; }
+       o contém, mesmo já do tamanho certo. Mesma constatação do ajuste feito
+       no antigo .wke-daytab-x, preservada aqui. */
+    .wke-daytab-menubtn [data-lucide] { width: 11px; height: 11px; }
+    .wke-daytab-menubtn [data-lucide] svg { width: 11px; height: 11px; display: block; }
+    .wke-daymenu { position: absolute; top: calc(100% + 6px); right: 0; min-width: 168px; background: var(--c-surface-2); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); padding: var(--space-1) 0; z-index: 40; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55); }
+    .wke-daymenu-item { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: 0; text-align: left; padding: 9px 14px; color: var(--c-textbody); font-family: var(--font-body); font-size: var(--fs-body-sm); cursor: pointer; }
+    .wke-daymenu-item:hover { background: rgba(166, 195, 0, 0.10); color: var(--c-white); }
+    .wke-daymenu-item.danger { color: var(--c-status-rejected); }
+    .wke-daymenu-item.danger:hover { background: rgba(192, 57, 43, 0.12); color: var(--c-status-rejected); }
+    .wke-daymenu-item [data-lucide] { width: 13px; height: 13px; }
+    .wke-daymenu-item [data-lucide] svg { width: 13px; height: 13px; display: block; }
     .wke-daytab-rename { padding: 8px 16px; border-radius: var(--radius-pill); border: 1px solid var(--c-lime); background: var(--c-black); color: var(--c-white); font-family: var(--font-label); font-size: var(--fs-label); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); width: 150px; }
     .wke-daytab-rename:focus { outline: none; box-shadow: 0 0 0 2px rgba(166,195,0,0.2); }
 
@@ -2126,6 +2142,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
       "message-circle": '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>',
       "external-link": '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>',
       "share-2": '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>',
+      // Menu de ações do dia (aba Treino). "pencil" também é usado no
+      // indicador de renomeação da aba ativa em ponteiro grosso — sem esta
+      // entrada, renderIcons() sai calado e o indicador não é desenhado.
+      "more-horizontal": '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+      "pencil": '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>',
     };
     function renderIcons(root) {
       (root || document).querySelectorAll('[data-lucide]').forEach(el => {
@@ -2990,7 +3011,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       wkeRenderCalcContext();
       // DayTabs
       if (tabsEl) {
-        const canDelete = plan.order.length > 1;
+        wkeCloseDayMenu();
         // O clique é tratado por delegação em #wke-daytabs (wkeOnDayTabsClick),
         // não por onclick embutido: renderWorkout reconstrói esta lista inteira,
         // e o nó que recebeu o primeiro clique deixa de existir antes do
@@ -3007,7 +3028,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
               wkeEsc(wkeDayName(d)) +
               (active && coarse ? '<span class="wke-daytab-pencil"><span data-lucide="pencil"></span></span>' : '') +
             '</button>' +
-            (canDelete ? '<button class="wke-daytab-x" title="Remover dia" data-day-del="' + wkeEsc(d) + '"><span data-lucide="x"></span></button>' : '') +
+            '<button class="wke-daytab-menubtn' + (active && coarse ? ' always' : '') + '" title="Ações do dia" aria-label="Ações do dia" aria-haspopup="true" aria-expanded="false" data-day-menu="' + wkeEsc(d) + '"><span data-lucide="more-horizontal"></span></button>' +
           '</span>';
         }).join('') + '<button class="wke-daytab add" data-day-add="1">+ Adicionar dia</button>';
         if (!tabsEl.dataset.bound) {
@@ -3320,15 +3341,72 @@ import AdminHeader from '../../components/AdminHeader.astro';
       }
     }
 
+    // ── Menu de ações do dia ──
+    // Renomear e Remover moram aqui. A exclusão continua pedindo confirmação
+    // (wkeConfirm) e só é oferecida quando há mais de um dia no plano.
+    let wkeDayMenuFor = null;
+
+    function wkeCloseDayMenu() {
+      const open = document.querySelector('.wke-daymenu');
+      if (open) open.remove();
+      const btn = document.querySelector('.wke-daytab-menubtn[aria-expanded="true"]');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+      wkeDayMenuFor = null;
+    }
+
+    function wkeToggleDayMenu(d, btn) {
+      if (wkeDayMenuFor === d) { wkeCloseDayMenu(); return; }
+      wkeCloseDayMenu();
+      const wrap = btn.closest('.wke-daytab-wrap');
+      if (!wrap) return;
+      const canDelete = wkeState.plan && wkeState.plan.order.length > 1;
+      const menu = document.createElement('div');
+      menu.className = 'wke-daymenu';
+      menu.setAttribute('role', 'menu');
+      menu.innerHTML =
+        '<button class="wke-daymenu-item" role="menuitem" data-menu-action="rename"><span data-lucide="pencil"></span> Renomear dia</button>' +
+        (canDelete
+          ? '<button class="wke-daymenu-item danger" role="menuitem" data-menu-action="delete"><span data-lucide="trash-2"></span> Remover dia</button>'
+          : '');
+      wrap.appendChild(menu);
+      btn.setAttribute('aria-expanded', 'true');
+      wkeDayMenuFor = d;
+      renderIcons();
+      if (!document.body.dataset.wkeDayMenuBound) {
+        document.addEventListener('click', function(ev) {
+          if (!wkeDayMenuFor) return;
+          if (ev.target.closest('.wke-daymenu') || ev.target.closest('.wke-daytab-menubtn')) return;
+          wkeCloseDayMenu();
+        });
+        document.addEventListener('keydown', function(ev) {
+          if (ev.key === 'Escape') wkeCloseDayMenu();
+        });
+        document.body.dataset.wkeDayMenuBound = '1';
+      }
+    }
+
     // Regra única de ativação:
     //  • dia ≠ dia ativo                     → seleciona;
     //  • dia = dia ativo e ponteiro grosso    → renomeia (2º toque);
     //  • ponteiro fino                        → renomeia no duplo clique.
     function wkeOnDayTabsClick(e) {
+      const menuItem = e.target.closest('[data-menu-action]');
+      if (menuItem) {
+        const d0 = wkeDayMenuFor;
+        const wrap0 = menuItem.closest('.wke-daytab-wrap');
+        const action = menuItem.dataset.menuAction;
+        wkeCloseDayMenu();
+        if (!d0) return;
+        if (action === 'delete') { wkeDeleteDay(d0); return; }
+        const tabBtn = wrap0 && wrap0.querySelector('.wke-daytab[data-day]');
+        if (tabBtn) wkeStartRenameDay(d0, tabBtn);
+        return;
+      }
+      const menuBtn = e.target.closest('[data-day-menu]');
+      if (menuBtn) { wkeToggleDayMenu(menuBtn.dataset.dayMenu, menuBtn); return; }
+      wkeCloseDayMenu();
       const addBtn = e.target.closest('[data-day-add]');
       if (addBtn) { wkeAddDay(); return; }
-      const delBtn = e.target.closest('[data-day-del]');
-      if (delBtn) { wkeDeleteDay(delBtn.dataset.dayDel); return; }
       const tab = e.target.closest('.wke-daytab[data-day]');
       if (!tab) return;
       const d = tab.dataset.day;
