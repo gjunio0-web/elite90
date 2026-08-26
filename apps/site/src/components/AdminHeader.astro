@@ -155,7 +155,11 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
   @media (max-width: 760px) and (orientation: portrait) {
     .adm-menu-toggle { display: inline-flex; }
     .adm-actions {
-      display: none;
+      /* display:flex fica fixo (não é mais o que abre/fecha o painel) — quem
+         faz isso agora é visibility/opacity/transform logo abaixo, porque um
+         display:none->flex não anima: o navegador troca de estado no mesmo
+         quadro, sem quadro intermediário para a transição percorrer. */
+      display: flex;
       position: absolute;
       top: calc(100% + 8px);
       right: 0;
@@ -178,8 +182,24 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
       border-radius: var(--radius-card);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
       overflow: hidden auto;
+      /* Fechado: invisível E fora da árvore de acessibilidade/tabulação —
+         visibility:hidden faz isso, ao contrário de opacity/pointer-events
+         sozinhos, que deixariam os itens focáveis via Tab mesmo escondidos.
+         O delay na transição de visibility é o que faz a saída (fade-out)
+         terminar de tocar antes do painel sumir de vez; na entrada o delay
+         é zero, porque não há nada para esperar. */
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px) scale(0.97);
+      transform-origin: top right;
+      transition: opacity 160ms ease, transform 160ms ease, visibility 0s linear 160ms;
     }
-    .adm-actions.is-open { display: flex; }
+    .adm-actions.is-open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      transition: opacity 160ms ease, transform 160ms ease, visibility 0s linear 0s;
+    }
     .adm-nav { display: block; }
     .adm-actions .adm-btn-icon {
       width: auto;
