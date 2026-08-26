@@ -712,6 +712,95 @@ const backHref =
 
 <section>
   <div class="wrap">
+    <h3 id="alimentos">Base de domínio</h3>
+    <h2>A base de alimentos</h2>
+    <p class="lead" style="margin-bottom:var(--space-4)">São 582 alimentos vindos da TACO, a
+      tabela de composição de alimentos da Unicamp — a mesma referência que nutricionista usa, com
+      procedência que se pode citar. Eles chegaram ao banco prontos, mas nenhum passou pelos seus
+      olhos ainda, e é isso que esta tela resolve. Enquanto nada estiver revisado, a busca de
+      alimento em Atletas continua vazia no site público.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Dois trabalhos, um rápido e um longo</h3>
+        <p style="font-size:.9rem; margin:0 0 var(--space-2)"><strong>Aprovar não exige abrir
+          nada.</strong> Filtra por categoria, confere a lista e aprova todos de uma vez. Os 582
+          saem em poucas sessões, e a partir daí a busca de alimento em Atletas volta a funcionar
+          no site público.</p>
+        <p style="font-size:.9rem; margin:0"><strong>Medida caseira é o trabalho longo</strong> — e
+          não bloqueia nada. Alimento aprovado sem ela já serve: o atleta lê a quantidade em
+          gramas, como leria de qualquer jeito. Preencher aos poucos, ao longo de meses, é o uso
+          esperado.</p>
+      </div>
+      <div class="card">
+        <h3>Quatro estados, um a mais que em exercícios</h3>
+        <ul class="clean">
+          <li><strong>Aguardando revisão</strong> — o padrão ao abrir a tela.</li>
+          <li><strong>Revisados</strong> — o que já chegou, ou vai chegar, aos atletas.</li>
+          <li><strong>Arquivados</strong> — fora do seletor, sem sumir dos planos antigos.</li>
+          <li><strong>Sem macros completos</strong> — 15 alimentos que a TACO não analisou por
+            inteiro.</li>
+        </ul>
+        <p style="font-size:.9rem; margin-top:var(--space-3)">Estes 15 nunca aparecem na busca,
+          revisados ou não: sem os quatro valores, o cálculo do plano sairia errado. Ficam
+          visíveis aqui, com o que falta em cada um, para que a ausência tenha explicação em vez
+          de virar um "por que não encontro isso".</p>
+      </div>
+    </div>
+
+    <div class="aviso a-lime" style="margin-top:var(--space-4)">
+      <div class="t">Por que preencher medida caseira, então</div>
+      <p>A TACO informa o valor por 100 gramas e para por aí: nenhum dos 582 diz quanto é uma
+        concha, uma colher ou uma fatia. É a diferença entre o atleta pesar arroz na balança toda
+        refeição e simplesmente ler "6 colheres de sopa" no plano — quem cumpre o plano é ele, e
+        cada obstáculo a menos é aderência a mais.</p>
+    </div>
+
+    <h3 style="margin-top:var(--space-5)">O que se edita, e o que não se toca</h3>
+    <div class="grid-3">
+      <div class="card">
+        <p style="font-size:.9rem; margin:0"><strong>Nome e medida caseira.</strong> A TACO traz o
+          nome técnico; aqui ele vira o nome que se usa na academia. A medida caseira é sua, do
+          zero.</p>
+      </div>
+      <div class="card">
+        <p style="font-size:.9rem; margin:0"><strong>Valores nutricionais da TACO.</strong>
+          Somente leitura. Poder citar a fonte foi a razão de escolhê-la — editar o número
+          desfaria justamente isso.</p>
+      </div>
+      <div class="card">
+        <p style="font-size:.9rem; margin:0"><strong>Cadastrar.</strong> Para o que a TACO não
+          cobre: whey, barra de proteína, iogurte de marca. Aqui os valores são digitados do
+          rótulo, e por isso são editáveis.</p>
+      </div>
+    </div>
+
+    <div class="aviso a-laranja" style="margin-top:var(--space-4)">
+      <div class="t">A conta é conferida antes de gravar</div>
+      <p>Ao cadastrar um alimento seu, o sistema soma proteína e carboidrato por quatro, gordura
+        por nove, e compara com as calorias que você digitou. Se não bater, recusa e avisa. Quase
+        sempre é rótulo lido em porção diferente de 100 gramas, ou um dígito trocado — e um erro
+        aqui vira conta errada no plano de todo atleta que comer aquele alimento.</p>
+    </div>
+
+    <div class="aviso a-azul" style="margin-top:var(--space-3)">
+      <div class="t">No celular, medida caseira ganha caminho próprio</div>
+      <p>Aqui a regra difere de exercícios de propósito. Escrever "1 concha média" é digitação de
+        segundos, e é no mercado ou na cozinha que a medida certa ocorre a alguém — então o
+        aparelho traz um filtro de quem ainda está sem medida, e abre esse campo primeiro. Marcar
+        como revisado e aprovar em bloco continuam só no computador, pelo mesmo motivo de sempre:
+        liberam comida para o plano de dezenas de atletas de uma vez.</p>
+    </div>
+
+    <p style="font-size:.85rem; color:var(--c-textsub); margin-top:var(--space-4)">Chega-se a esta
+      tela pela faixa <strong>Bases de domínio</strong> no hub, pelo atalho <strong>Gerenciar
+      base</strong> dentro da busca de alimento em Atletas, ou direto pelo endereço
+      <strong>/admin/alimentos</strong>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
     <h3 id="seguranca">Quem consegue ver os dados</h3>
     <h2>As fechaduras do painel</h2>
     <p class="lead" style="margin-bottom:var(--space-4)">As fichas guardam informação de saúde.
