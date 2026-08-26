@@ -191,7 +191,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .alm-btn-lime[disabled], .alm-btn-vazado[disabled] { opacity: 0.45; cursor: default; }
   .alm-desfazer { background: transparent; border: 0; padding: 0; color: var(--c-textsub); font-family: var(--font-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .alm-desfazer:hover { color: var(--c-pending); }
-  #alm-desrevisar, #alm-arquivar { margin-top: var(--space-3); display: block; }
+  /* :not([hidden]) — nunca "display: block" liso: isso bateria o
+     [hidden]{display:none} do navegador (o próprio hidden vira um atributo
+     comum, não um estado de verdade) e os dois botões apareceriam sempre,
+     não importa o que abrir()/abrirNovo() decidissem. */
+  #alm-desrevisar:not([hidden]), #alm-arquivar:not([hidden]) { margin-top: var(--space-3); display: block; }
   .alm-recado { margin-top: var(--space-3); font-size: var(--fs-body-sm); padding: 10px 12px; border-radius: var(--radius-card); }
   .alm-recado--ok { color: var(--c-lime); background: rgba(166,195,0,0.08); border: 1px solid rgba(166,195,0,0.3); }
   .alm-recado--erro { color: var(--c-pending); background: rgba(230,126,34,0.08); border: 1px solid rgba(230,126,34,0.35); }
