@@ -182,6 +182,13 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
       border-radius: var(--radius-card);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
       overflow: hidden auto;
+      /* Sem isto, um gesto de toque que começa dentro do painel mas não tem
+         mais o que rolar ali (lista cabe, ou já chegou ao fim) "atravessa"
+         para o body — que também trava enquanto o menu está aberto (ver
+         script abaixo), mas overscroll-behavior é a defesa de dentro para
+         fora: contém a rolagem mesmo se algo destravar o body no meio do
+         caminho. */
+      overscroll-behavior: contain;
       /* Fechado: invisível E fora da árvore de acessibilidade/tabulação —
          visibility:hidden faz isso, ao contrário de opacity/pointer-events
          sozinhos, que deixariam os itens focáveis via Tab mesmo escondidos.
@@ -284,15 +291,25 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
   const menuToggle = document.getElementById("adm-menu-toggle");
   const actions = document.getElementById("adm-actions");
 
+  // Sem travar o body, um toque que começa dentro do painel mas não tem mais
+  // o que rolar ali (lista curta o bastante para caber, ou já no fim) rola a
+  // página por trás em vez de ficar parado — a rolagem "atravessa" o menu.
+  function openMenu() {
+    actions?.classList.add("is-open");
+    menuToggle?.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
+  }
+
   function closeMenu() {
     actions?.classList.remove("is-open");
     menuToggle?.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
   }
 
   menuToggle?.addEventListener("click", (e) => {
     e.stopPropagation();
-    const isOpen = actions?.classList.toggle("is-open");
-    menuToggle.setAttribute("aria-expanded", String(!!isOpen));
+    if (actions?.classList.contains("is-open")) closeMenu();
+    else openMenu();
   });
 
   document.addEventListener("click", (e) => {
