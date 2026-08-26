@@ -3375,12 +3375,22 @@ import AdminHeader from '../../components/AdminHeader.astro';
           ? '<button class="wke-daymenu-item danger" role="menuitem" data-menu-action="delete"><span data-lucide="trash-2"></span> Remover dia</button>'
           : '');
       // Anexado ao <body>, não ao wrap — ver o comentário de .wke-daymenu no
-      // CSS. top/right calculados do próprio botão para reproduzir a mesma
-      // posição visual de antes (colado embaixo, alinhado à direita).
-      const r = btn.getBoundingClientRect();
-      menu.style.top = (r.bottom + 6) + 'px';
-      menu.style.right = (window.innerWidth - r.right) + 'px';
+      // CSS. Medido escondido antes de posicionar: alinhar pela direita do
+      // botão (como antes) presumia espaço à esquerda que uma aba perto da
+      // borda no celular não tem — "Dia A" é sempre a primeira, e no celular
+      // isso já bastava para o menu invadir a borda esquerda da tela. Por
+      // isso o left final é GRUDADO ao viewport (nunca ao botão): calcula
+      // onde ficaria alinhado à direita e recua se isso passar da borda.
+      menu.style.visibility = 'hidden';
       document.body.appendChild(menu);
+      const r = btn.getBoundingClientRect();
+      const menuW = menu.offsetWidth;
+      const MARGIN = 8;
+      let left = r.right - menuW;
+      left = Math.max(MARGIN, Math.min(left, window.innerWidth - menuW - MARGIN));
+      menu.style.top = (r.bottom + 6) + 'px';
+      menu.style.left = left + 'px';
+      menu.style.visibility = '';
       btn.setAttribute('aria-expanded', 'true');
       wkeDayMenuFor = d;
       renderIcons();
