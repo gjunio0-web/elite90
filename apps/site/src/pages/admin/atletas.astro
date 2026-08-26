@@ -273,7 +273,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     /* ── WKE: WORKOUT EDITOR (Aba 4 — Treino) ── */
     .wke-daytabs { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-5); }
-    .wke-daytab { padding: 8px 16px; border-radius: var(--radius-pill); border: 1px solid rgba(255, 255, 255, 0.14); background: transparent; color: var(--c-textsub); font-family: var(--font-label); font-size: var(--fs-label); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); cursor: pointer; transition: color 150ms ease, border-color 150ms ease, background 150ms ease; white-space: nowrap; }
+    /* touch-action: manipulation — no toque, renomear é o segundo toque na aba
+       JÁ ativa (wkeOnDayTabsClick). Sem isso, o iOS interpreta os dois toques
+       como o gesto de ampliar a página e o segundo nunca chega ao elemento. */
+    .wke-daytab { padding: 8px 16px; border-radius: var(--radius-pill); border: 1px solid rgba(255, 255, 255, 0.14); background: transparent; color: var(--c-textsub); font-family: var(--font-label); font-size: var(--fs-label); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); cursor: pointer; transition: color 150ms ease, border-color 150ms ease, background 150ms ease; white-space: nowrap; touch-action: manipulation; }
+    .wke-daytab-pencil { display: inline-flex; vertical-align: middle; margin-left: 6px; opacity: 0.7; }
+    .wke-daytab-pencil [data-lucide] { width: 11px; height: 11px; }
     .wke-daytab:hover { border-color: rgba(166, 195, 0, 0.50); color: var(--c-white); }
     .wke-daytab.active { background: var(--c-lime); border-color: var(--c-lime); color: #0D0D0D; }
     .wke-daytab.add { color: var(--c-lime); border-style: dashed; border-color: rgba(166, 195, 0, 0.50); }
@@ -691,6 +696,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .doc-section-num { font-family: var(--font-display); font-size: 1.7rem; color: var(--c-lime); line-height: 1; }
     .doc-section-title { font-family: var(--font-display); font-size: clamp(1.1rem, 3vw, 1.5rem); letter-spacing: 0.06em; color: var(--c-white); text-transform: uppercase; }
     .doc-section-body { font-family: var(--font-body); font-size: 0.82rem; line-height: 1.85; color: var(--c-textbody); }
+    /* Observações do Coach no documento do atleta: o texto é digitado livremente
+       num textarea, então as quebras de linha são intenção do autor. */
+    .doc-section-body.doc-notes { white-space: pre-wrap; }
     .doc-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 28px 0; }
     /* macros e refeições dentro do documento */
     .doc-macros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 4px 0 6px; }
@@ -1475,6 +1483,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <div class="wke-stats" id="wke-stats"></div>
           <div id="wke-exercises"></div>
           <button class="wke-add-ex" id="wke-add-ex-btn" onclick="openExerciseSearch()"><span data-lucide="plus"></span> Adicionar exercício</button>
+
+          <!-- Observações do Coach — orientação DIRIGIDA AO ATLETA: sai também
+               no documento de "Ver como o atleta recebe" (wkeOpenPreview). O
+               conteúdo vive em wkeState.plan.coachNotes, portanto é por atleta;
+               o campo nasce vazio de propósito. Espelho exato do bloco da aba
+               Nutricional. -->
+          <div class="drawer-section" id="wke-coach-notes-section" style="margin-top: var(--space-7); padding-top: var(--space-6); border-top: 1px solid rgba(255, 255, 255, 0.08);">
+            <div class="drawer-section-title">Observações do Coach</div>
+            <textarea class="note-textarea" id="wke-coach-notes" rows="3" placeholder="Orientações para o atleta sobre este treino…" oninput="wkeSetCoachNotes(this.value)"></textarea>
+          </div>
         </div>
 
         <!-- Overlay: plano de treino como o atleta o vê (PRT-06) -->
@@ -1551,7 +1569,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
           <div class="drawer-section" id="nte-coach-notes-section" style="margin-top: var(--space-7); padding-top: var(--space-6); border-top: 1px solid rgba(255, 255, 255, 0.08);">
             <div class="drawer-section-title">Observações do Coach</div>
-            <textarea class="note-textarea" id="nte-coach-notes" rows="3" placeholder="Notas sobre o plano…" oninput="nteAutoSave()">Aderência excelente. Aumentar hidratação em dias quentes. Considerar suplementação com creatina. Revisar tolerância a lactose.</textarea>
+            <textarea class="note-textarea" id="nte-coach-notes" rows="3" placeholder="Orientações para o atleta sobre este plano…" oninput="nteSetCoachNotes(this.value)"></textarea>
           </div>
         </div>
 
@@ -2755,6 +2773,24 @@ import AdminHeader from '../../components/AdminHeader.astro';
     const wkePlanCache = {}; // por id de atleta — preserva edições na sessão
     let wkeSearchSelIdx = -1;
 
+    // Escapa texto digitado pelo Coach antes de concatená-lo em innerHTML.
+    // Hoje o nome do dia e as observações só existem na memória desta página,
+    // mas passam a vir do banco na Etapa 1 do M2 — e, com a delegação (M4),
+    // passam a ser escritos por uma pessoa e renderizados no navegador de
+    // outra. Sem escape, isso é injeção de script armazenada.
+    function wkeEsc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Ponteiro grosso (dedo) — decide se renomear é o segundo toque na aba já
+    // ativa ou o duplo clique. Avaliado a cada render: um tablet com teclado
+    // acoplado pode mudar de modo sem recarregar a página.
+    function wkeCoarsePointer() {
+      return typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+    }
+
     function wkeRound(v) { return Math.round(v / 2.5) * 2.5; }
 
     function initWorkout(athlete) {
@@ -2838,6 +2874,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const statsEl = document.getElementById('wke-stats');
       const exEl = document.getElementById('wke-exercises');
       const addBtn = document.getElementById('wke-add-ex-btn');
+      const notesEl = document.getElementById('wke-coach-notes-section');
       // Estado de primeira vez: nenhum dia criado ainda
       if (!plan.order.length) {
         if (tabsEl) tabsEl.innerHTML = '';
@@ -2845,6 +2882,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         var wkeCtxEmpty = document.getElementById('wke-calcctx');
         if (wkeCtxEmpty) wkeCtxEmpty.style.display = 'none';
         if (addBtn) addBtn.style.display = 'none';
+        if (notesEl) notesEl.style.display = 'none';
         const nome = (wkeState.athlete && wkeState.athlete.name.split(' ')[0]) || 'O atleta';
         if (exEl) {
           exEl.innerHTML = '<div class="wke-empty"><div class="wke-empty-icon"><span data-lucide="dumbbell"></span></div>' +
@@ -2856,19 +2894,38 @@ import AdminHeader from '../../components/AdminHeader.astro';
         return;
       }
       if (addBtn) addBtn.style.display = '';
+      if (notesEl) notesEl.style.display = '';
+      wkeSyncCoachNotes();
       var wkeCtxEl = document.getElementById('wke-calcctx');
       if (wkeCtxEl) wkeCtxEl.style.display = 'flex';
       wkeRenderCalcContext();
       // DayTabs
       if (tabsEl) {
         const canDelete = plan.order.length > 1;
+        // O clique é tratado por delegação em #wke-daytabs (wkeOnDayTabsClick),
+        // não por onclick embutido: renderWorkout reconstrói esta lista inteira,
+        // e o nó que recebeu o primeiro clique deixa de existir antes do
+        // segundo — o que tornava o ondblclick dependente de como cada
+        // navegador reconcilia alvos destruídos.
+        const coarse = wkeCoarsePointer();
         tabsEl.innerHTML = plan.order.map(function(d) {
           const active = d === wkeState.activeDay;
+          const hint = active
+            ? (coarse ? 'Toque de novo para renomear' : 'Duplo-clique para renomear')
+            : 'Selecionar dia';
           return '<span class="wke-daytab-wrap">' +
-            '<button class="wke-daytab' + (active ? ' active' : '') + '" onclick="wkeSelectDay(\'' + d + '\')" ondblclick="wkeStartRenameDay(\'' + d + '\',this)" title="Duplo-clique para renomear">' + wkeDayName(d) + '</button>' +
-            (canDelete ? '<button class="wke-daytab-x" title="Remover dia" onclick="wkeDeleteDay(\'' + d + '\')"><span data-lucide="x"></span></button>' : '') +
+            '<button class="wke-daytab' + (active ? ' active' : '') + '" data-day="' + wkeEsc(d) + '" title="' + hint + '">' +
+              wkeEsc(wkeDayName(d)) +
+              (active && coarse ? '<span class="wke-daytab-pencil"><span data-lucide="pencil"></span></span>' : '') +
+            '</button>' +
+            (canDelete ? '<button class="wke-daytab-x" title="Remover dia" data-day-del="' + wkeEsc(d) + '"><span data-lucide="x"></span></button>' : '') +
           '</span>';
-        }).join('') + '<button class="wke-daytab add" onclick="wkeAddDay()">+ Adicionar dia</button>';
+        }).join('') + '<button class="wke-daytab add" data-day-add="1">+ Adicionar dia</button>';
+        if (!tabsEl.dataset.bound) {
+          tabsEl.addEventListener('click', wkeOnDayTabsClick);
+          tabsEl.addEventListener('dblclick', wkeOnDayTabsDblClick);
+          tabsEl.dataset.bound = '1';
+        }
       }
       const day = plan.days[wkeState.activeDay];
       // Stats
@@ -2948,11 +3005,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
           }).join('');
         }
         var sec = '<div class="doc-section">' +
-          '<div class="doc-section-h"><span class="doc-section-num">' + num + '</span><span class="doc-section-title">' + wkeDayName(dayKey) + '</span></div>' +
+          '<div class="doc-section-h"><span class="doc-section-num">' + num + '</span><span class="doc-section-title">' + wkeEsc(wkeDayName(dayKey)) + '</span></div>' +
           exHtml +
         '</div>';
         return sec + (idx < plan.order.length - 1 ? '<div class="doc-divider"></div>' : '');
       }).join('');
+      inner += docNotesSection(plan.coachNotes, plan.order.length + 1);
       document.getElementById('wke-preview-body').innerHTML =
         docEnvelope('Plano de Treino', 'Plano de Treino', a && a.name, ' com base na sua fase e objetivo do ciclo', inner);
       document.getElementById('wke-preview').style.display = 'flex';
@@ -3173,9 +3231,51 @@ import AdminHeader from '../../components/AdminHeader.astro';
       }
     }
 
+    // Regra única de ativação:
+    //  • dia ≠ dia ativo                     → seleciona;
+    //  • dia = dia ativo e ponteiro grosso    → renomeia (2º toque);
+    //  • ponteiro fino                        → renomeia no duplo clique.
+    function wkeOnDayTabsClick(e) {
+      const addBtn = e.target.closest('[data-day-add]');
+      if (addBtn) { wkeAddDay(); return; }
+      const delBtn = e.target.closest('[data-day-del]');
+      if (delBtn) { wkeDeleteDay(delBtn.dataset.dayDel); return; }
+      const tab = e.target.closest('.wke-daytab[data-day]');
+      if (!tab) return;
+      const d = tab.dataset.day;
+      if (d !== wkeState.activeDay) { wkeSelectDay(d); return; }
+      if (wkeCoarsePointer()) wkeStartRenameDay(d, tab);
+    }
+
+    function wkeOnDayTabsDblClick(e) {
+      if (wkeCoarsePointer()) return; // no toque, quem renomeia é o 2º toque
+      const tab = e.target.closest('.wke-daytab[data-day]');
+      if (!tab) return;
+      wkeStartRenameDay(tab.dataset.day, tab);
+    }
+
     function wkeSelectDay(d) {
+      if (d === wkeState.activeDay) return; // evita re-render inútil da aba inteira
       wkeState.activeDay = d;
       renderWorkout();
+    }
+
+    // ── Observações do Coach (aba Treino) ──
+    // Vivem em wkeState.plan.coachNotes, dentro de wkePlanCache[athlete.id]:
+    // são por atleta e sobrevivem à troca de ficha dentro da sessão.
+    function wkeSetCoachNotes(v) {
+      if (!wkeState.plan) return;
+      wkeState.plan.coachNotes = v;
+      wkeAutoSave();
+    }
+
+    function wkeSyncCoachNotes() {
+      const el = document.getElementById('wke-coach-notes');
+      if (!el) return;
+      // Não sobrescrever enquanto o Coach digita: renderWorkout é chamado por
+      // muitos caminhos, e wkeAutoSave marca alteração pendente a cada tecla.
+      if (document.activeElement === el) return;
+      el.value = (wkeState.plan && wkeState.plan.coachNotes) || '';
     }
 
     // C-03: nome de exibição do dia
@@ -4392,6 +4492,22 @@ import AdminHeader from '../../components/AdminHeader.astro';
       renderNutrition();
     }
 
+    // ── Observações do Coach (aba Nutricional) ──
+    // Mesma ligação ao estado da aba Treino: por atleta, em ntePlanCache.
+    // Antes desta mudança o texto era fixo no HTML e igual para todos.
+    function nteSetCoachNotes(v) {
+      if (!nteState.plan) return;
+      nteState.plan.coachNotes = v;
+      nteAutoSave();
+    }
+
+    function nteSyncCoachNotes() {
+      const el = document.getElementById('nte-coach-notes');
+      if (!el) return;
+      if (document.activeElement === el) return; // não sobrescrever enquanto digita
+      el.value = (nteState.plan && nteState.plan.coachNotes) || '';
+    }
+
     function nteMacrosOf(food) {
       const k = (parseFloat(food.qty) || 0) / 100;
       const b = food.base || { kcal: 0, p: 0, c: 0, g: 0 };
@@ -4441,6 +4557,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       }
       if (addBtn) addBtn.style.display = '';
       if (notesEl) notesEl.style.display = '';
+      nteSyncCoachNotes();
       nteRenderCalcContext();
       nteRenderDaySelector();
       nteRenderMacros();
@@ -4506,6 +4623,19 @@ import AdminHeader from '../../components/AdminHeader.astro';
         '</div>' +
       '</div>';
     }
+    // Observações do Coach como seção final do documento entregue ao atleta —
+    // mesma função para os dois planos. Sem conteúdo, a seção não é renderizada:
+    // um "sem conteúdo registrado" num documento entregue não informa nada.
+    function docNotesSection(notes, sectionNum) {
+      var txt = (notes == null ? '' : String(notes)).trim();
+      if (!txt) return '';
+      var num = ('0' + sectionNum).slice(-2);
+      return '<div class="doc-divider"></div>' +
+        '<div class="doc-section">' +
+          '<div class="doc-section-h"><span class="doc-section-num">' + num + '</span><span class="doc-section-title">Orientações do Coach</span></div>' +
+          '<div class="doc-section-body doc-notes">' + wkeEsc(txt) + '</div>' +
+        '</div>';
+    }
     function docMealsBlock(meals) {
       if (!meals || !meals.length) return '<div class="doc-empty">Nenhuma refeição definida para este dia.</div>';
       return meals.map(function(m){
@@ -4556,6 +4686,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         '</div>';
         return sec + (i < dayDefs.length - 1 ? '<div class="doc-divider"></div>' : '');
       }).join('');
+      inner += docNotesSection(nteState.plan.coachNotes, dayDefs.length + 1);
       document.getElementById('nte-preview-body').innerHTML =
         docEnvelope('Plano Nutricional', 'Plano Nutricional', a && a.name, ' com base na sua fase e composição corporal', inner);
       document.getElementById('nte-preview').style.display = 'flex';
