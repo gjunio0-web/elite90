@@ -377,7 +377,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
        no antigo .wke-daytab-x, preservada aqui. */
     .wke-daytab-menubtn [data-lucide] { width: 11px; height: 11px; }
     .wke-daytab-menubtn [data-lucide] svg { width: 11px; height: 11px; display: block; }
-    .wke-daymenu { position: absolute; top: calc(100% + 6px); right: 0; min-width: 168px; background: var(--c-surface-2); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); padding: var(--space-1) 0; z-index: 40; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55); }
+    /* position:fixed, não absolute: o wrap vive dentro de .drawer-content-wrap,
+       que só declara overflow-y — o CSS Overflow Módulo 3 obriga overflow-x a
+       herdar "auto" nesse caso (não fica "visible"), recortando o menu sempre
+       que a aba fica perto da borda esquerda (ex.: "Dia A"). Anexado ao
+       <body> com top/right calculados em wkeToggleDayMenu, não sofre esse
+       recorte. z-index acima da gaveta (100), abaixo dos overlays de tela
+       cheia (300+) — nunca precisa competir com eles, pois o menu já fecha
+       antes de qualquer um se abrir. */
+    .wke-daymenu { position: fixed; min-width: 168px; background: var(--c-surface-2); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); padding: var(--space-1) 0; z-index: 150; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55); }
     .wke-daymenu-item { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: 0; text-align: left; padding: 9px 14px; color: var(--c-textbody); font-family: var(--font-body); font-size: var(--fs-body-sm); cursor: pointer; }
     .wke-daymenu-item:hover { background: rgba(166, 195, 0, 0.10); color: var(--c-white); }
     .wke-daymenu-item.danger { color: var(--c-status-rejected); }
@@ -3357,8 +3365,6 @@ import AdminHeader from '../../components/AdminHeader.astro';
     function wkeToggleDayMenu(d, btn) {
       if (wkeDayMenuFor === d) { wkeCloseDayMenu(); return; }
       wkeCloseDayMenu();
-      const wrap = btn.closest('.wke-daytab-wrap');
-      if (!wrap) return;
       const canDelete = wkeState.plan && wkeState.plan.order.length > 1;
       const menu = document.createElement('div');
       menu.className = 'wke-daymenu';
@@ -3368,19 +3374,42 @@ import AdminHeader from '../../components/AdminHeader.astro';
         (canDelete
           ? '<button class="wke-daymenu-item danger" role="menuitem" data-menu-action="delete"><span data-lucide="trash-2"></span> Remover dia</button>'
           : '');
-      wrap.appendChild(menu);
+      // Anexado ao <body>, não ao wrap — ver o comentário de .wke-daymenu no
+      // CSS. top/right calculados do próprio botão para reproduzir a mesma
+      // posição visual de antes (colado embaixo, alinhado à direita).
+      const r = btn.getBoundingClientRect();
+      menu.style.top = (r.bottom + 6) + 'px';
+      menu.style.right = (window.innerWidth - r.right) + 'px';
+      document.body.appendChild(menu);
       btn.setAttribute('aria-expanded', 'true');
       wkeDayMenuFor = d;
       renderIcons();
       if (!document.body.dataset.wkeDayMenuBound) {
+        // Trata os itens do menu AQUI, não em wkeOnDayTabsClick: aquele
+        // listener está preso a #wke-daytabs (delegação), e o menu agora vive
+        // no <body> — fora da subárvore, o clique nunca chegaria lá.
         document.addEventListener('click', function(ev) {
           if (!wkeDayMenuFor) return;
+          const menuItem = ev.target.closest('[data-menu-action]');
+          if (menuItem && menuItem.closest('.wke-daymenu')) {
+            const d0 = wkeDayMenuFor;
+            const action = menuItem.dataset.menuAction;
+            wkeCloseDayMenu();
+            if (action === 'delete') { wkeDeleteDay(d0); return; }
+            const tabBtn = document.querySelector('.wke-daytab[data-day="' + CSS.escape(d0) + '"]');
+            if (tabBtn) wkeStartRenameDay(d0, tabBtn);
+            return;
+          }
           if (ev.target.closest('.wke-daymenu') || ev.target.closest('.wke-daytab-menubtn')) return;
           wkeCloseDayMenu();
         });
         document.addEventListener('keydown', function(ev) {
           if (ev.key === 'Escape') wkeCloseDayMenu();
         });
+        // position:fixed é relativo à viewport, não ao contêiner com rolagem
+        // — rolar a gaveta desalinharia o menu do botão que o abriu. 'scroll'
+        // não borbulha em elementos comuns, por isso a fase de captura.
+        document.addEventListener('scroll', function() { if (wkeDayMenuFor) wkeCloseDayMenu(); }, true);
         document.body.dataset.wkeDayMenuBound = '1';
       }
     }
@@ -3390,18 +3419,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
     //  • dia = dia ativo e ponteiro grosso    → renomeia (2º toque);
     //  • ponteiro fino                        → renomeia no duplo clique.
     function wkeOnDayTabsClick(e) {
-      const menuItem = e.target.closest('[data-menu-action]');
-      if (menuItem) {
-        const d0 = wkeDayMenuFor;
-        const wrap0 = menuItem.closest('.wke-daytab-wrap');
-        const action = menuItem.dataset.menuAction;
-        wkeCloseDayMenu();
-        if (!d0) return;
-        if (action === 'delete') { wkeDeleteDay(d0); return; }
-        const tabBtn = wrap0 && wrap0.querySelector('.wke-daytab[data-day]');
-        if (tabBtn) wkeStartRenameDay(d0, tabBtn);
-        return;
-      }
+      // Cliques nos itens do menu (Renomear/Remover) são tratados no listener
+      // global de document dentro de wkeToggleDayMenu — o menu vive no
+      // <body>, fora desta subárvore, então nunca chegariam aqui.
       const menuBtn = e.target.closest('[data-day-menu]');
       if (menuBtn) { wkeToggleDayMenu(menuBtn.dataset.dayMenu, menuBtn); return; }
       wkeCloseDayMenu();
