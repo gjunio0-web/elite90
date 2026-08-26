@@ -19,17 +19,15 @@
 // chamadas seguintes reusam o mesmo token para sempre — republicar o
 // protocolo troca o CONTEÚDO que o link mostra, nunca o link em si.
 //
-// POR QUE RECUSA QUANDO O PROTOCOLO NUNCA FOI PUBLICADO
-// Gerar um link para um rascunho daria ao atleta acesso a algo que o Coach
-// ainda pode descartar sem aviso, e a página pública (/plano/[token].astro)
-// não teria o que mostrar de qualquer forma. A tela também esconde o botão
-// nesse caso (ver renderPubHeader em atletas.astro) — esta recusa é a
-// garantia real, a de lá é conveniência.
-//
-// PREMISSA DE FORMATO — mesma do cabeçalho de plano-documento.ts: assume que
-// athletes/{id}.trainingPlan / .nutritionPlan, quando a persistência real
-// existir, trazem ao menos { status: 'publicado' | ... }. Ajustar aqui se o
-// formato final divergir.
+// SEM PLANO PUBLICADO: NÃO É RECUSADO AQUI (decisão do Coach, 26/08/2026)
+// Esta função sempre gera/renova o link, contanto que o atleta exista — ela
+// não sabe e não pergunta se há algo publicado. Quem decide se há conteúdo
+// de verdade para mostrar é só /plano/[token].astro (estado "semPlano"), na
+// hora em que o link é aberto. Motivo: a lacuna deve aparecer para quem abre
+// o link, como esperado desde o início — não travar o botão de compartilhar
+// no painel antes disso. A tela do painel ainda esconde o próprio botão
+// enquanto nada foi publicado (ver renderPubHeader em atletas.astro), mas
+// isso é só conveniência de UI; a função não depende disso para nada.
 
 import { getAuth } from "firebase-admin/auth";
 import { getApp, getDb } from "./_firebase";
@@ -40,7 +38,6 @@ const VALIDADE_MS = 90 * 24 * 60 * 60 * 1000; // 90 dias — mesma janela da ava
 
 const CAMPO_TOKEN = { training: "trainingPlanToken", nutrition: "nutritionPlanToken" } as const;
 const CAMPO_EXPIRA = { training: "trainingPlanTokenExpiresAt", nutrition: "nutritionPlanTokenExpiresAt" } as const;
-const CAMPO_PLANO = { training: "trainingPlan", nutrition: "nutritionPlan" } as const;
 const ROTULO = { training: "Plano de Treino", nutrition: "Plano Nutricional" } as const;
 
 type Kind = keyof typeof CAMPO_TOKEN;
@@ -91,12 +88,6 @@ export const handler = async (event: any) => {
     if (!doc.exists) return json(404, { erro: "Atleta não encontrado." });
 
     const dados = doc.data() ?? {};
-    const plano = dados[CAMPO_PLANO[k]];
-    if (!plano || plano.status !== "publicado") {
-      return json(422, {
-        erro: `${ROTULO[k]} ainda não foi publicado para este atleta — não há o que compartilhar.`,
-      });
-    }
 
     const agora = Date.now();
     const campoToken = CAMPO_TOKEN[k];
