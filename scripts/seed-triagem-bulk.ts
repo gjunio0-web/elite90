@@ -7,9 +7,15 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON!);
 
+const bucket = process.env.PUBLIC_FIREBASE_STORAGE_BUCKET;
+if (!bucket) {
+  console.error('PUBLIC_FIREBASE_STORAGE_BUCKET ausente. Este roteiro ESCREVE em lote — sem alvo declarado, não executa.');
+  process.exit(1);
+}
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'elite90-c716b.firebasestorage.app'
+  storageBucket: bucket
 });
 
 const db = admin.firestore();

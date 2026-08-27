@@ -23,13 +23,26 @@
 import { initializeApp, getApps, cert, type App } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 
-const BUCKET_PADRAO = "elite90-c716b.firebasestorage.app";
-
 /** Nome do bucket de Storage. Passar explicitamente ao chamar .bucket(): a
  *  resolução implícita pelas opções do app já devolveu "bucket does not exist"
- *  mesmo com o valor correto configurado. */
+ *  mesmo com o valor correto configurado.
+ *
+ *  NÃO EXISTE VALOR DE RESERVA, e isso é deliberado (26/08/2026). Havia aqui
+ *  uma constante com o bucket de PRODUÇÃO, usada quando a variável faltava.
+ *  Com projetos separados, esse padrão é o pior modo de falha possível: uma
+ *  função de homologação sem a variável não falhava — gravava no bucket real,
+ *  em silêncio, e a operação parecia bem-sucedida. Variável ausente agora é
+ *  erro explícito. Falhar alto é mais barato que acertar o alvo errado. */
 export function storageBucketName(): string {
-  return process.env.PUBLIC_FIREBASE_STORAGE_BUCKET ?? BUCKET_PADRAO;
+  const bucket = process.env.PUBLIC_FIREBASE_STORAGE_BUCKET;
+  if (!bucket) {
+    throw new Error(
+      "PUBLIC_FIREBASE_STORAGE_BUCKET ausente. Configure a variável no contexto " +
+      "de implantação. Não há valor padrão: assumir um bucket seria arriscar " +
+      "gravar no projeto errado."
+    );
+  }
+  return bucket;
 }
 
 function lerCredencial(): any {

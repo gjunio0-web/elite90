@@ -31,7 +31,11 @@ import { fileURLToPath } from 'node:url';
 import admin from 'firebase-admin';
 
 export const RAIZ_PROJETO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const PROJETO_ESPERADO = 'elite90-c716b';
+// O projeto esperado vem do ambiente, não do código. Com projetos separados
+// (produção e homologação), um valor embutido faria a guarda avisar em toda
+// execução legítima de homologação — e aviso que aparece sempre é aviso que
+// ninguém lê no dia em que significa alguma coisa.
+const PROJETO_ESPERADO = process.env.PUBLIC_FIREBASE_PROJECT_ID;
 
 /**
  * `sePossivel: true` troca "derrubar o processo" por "avisar e devolver null" —
@@ -105,9 +109,16 @@ export function conectar({ sePossivel = false } = {}) {
       + `  Confira também se project_id é "${PROJETO_ESPERADO}".`,
       { sePossivel });
   }
+  if (!PROJETO_ESPERADO) {
+    return abortar('PUBLIC_FIREBASE_PROJECT_ID ausente no ambiente.\n'
+      + '  Sem ela não há como conferir se a credencial aponta para o banco certo.',
+      { sePossivel });
+  }
   if (credencial.project_id && credencial.project_id !== PROJETO_ESPERADO) {
-    console.warn(`\n  AVISO: o projeto da credencial é "${credencial.project_id}", não "${PROJETO_ESPERADO}".`);
-    console.warn('  Confirme que é o banco certo antes de gravar.\n');
+    return abortar(`a credencial é do projeto "${credencial.project_id}", mas o ambiente declara "${PROJETO_ESPERADO}".\n`
+      + '  Divergência entre credencial e ambiente INTERROMPE a execução — antes\n'
+      + '  isto era apenas um aviso, e um aviso não impede gravar no banco errado.',
+      { sePossivel });
   }
   return admin.firestore();
 }

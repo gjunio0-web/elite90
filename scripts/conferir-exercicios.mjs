@@ -111,8 +111,9 @@ function conectar() {
   } catch (e) {
     abortar(`a credencial foi lida, mas o Firebase a recusou.\n  Motivo: ${e?.message ?? e}`);
   }
-  if (credencial.project_id && credencial.project_id !== 'elite90-c716b') {
-    console.warn(`\n  AVISO: o projeto da credencial é "${credencial.project_id}", não "elite90-c716b".\n`);
+  const projetoEsperado = process.env.PUBLIC_FIREBASE_PROJECT_ID;
+  if (projetoEsperado && credencial.project_id && credencial.project_id !== projetoEsperado) {
+    console.warn(`\n  AVISO: o projeto da credencial é "${credencial.project_id}", não "${projetoEsperado}".\n`);
   }
   return admin.firestore();
 }

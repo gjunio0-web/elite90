@@ -168,11 +168,15 @@ function conectar() {
     abortar('a credencial foi lida, mas o Firebase a recusou.\n'
       + `  Motivo: ${e?.message ?? e}\n`
       + '  Causa provável: a chave privada perdeu as quebras de linha na colagem.\n'
-      + '  Confira também se project_id é "elite90-c716b".');
+      + `  Confira também se project_id é "${process.env.PUBLIC_FIREBASE_PROJECT_ID}".`);
   }
-  if (credencial.project_id && credencial.project_id !== 'elite90-c716b') {
-    console.warn(`\n  AVISO: o projeto da credencial é "${credencial.project_id}", não "elite90-c716b".`);
-    console.warn('  Confirme que é o banco certo antes de usar --commit.\n');
+  const projetoEsperado = process.env.PUBLIC_FIREBASE_PROJECT_ID;
+  if (!projetoEsperado) {
+    abortar('PUBLIC_FIREBASE_PROJECT_ID ausente no ambiente.');
+  }
+  if (credencial.project_id && credencial.project_id !== projetoEsperado) {
+    abortar(`a credencial é do projeto "${credencial.project_id}", mas o ambiente declara "${projetoEsperado}".\n`
+      + '  Este roteiro grava em lote. Divergência interrompe.');
   }
   return admin.firestore();
 }

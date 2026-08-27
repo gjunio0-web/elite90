@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "elite90-c716b"
+    "default": "PROJETO_HOMOLOGACAO_A_PREENCHER",
+    "homologacao": "PROJETO_HOMOLOGACAO_A_PREENCHER",
+    "producao": "elite90-c716b"
   }
 }
