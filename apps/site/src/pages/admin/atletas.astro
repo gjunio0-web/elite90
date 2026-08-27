@@ -5671,9 +5671,17 @@ import AdminHeader from '../../components/AdminHeader.astro';
     // troca a visibilidade de dois blocos distintos — tabela e cards vivem
     // em elementos SEPARADOS —, aqui reflui a mesma tabela via CSS). Manter
     // as duas em sincronia se uma mudar.
+    //
+    // "observar" (opcional) existe por causa de fichas.astro: lá o elemento
+    // medido (wrap) fica display:none no modo cards, e um elemento fora do
+    // layout para de reportar resize — o mecanismo travaria em cards para
+    // sempre. Aqui o wrap nunca some (só o conteúdo interno reflui), então
+    // não precisa ser usado — mas o parâmetro existe nos dois para as duas
+    // cópias ficarem idênticas.
     function observarLarguraTabela(opts) {
       const mql = opts.mediaMobile ? window.matchMedia(opts.mediaMobile) : null;
       const tolerancia = opts.tolerancia ?? 1;
+      const alvoObservado = opts.observar || opts.wrap;
       let frame = 0;
       function medir() {
         frame = 0;
@@ -5687,7 +5695,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         frame = requestAnimationFrame(medir);
       }
       const ro = new ResizeObserver(agendar);
-      ro.observe(opts.wrap);
+      ro.observe(alvoObservado);
       mql?.addEventListener('change', agendar);
       agendar();
       return () => {

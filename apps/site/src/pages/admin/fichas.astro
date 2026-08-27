@@ -1248,12 +1248,24 @@ import AdminHeader from '../../components/AdminHeader.astro';
     // atletas.astro, que reflui a mesma tabela via CSS). Manter as duas em
     // sincronia se uma mudar.
     //
+    // "observar" É DELIBERADAMENTE DIFERENTE DE "wrap": o ResizeObserver
+    // precisa vigiar um elemento que NUNCA fica display:none — aqui, ao
+    // contrário de atletas.astro, .table-wrap (o "wrap") vira display:none
+    // no modo cards, e um elemento fora do layout não participa mais dele:
+    // o navegador simplesmente para de reportar mudança de tamanho nele,
+    // mesmo a janela sendo redimensionada de verdade depois. Sem essa
+    // separação, o mecanismo entra em cards e nunca mais volta para
+    // tabela, porque o próprio observador emudece. <main> nunca some,
+    // então é ele quem é vigiado — "wrap" continua servindo só para medir
+    // o clientWidth disponível de verdade.
+    //
     // Fica fora do fluxo de auth de propósito, mesmo motivo do índice do
     // guia (ver seu cabeçalho) — layout não deveria depender de rede/sessão
     // para decidir como se apresentar.
     function observarLarguraTabela(opts) {
       const mql = opts.mediaMobile ? window.matchMedia(opts.mediaMobile) : null;
       const tolerancia = opts.tolerancia ?? 1;
+      const alvoObservado = opts.observar || opts.wrap;
       let frame = 0;
       function medir() {
         frame = 0;
@@ -1267,7 +1279,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         frame = requestAnimationFrame(medir);
       }
       const ro = new ResizeObserver(agendar);
-      ro.observe(opts.wrap);
+      ro.observe(alvoObservado);
       mql?.addEventListener('change', agendar);
       agendar();
       return () => {
@@ -1282,7 +1294,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const main = document.querySelector("main");
       if (wrap && table && main) {
         observarLarguraTabela({
-          wrap, table,
+          wrap, table, observar: main,
           mediaMobile: "(max-width: 760px)",
           mostrarTabela: () => main.classList.remove("tc-cards"),
           aplicar: (precisaDeCards) => main.classList.toggle("tc-cards", precisaDeCards),
