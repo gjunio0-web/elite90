@@ -115,6 +115,39 @@ import AdminHeader from '../../components/AdminHeader.astro';
     table { width: 100%; border-collapse: collapse; }
     th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); color: var(--c-lime); text-align: left; padding: var(--space-3) var(--space-4); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
     .athlete-row { transition: background var(--dur-med) var(--ease-std); }
+
+    /* ── TABLE → CARDS condicionado à largura real (desktop) ──
+       Mesma troca do bloco "TABLE → CARDS" lá embaixo (@media max-width:768px),
+       espelhada aqui atrás de uma classe em vez de um ponto de corte fixo —
+       aplicada por observarLarguraTabela (chamado no fim do <script>
+       clássico) quando a tabela real não cabe, mesmo em telas que não são
+       "mobile". Manter as duas em sincronia se uma mudar. */
+    #athletes-table-wrap.tc-cards table { display: block; width: 100%; }
+    #athletes-table-wrap.tc-cards thead { display: none; }
+    #athletes-table-wrap.tc-cards tbody { display: block; width: 100%; }
+    #athletes-table-wrap.tc-cards .athlete-row {
+      display: flex !important;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-2) var(--space-3);
+      padding: var(--space-4);
+      margin-bottom: var(--space-3);
+      background: var(--c-darkbg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-card);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #athletes-table-wrap.tc-cards .athlete-row:hover td { background: transparent; }
+    #athletes-table-wrap.tc-cards .athlete-row td { display: block; padding: 0; border: none; }
+    #athletes-table-wrap.tc-cards .td--date { display: none !important; }
+    #athletes-table-wrap.tc-cards .td--name-cell { order: 1; width: 100%; }
+    #athletes-table-wrap.tc-cards .td--name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #athletes-table-wrap.tc-cards .td--cycle { order: 2; flex: 1; font-size: var(--fs-body-sm); display: flex; align-items: center; gap: var(--space-3); }
+    #athletes-table-wrap.tc-cards .td--progress { flex: 1; display: block; }
+    #athletes-table-wrap.tc-cards .td--status { order: 3; width: auto; }
+    #athletes-table-wrap.tc-cards .status-badge { font-size: 0.6rem; padding: 3px 10px; white-space: nowrap; }
+    #athletes-table-wrap.tc-cards .td--actions { order: 4; width: 100%; text-align: right; }
     .athlete-row:hover td { background: rgba(255,255,255,.03); }
     .athlete-row td { padding: var(--space-4); border-bottom: 1px solid rgba(255, 255, 255, 0.08); vertical-align: middle; }
 
@@ -1169,8 +1202,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
   </div>
 
   <!-- TABLE -->
-  <div class="table-wrap">
-    <table>
+  <div class="table-wrap" id="athletes-table-wrap">
+    <table id="athletes-table">
       <thead>
         <tr>
           <th style="width: 15%; text-align: left;"><button class="sort-btn" onclick="sortAthletes('date')">DATA <span class="sort-arrow">↕</span></button></th>
@@ -5610,6 +5643,71 @@ import AdminHeader from '../../components/AdminHeader.astro';
       if (!isOpen) __positionMenu(__filterMenu, e.currentTarget);
     });
     window.addEventListener('scroll', __closeFilterMenu, { passive: true });
+
+    // ── Tabela → cards por largura real (desktop) ──
+    // Decide se a tabela vira cards empilhados com base na largura DE
+    // VERDADE, não num ponto de corte fixo — o media query abaixo
+    // (max-width:768px) já cobre o mobile de sempre, mas nunca cobria uma
+    // tela larga o bastante para não ser "mobile" e, ainda assim, estreita
+    // demais para as colunas caberem sem rolagem lateral (o que .table-wrap
+    // com overflow-x:auto permitia acontecer, silenciosamente).
+    //
+    // PORQUÊ MEDIR EM VEZ DE SÓ COMPARAR LARGURA DE TELA
+    // Esta tabela tem colunas fluidas (width:%) — só transborda por causa do
+    // conteúdo (nome sem quebra, botões de ação), não por uma largura mínima
+    // declarada. Não dá pra saber de antemão a partir de que largura de tela
+    // ela para de caber; é preciso perguntar ao próprio navegador.
+    //
+    // PORQUÊ FORÇAR "MODO TABELA" ANTES DE MEDIR
+    // Depois que a tabela vira cards, seu scrollWidth passa a refletir o
+    // LAYOUT DE CARDS (sempre cabe), não mais o da tabela — perguntar de
+    // novo nesse estado nunca revelaria que ela voltou a caber. mostrarTabela
+    // força o layout tabular de volta, IMEDIATAMENTE ANTES da leitura de
+    // scrollWidth, na mesma execução síncrona que decide e reaplica o estado
+    // final — o navegador nunca chega a pintar o quadro intermediário
+    // forçado.
+    //
+    // ESPELHADO em fichas.astro (mesma função, adaptada só no "aplicar": lá
+    // troca a visibilidade de dois blocos distintos — tabela e cards vivem
+    // em elementos SEPARADOS —, aqui reflui a mesma tabela via CSS). Manter
+    // as duas em sincronia se uma mudar.
+    function observarLarguraTabela(opts) {
+      const mql = opts.mediaMobile ? window.matchMedia(opts.mediaMobile) : null;
+      const tolerancia = opts.tolerancia ?? 1;
+      let frame = 0;
+      function medir() {
+        frame = 0;
+        if (mql && mql.matches) return;
+        opts.mostrarTabela();
+        const precisa = opts.table.scrollWidth > opts.wrap.clientWidth + tolerancia;
+        opts.aplicar(precisa);
+      }
+      function agendar() {
+        if (frame) return;
+        frame = requestAnimationFrame(medir);
+      }
+      const ro = new ResizeObserver(agendar);
+      ro.observe(opts.wrap);
+      mql?.addEventListener('change', agendar);
+      agendar();
+      return () => {
+        ro.disconnect();
+        mql?.removeEventListener('change', agendar);
+        if (frame) cancelAnimationFrame(frame);
+      };
+    }
+    {
+      const wrap = document.getElementById('athletes-table-wrap');
+      const table = document.getElementById('athletes-table');
+      if (wrap && table) {
+        observarLarguraTabela({
+          wrap, table,
+          mediaMobile: '(max-width: 768px)',
+          mostrarTabela: () => wrap.classList.remove('tc-cards'),
+          aplicar: (precisaDeCards) => wrap.classList.toggle('tc-cards', precisaDeCards),
+        });
+      }
+    }
 
     // ── INIT: ver loadAthletes(), chamado pelo auth guard no topo do arquivo. ──
 </script>

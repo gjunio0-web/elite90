@@ -390,6 +390,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
       background: rgba(166, 195, 0, 0.06);
     }
 
+    /* ── TABLE → CARDS condicionado à largura real (desktop) ──
+       Mesma troca de baixo, só que aqui o gatilho é medido de verdade (ver
+       observarLarguraTabela em tabela-responsiva.ts, chamado no início do
+       script de módulo) em vez de um ponto de corte fixo — cobre a faixa de
+       tela larga o bastante para não ser "mobile", mas estreita demais para
+       as seis colunas caberem sem rolar de lado. */
+    main.tc-cards .table-wrap { display: none; }
+    main.tc-cards .leads-cards { display: block; }
+
     @media (max-width: 760px) {
       .table-wrap { display: none; }
       .leads-cards { display: block; }
@@ -984,8 +993,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
       <span class="leads-count" id="leads-count"></span>
     </div>
 
-    <div class="table-wrap">
-      <table>
+    <div class="table-wrap" id="leads-table-wrap">
+      <table id="leads-table">
         <thead>
           <tr>
             <th class="th-sortable" data-sort="data">Data</th>
@@ -1225,7 +1234,62 @@ import AdminHeader from '../../components/AdminHeader.astro';
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, collection, getDocs, doc, updateDoc, query, orderBy, where, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-      
+    // ── Tabela → cards por largura real (desktop) ──
+    // ESPELHA a função de mesmo nome em atletas.astro — não importa de um
+    // módulo compartilhado porque um import relativo dentro de <script
+    // type="module"> no CORPO da página (fora do frontmatter) não resolve
+    // pelo caminho do arquivo-fonte; o navegador resolve contra a URL da
+    // própria página (testado: virou 404 em /lib/tabela-responsiva). Ver o
+    // cabeçalho da função em atletas.astro para a explicação completa do
+    // porquê de medir em vez de comparar contra um ponto de corte fixo, e do
+    // porquê de forçar "modo tabela" antes de ler scrollWidth. Adaptada só
+    // no "aplicar": aqui troca a visibilidade de dois blocos SEPARADOS
+    // (tabela e cards vivem em elementos distintos, ao contrário de
+    // atletas.astro, que reflui a mesma tabela via CSS). Manter as duas em
+    // sincronia se uma mudar.
+    //
+    // Fica fora do fluxo de auth de propósito, mesmo motivo do índice do
+    // guia (ver seu cabeçalho) — layout não deveria depender de rede/sessão
+    // para decidir como se apresentar.
+    function observarLarguraTabela(opts) {
+      const mql = opts.mediaMobile ? window.matchMedia(opts.mediaMobile) : null;
+      const tolerancia = opts.tolerancia ?? 1;
+      let frame = 0;
+      function medir() {
+        frame = 0;
+        if (mql && mql.matches) return;
+        opts.mostrarTabela();
+        const precisa = opts.table.scrollWidth > opts.wrap.clientWidth + tolerancia;
+        opts.aplicar(precisa);
+      }
+      function agendar() {
+        if (frame) return;
+        frame = requestAnimationFrame(medir);
+      }
+      const ro = new ResizeObserver(agendar);
+      ro.observe(opts.wrap);
+      mql?.addEventListener('change', agendar);
+      agendar();
+      return () => {
+        ro.disconnect();
+        mql?.removeEventListener('change', agendar);
+        if (frame) cancelAnimationFrame(frame);
+      };
+    }
+    {
+      const wrap = document.getElementById("leads-table-wrap");
+      const table = document.getElementById("leads-table");
+      const main = document.querySelector("main");
+      if (wrap && table && main) {
+        observarLarguraTabela({
+          wrap, table,
+          mediaMobile: "(max-width: 760px)",
+          mostrarTabela: () => main.classList.remove("tc-cards"),
+          aplicar: (precisaDeCards) => main.classList.toggle("tc-cards", precisaDeCards),
+        });
+      }
+    }
+
     const cfg={apiKey:document.querySelector('meta[name="fb-api"]')?.content,authDomain:document.querySelector('meta[name="fb-auth"]')?.content,projectId:document.querySelector('meta[name="fb-proj"]')?.content,storageBucket:document.querySelector('meta[name="fb-bucket"]')?.content,messagingSenderId:document.querySelector('meta[name="fb-sender"]')?.content,appId:document.querySelector('meta[name="fb-appid"]')?.content};
     const app=initializeApp(cfg);
     const auth=getAuth(app);
