@@ -54,8 +54,10 @@ import {
   categoriaValida, FONTE_CURADORIA,
 } from "./_vocabulario-alimentos";
 import { marcarPendente } from "./_publicacao";
+import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 
 const COLECAO = "foods";
+const ORIGEM = "atualizar-alimento";
 
 const json = (statusCode: number, corpo: unknown) => ({
   statusCode,
@@ -76,7 +78,8 @@ const LOTE_MAX_POR_GRAVACAO = 400;
  * Exclui publicado:false dos alvos, nas duas direções — ver o cabeçalho do
  * arquivo sobre o passo 8.
  */
-async function revisarLote(corpo: Record<string, any>, uid: string, marcar: boolean) {
+async function revisarLote(corpo: Record<string, any>, ator: Ator & { tipo: "humano" }, marcar: boolean) {
+  const uid = ator.uid;
   const filtro = corpo.filtro ?? {};
   const esperados = Number(corpo.esperados);
   if (!Number.isInteger(esperados) || esperados < 1) {
@@ -120,6 +123,14 @@ async function revisarLote(corpo: Record<string, any>, uid: string, marcar: bool
   }
 
   await marcarPendente("alimentos");
+  // UM evento por lote — mesma razão do equivalente em atualizar-exercicio.ts.
+  await registrar({
+    acao: marcar ? "catalogo.revisar-lote" : "catalogo.desrevisar-lote",
+    ator,
+    origem: ORIGEM,
+    alvos: alvos.map((d): Alvo => ({ colecao: COLECAO, id: d.id })),
+    detalhe: { filtro, aplicados: alvos.length },
+  });
   return json(200, {
     ok: true,
     operacao: marcar ? "revisar-lote" : "desrevisar-lote",
@@ -144,7 +155,8 @@ async function revisarLote(corpo: Record<string, any>, uid: string, marcar: bool
  * existente na TACO (ou de outro item de curadoria), e o Coach escolheria um
  * dos dois ao acaso no construtor nutricional.
  */
-async function criar(corpo: Record<string, any>, uid: string) {
+async function criar(corpo: Record<string, any>, ator: Ator & { tipo: "humano" }) {
+  const uid = ator.uid;
   const campos = corpo.campos;
   if (!campos || typeof campos !== "object" || Array.isArray(campos)) {
     return json(400, { erro: "campos obrigatório para 'criar'." });
@@ -199,6 +211,13 @@ async function criar(corpo: Record<string, any>, uid: string) {
 
   const ref = await db.collection(COLECAO).add(documento);
   await marcarPendente("alimentos");
+  await registrar({
+    acao: "catalogo.criar",
+    ator,
+    origem: ORIGEM,
+    alvo: { colecao: COLECAO, id: ref.id },
+    detalhe: { revisadoNaCriacao: revisar },
+  });
   return json(201, { ok: true, operacao: "criar", foodId: ref.id, revisado: revisar });
 }
 
@@ -216,10 +235,14 @@ export const handler = async (event: any) => {
   if (!idToken) return { statusCode: 401, body: "Unauthorized" };
 
   let uid: string;
+  let ator: Ator & { tipo: "humano" };
   try {
     const decoded = await getAuth(app).verifyIdToken(idToken);
     if (!decoded.admin) return { statusCode: 403, body: "Acesso não autorizado" };
     uid = decoded.uid;
+    // Ver o comentário equivalente em atualizar-exercicio.ts sobre por que o
+    // e-mail é gravado no momento do evento (DR-09).
+    ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "admin" };
   } catch {
     return { statusCode: 401, body: "Invalid token" };
   }
@@ -235,9 +258,9 @@ export const handler = async (event: any) => {
 
   // As que não trabalham sobre um documento existente saem antes da exigência
   // de foodId — mesma ordem de atualizar-exercicio.ts.
-  if (operacao === "criar") return criar(corpo, uid);
-  if (operacao === "revisar-lote") return revisarLote(corpo, uid, true);
-  if (operacao === "desrevisar-lote") return revisarLote(corpo, uid, false);
+  if (operacao === "criar") return criar(corpo, ator);
+  if (operacao === "revisar-lote") return revisarLote(corpo, ator, true);
+  if (operacao === "desrevisar-lote") return revisarLote(corpo, ator, false);
 
   const SOBRE_UM = ["editar", "revisar", "desrevisar", "arquivar", "desarquivar"];
   if (!SOBRE_UM.includes(operacao)) {
@@ -281,6 +304,15 @@ export const handler = async (event: any) => {
       // atleta. revisadoPor/revisadoEm não são tocados aqui.
       await ref.update(patch);
       await marcarPendente("alimentos");
+      // Apenas os NOMES dos campos alterados (DR-04). Em alimentos isso importa
+      // ainda mais: os valores seriam macros e medidas do item.
+      await registrar({
+        acao: "catalogo.editar",
+        ator,
+        origem: ORIGEM,
+        alvo: { colecao: COLECAO, id: foodId },
+        detalhe: { campos: chaves },
+      });
 
       return json(200, {
         ok: true,
@@ -306,6 +338,13 @@ export const handler = async (event: any) => {
       }
       await ref.update({ ativo: !arquivando, atualizadoPor: uid, atualizadoEm: agora });
       await marcarPendente("alimentos");
+      // Depois da saída por `jaEstava`: sem gravação não há evento.
+      await registrar({
+        acao: arquivando ? "catalogo.arquivar" : "catalogo.desarquivar",
+        ator,
+        origem: ORIGEM,
+        alvo: { colecao: COLECAO, id: foodId },
+      });
       return json(200, { ok: true, operacao, foodId, ativo: !arquivando });
     }
 
@@ -320,6 +359,15 @@ export const handler = async (event: any) => {
         atualizadoEm: agora,
       });
       await marcarPendente("alimentos");
+      // O evento de `catalogo.revisar` anterior PERMANECE — é o que o campo
+      // revisadoPor perde ao ser zerado acima.
+      await registrar({
+        acao: "catalogo.desrevisar",
+        ator,
+        origem: ORIGEM,
+        alvo: { colecao: COLECAO, id: foodId },
+        detalhe: { de: "revisado", para: "aguardando" },
+      });
       return json(200, { ok: true, operacao: "desrevisar", foodId, revisadoPorAnterior: dados.revisadoPor });
     }
 
@@ -353,6 +401,15 @@ export const handler = async (event: any) => {
       atualizadoEm: agora,
     });
     await marcarPendente("alimentos");
+    // Depois das duas saídas anteriores — item não publicado (422) e revisão
+    // repetida (200 idempotente) —, ambas sem gravação e portanto sem evento.
+    await registrar({
+      acao: "catalogo.revisar",
+      ator,
+      origem: ORIGEM,
+      alvo: { colecao: COLECAO, id: foodId },
+      detalhe: { de: "aguardando", para: "revisado" },
+    });
 
     return json(200, { ok: true, operacao: "revisar", foodId, revisadoPor: uid });
   } catch (e: any) {

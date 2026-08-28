@@ -53,8 +53,10 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
 import { CAMPOS_EDITAVEIS, validarCampos, validarNovo, dobraBusca, GRUPOS, EQUIPAMENTOS } from "./_vocabulario-exercicios";
 import { marcarPendente } from "./_publicacao";
+import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 
 const COLECAO = "exercises";
+const ORIGEM = "atualizar-exercicio";
 
 const json = (statusCode: number, corpo: unknown) => ({
   statusCode,
@@ -84,7 +86,8 @@ const LOTE_MAX_POR_GRAVACAO = 400;
  * é dividida em blocos de 400 apenas porque é o teto do Firestore, não como
  * política.
  */
-async function revisarLote(corpo: Record<string, any>, uid: string, marcar: boolean) {
+async function revisarLote(corpo: Record<string, any>, ator: Ator & { tipo: "humano" }, marcar: boolean) {
+  const uid = ator.uid;
   const filtro = corpo.filtro ?? {};
   const esperados = Number(corpo.esperados);
   if (!Number.isInteger(esperados) || esperados < 1) {
@@ -134,6 +137,17 @@ async function revisarLote(corpo: Record<string, any>, uid: string, marcar: bool
   }
 
   await marcarPendente("exercicios");
+  // UM evento por lote, não um por item: um lote de 96 itens vira 96 linhas
+  // idênticas numa lista de consulta e a torna inútil no dia seguinte. O
+  // conjunto exato continua reconstituível por `detalhe.filtro`. Acima de 50
+  // alvos o módulo trunca o array e preserva a contagem real em `alvosTotal`.
+  await registrar({
+    acao: marcar ? "catalogo.revisar-lote" : "catalogo.desrevisar-lote",
+    ator,
+    origem: ORIGEM,
+    alvos: alvos.map((d): Alvo => ({ colecao: COLECAO, id: d.id })),
+    detalhe: { filtro, aplicados: alvos.length },
+  });
   return json(200, {
     ok: true,
     operacao: marcar ? "revisar-lote" : "desrevisar-lote",
@@ -166,7 +180,8 @@ async function revisarLote(corpo: Record<string, any>, uid: string, marcar: bool
  * comparação usa a mesma dobra da busca: acento e caixa não fazem exercício
  * diferente.
  */
-async function criar(corpo: Record<string, any>, uid: string) {
+async function criar(corpo: Record<string, any>, ator: Ator & { tipo: "humano" }) {
+  const uid = ator.uid;
   const campos = corpo.campos;
   if (!campos || typeof campos !== "object" || Array.isArray(campos)) {
     return json(400, { erro: "campos obrigatório para 'criar'." });
@@ -221,6 +236,13 @@ async function criar(corpo: Record<string, any>, uid: string) {
 
   const ref = await db.collection(COLECAO).add(documento);
   await marcarPendente("exercicios");
+  await registrar({
+    acao: "catalogo.criar",
+    ator,
+    origem: ORIGEM,
+    alvo: { colecao: COLECAO, id: ref.id },
+    detalhe: { revisadoNaCriacao: revisar },
+  });
   return json(201, { ok: true, operacao: "criar", exerciseId: ref.id, revisado: revisar });
 }
 
@@ -239,6 +261,7 @@ export const handler = async (event: any) => {
   if (!idToken) return { statusCode: 401, body: "Unauthorized" };
 
   let uid: string;
+  let ator: Ator & { tipo: "humano" };
   try {
     const decoded = await getAuth(app).verifyIdToken(idToken);
     if (!decoded.admin) return { statusCode: 403, body: "Acesso não autorizado" };
@@ -246,6 +269,11 @@ export const handler = async (event: any) => {
     // bloco por script, com o sentinela 'coach:aprovacao-lote-NN', porque não
     // havia sessão autenticada do Coach em nenhum ponto do fluxo.
     uid = decoded.uid;
+    // O e-mail é gravado NO MOMENTO do evento, e não resolvido na leitura
+    // (DR-09): sem ele o histórico identificaria quem agiu por um uid opaco, e
+    // ler exigiria consultar o console do Firebase item a item. Gravar agora
+    // preserva a identificação ainda que a conta seja renomeada ou removida.
+    ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "admin" };
   } catch {
     return { statusCode: 401, body: "Invalid token" };
   }
@@ -262,9 +290,9 @@ export const handler = async (event: any) => {
   // As que não trabalham sobre um documento existente saem antes da exigência
   // de exerciseId: criar ainda não tem id, e as de lote resolvem o conjunto
   // pelo filtro.
-  if (operacao === "criar") return criar(corpo, uid);
-  if (operacao === "revisar-lote") return revisarLote(corpo, uid, true);
-  if (operacao === "desrevisar-lote") return revisarLote(corpo, uid, false);
+  if (operacao === "criar") return criar(corpo, ator);
+  if (operacao === "revisar-lote") return revisarLote(corpo, ator, true);
+  if (operacao === "desrevisar-lote") return revisarLote(corpo, ator, false);
 
   const SOBRE_UM = ["editar", "revisar", "desrevisar", "arquivar", "desarquivar"];
   if (!SOBRE_UM.includes(operacao)) {
@@ -305,6 +333,15 @@ export const handler = async (event: any) => {
       // propósito, e por isso revisadoPor/revisadoEm não são tocados aqui.
       await ref.update(patch);
       await marcarPendente("exercicios");
+      // Apenas os NOMES dos campos alterados. Gravar os valores colocaria
+      // conteúdo do documento dentro do evento, que DR-04 proíbe.
+      await registrar({
+        acao: "catalogo.editar",
+        ator,
+        origem: ORIGEM,
+        alvo: { colecao: COLECAO, id: exerciseId },
+        detalhe: { campos: chaves },
+      });
 
       return json(200, {
         ok: true,
@@ -336,6 +373,14 @@ export const handler = async (event: any) => {
       }
       await ref.update({ ativo: !arquivando, atualizadoPor: uid, atualizadoEm: agora });
       await marcarPendente("exercicios");
+      // Depois da saída por `jaEstava`: sem gravação não há evento. Registrar um
+      // ato que não alterou nada encheria o histórico de ruído.
+      await registrar({
+        acao: arquivando ? "catalogo.arquivar" : "catalogo.desarquivar",
+        ator,
+        origem: ORIGEM,
+        alvo: { colecao: COLECAO, id: exerciseId },
+      });
       return json(200, { ok: true, operacao, exerciseId, ativo: !arquivando });
     }
 
@@ -351,6 +396,16 @@ export const handler = async (event: any) => {
         atualizadoEm: agora,
       });
       await marcarPendente("exercicios");
+      // O evento de `catalogo.revisar` anterior PERMANECE na coleção — é
+      // exatamente o que o campo revisadoPor perde ao ser zerado acima, e a
+      // razão de esta coleção existir.
+      await registrar({
+        acao: "catalogo.desrevisar",
+        ator,
+        origem: ORIGEM,
+        alvo: { colecao: COLECAO, id: exerciseId },
+        detalhe: { de: "revisado", para: "aguardando" },
+      });
       return json(200, { ok: true, operacao: "desrevisar", exerciseId, revisadoPorAnterior: d.revisadoPor });
     }
 
@@ -380,6 +435,15 @@ export const handler = async (event: any) => {
       // falta conferência. Quem confere, desmarca — pela operação 'editar'.
     });
     await marcarPendente("exercicios");
+    // Depois da saída idempotente por `jaEstavaRevisado`: repetir a revisão não
+    // grava nada, logo não gera evento.
+    await registrar({
+      acao: "catalogo.revisar",
+      ator,
+      origem: ORIGEM,
+      alvo: { colecao: COLECAO, id: exerciseId },
+      detalhe: { de: "aguardando", para: "revisado" },
+    });
 
     return json(200, { ok: true, operacao: "revisar", exerciseId, revisadoPor: uid });
   } catch (e: any) {
