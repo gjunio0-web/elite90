@@ -1302,6 +1302,29 @@ import AdminHeader from '../../components/AdminHeader.astro';
       }
     }
 
+    // ── MENSAGEM DE FALHA DE ACESSO AO FIRESTORE ──
+    // ESPELHA a função de mesmo nome em atletas.astro — não importa de um
+    // módulo compartilhado pelo mesmo motivo de observarLarguraTabela acima:
+    // nem este <script type="module"> nem o <script is:inline> clássico de
+    // atletas.astro resolvem um import relativo de dentro do corpo da
+    // página. Antes desta função, as três aparições desta mensagem (esta
+    // tabela, o card logo abaixo, e a tabela de atletas.astro) eram três
+    // cópias escritas em momentos diferentes: cores (--c-status-alert vs
+    // --c-status-rejected) e até o próprio texto divergiam entre elas.
+    // --c-status-rejected (vermelho) é o token certo aqui — é falha de
+    // permissão, não um aviso brando. Manter as duas cópias em sincronia
+    // se mudar.
+    function mensagemFalhaAcessoHTML(opts) {
+      opts = opts || {};
+      const texto = "[ FALHA DE ACESSO ] Permissão negada ou erro de rede. Verifique as regras do Firestore.";
+      const estilo = "text-align:center;color:var(--c-status-rejected);font-weight:700;padding:24px;";
+      if (opts.formato === "card") {
+        return `<div class="${opts.className || ""}" style="${estilo}">${texto}</div>`;
+      }
+      const classeAttr = opts.className ? ` class="${opts.className}"` : "";
+      return `<tr><td${classeAttr} colspan="${opts.colspan}" style="${estilo}">${texto}</td></tr>`;
+    }
+
     const cfg={apiKey:document.querySelector('meta[name="fb-api"]')?.content,authDomain:document.querySelector('meta[name="fb-auth"]')?.content,projectId:document.querySelector('meta[name="fb-proj"]')?.content,storageBucket:document.querySelector('meta[name="fb-bucket"]')?.content,messagingSenderId:document.querySelector('meta[name="fb-sender"]')?.content,appId:document.querySelector('meta[name="fb-appid"]')?.content};
     const app=initializeApp(cfg);
     const auth=getAuth(app);
@@ -1384,8 +1407,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
         reopenDrawerFromUrl();
       } catch (err) {
         console.error("Erro sistêmico ao carregar fichas:", err);
-        document.getElementById("leads-tbody").innerHTML=`<tr><td class="td" colspan="6" style="text-align:center;color:var(--c-status-alert);font-weight:700;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede. Verifique as regras do Firestore.</td></tr>`;
-        document.getElementById("leads-cards").innerHTML=`<div class="lead-card" style="color:var(--c-status-alert);font-weight:700;text-align:center;">[ FALHA DE ACESSO ] Permissão negada ou erro de rede.</div>`;
+        document.getElementById("leads-tbody").innerHTML = mensagemFalhaAcessoHTML({ colspan: 6, className: "td" });
+        document.getElementById("leads-cards").innerHTML = mensagemFalhaAcessoHTML({ formato: "card", className: "lead-card" });
       }
     }
 
