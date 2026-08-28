@@ -1,4 +1,22 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "rastreabilidade",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ambiente", "order": "ASCENDING" },
+        { "fieldPath": "ocorridoEm", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "rastreabilidade",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "alvo.colecao", "order": "ASCENDING" },
+        { "fieldPath": "alvo.id", "order": "ASCENDING" },
+        { "fieldPath": "ocorridoEm", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

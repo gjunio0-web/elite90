@@ -105,6 +105,17 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ── RASTREABILIDADE (registro imutável de atos) — nenhum acesso direto do
+    // navegador, NEM PARA admin. A escrita é exclusiva de _rastreabilidade.ts
+    // via Admin SDK, que ignora estas regras por ser servidor; a leitura, quando
+    // a tela /admin/rastreabilidade existir, será por função de servidor
+    // dedicada. Abrir leitura direta a admin aqui reintroduziria no navegador
+    // exatamente a superfície que o resto da arquitetura vem removendo — e num
+    // registro cuja razão de existir é não poder ser alterado por quem opera.
+    match /rastreabilidade/{eventoId} {
+      allow read, write: if false;
+    }
+
     // ── Tudo o mais: negado. Explícito, para não depender do padrão.
     match /{document=**} {
       allow read, write: if false;
