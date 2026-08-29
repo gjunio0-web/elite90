@@ -93,7 +93,20 @@ function createConfluentLead(index: number) {
 
   return {
     nome: `${faker.person.firstName('male')} ${faker.person.lastName()} (MOCK #${String(index + 1).padStart(2, '0')})`,
-    email: 'gjunio0@gmail.com',
+    // Sufixo por ficha (subendereçamento com "+"): o Gmail ignora tudo entre o
+    // "+" e o "@" na entrega, então todas continuam chegando na mesma caixa —
+    // mas o Firebase Authentication as trata como endereços DISTINTOS.
+    //
+    // Antes havia aqui um endereço fixo, igual nas 90 fichas. Funcionava para
+    // exercitar a triagem, mas quebrava na PROMOÇÃO: promote-lead resolve a
+    // conta pelo e-mail e grava o atleta em athletes/{uid}. Duas fichas com o
+    // mesmo endereço devolvem o MESMO uid, e a segunda promoção sobrescreve a
+    // primeira em silêncio — um atleta simplesmente some do painel.
+    // Verificado em 28/08/2026 na homologação: duas promoções, um só atleta.
+    //
+    // Isto corrige a HOMOLOGAÇÃO. A guarda de conflito em promote-lead.ts é
+    // item separado de backlog, sobre código de produção.
+    email: `gjunio0+mock${String(index + 1).padStart(2, '0')}@gmail.com`,
     cpf: faker.helpers.replaceSymbols('###.###.###-##'),
     altura: '1.80',
     peso: '85.0',
