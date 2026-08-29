@@ -2337,7 +2337,14 @@ import AdminHeader from '../../components/AdminHeader.astro';
         await loadLeads();
       }catch(e){
         console.error("Erro ao enviar avaliação:",e);
-        statusEl.textContent = e?.message || "Não foi possível enviar a avaliação agora. Tente novamente.";
+        const msg = e?.message || "Não foi possível enviar a avaliação agora. Tente novamente.";
+        // O overlay de confirmação já fechou (linha acima, antes do envio) e o
+        // texto de #eval-status é sempre lima — a mesma cor de sucesso, sem
+        // nenhum destaque de erro. Sem o toast, uma falha aqui parecia
+        // silenciosa: o formulário só reaparecia como se nada tivesse sido
+        // clicado.
+        showToast(msg, "warning");
+        statusEl.textContent = msg;
       }finally{
         btnConfirm.disabled = false;
         btnConfirm.textContent = "Confirmar envio";
