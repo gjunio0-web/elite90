@@ -263,6 +263,14 @@ import AdminHeader from '../../components/AdminHeader.astro';
       text-align: left;
       background: transparent;
       border: none;
+      /* <button> não herda color do ancestral como <div>/<span> herdariam —
+         sem esta linha, cai no preto padrão do navegador. Ficou mascarado
+         até agora porque os dois usos anteriores (status, filtro) sempre
+         tinham um modificador [data-value="..."] cobrindo cada opção; os
+         dropdowns de Fase inicial/Gênero foram os primeiros a expor valores
+         sem modificador de cor. Os seletores [data-value="novo"] etc. abaixo
+         têm especificidade maior e continuam vencendo esta linha. */
+      color: var(--c-textbody);
       font-family: var(--font-label);
       font-size: 0.65rem;
       font-weight: 700;
