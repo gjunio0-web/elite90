@@ -11,6 +11,8 @@
 //     casar com o padrão "(MOCK #NN)" gravado pelo semeador. Atleta só é
 //     candidato se a ficha de origem for uma dessas, ou se o documento tiver
 //     _mockPlan: true. Qualquer outro alvo exige --atleta=<uid> explícito.
+//     Evento de rastreabilidade só é candidato se TODOS os identificadores que
+//     ele referencia estiverem nesse mesmo conjunto.
 //
 // ─────────────────────────────────────────────────────────────────────────────
 // POR QUE ISTO EXISTE, SE JÁ HÁ delete-lead E clean-mock-leads
@@ -31,6 +33,16 @@
 //   2. Ele devolve 409 para ficha com convertedAt — de propósito, porque as
 //      fotos do Dia 1 do atleta são os mesmos arquivos da ficha. Este roteiro
 //      trata o par ficha+atleta em conjunto, na ordem em que o elo permite.
+//
+// ─────────────────────────────────────────────────────────────────────────────
+// ORDEM ENTRE OS ALVOS
+// ─────────────────────────────────────────────────────────────────────────────
+//   rastreabilidade → atletas → leads-mock → storage-seed
+//
+// Fixa no código, independente da ordem em que os alvos forem declarados. Os
+// eventos precisam dos documentos AINDA VIVOS para serem identificados (um
+// evento guarda identificador, não nome); o atleta libera a ficha; a ficha
+// libera as imagens.
 //
 // ─────────────────────────────────────────────────────────────────────────────
 // ORDEM DE REMOÇÃO DO ATLETA, E POR QUE ELA É ESSA
@@ -57,6 +69,7 @@
 // patch-lead-email.js e ativar-planos-mock.js.
 //
 // Uso:
+//   node scripts/limpar-homologacao.mjs --alvo=rastreabilidade
 //   node scripts/limpar-homologacao.mjs --alvo=leads-mock
 //   node scripts/limpar-homologacao.mjs --alvo=atletas
 //   node scripts/limpar-homologacao.mjs --alvo=atletas --atleta=<uid>
@@ -103,7 +116,7 @@ const UIDS_EXPLICITOS = args
   .map((a) => a.slice('--atleta='.length).trim())
   .filter(Boolean);
 
-const ALVOS_VALIDOS = ['leads-mock', 'atletas', 'storage-seed'];
+const ALVOS_VALIDOS = ['rastreabilidade', 'atletas', 'leads-mock', 'storage-seed'];
 
 if (alvos.size === 0) {
   console.error(
@@ -213,10 +226,10 @@ async function apagarSubcolecoes(docRef, trilha = []) {
   return total;
 }
 
-// ── ALVO: atletas ────────────────────────────────────────────────────────────
-async function limparAtletas() {
-  console.log('\n═══ ATLETAS ═══');
-
+/** Atletas elegíveis. Extraído em função própria porque DOIS alvos dependem
+ *  dele — atletas e rastreabilidade —, e critério duplicado é critério que
+ *  diverge na primeira alteração de um dos lados. */
+async function selecionarAtletas() {
   const snap = await db.collection('athletes').get();
   const candidatos = [];
 
@@ -244,12 +257,21 @@ async function limparAtletas() {
     }
   }
 
-  const naoEncontrados = UIDS_EXPLICITOS.filter((uid) => !snap.docs.some((d) => d.id === uid));
+  return { candidatos, total: snap.size, ids: snap.docs.map((d) => d.id) };
+}
+
+// ── ALVO: atletas ────────────────────────────────────────────────────────────
+async function limparAtletas() {
+  console.log('\n═══ ATLETAS ═══');
+
+  const { candidatos, total, ids } = await selecionarAtletas();
+
+  const naoEncontrados = UIDS_EXPLICITOS.filter((uid) => !ids.includes(uid));
   for (const uid of naoEncontrados) {
     console.log(`  ! ${uid} — declarado em --atleta, mas não existe em athletes/. Ignorado.`);
   }
 
-  console.log(`Total na coleção: ${snap.size}. Candidatos: ${candidatos.length}.\n`);
+  console.log(`Total na coleção: ${total}. Candidatos: ${candidatos.length}.\n`);
   if (candidatos.length === 0) return;
 
   for (const { doc, motivo } of candidatos) {
@@ -305,6 +327,111 @@ async function limparAtletas() {
     }
     console.log('');
   }
+}
+
+// ── ALVO: rastreabilidade ────────────────────────────────────────────────────
+// RODA ANTES DE TODOS OS OUTROS, e a razão é a única que importa: um evento se
+// identifica como sintético pelos IDENTIFICADORES que ele referencia. Apagados
+// a ficha e o atleta, não há mais como saber que aquele `atleta.promovido`
+// tratava de um registro fictício — o evento guarda o identificador, não o nome.
+//
+// A seleção NÃO usa `ambiente: 'homologacao'`. Todo evento gravado neste projeto
+// tem esse valor, inclusive os produzidos ao exercitar a própria rastreabilidade
+// — apagar por ele esvaziaria a coleção e destruiria a evidência de que o
+// mecanismo funciona, que é justamente o que a homologação precisa demonstrar.
+//
+// Também NÃO usa `_test`: `registrar` só grava esse campo quando o chamador o
+// declara, e nem promote-lead.ts nem delete-lead.ts o declaram.
+//
+// RELAÇÃO COM DR-08. A política da coleção manda preservar o evento cujo alvo já
+// foi expurgado — o registro de que uma exclusão ocorreu não pode desaparecer
+// junto com o que foi excluído. Isso vale para dado de pessoa real. Aqui não há
+// pessoa: são registros de operação sobre fichas geradas por script, e a decisão
+// de removê-los junto é do responsável pelo produto (28/08/2026). Este alvo é a
+// exceção declarada, não uma reinterpretação da política.
+async function limparRastreabilidade() {
+  console.log('\n═══ EVENTOS DE RASTREABILIDADE ═══');
+
+  // 1. Conjunto de identificadores sintéticos, montado ANTES de qualquer
+  //    remoção, pelos mesmos critérios dos outros dois alvos.
+  const leadsSnap = await db.collection('leads').get();
+  const leadsMock = leadsSnap.docs.filter((d) => PADRAO_MOCK.test(String(d.data().nome ?? '')));
+  const { candidatos: atletasMock } = await selecionarAtletas();
+
+  const sinteticos = new Set();
+  leadsMock.forEach((d) => sinteticos.add(d.id));
+  atletasMock.forEach(({ doc }) => sinteticos.add(doc.id));
+
+  // Avaliações vinculadas: delete-lead.ts as inclui como alvos do evento
+  // `lead.excluido`, então elas precisam constar do conjunto para que esse
+  // evento não seja classificado como misto.
+  for (const d of leadsMock) {
+    const av = await db.collection('avaliacoes').where('leadId', '==', d.id).get();
+    av.docs.forEach((a) => sinteticos.add(a.id));
+  }
+
+  console.log(`Identificadores sintéticos reunidos: ${sinteticos.size}`);
+  console.log(`  (${leadsMock.length} ficha(s), ${atletasMock.length} atleta(s), demais são avaliações)`);
+
+  if (sinteticos.size === 0) {
+    console.log(
+      '\n  Nenhum registro sintético encontrado em leads/ nem athletes/.\n' +
+      '  Se a limpeza dos outros alvos já foi executada, a identificação dos\n' +
+      '  eventos correspondentes NÃO É MAIS POSSÍVEL por este caminho: o evento\n' +
+      '  guarda o identificador do documento, e o documento já não existe para\n' +
+      '  dizer que era fictício. Este alvo precisa rodar ANTES dos demais.'
+    );
+    return;
+  }
+
+  // 2. Classificação dos eventos. Leitura integral e filtro em memória: não há
+  //    consulta de igualdade sobre elemento de array de mapas que sirva aqui, e
+  //    a coleção é pequena neste ambiente.
+  const snap = await db.collection('rastreabilidade').get();
+  const alvo = [];
+  const mistos = [];
+
+  for (const doc of snap.docs) {
+    const e = doc.data();
+    const refs = [];
+    if (e.alvo?.id) refs.push(e.alvo);
+    if (Array.isArray(e.alvos)) e.alvos.forEach((a) => a?.id && refs.push(a));
+    if (refs.length === 0) continue; // evento sem alvo não é atribuível a nada
+
+    const dentro = refs.filter((r) => sinteticos.has(String(r.id)));
+    if (dentro.length === 0) continue;
+
+    // Truncamento de lote (DR-10): com `alvosTotal` presente, o array gravado é
+    // PARCIAL, e nada se pode concluir sobre os alvos que ficaram de fora. Vai
+    // para conferência manual antes de qualquer outra classificação — a
+    // verificação precisa vir primeiro, ou o evento seria classificado pelo que
+    // se vê dele, que é justamente o que não basta aqui.
+    if (e.alvosTotal) { mistos.push({ doc, e }); continue; }
+
+    // Evento que mistura sintético e não-sintético NÃO é apagado. Não deveria
+    // ocorrer — os alvos de um evento vêm sempre do mesmo ato —, mas a hipótese
+    // custa uma linha e o erro custaria um registro legítimo.
+    if (dentro.length === refs.length) alvo.push({ doc, e });
+    else mistos.push({ doc, e });
+  }
+
+  console.log(`\nEventos na coleção: ${snap.size}. A apagar: ${alvo.length}.`);
+
+  const porAcao = {};
+  alvo.forEach(({ e }) => { porAcao[e.acao] = (porAcao[e.acao] ?? 0) + 1; });
+  Object.entries(porAcao).forEach(([acao, n]) => console.log(`    ${acao}: ${n}`));
+
+  if (mistos.length > 0) {
+    console.log(
+      `\n  ${mistos.length} evento(s) MANTIDO(S) por referenciarem também registros\n` +
+      '  não-sintéticos, ou por terem lista de alvos truncada. Conferir um a um:'
+    );
+    mistos.forEach(({ doc, e }) => console.log(`    - ${doc.id} (${e.acao}, origem ${e.origem})`));
+  }
+
+  if (alvo.length === 0) return;
+  console.log(seco(`\napagar ${alvo.length} evento(s)`));
+  await apagarEmLotes(alvo.map(({ doc }) => doc.ref));
 }
 
 // ── ALVO: leads-mock ─────────────────────────────────────────────────────────
@@ -414,8 +541,10 @@ async function main() {
   console.log(`Alvos:    ${[...alvos].join(', ')}`);
   console.log(COMMIT ? 'Modo:     GRAVAÇÃO (--commit)' : 'Modo:     ENSAIO EM SECO (nada é apagado; use --commit)');
 
-  // Ordem fixa, independente da ordem dos argumentos: o atleta libera a ficha,
-  // e a ficha libera as imagens.
+  // Ordem fixa, independente da ordem dos argumentos: os eventos precisam dos
+  // documentos vivos para serem identificados, o atleta libera a ficha, e a
+  // ficha libera as imagens.
+  if (alvos.has('rastreabilidade')) await limparRastreabilidade();
   if (alvos.has('atletas')) await limparAtletas();
   if (alvos.has('leads-mock')) await limparLeadsMock();
   if (alvos.has('storage-seed')) await limparStorageSeed();
