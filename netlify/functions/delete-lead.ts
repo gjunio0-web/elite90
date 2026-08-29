@@ -9,6 +9,7 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { getApp, storageBucketName } from "./_firebase";
+import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 
 
 export const handler = async (event: any) => {
@@ -21,9 +22,14 @@ export const handler = async (event: any) => {
   const authHeader = event.headers["authorization"] ?? "";
   const idToken = authHeader.replace("Bearer ", "").trim();
   if (!idToken) return { statusCode: 401, body: "Unauthorized" };
+  let ator: Ator & { tipo: "humano" };
   try {
     const decoded = await getAuth(app).verifyIdToken(idToken);
     if (!decoded.admin) return { statusCode: 403, body: "Acesso não autorizado" };
+    // Até aqui o token era verificado e descartado. A exclusão de ficha é ato
+    // irreversível sobre dados de uma pessoa real, e era justamente o ato de que
+    // menos restava registro: apagado o documento, nada dizia quem o apagou.
+    ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "admin" };
   } catch {
     return { statusCode: 401, body: "Invalid token" };
   }
@@ -90,6 +96,8 @@ export const handler = async (event: any) => {
       .where("leadId", "==", leadId)
       .get();
 
+    const avaliacoesIds = avaliacoesSnap.docs.map((d) => d.id);
+
     if (!avaliacoesSnap.empty) {
       const lote = db.batch();
       avaliacoesSnap.docs.forEach((d) => lote.delete(d.ref));
@@ -101,6 +109,31 @@ export const handler = async (event: any) => {
     if (storageErrors.length > 0) {
       console.warn("[delete-lead] Fotos não removidas do Storage:", storageErrors);
     }
+
+    // O evento sobrevive à ficha, e é por isso que ele existe: apagado o
+    // documento, este registro é a única coisa que ainda diz que a exclusão
+    // ocorreu e quem a pediu. Guarda apenas identificadores e contagens — nome,
+    // e-mail, fotos e texto de avaliação estão fora por DR-04, e é o que permite
+    // o evento permanecer sem contrariar o próprio pedido de exclusão.
+    //
+    // `parcial` cobre falha REAL de remoção no Storage. Arquivo já ausente
+    // (404/204) não entra em storageErrors por decisão do próprio fluxo acima —
+    // não é falha, é o estado desejado alcançado por outro caminho.
+    await registrar({
+      acao: "lead.excluido",
+      ator,
+      origem: "delete-lead",
+      alvos: [
+        { colecao: "leads", id: leadId } as Alvo,
+        ...avaliacoesIds.map((id): Alvo => ({ colecao: "avaliacoes", id })),
+      ],
+      detalhe: {
+        avaliacoesRemovidas: avaliacoesSnap.size,
+        arquivosRemovidos: fotosPaths.length - storageErrors.length,
+        arquivosFalhados: storageErrors.length,
+      },
+      resultado: storageErrors.length > 0 ? "parcial" : "ok",
+    });
 
     return {
       statusCode: 200,

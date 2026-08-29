@@ -27,6 +27,7 @@ import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header"
 
 // @ts-ignore — módulo CommonJS compartilhado com scripts/emulate-fn08.js
 import athleteContract from "./_athlete-from-lead.js";
+import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 const { athleteFromLead } = athleteContract as any;
 
 const FASES_VALIDAS = ["Bulking", "Cutting", "Diet Break"];
@@ -131,6 +132,12 @@ export const handler = async (event: any) => {
   if (caller.admin !== true) {
     return { statusCode: 403, body: JSON.stringify({ error: "Ação restrita ao administrador." }) };
   }
+  const ator: Ator & { tipo: "humano" } = {
+    tipo: "humano",
+    uid: caller.uid,
+    email: caller.email ?? null,
+    papel: "admin",
+  };
 
   try {
     const body = JSON.parse(event.body ?? "{}");
@@ -185,6 +192,10 @@ export const handler = async (event: any) => {
     const auth = getAuth(app);
     const emailNorm = String(lead.email).trim().toLowerCase();
     let uid: string;
+    // Distingue promoção que CRIOU conta de promoção sobre conta que já existia
+    // — são situações diferentes de suporte, e o documento do atleta não guarda
+    // essa diferença em lugar nenhum.
+    let contaCriada = false;
     try {
       uid = (await auth.getUserByEmail(emailNorm)).uid;
     } catch {
@@ -197,6 +208,7 @@ export const handler = async (event: any) => {
         password: `E90-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`,
       });
       uid = criada.uid;
+      contaCriada = true;
     }
 
     // Preserva claims existentes — a conta pode já ter outro papel.
@@ -243,6 +255,20 @@ export const handler = async (event: any) => {
       convertedAthleteUid: uid,
       convertedBy:         caller.uid,
       convertedByEmail:    caller.email ?? null,
+    });
+
+    // A promoção está consumada aqui: a conta existe, o documento do atleta foi
+    // gravado e o elo na ficha foi fechado. O e-mail de boas-vindas vem depois e
+    // é não-fatal por decisão do próprio fluxo, então não faz parte deste ato.
+    await registrar({
+      acao: "atleta.promovido",
+      ator,
+      origem: "promote-lead",
+      alvos: [
+        { colecao: "leads", id: leadId } as Alvo,
+        { colecao: "athletes", id: uid } as Alvo,
+      ],
+      detalhe: { contaCriada },
     });
 
     // -- E-mail de boas-vindas (opcional, escolha do Coach no modal) --
