@@ -1771,15 +1771,59 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <a class="btn-sm btn-outline" href="/admin/atletas" style="display:block;text-align:center;text-decoration:none;">Ver no acompanhamento</a>
         </div>`;
       } else if (aptoParaPromover) {
-        const nota = lead.status === "avaliacao_enviada"
-          ? "Ficha aprovada e avaliação enviada. A promoção cria a conta de acesso do atleta e inicia o ciclo de 90 dias."
-          : "Ficha aprovada. A promoção pode ser feita mesmo antes do envio da avaliação — cria a conta de acesso e inicia o ciclo de 90 dias.";
-        promotionSection = `<div class="detail-section">
-          <div class="detail-section__title detail-section__title--promote">Entrada no programa</div>
-          <p class="promotion-note">${nota}</p>
-          <a class="guide-inline" href="/admin/guia?from=%2Fadmin%2Ffichas&lead=${id}&drawer=detail#promocao" target="_blank" rel="noopener">O que acontece ao promover</a>
-          <button class="btn-sm btn-outline" id="btn-promote-lead" style="width:100%;">Promover a atleta</button>
-        </div>`;
+        // -- Colisão de e-mail: detectada ANTES de abrir o modal --
+        // O Firebase Authentication não admite duas contas com o mesmo e-mail, e
+        // promote-lead reaproveita a conta existente. Duas fichas com o mesmo
+        // endereço gravariam o mesmo athletes/{uid} — a segunda promoção
+        // sobrescreve a primeira. A guarda no servidor (promote-lead.ts) recusa
+        // isso e é a que garante; ESTA aqui é conveniência: evita que o Coach
+        // preencha data e fase para receber a recusa só no fim.
+        //
+        // Detecta sem leitura nova: as fichas já estão todas em memória, e
+        // `convertedAt` marca as que viraram atleta. Não consulta a coleção
+        // athletes — o que também dispensa mexer nas regras de segurança, já
+        // que esta tela não a lê.
+        //
+        // Normaliza igual ao servidor (trim + minúsculas), senão duas grafias
+        // do mesmo endereço passariam despercebidas aqui e seriam barradas lá.
+        const normEmail = (v) => String(v ?? "").trim().toLowerCase();
+        const emailAtual = normEmail(lead.email);
+        const ocupante = emailAtual
+          ? leads.find(l => l.id !== id && l.convertedAt && normEmail(l.email) === emailAtual)
+          : null;
+
+        if (ocupante) {
+          // Escape local: esta tela interpola nome sem escapar em outros pontos,
+          // e aqui o valor vem de OUTRA ficha — não repetir o padrão frouxo.
+          const escHtml = (s) => String(s ?? "").replace(/[&<>"']/g, c => (
+            { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+          ));
+          const nomeOcupante = escHtml(ocupante.nome || "outro atleta");
+          const quandoOcupante = ocupante.convertedAt?.toDate?.()?.toLocaleDateString("pt-BR") ?? "--";
+          promotionSection = `<div class="detail-section">
+            <div class="detail-section__title detail-section__title--promote">Entrada no programa</div>
+            <p class="promotion-note" style="color:var(--c-pending);font-weight:700;">Não é possível promover esta ficha.</p>
+            <p class="promotion-note">
+              O e-mail informado já pertence ao atleta <strong>${nomeOcupante}</strong>, promovido em ${quandoOcupante}.
+              Cada atleta precisa de endereço próprio para acessar o programa.
+            </p>
+            <p class="promotion-note">
+              Peça ao candidato que preencha uma ficha nova com endereço exclusivo —
+              esta ficha permanece registrada como está.
+            </p>
+            <button class="btn-sm btn-outline" id="btn-promote-lead" style="width:100%;" disabled title="E-mail já usado por outro atleta">Promover a atleta</button>
+          </div>`;
+        } else {
+          const nota = lead.status === "avaliacao_enviada"
+            ? "Ficha aprovada e avaliação enviada. A promoção cria a conta de acesso do atleta e inicia o ciclo de 90 dias."
+            : "Ficha aprovada. A promoção pode ser feita mesmo antes do envio da avaliação — cria a conta de acesso e inicia o ciclo de 90 dias.";
+          promotionSection = `<div class="detail-section">
+            <div class="detail-section__title detail-section__title--promote">Entrada no programa</div>
+            <p class="promotion-note">${nota}</p>
+            <a class="guide-inline" href="/admin/guia?from=%2Fadmin%2Ffichas&lead=${id}&drawer=detail#promocao" target="_blank" rel="noopener">O que acontece ao promover</a>
+            <button class="btn-sm btn-outline" id="btn-promote-lead" style="width:100%;">Promover a atleta</button>
+          </div>`;
+        }
       }
 
       const privacySection=`<div class="detail-section detail-section--danger">
