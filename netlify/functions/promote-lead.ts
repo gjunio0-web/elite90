@@ -211,6 +211,51 @@ export const handler = async (event: any) => {
       contaCriada = true;
     }
 
+    // -- Guarda de colisão de e-mail --
+    // Simétrica à guarda de idempotência acima: aquela pergunta "esta FICHA já
+    // virou atleta?"; esta pergunta "esta CONTA já é de outro atleta?".
+    //
+    // O Firebase Authentication não admite duas contas com o mesmo e-mail, e a
+    // resolução acima REAPROVEITA a conta existente. Sem esta guarda, promover
+    // duas fichas com o mesmo endereço grava as duas em athletes/{mesmo uid} —
+    // e o `set(..., { merge: true })` lá embaixo sobrescreve a primeira EM
+    // SILÊNCIO. O atleta anterior some do painel sem erro, sem aviso, sem
+    // registro. Verificado na homologação em 28/08/2026: duas promoções, um
+    // único atleta, com nome e startDate do segundo.
+    //
+    // Regra de produto (decisão de 28/08/2026): cada atleta tem e-mail próprio,
+    // obrigatoriamente. Endereço já usado por outro atleta = recusa, não fusão.
+    // O e-mail vem do candidato e não é editável no painel: a saída é o
+    // candidato preencher ficha nova com endereço exclusivo, e a mensagem abaixo
+    // precisa dizer isso — recusar sem indicar caminho deixa o Coach travado.
+    //
+    // `originLeadId` distingue os dois casos: mesma ficha (repromoção após o
+    // atleta ter sido excluído — segue adiante, é o caso órfão que a guarda de
+    // idempotência já libera) de ficha diferente (colisão — recusa).
+    if (!contaCriada) {
+      const ocupanteSnap = await db.collection("athletes").doc(uid).get();
+      if (ocupanteSnap.exists) {
+        const ocupante = ocupanteSnap.data() ?? {};
+        if (ocupante.originLeadId && ocupante.originLeadId !== leadId) {
+          const nomeOcupante = String(ocupante.name ?? "").trim() || "outro atleta";
+          return {
+            statusCode: 409,
+            body: JSON.stringify({
+              error:
+                `O e-mail desta ficha já pertence ao atleta ${nomeOcupante}. ` +
+                "Cada atleta precisa de endereço próprio para acessar o programa. " +
+                "Peça ao candidato que preencha uma ficha nova com endereço exclusivo — " +
+                "esta ficha permanece registrada como está.",
+              reason: "email-em-uso",
+              athleteUid: uid,
+              athleteName: nomeOcupante,
+              originLeadId: ocupante.originLeadId,
+            }),
+          };
+        }
+      }
+    }
+
     // Preserva claims existentes — a conta pode já ter outro papel.
     const claimsAtuais = (await auth.getUser(uid)).customClaims ?? {};
     await auth.setCustomUserClaims(uid, { ...claimsAtuais, athlete: true });
