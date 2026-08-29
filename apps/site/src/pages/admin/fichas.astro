@@ -1175,6 +1175,19 @@ import AdminHeader from '../../components/AdminHeader.astro';
         </select>
       </div>
 
+      <div class="promote-field">
+        <label for="promote-genero">Gênero</label>
+        <!-- Vocabulário fechado, não texto livre: alguns casos de uso de IA
+             (ainda a construir) vão ler este campo direto de athletes/{uid},
+             e uma string arbitrária não daria a mesma garantia que um
+             enum de três valores dá a um prompt. -->
+        <select id="promote-genero">
+          <option value="masculino" selected>Masculino</option>
+          <option value="feminino">Feminino</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+
       <label class="promote-check">
         <input type="checkbox" id="promote-welcome" checked />
         <span>Enviar e-mail de boas-vindas ao atleta</span>
@@ -2006,6 +2019,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       document.getElementById("promote-start").value =
         `${String(hoje.getDate()).padStart(2,"0")}/${String(hoje.getMonth()+1).padStart(2,"0")}/${hoje.getFullYear()}`;
       document.getElementById("promote-phase").value = "Bulking";
+      document.getElementById("promote-genero").value = "masculino";
       document.getElementById("promote-welcome").checked = true;
       const errEl = document.getElementById("promote-error");
       errEl.hidden = true; errEl.textContent = "";
@@ -2094,6 +2108,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const msgData = erroDeData(startDate);
       if (msgData) { errEl.textContent = msgData; errEl.hidden = false; return; }
       const phase = document.getElementById("promote-phase").value;
+      const genero = document.getElementById("promote-genero").value;
       const sendWelcome = document.getElementById("promote-welcome").checked;
 
       errEl.hidden = true;
@@ -2103,7 +2118,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         const res = await fetch("/.netlify/functions/promote-lead", {
           method: "POST",
           headers: { "content-type": "application/json", "Authorization": `Bearer ${token}` },
-          body: JSON.stringify({ leadId: currentDetailLeadId, startDate, phase, sendWelcome }),
+          body: JSON.stringify({ leadId: currentDetailLeadId, startDate, phase, genero, sendWelcome }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error ?? "Não foi possível promover agora.");

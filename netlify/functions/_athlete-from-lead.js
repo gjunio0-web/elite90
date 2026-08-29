@@ -164,6 +164,10 @@ function athleteFromLead(lead, avaliacao, opts = {}) {
     // Coach Fernando se esta semântica é a adequada antes de usar em produção.
     status: opts.status || 'awaiting_checkin',
     startDate,                                              // DD/MM/YYYY
+    // Vocabulário fechado ('masculino'|'feminino'|'outro'), validado por quem
+    // chama (promote-lead.ts) — este contrato só grava o que recebe. Existe
+    // para casos de uso de IA que ainda serão construídos sobre este campo.
+    genero: opts.genero || null,
 
     // -- Progressão de ciclo (lista + Visão Geral) --
     week:  1,                                               // semana 1 de 13

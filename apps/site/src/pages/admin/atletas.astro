@@ -1262,6 +1262,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
             <span class="drawer-value" id="profile-age">—</span>
           </div>
           <div class="drawer-row">
+            <span class="drawer-label">Gênero</span>
+            <span class="drawer-value" id="profile-genero">—</span>
+          </div>
+          <div class="drawer-row">
             <span class="drawer-label">Altura</span>
             <span class="drawer-value" id="profile-height">—</span>
           </div>
@@ -2648,13 +2652,18 @@ import AdminHeader from '../../components/AdminHeader.astro';
       // Perfil do Atleta
       const profileStart  = document.getElementById('profile-start');
       const profileAge    = document.getElementById('profile-age');
+      const profileGenero = document.getElementById('profile-genero');
       const profileHeight = document.getElementById('profile-height');
       const profileYears  = document.getElementById('profile-years');
       const profileFreq   = document.getElementById('profile-freq');
       const profileDur    = document.getElementById('profile-duration');
       const profileGoal   = document.getElementById('profile-goal');
+      // Vocabulário fechado gravado em minúsculas (promote-lead.ts); rótulo de
+      // exibição mapeado aqui, não invertido na gravação.
+      const GENERO_LABEL = { masculino: 'Masculino', feminino: 'Feminino', outro: 'Outro' };
       if (profileStart)  profileStart.textContent  = athlete.startDate || '—';
       if (profileAge)    profileAge.textContent    = athlete.age    ? `${athlete.age} anos`    : '—';
+      if (profileGenero) profileGenero.textContent = GENERO_LABEL[athlete.genero] || '—';
       if (profileHeight) profileHeight.textContent = athlete.height  || '—';
       if (profileYears)  profileYears.textContent  = athlete.years_active ? `${athlete.years_active} anos` : '—';
       if (profileFreq)   profileFreq.textContent   = athlete.freq    || '—';

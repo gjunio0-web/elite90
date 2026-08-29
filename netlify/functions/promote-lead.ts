@@ -31,6 +31,12 @@ import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 const { athleteFromLead } = athleteContract as any;
 
 const FASES_VALIDAS = ["Bulking", "Cutting", "Diet Break"];
+// Vocabulário fechado, não texto livre: alguns casos de uso de IA (ainda a
+// construir) vão ler athletes/{uid}.genero direto, e um enum de três valores
+// dá a esses prompts uma garantia que uma string arbitrária não daria.
+// Sem valor de reserva (ao contrário de FASES_VALIDAS acima) — é o que torna
+// o campo de fato obrigatório: ausente ou fora do vocabulário, recusa.
+const GENEROS_VALIDOS = ["masculino", "feminino", "outro"];
 
 /** Valida DD/MM/AAAA e confirma que a data existe (rejeita 31/02/2026). */
 function isValidBrDate(s: string): boolean {
@@ -144,6 +150,7 @@ export const handler = async (event: any) => {
     const leadId: string    = String(body.leadId ?? "").trim();
     const startDate: string = String(body.startDate ?? "").trim();
     const phase: string     = String(body.phase ?? "Bulking").trim();
+    const genero: string    = String(body.genero ?? "").trim();
     const sendWelcome: boolean = body.sendWelcome !== false;
 
     if (!leadId) {
@@ -154,6 +161,9 @@ export const handler = async (event: any) => {
     }
     if (!FASES_VALIDAS.includes(phase)) {
       return { statusCode: 400, body: JSON.stringify({ error: `Fase deve ser uma de: ${FASES_VALIDAS.join(", ")}.` }) };
+    }
+    if (!GENEROS_VALIDOS.includes(genero)) {
+      return { statusCode: 400, body: JSON.stringify({ error: `Gênero deve ser um de: ${GENEROS_VALIDOS.join(", ")}.` }) };
     }
 
     const db = getFirestore();
@@ -266,6 +276,7 @@ export const handler = async (event: any) => {
       leadId,
       startDate,
       phase,
+      genero,
       test: lead._test === true,
     });
     // Fotos do Dia 1 = as mesmas enviadas na ficha de triagem (decisão 15/08/2026).
