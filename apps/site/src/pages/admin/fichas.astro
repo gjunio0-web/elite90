@@ -890,6 +890,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
       color: var(--c-white); font-family: var(--font-body);
       font-size: 0.85rem; padding: 9px 11px;
     }
+    .promote-field button.promote-dropdown-trigger {
+      width: 100%; background: var(--c-darkbg);
+      border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card);
+      color: var(--c-white); font-family: var(--font-body);
+      font-size: 0.85rem; padding: 9px 32px 9px 11px;
+      text-align: left; cursor: pointer;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23C7C7C7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+    }
     .promote-check {
       display: flex; align-items: flex-start; gap: 9px;
       font-family: var(--font-body); font-size: 0.8rem;
@@ -1168,11 +1177,14 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
       <div class="promote-field">
         <label for="promote-phase">Fase inicial</label>
-        <select id="promote-phase">
-          <option value="Bulking" selected>Bulking</option>
-          <option value="Cutting">Cutting</option>
-          <option value="Diet Break">Diet Break</option>
-        </select>
+        <!-- Botão-gatilho, não <select> nativo: a lista aberta de um select
+             é desenhada pelo sistema operacional, fora do alcance do CSS da
+             página (mesmo problema já resolvido para o status da ficha nos
+             cards mobile — ver DROPDOWN DE STATUS CUSTOMIZADO mais abaixo).
+             O valor de fato fica em data-value; o texto visível é só o
+             rótulo. Sem :hover próprio — reaproveita .promote-field button
+             abaixo. -->
+        <button type="button" class="promote-dropdown-trigger" id="promote-phase" data-value="Bulking">Bulking</button>
       </div>
 
       <div class="promote-field">
@@ -1180,12 +1192,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
         <!-- Vocabulário fechado, não texto livre: alguns casos de uso de IA
              (ainda a construir) vão ler este campo direto de athletes/{uid},
              e uma string arbitrária não daria a mesma garantia que um
-             enum de três valores dá a um prompt. -->
-        <select id="promote-genero">
-          <option value="masculino" selected>Masculino</option>
-          <option value="feminino">Feminino</option>
-          <option value="outro">Outro</option>
-        </select>
+             enum de três valores dá a um prompt. Mesmo padrão de gatilho
+             customizado do campo "Fase inicial" acima. -->
+        <button type="button" class="promote-dropdown-trigger" id="promote-genero" data-value="masculino">Masculino</button>
       </div>
 
       <label class="promote-check">
@@ -2008,6 +2017,54 @@ import AdminHeader from '../../components/AdminHeader.astro';
       }
     });
 
+    // ── Dropdowns customizados do modal de promoção (Fase inicial / Gênero) ──
+    // Mesma razão do DROPDOWN DE STATUS CUSTOMIZADO mais abaixo: um <select>
+    // nativo só permite estilizar o estado fechado, a lista aberta é
+    // desenhada pelo sistema operacional. Diferente do status, este modal
+    // nunca teve variante mobile/desktop separada — um gatilho só serve para
+    // as duas telas. __createMenu/__positionMenu são definidas mais abaixo
+    // neste mesmo <script>, mas por serem `function` são hoisted: podem ser
+    // chamadas aqui em cima sem problema de ordem.
+    const __promoDropdowns = [];
+    function __fecharPromoDropdowns() { __promoDropdowns.forEach(m => { m.hidden = true; }); }
+
+    function criarDropdownPromocao(triggerId, itens) {
+      const trigger = document.getElementById(triggerId);
+      const menu = __createMenu(itens);
+      __promoDropdowns.push(menu);
+      const rotulo = (v) => itens.find(i => i.value === v)?.label ?? v;
+
+      function definir(v) {
+        trigger.dataset.value = v;
+        trigger.textContent = rotulo(v);
+      }
+      trigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const abrir = menu.hidden;
+        __fecharPromoDropdowns();
+        if (abrir) __positionMenu(menu, trigger);
+      });
+      menu.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const opt = e.target.closest("button[data-value]");
+        if (opt) definir(opt.dataset.value);
+        menu.hidden = true;
+      });
+      return { reset: definir };
+    }
+
+    const __promoFase = criarDropdownPromocao("promote-phase", [
+      { value: "Bulking",    label: "Bulking" },
+      { value: "Cutting",    label: "Cutting" },
+      { value: "Diet Break", label: "Diet Break" },
+    ]);
+    const __promoGenero = criarDropdownPromocao("promote-genero", [
+      { value: "masculino", label: "Masculino" },
+      { value: "feminino",  label: "Feminino" },
+      { value: "outro",     label: "Outro" },
+    ]);
+    document.addEventListener("click", () => __fecharPromoDropdowns());
+
     // ── Promoção a atleta (ADM-04c1 → promote-lead) ──
     // O botão é injetado via innerHTML na gaveta, por isso o listener é delegado.
     document.getElementById("detail-content")?.addEventListener("click", e => {
@@ -2018,8 +2075,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const hoje = new Date();
       document.getElementById("promote-start").value =
         `${String(hoje.getDate()).padStart(2,"0")}/${String(hoje.getMonth()+1).padStart(2,"0")}/${hoje.getFullYear()}`;
-      document.getElementById("promote-phase").value = "Bulking";
-      document.getElementById("promote-genero").value = "masculino";
+      __promoFase.reset("Bulking");
+      __promoGenero.reset("masculino");
       document.getElementById("promote-welcome").checked = true;
       const errEl = document.getElementById("promote-error");
       errEl.hidden = true; errEl.textContent = "";
@@ -2107,8 +2164,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const startDate = document.getElementById("promote-start").value.trim();
       const msgData = erroDeData(startDate);
       if (msgData) { errEl.textContent = msgData; errEl.hidden = false; return; }
-      const phase = document.getElementById("promote-phase").value;
-      const genero = document.getElementById("promote-genero").value;
+      const phase = document.getElementById("promote-phase").dataset.value;
+      const genero = document.getElementById("promote-genero").dataset.value;
       const sendWelcome = document.getElementById("promote-welcome").checked;
 
       errEl.hidden = true;
