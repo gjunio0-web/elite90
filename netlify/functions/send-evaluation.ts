@@ -8,6 +8,7 @@ import { getApp, getDb } from "./_firebase";
 import { randomBytes } from "crypto";
 import { sendMail } from "./_mailer";
 import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header";
+import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 
 
 function buildEvaluationEmail(
@@ -119,9 +120,11 @@ export const handler = async (event: any) => {
   const authHeader = event.headers["authorization"] ?? "";
   const idToken = authHeader.replace("Bearer ", "").trim();
   if (!idToken) return { statusCode: 401, body: "Unauthorized" };
+  let ator: Ator & { tipo: "humano" };
   try {
     const decoded = await getAuth(getApp()).verifyIdToken(idToken);
     if (!decoded.admin) return { statusCode: 403, body: "Acesso não autorizado" };
+    ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "admin" };
   } catch {
     return { statusCode: 401, body: "Invalid token" };
   }
@@ -168,7 +171,7 @@ export const handler = async (event: any) => {
 
     // Firestore writes only reach here if Resend accepted the email.
     const ninetyDaysFromNow = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
-    await db.collection("avaliacoes").add({
+    const avaliacaoRef = await db.collection("avaliacoes").add({
       leadId,
       nome: lead.nome,
       email: lead.email,
@@ -191,6 +194,21 @@ export const handler = async (event: any) => {
       avaliacao_enviada: true,
       avaliacao_token: token,
       updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    // Ato com efeito EXTERNO: quando chegamos aqui um e-mail já saiu para o
+    // candidato. O token NÃO entra no evento — ele abre /avaliacao/{token},
+    // página pública sem autenticação, e replicá-lo aqui criaria uma segunda via
+    // do acesso, fora do alcance do expurgo que apaga a avaliação.
+    await registrar({
+      acao: "avaliacao.enviada",
+      ator,
+      origem: "send-evaluation",
+      alvos: [
+        { colecao: "leads", id: leadId } as Alvo,
+        { colecao: "avaliacoes", id: avaliacaoRef.id } as Alvo,
+      ],
+      detalhe: { idioma },
     });
 
     return {

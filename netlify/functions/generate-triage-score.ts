@@ -8,6 +8,7 @@ import { getAuth } from "firebase-admin/auth";
 import { FieldValue } from "firebase-admin/firestore";
 import { getApp, getDb } from "./_firebase";
 import { calcularScoreBase, ajusteIA, classificarPrioridade } from "./_scoring";
+import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 
 
 export const handler = async (event: any) => {
@@ -25,6 +26,10 @@ export const handler = async (event: any) => {
   // nao vazio passava como chamada interna e contornava a checagem de admin.
   const isInternalCall = functionSecret.length > 0 && callerSecret === functionSecret;
 
+  // Dois atores possíveis nesta função, e o evento precisa distingui-los: a
+  // chamada interna por segredo compartilhado não tem sessão humana nenhuma.
+  let ator: Ator = { tipo: "sistema", processo: "chamada-interna" };
+
   if (!isInternalCall) {
     const authHeader = event.headers["authorization"] ?? "";
     const idToken = authHeader.replace("Bearer ", "").trim();
@@ -32,6 +37,7 @@ export const handler = async (event: any) => {
     try {
       const decoded = await getAuth(getApp()).verifyIdToken(idToken);
       if (!decoded.admin) return { statusCode: 403, body: "Acesso não autorizado" };
+      ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "admin" };
     } catch {
       return { statusCode: 401, body: "Invalid token" };
     }
@@ -58,6 +64,17 @@ export const handler = async (event: any) => {
       score_flags:         flags,
       score_justificativa: justificativa,
       score_gerado_em:     FieldValue.serverTimestamp(),
+    });
+
+    // A nota e a prioridade entram; a justificativa gerada pelo modelo NÃO —
+    // ela é texto corrido sobre condições declaradas na anamnese, e DR-04 a
+    // mantém fora do evento.
+    await registrar({
+      acao: "lead.pontuado",
+      ator,
+      origem: "generate-triage-score",
+      alvo: { colecao: "leads", id: leadId },
+      detalhe: { pontuacao: scoreFinal, prioridade },
     });
 
     return {

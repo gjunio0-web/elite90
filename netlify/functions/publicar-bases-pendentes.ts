@@ -36,6 +36,7 @@
 
 import { Timestamp } from "firebase-admin/firestore";
 import { getDb } from "./_firebase";
+import { registrar, type Alvo } from "./_rastreabilidade";
 
 const COLECAO = "_publicacao";
 
@@ -102,6 +103,20 @@ export const handler = async () => {
       marcadas.push(id);
     });
   }));
+
+  // Um POST cobre todas as bases devidas, então um evento cobre a rodada.
+  // `devidas` e `confirmadas` divergem quando uma base foi alterada de novo
+  // entre a captura e a transação — divergência é informação, não defeito, e
+  // por isso as duas contagens entram.
+  if (marcadas.length > 0) {
+    await registrar({
+      acao: "base.publicada",
+      ator: { tipo: "sistema", processo: "publicar-bases-pendentes" },
+      origem: "publicar-bases-pendentes",
+      alvos: marcadas.map((id): Alvo => ({ colecao: "_publicacao", id })),
+      detalhe: { devidas: devidas.length, confirmadas: marcadas.length },
+    });
+  }
 
   console.log(`[publicar-bases-pendentes] build acionado — bases cobertas: ${marcadas.join(", ") || "(nenhuma confirmada, ver corrida acima)"}`);
   return { statusCode: 200, body: `build acionado — ${devidas.length} base(s) devida(s), ${marcadas.length} confirmada(s)` };

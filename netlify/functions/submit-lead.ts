@@ -8,6 +8,7 @@ import { getDb, storageBucketName } from "./_firebase";
 import { calcularScoreBase, ajusteIA, classificarPrioridade } from "./_scoring";
 import { sendMail } from "./_mailer";
 import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header";
+import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 
 
 // Upload de fotos base64 para Firebase Storage via Admin SDK (sem CORS, sem restrições de bucket)
@@ -364,6 +365,20 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       }
     }
 
+    // Ator PÚBLICO: quem age aqui é o próprio candidato, ainda não
+    // identificado no sistema. Sem uid, e deliberadamente SEM endereço de rede
+    // nem identificador de navegador — seriam dados pessoais de um titular que
+    // consentiu apenas com o tratamento declarado no formulário.
+    // O evento guarda o identificador da ficha e o idioma; nome, e-mail,
+    // documento, celular e a anamnese inteira ficam de fora por DR-04.
+    await registrar({
+      acao: "lead.recebido",
+      ator: { tipo: "publico" },
+      origem: "submit-lead",
+      alvo: { colecao: "leads", id: docRef.id },
+      detalhe: { idioma },
+    });
+
     // Calcula o score de triagem inline — evita o HTTP hop entre funções Lambda,
     // que é cancelado pelo runtime antes de concluir quando o handler retorna.
     const leadParaScore: Record<string, any> = {
@@ -399,6 +414,17 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
         score_flags:         flags,
         score_justificativa: justificativa,
         score_gerado_em:     FieldValue.serverTimestamp(),
+      });
+      // Mesma ação que generate-triage-score grava, com ator diferente: aqui o
+      // cálculo é automático, disparado pela chegada da ficha, sem nenhuma
+      // pessoa envolvida. Dentro do try de propósito — score que falhou não
+      // aconteceu, e a advertência abaixo já registra a falha.
+      await registrar({
+        acao: "lead.pontuado",
+        ator: { tipo: "sistema", processo: "submit-lead" },
+        origem: "submit-lead",
+        alvo: { colecao: "leads", id: docRef.id },
+        detalhe: { pontuacao: scoreFinal, prioridade },
       });
     } catch (scoreErr: any) {
       console.warn("[submit-lead] Score de triagem falhou (não-fatal):", scoreErr.message);

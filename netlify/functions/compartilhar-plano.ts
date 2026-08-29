@@ -32,6 +32,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { getApp, getDb } from "./_firebase";
 import { randomBytes } from "crypto";
+import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 
 const COLECAO = "athletes";
 const VALIDADE_MS = 90 * 24 * 60 * 60 * 1000; // 90 dias — mesma janela da avaliação (seção 9 do repasse)
@@ -58,9 +59,11 @@ export const handler = async (event: any) => {
   const authHeader = event.headers["authorization"] ?? "";
   const idToken = authHeader.replace("Bearer ", "").trim();
   if (!idToken) return { statusCode: 401, body: "Unauthorized" };
+  let ator: Ator & { tipo: "humano" };
   try {
     const decoded = await getAuth(app).verifyIdToken(idToken);
     if (!decoded.admin) return { statusCode: 403, body: "Acesso não autorizado" };
+    ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "admin" };
   } catch {
     return { statusCode: 401, body: "Invalid token" };
   }
@@ -113,6 +116,20 @@ export const handler = async (event: any) => {
     const primeiroNome = String(dados.name ?? "").trim().split(/\s+/)[0] || null;
     const mensagem = `Olá${primeiroNome ? ", " + primeiroNome : ""}! Aqui está o link do seu ${ROTULO[k]}: ${url}`;
     const whatsappUrl = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(mensagem)}` : null;
+
+    // ÚNICO EVENTO DESTE LOTE QUE NÃO ACOMPANHA UMA GRAVAÇÃO. Quando o token
+    // ainda é válido nada é escrito, mas a função devolve assim mesmo um
+    // endereço vivo que abre o protocolo do atleta — e é ESSE o ato que interessa
+    // rastrear, não a renovação do token. `renovado` distingue os dois casos.
+    // A URL e o token ficam de fora: /plano/{token} é público, e replicá-lo aqui
+    // criaria uma segunda via do acesso.
+    await registrar({
+      acao: "plano.compartilhado",
+      ator,
+      origem: "compartilhar-plano",
+      alvo: { colecao: COLECAO, id: athleteId },
+      detalhe: { kind: k, renovado: precisaRenovar },
+    });
 
     return json(200, { ok: true, kind: k, url, whatsappUrl, phone, renovado: precisaRenovar });
   } catch (e: any) {

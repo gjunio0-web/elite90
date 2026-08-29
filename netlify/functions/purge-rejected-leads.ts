@@ -12,6 +12,7 @@ import { schedule } from "@netlify/functions";
 import { Timestamp } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { getDb, storageBucketName } from "./_firebase";
+import { registrar, type Alvo } from "./_rastreabilidade";
 
 const RETENTION_DAYS = 90;
 
@@ -32,6 +33,10 @@ const handlerFn = async () => {
     let deleted = 0;
     let avaliacoesDeleted = 0;
     const errors: string[] = [];
+    // Identificadores do que foi de fato removido nesta execução — é o que o
+    // evento registra. Colhidos aqui e não no laço porque um único evento cobre
+    // a rodada inteira, não uma ficha por vez.
+    const removidos: Alvo[] = [];
 
     for (const docSnap of snap.docs) {
       const data = docSnap.data();
@@ -93,6 +98,7 @@ const handlerFn = async () => {
           }
 
           await docSnap.ref.delete();
+          removidos.push({ colecao: "leads", id: docSnap.id });
           deleted++;
         } catch (e: any) {
           errors.push(`${docSnap.id}: ${e.message}`);
@@ -109,6 +115,31 @@ const handlerFn = async () => {
       errors,
       ranAt: new Date().toISOString(),
     };
+
+    // SÓ REGISTRA QUANDO ALGO FOI REMOVIDO. A rotina roda todo dia às 03:00 e
+    // na maioria das execuções não encontra nada devido; gravar um evento por
+    // execução vazia encheria a coleção de ruído diário e afogaria os eventos
+    // que importam. Execução sem remoção fica apenas no log da função.
+    //
+    // Ação distinta de `lead.excluido` de propósito: aquela é ato humano
+    // deliberado, esta é cumprimento automático de política de retenção.
+    // Colapsá-las apagaria justamente a distinção que o registro precisa manter.
+    if (removidos.length > 0) {
+      await registrar({
+        acao: "lead.expurgado",
+        ator: { tipo: "sistema", processo: "purge-rejected-leads" },
+        origem: "purge-rejected-leads",
+        alvos: removidos,
+        detalhe: {
+          verificadas: snap.size,
+          fichasRemovidas: deleted,
+          avaliacoesRemovidas: avaliacoesDeleted,
+          falhas: errors.length,
+          retencaoDias: RETENTION_DAYS,
+        },
+        resultado: errors.length > 0 ? "parcial" : "ok",
+      });
+    }
 
     console.log("[purge-rejected-leads]", JSON.stringify(summary));
 

@@ -8,6 +8,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { getApp, getDb } from "./_firebase";
 import { sendMail } from "./_mailer";
 import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header";
+import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 
 
 function buildResendEmail(nome: string, token: string, siteUrl: string, idioma: string): string {
@@ -101,9 +102,11 @@ export const handler = async (event: any) => {
   const authHeader = event.headers["authorization"] ?? "";
   const idToken = authHeader.replace("Bearer ", "").trim();
   if (!idToken) return { statusCode: 401, body: "Unauthorized" };
+  let ator: Ator & { tipo: "humano" };
   try {
     const decoded = await getAuth(getApp()).verifyIdToken(idToken);
     if (!decoded.admin) return { statusCode: 403, body: "Acesso não autorizado" };
+    ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "admin" };
   } catch {
     return { statusCode: 401, body: "Invalid token" };
   }
@@ -160,6 +163,14 @@ export const handler = async (event: any) => {
       lastResentAt: FieldValue.serverTimestamp(),
       resentCount: FieldValue.increment(1),
       lastResentEmailId: resentEmailId,
+    });
+
+    await registrar({
+      acao: "avaliacao.reenviada",
+      ator,
+      origem: "resend-evaluation",
+      alvo: { colecao: "avaliacoes", id: evalId },
+      detalhe: { idioma },
     });
 
     return {
