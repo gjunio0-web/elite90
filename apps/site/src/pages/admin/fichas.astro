@@ -51,9 +51,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
       color: var(--c-lime);
       border: 1px solid rgba(166, 195, 0, 0.3);
     }
-    .btn-outline:hover {
+    .btn-outline:hover:not(:disabled) {
       background: rgba(166, 195, 0, 0.05);
       border-color: var(--c-lime);
+    }
+    .btn-outline:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     .btn-primary {
       background: var(--c-lime);
