@@ -24,6 +24,14 @@
 [functions."publicar-bases-pendentes"]
   schedule = "*/5 * * * *"
 
+# Diariamente às 03:30 UTC, remove eventos da coleção `rastreabilidade` com mais
+# de 24 meses (decisão DR-07). Meia hora depois de purge-rejected-leads de
+# propósito: as duas varrem coleções diferentes e não competem, mas separá-las
+# mantém os registros de execução legíveis quando algo falhar. Ver o cabeçalho
+# de expurgar-rastreabilidade.ts para o desenho completo.
+[functions."expurgar-rastreabilidade"]
+  schedule = "30 3 * * *"
+
 [[redirects]]
   from = "/app/*"
   to = "/app/index.html"
