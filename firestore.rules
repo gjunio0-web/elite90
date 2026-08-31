@@ -1,7 +1,11 @@
 rules_version = '2';
 
 // ELITE90 PRO · Regras de segurança do Firestore
-// Projeto: elite90-c716b (southamerica-east1)
+// Projetos (southamerica-east1), desde a separação de 29/08/2026:
+//   · elite90-c716b     — PRODUÇÃO
+//   · elt90-quality-env — homologação
+// Este arquivo é publicado nos dois. Homologar contra regras mais frouxas não
+// homologa nada: qualquer exceção aberta aqui vale para o banco real também.
 //
 // PRINCÍPIO: o Admin SDK (usado por todas as Netlify Functions) IGNORA estas
 // regras. Portanto, tudo o que passa por função de servidor continua
