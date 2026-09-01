@@ -2794,13 +2794,28 @@ import AdminHeader from '../../components/AdminHeader.astro';
       // resto do drawer (Treino/Nutricional/Evolução são independentes).
       try { initCharts(athlete); } catch (e) { console.error('Erro ao inicializar gráficos:', e); }
 
-      // Inicializar editor de treino (WKE-01)
-      initWorkout(athlete);
+      // Inicializar editores de treino (WKE-01) e nutricional (NTE-01).
+      //
+      // ITEM 1.4: as duas passaram a ser assíncronas, porque buscam o rascunho
+      // gravado antes de montar. A promessa é DELIBERADAMENTE não aguardada
+      // aqui, e o motivo importa: a gaveta abre na aba Visão Geral, e travá-la
+      // por uma leitura de plano que o Coach talvez nem vá abrir seria pagar
+      // latência por trabalho que pode não ser usado.
+      //
+      // As duas montam a própria aba ao terminar — renderWorkout e
+      // renderNutrition são chamadas por elas, não daqui. Se a leitura demorar,
+      // a aba correspondente monta um instante depois; nenhuma outra parte da
+      // gaveta depende disso.
+      //
+      // O .catch existe para que uma falha não vire rejeição não tratada no
+      // console. m2CarregarRascunho já não lança, mas o encadeamento pode
+      // quebrar por outro motivo, e silêncio aqui esconderia o defeito.
+      initWorkout(athlete).catch(function (e) { console.error('initWorkout:', e); });
+      initNutrition(athlete).catch(function (e) { console.error('initNutrition:', e); });
 
-      // Inicializar editor nutricional (NTE-01)
-      initNutrition(athlete);
-
-      // WKE-04: cabeçalhos de publicação
+      // WKE-04: cabeçalhos de publicação.
+      // Leem planStatus do documento do atleta, não do rascunho — por isso não
+      // aguardam as duas chamadas acima.
       renderPubHeader('training');
       renderPubHeader('nutrition');
 
@@ -3035,8 +3050,22 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     function wkeRound(v) { return Math.round(v / 2.5) * 2.5; }
 
-    function initWorkout(athlete) {
+    async function initWorkout(athlete) {
       if (!athlete) return;
+      // ITEM 1.4 — o rascunho gravado tem precedência sobre tudo o mais.
+      // Ordem deliberada: rascunho persistido > cache da sessão > plano-base.
+      // O cache continua servindo à navegação entre atletas dentro da mesma
+      // sessão, sem ida ao servidor a cada troca de gaveta.
+      //
+      // O comentário abaixo, escrito antes deste item, previa exatamente isto:
+      // "quando o editor passar a ler plano real do banco, é aqui que a leitura
+      // entra, e a segunda situação deixa de existir". A segunda situação é o
+      // editor abrir VAZIO em produção, por ausência da maquete de demonstração.
+      // Com rascunho gravado, deixa de acontecer.
+      if (!wkePlanCache[athlete.id]) {
+        const salvo = await m2CarregarRascunho('training', athlete.id);
+        if (salvo) wkePlanCache[athlete.id] = salvo;
+      }
       // Recupera plano do cache OU escala o plano-base p/ este atleta
       if (!wkePlanCache[athlete.id]) {
         const base = athlete.planStatus === 'none' ? null : wkeBuildBasePlan();
@@ -4765,6 +4794,48 @@ import AdminHeader from '../../components/AdminHeader.astro';
       return resp.json();
     }
 
+    // ── LEITOR ÚNICO (item 1.4) ──
+    // Irmão de m2Escrever. Toda leitura do M2 passa por aqui, pelo mesmo motivo
+    // que toda escrita passa por um ponto só: quando a fila da Fase 7 chegar,
+    // ela se instala em dois lugares conhecidos, não em vinte espalhados.
+    //
+    // Usa POST como a escrita. Não é descuido — ver a justificativa no cabeçalho
+    // de ler-rascunho-plano.ts: o padrão de escrita é normativo (Adendo 05,
+    // W-4/TF-05), a convenção de método não é.
+    async function m2Ler(rota, carga) {
+      const idToken = await window.__getFreshToken();
+      const resp = await fetch('/.netlify/functions/' + rota, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+        body: JSON.stringify(carga),
+      });
+      if (!resp.ok) {
+        let detalhe = '';
+        try { detalhe = (await resp.json()).erro || ''; } catch (_) {}
+        throw new Error('[' + resp.status + '] ' + (detalhe || 'falha ao ler'));
+      }
+      return resp.json();
+    }
+
+    // Devolve o rascunho gravado, ou null quando não há.
+    //
+    // NUNCA LANÇA. Falha de leitura degrada para "monta como montava antes" — o
+    // Coach perde o rascunho persistido naquela abertura, mas a gaveta abre e
+    // ele trabalha. Lançar aqui deixaria a aba em branco por indisponibilidade
+    // momentânea de rede, o que é pior que o estado anterior a este item.
+    // O erro vai para o console e para o indicador de estado.
+    async function m2CarregarRascunho(kind, athleteId) {
+      if (!athleteId) return null;
+      try {
+        const r = await m2Ler('ler-rascunho-plano', { athleteUid: athleteId, planType: kind });
+        return (r && r.draft) || null;
+      } catch (e) {
+        console.error('[m2CarregarRascunho]', kind, e);
+        m2SetSaveState(kind, 'error', 'não foi possível carregar o rascunho salvo');
+        return null;
+      }
+    }
+
     // Estado do autossalvo, por tipo de plano. Exibido no cabeçalho de
     // publicação — sem isto, uma falha de gravação seria silenciosa, e o Coach
     // continuaria digitando sobre trabalho que não está sendo salvo.
@@ -5024,8 +5095,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
     const ntePlanCache = {};
     let nteSearchResults = [], nteSearchSelIdx = -1, ntePendingFood = null, ntePendingMeal = null;
 
-    function initNutrition(athlete) {
+    async function initNutrition(athlete) {
       if (!athlete) return;
+      // ITEM 1.4 — mesma ordem de precedência da aba de Treino.
+      if (!ntePlanCache[athlete.id]) {
+        const salvo = await m2CarregarRascunho('nutrition', athlete.id);
+        if (salvo) ntePlanCache[athlete.id] = salvo;
+      }
       if (!ntePlanCache[athlete.id]) {
         if (athlete.planStatus === 'none') {
           // Atleta recém-chegado: sem plano nutricional publicado (estado de primeira vez)
