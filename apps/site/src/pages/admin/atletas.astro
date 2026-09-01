@@ -1585,6 +1585,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
             </div>
             <div class="pub-actions">
               <span class="pub-ts" id="tr-pubts"></span>
+              <!-- Estado do autossalvo (M2 Fase 1). Vazio em repouso; falha de
+                   gravação precisa ser VISÍVEL — silêncio aqui faria o Coach
+                   seguir digitando sobre trabalho que não está sendo salvo. -->
+              <span class="pub-ts" id="tr-savestate"></span>
               <button class="nte-formula-gear-btn" id="tr-sharebtn" onclick="compartilharPlano('training')" title="Compartilhar link do plano" hidden><span data-lucide="share-2"></span></button>
               <button class="btn-protocol" id="tr-pubbtn" onclick="wkePublish()"></button>
             </div>
@@ -1656,6 +1660,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
             </div>
             <div class="pub-actions">
               <span class="pub-ts" id="nu-pubts"></span>
+              <!-- Estado do autossalvo (M2 Fase 1). Vazio em repouso; falha de
+                   gravação precisa ser VISÍVEL — silêncio aqui faria o Coach
+                   seguir digitando sobre trabalho que não está sendo salvo. -->
+              <span class="pub-ts" id="nu-savestate"></span>
               <button class="nte-formula-gear-btn" id="nu-sharebtn" onclick="compartilharPlano('nutrition')" title="Compartilhar link do plano" hidden><span data-lucide="share-2"></span></button>
               <button class="nte-formula-gear-btn" id="nu-formulabtn" onclick="nteToggleFormulaPanel()" title="Configurar fórmula de macros"><span data-lucide="sliders-horizontal"></span></button>
               <button class="btn-protocol" id="nu-pubbtn" onclick="ntePublish()"></button>
@@ -4718,9 +4726,83 @@ import AdminHeader from '../../components/AdminHeader.astro';
     function evoUnresolveAlert(i) { EVO_ED_ALERTS[i].resolved = false; evoRenderEditAlerts(); evoTriggerAutosave(); }
 
     let wkeSaveTimer = null;
+    // ════════════════════════════════════════════════════════
+    //  M2-01 — CLIENTE ÚNICO DE ESCRITA (Fase 1 da persistência)
+    // ════════════════════════════════════════════════════════
+    // TODA gravação do M2 passa por aqui. Um ponto só, e não um fetch por
+    // ponto de chamada, por três razões:
+    //
+    //  1. A fila local de escrita sem rede (Fase 7) substitui ESTE ponto e
+    //     mais nenhum. Espalhar chamadas agora significaria caçá-las depois.
+    //  2. A chave de idempotência nasce aqui, no cliente, desde já — mesmo
+    //     que a Fase 1 não a use para desduplicar. Quem gera a chave é quem
+    //     enfileira, e é o mesmo lugar.
+    //  3. O token nunca é guardado em variável: window.__getFreshToken() já
+    //     resolve isso, e reusá-lo evita uma segunda fonte de verdade sobre
+    //     a sessão.
+    //
+    // NÃO grava versão publicada: isso é a Fase 5. Só rascunho.
+    let m2SaveSeq = 0;
+    function m2NovaChave() {
+      // Sem crypto.randomUUID em navegador antigo: o par tempo + contador
+      // basta, porque a chave só precisa ser única dentro desta sessão.
+      m2SaveSeq += 1;
+      return Date.now().toString(36) + '-' + m2SaveSeq.toString(36);
+    }
+
+    async function m2Escrever(rota, carga) {
+      const idToken = await window.__getFreshToken();
+      const resp = await fetch('/.netlify/functions/' + rota, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+        body: JSON.stringify(Object.assign({ idempotencyKey: m2NovaChave() }, carga)),
+      });
+      if (!resp.ok) {
+        let detalhe = '';
+        try { detalhe = (await resp.json()).erro || ''; } catch (_) {}
+        throw new Error('[' + resp.status + '] ' + (detalhe || 'falha ao gravar'));
+      }
+      return resp.json();
+    }
+
+    // Estado do autossalvo, por tipo de plano. Exibido no cabeçalho de
+    // publicação — sem isto, uma falha de gravação seria silenciosa, e o Coach
+    // continuaria digitando sobre trabalho que não está sendo salvo.
+    const m2SaveState = { training: 'idle', nutrition: 'idle' };
+
+    function m2SetSaveState(kind, estado, mensagem) {
+      m2SaveState[kind] = estado;
+      const el = document.getElementById((kind === 'training' ? 'tr' : 'nu') + '-savestate');
+      if (!el) return;
+      if (estado === 'saving')  { el.textContent = 'salvando…';      el.style.color = 'var(--c-textsub)'; }
+      else if (estado === 'saved') { el.textContent = 'salvo';        el.style.color = 'var(--c-textsub)'; }
+      else if (estado === 'error') { el.textContent = 'NÃO SALVO — ' + (mensagem || 'erro'); el.style.color = 'var(--c-status-alert)'; }
+      else { el.textContent = ''; }
+    }
+
+    async function m2SalvarRascunho(kind, plano) {
+      const a = wke04CurrentAthlete;
+      if (!a || !a.id) return;                 // gaveta fechada: nada a salvar
+      m2SetSaveState(kind, 'saving');
+      try {
+        await m2Escrever('salvar-rascunho-plano', {
+          athleteUid: a.id,
+          planType: kind,
+          draft: plano,
+        });
+        m2SetSaveState(kind, 'saved');
+      } catch (e) {
+        m2SetSaveState(kind, 'error', e && e.message ? e.message : '');
+        console.error('[m2SalvarRascunho]', kind, e);
+      }
+    }
+
     function wkeAutoSave() {
       clearTimeout(wkeSaveTimer);
-      wkeSaveTimer = setTimeout(function() { /* mock: serializaria wkeState.plan no backend */ }, 500);
+      // O represamento de 500 ms já existia e é preservado: o autossalvo é
+      // chamado a cada tecla, e uma gravação por tecla seria uma gravação de
+      // documento inteiro por tecla.
+      wkeSaveTimer = setTimeout(function() { m2SalvarRascunho('training', wkeState.plan); }, 500);
       var _trp = getPlanRef('training');
       if (_trp && _trp.status === 'publicado' && !_trp.hasUnpublishedChanges) { _trp.hasUnpublishedChanges = true; renderPubHeader('training'); }
     }
@@ -5463,7 +5545,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     let nteSaveTimer = null;
     function nteAutoSave() {
       clearTimeout(nteSaveTimer);
-      nteSaveTimer = setTimeout(function() { /* mock: serializaria nteState.plan no backend */ }, 500);
+      nteSaveTimer = setTimeout(function() { m2SalvarRascunho('nutrition', nteState.plan); }, 500);
       var _nup = getPlanRef('nutrition');
       if (_nup && _nup.status === 'publicado' && !_nup.hasUnpublishedChanges) { _nup.hasUnpublishedChanges = true; renderPubHeader('nutrition'); }
     }
