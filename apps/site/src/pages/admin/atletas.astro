@@ -2374,6 +2374,24 @@ import AdminHeader from '../../components/AdminHeader.astro';
     let filteredAthletes = [...athletes];
     let sortState = { column: null, direction: 'asc' };
 
+    // Tabela de rótulos de exibição do vocabulário de fase (Adendo 03,
+    // AF-10). O valor gravado — Bulking | Cutting | Diet Break | Maintenance,
+    // vocabulário fechado de _m2-validacao.ts/FASES_VALIDAS — nunca é
+    // exibido direto. Só Maintenance precisa de tradução hoje: os outros três
+    // já são o que a tela sempre mostrou, e ficam como estão para não mexer
+    // em nada que já funciona. Mudar o texto da tela deixa de ser alteração
+    // de banco — é exatamente o problema que a AF-08 teve de resolver, agora
+    // resolvido de vez.
+    const FASE_LABEL = {
+      'Bulking':    'Bulking',
+      'Cutting':    'Cutting',
+      'Diet Break': 'Diet Break',
+      'Maintenance': 'Manutenção',
+    };
+    function rotuloFase(fase) {
+      return FASE_LABEL[fase] || fase || '—';
+    }
+
     // Fase 2 do plano de persistência (Esquema v3, seção 5): startDate deixou
     // de ser string "DD/MM/AAAA" e passou a Timestamp do Firestore. O
     // Firestore Web SDK devolve um objeto com .toDate(); um valor já
@@ -2512,7 +2530,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const cols = ['ID','Nome','Email','Fase','Peso Inicial (kg)','Peso Atual (kg)','Variação','Status','Início','Semana'];
       const statusLabel = { active: 'Ativo', checkin_sent: 'Check-in Enviado', awaiting_checkin: 'Aguardando Check-in' };
       const rows = filteredAthletes.map(a => [
-        a.id, a.name, a.email, a.phase || '',
+        a.id, a.name, a.email, rotuloFase(a.phase),
         a.weightInitialKg || '', a.weightCurrentKg || '',
         // weight_change saiu do contrato (Esquema v3, seção 5) — derivado aqui,
         // no único ponto que o lia, em vez de gravado.
@@ -2715,7 +2733,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       // — o Coach continua vendo o nome. Atleta promovido antes da Fase 2 e
       // ainda não alcançado pela rotina de preenchimento mostra o traço.
       document.getElementById('drawer-external-label').textContent = athlete.externalLabel || '—';
-      document.getElementById('overview-cycle-label').innerHTML = `Progresso: <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">Semana ${athlete.week} de 13</span>. Em fase de <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">${athlete.phase}</span>. Iniciado em <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">${formatarDataBr(athlete.startDate) || '—'}</span>.`;
+      document.getElementById('overview-cycle-label').innerHTML = `Progresso: <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">Semana ${athlete.week} de 13</span>. Em fase de <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">${rotuloFase(athlete.phase)}</span>. Iniciado em <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">${formatarDataBr(athlete.startDate) || '—'}</span>.`;
       document.getElementById('overview-progress').style.width = `${(athlete.day / 90) * 100}%`;
 
 
@@ -3331,7 +3349,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         else if (key.indexOf('diet') > -1) cls = 'dietbreak';
         else if (key.indexOf('manu') > -1) cls = 'manutencao';
         chip.className = 'nte-phasechip ' + cls;
-        chip.textContent = phase;
+        chip.textContent = rotuloFase(phase);
       }
       if (wv) wv.textContent = weight ? (weight + ' kg') : '—';
     }
@@ -5288,7 +5306,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         else if (key.indexOf('diet') > -1) cls = 'dietbreak';
         else if (key.indexOf('manu') > -1) cls = 'manutencao';
         chip.className = 'nte-phasechip ' + cls;
-        chip.textContent = phase;
+        chip.textContent = rotuloFase(phase);
       }
       if (wv) wv.textContent = weight ? (weight + ' kg') : '—';
       ctx.style.display = 'flex';
