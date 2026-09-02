@@ -10,7 +10,8 @@
     "conferir:exercicios": "node scripts/conferir-exercicios.mjs",
     "demo:filtrar": "node scripts/filtrar-demo.mjs",
     "catalogo:alimentos": "node scripts/gerar-base.mjs --base=alimentos",
-    "bases:filtrar": "node scripts/filtrar-bases.mjs"
+    "bases:filtrar": "node scripts/filtrar-bases.mjs",
+    "test": "node --test \"tests/**/*.test.js\""
   },
   "devDependencies": {
     "sharp": "^0.35.3",

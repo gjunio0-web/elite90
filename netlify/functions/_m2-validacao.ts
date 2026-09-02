@@ -8,10 +8,21 @@
 // em vez de manter cópia própria, exatamente como _vocabulario-exercicios.ts
 // faz com CAMPOS_EDITAVEIS.
 //
-// ESCOPO ATUAL: apenas o rascunho de plano (Fase 1 do plano de persistência).
-// As demais estruturas do M2 — check-in, série de peso, avaliação física,
-// relatório — entram aqui quando as fases correspondentes forem implementadas.
+// ESCOPO ATUAL: o rascunho de plano (Fase 1 do plano de persistência) e o
+// rótulo externo do atleta (Fase 2, Adendo 02 — Delegação). As demais
+// estruturas do M2 — check-in, série de peso, avaliação física, relatório —
+// entram aqui quando as fases correspondentes forem implementadas.
 // Não antecipar: validar estrutura que ainda não é gravada envelhece sozinho.
+
+// @ts-ignore — módulo CommonJS compartilhado com scripts/ (mesmo arranjo de
+// _athlete-from-lead.js em promote-lead.ts). A forma do rótulo é definida uma
+// única vez lá; aqui ela só é reexportada e aplicada.
+import externalLabelModule from "./_external-label.js";
+const { EXTERNAL_LABEL_PATTERN, isExternalLabel } = externalLabelModule as {
+  EXTERNAL_LABEL_PATTERN: RegExp;
+  isExternalLabel: (v: unknown) => boolean;
+};
+export { EXTERNAL_LABEL_PATTERN };
 
 /** Tipos de plano. Fechado — o esquema de persistência v3, seção 8, define dois. */
 export const PLAN_TYPES = ["training", "nutrition"] as const;
@@ -36,6 +47,20 @@ export const DRAFT_MAX_CHARS = 700000;
 export type ResultadoValidacao =
   | { ok: true }
   | { ok: false; erro: string };
+
+/**
+ * Rótulo externo do atleta: `ATL-` mais quatro símbolos do alfabeto de 31
+ * (Adendo 02, AD-04; critério CA-25). Armazenado com o prefixo.
+ */
+export function validarExternalLabel(valor: unknown): ResultadoValidacao {
+  if (!isExternalLabel(valor)) {
+    return {
+      ok: false,
+      erro: "externalLabel inválido. Esperado ATL- seguido de quatro símbolos sem I, L, O, 0 ou 1.",
+    };
+  }
+  return { ok: true };
+}
 
 /** Identificador de documento do Firestore: não vazio, sem barra, sem ponto isolado. */
 export function validarUid(uid: unknown): ResultadoValidacao {

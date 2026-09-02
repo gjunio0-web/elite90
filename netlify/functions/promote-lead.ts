@@ -28,7 +28,13 @@ import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header"
 // @ts-ignore — módulo CommonJS compartilhado com scripts/emulate-fn08.js
 import athleteContract from "./_athlete-from-lead.js";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
+// @ts-ignore — módulo CommonJS compartilhado com scripts/emulate-fn08.js
+import externalLabelModule from "./_external-label.js";
 const { athleteFromLead } = athleteContract as any;
+const { gerarExternalLabel, isExternalLabel } = externalLabelModule as {
+  gerarExternalLabel: () => string;
+  isExternalLabel: (v: unknown) => boolean;
+};
 
 const FASES_VALIDAS = ["Bulking", "Cutting", "Diet Break"];
 // Vocabulário fechado, não texto livre: alguns casos de uso de IA (ainda a
@@ -37,6 +43,39 @@ const FASES_VALIDAS = ["Bulking", "Cutting", "Diet Break"];
 // Sem valor de reserva (ao contrário de FASES_VALIDAS acima) — é o que torna
 // o campo de fato obrigatório: ausente ou fora do vocabulário, recusa.
 const GENEROS_VALIDOS = ["masculino", "feminino", "outro"];
+
+// Teto de tentativas do sorteio do rótulo. Com 923.521 combinações e uma
+// carteira de dezenas de atletas, uma colisão já é rara; dez seguidas
+// indicariam defeito (alfabeto errado, banco inesperado), não azar.
+const EXTERNAL_LABEL_MAX_TENTATIVAS = 10;
+
+/**
+ * Sorteia um rótulo externo que nenhum atleta possui (Adendo 02, seção 5.1:
+ * "sorteia um código, verifica que nenhum atleta o possui e repete em caso de
+ * colisão"). A consulta usa o índice automático de campo único; nada entra em
+ * firestore.indexes.json.
+ *
+ * DECISÃO REGISTRADA (02/09/2026): consulta e gravação são operações
+ * separadas, não uma transação. A janela em que duas promoções simultâneas
+ * sorteariam o mesmo código exige dois operadores promovendo no mesmo
+ * instante, e a promoção é ato manual de um único Coach. O custo de uma
+ * transação sobre um caminho que já faz cinco leituras não se paga por essa
+ * hipótese. Se um dia houver mais de um promotor concorrente, trocar por
+ * transação é alteração contida nesta função.
+ */
+async function sortearExternalLabelLivre(db: FirebaseFirestore.Firestore): Promise<string> {
+  for (let i = 0; i < EXTERNAL_LABEL_MAX_TENTATIVAS; i++) {
+    const codigo = gerarExternalLabel();
+    const ocupado = await db.collection("athletes")
+      .where("externalLabel", "==", codigo)
+      .limit(1)
+      .get();
+    if (ocupado.empty) return codigo;
+  }
+  throw new Error(
+    `Não foi possível sortear um rótulo externo livre em ${EXTERNAL_LABEL_MAX_TENTATIVAS} tentativas.`
+  );
+}
 
 /** Valida DD/MM/AAAA e confirma que a data existe (rejeita 31/02/2026). */
 function isValidBrDate(s: string): boolean {
@@ -242,10 +281,20 @@ export const handler = async (event: any) => {
     // `originLeadId` distingue os dois casos: mesma ficha (repromoção após o
     // atleta ter sido excluído — segue adiante, é o caso órfão que a guarda de
     // idempotência já libera) de ficha diferente (colisão — recusa).
+    // Rótulo já atribuído a este documento, se ele existir e for da mesma
+    // ficha. O rótulo é imutável (Adendo 02, AD-03; critério CA-16): no único
+    // caminho em que o `set(..., { merge: true })` abaixo alcança um documento
+    // já existente — mesma ficha, conta reaproveitada, elo na ficha não fechado
+    // — sortear de novo sobrescreveria um código que um delegado pode já
+    // conhecer. Preserva-se o existente; só se sorteia quando não há nenhum.
+    let externalLabelExistente: string | null = null;
     if (!contaCriada) {
       const ocupanteSnap = await db.collection("athletes").doc(uid).get();
       if (ocupanteSnap.exists) {
         const ocupante = ocupanteSnap.data() ?? {};
+        if (ocupante.originLeadId === leadId && isExternalLabel(ocupante.externalLabel)) {
+          externalLabelExistente = ocupante.externalLabel;
+        }
         if (ocupante.originLeadId && ocupante.originLeadId !== leadId) {
           const nomeOcupante = String(ocupante.name ?? "").trim() || "outro atleta";
           return {
@@ -270,6 +319,13 @@ export const handler = async (event: any) => {
     const claimsAtuais = (await auth.getUser(uid)).customClaims ?? {};
     await auth.setCustomUserClaims(uid, { ...claimsAtuais, athlete: true });
 
+    // -- Rótulo externo (Adendo 02, seção 5.1) --
+    // Sorteado aqui, no mesmo ponto em que o documento do atleta é gravado,
+    // e passado ao contrato como `genero`: o contrato é puro e não consulta
+    // o banco. Todo atleta promovido por esta função nasce com rótulo
+    // (critério CA-15).
+    const externalLabel = externalLabelExistente ?? await sortearExternalLabelLivre(db);
+
     // -- Documento do atleta, pelo contrato compartilhado --
     const athleteDoc = athleteFromLead(lead, null, {
       uid,
@@ -277,6 +333,7 @@ export const handler = async (event: any) => {
       startDate,
       phase,
       genero,
+      externalLabel,
       test: lead._test === true,
     });
     // Fotos do Dia 1 = as mesmas enviadas na ficha de triagem (decisão 15/08/2026).
@@ -324,7 +381,7 @@ export const handler = async (event: any) => {
         { colecao: "leads", id: leadId } as Alvo,
         { colecao: "athletes", id: uid } as Alvo,
       ],
-      detalhe: { contaCriada },
+      detalhe: { contaCriada, externalLabel },
     });
 
     // -- E-mail de boas-vindas (opcional, escolha do Coach no modal) --
@@ -360,7 +417,7 @@ export const handler = async (event: any) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true, athleteUid: uid, startDate, phase, welcomeSent, welcomeError }),
+      body: JSON.stringify({ success: true, athleteUid: uid, startDate, phase, externalLabel, welcomeSent, welcomeError }),
     };
 
   } catch (err: any) {

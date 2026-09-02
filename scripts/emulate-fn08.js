@@ -13,8 +13,9 @@
 //   1) lê leads/{leadId} (+ avaliação correspondente, se houver);
 //   2) cria-ou-obtém a conta no Firebase Auth pelo e-mail (idempotente);
 //   3) define o claim { athlete: true } (salvo --no-claim);
-//   4) grava athletes/{uid} via o contrato _athlete-from-lead.js;
-//   5) (opcional) marca o lead como convertido.
+//   4) sorteia o rótulo externo (_external-label.js), preservando o existente;
+//   5) grava athletes/{uid} via o contrato _athlete-from-lead.js;
+//   6) (opcional) marca o lead como convertido.
 // Idempotente: doc-id = uid → re-rodar faz upsert, nunca duplica.
 //
 // ATENÇÃO — artefato de HOMOLOGAÇÃO. Rodar apenas contra um projeto Firebase
@@ -31,6 +32,7 @@ const { getFirestore }        = require('firebase-admin/firestore');
 const fs                      = require('fs');
 const path                    = require('path');
 const { athleteFromLead }     = require('../netlify/functions/_athlete-from-lead.js');
+const { gerarExternalLabel, isExternalLabel } = require('../netlify/functions/_external-label.js');
 
 // -- Carrega .env.local da raiz (mesmo mecanismo de set-admin-claim.js, sem dotenv) --
 const envPath = path.resolve(__dirname, '../.env.local');
@@ -143,14 +145,30 @@ async function main() {
     console.log('- Claim não alterado (--no-claim).');
   }
 
-  // 5) Monta e grava athletes/{uid} via contrato compartilhado (upsert idempotente)
-  const athleteDoc = athleteFromLead(lead, avaliacao, { uid, leadId });
+  // 5) Rótulo externo (Adendo 02, seção 5.1) — mesmo módulo e mesma regra de
+  //    promote-lead.ts: preserva o rótulo se o documento já existe (imutável,
+  //    CA-16), senão sorteia até achar um livre. Sem isto, atleta promovido
+  //    pelo runner nasceria sem rótulo e a rotina única teria de alcançá-lo.
+  const existenteSnap = await db.collection('athletes').doc(uid).get();
+  const existente = existenteSnap.exists ? (existenteSnap.data() || {}) : {};
+  let externalLabel = isExternalLabel(existente.externalLabel) ? existente.externalLabel : null;
+  if (!externalLabel) {
+    for (let i = 0; i < 10 && !externalLabel; i++) {
+      const codigo = gerarExternalLabel();
+      const ocupado = await db.collection('athletes').where('externalLabel', '==', codigo).limit(1).get();
+      if (ocupado.empty) externalLabel = codigo;
+    }
+    if (!externalLabel) throw new Error('Sem rótulo externo livre em 10 tentativas.');
+  }
+
+  // 6) Monta e grava athletes/{uid} via contrato compartilhado (upsert idempotente)
+  const athleteDoc = athleteFromLead(lead, avaliacao, { uid, leadId, externalLabel });
   await db.collection('athletes').doc(uid).set(athleteDoc, { merge: true });
   console.log(`- athletes/${uid} gravado:`);
-  console.log(`    name="${athleteDoc.name}", status="${athleteDoc.status}", startDate=${athleteDoc.startDate}`);
+  console.log(`    name="${athleteDoc.name}", status="${athleteDoc.status}", startDate=${athleteDoc.startDate}, externalLabel=${athleteDoc.externalLabel}`);
   console.log(`    evaluationToken=${athleteDoc.evaluationToken || 'null'}, _test=${athleteDoc._test}`);
 
-  // 6) (Opcional) fecha o elo Pipeline A -> B
+  // 7) (Opcional) fecha o elo Pipeline A -> B
   if (doConvert) {
     await db.collection('leads').doc(leadId).update({
       convertedAt:          new Date().toISOString(),

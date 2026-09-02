@@ -33,6 +33,12 @@
 //   OUTRAS ABAS
 //   - checkin (null até o 1º check-in), prev, avaliacao, baselinePhotos, planStatus
 //
+//   RÓTULO EXTERNO (Adendo 02 — Delegação, seção 5.1, AD-03/AD-04)
+//   - externalLabel -> "ATL-" + 4 símbolos, sorteado, imutável. Recebido por
+//                      parâmetro, como `genero`: quem chama sorteia e confere
+//                      colisão no banco (promote-lead.ts); este contrato é puro
+//                      e só grava o que recebe. Forma em _external-label.js.
+//
 // ATENÇÃO ao idioma das chaves: o lead do M1 usa pt-BR (nome, objetivo,
 // altura...), o documento de atleta do M2 usa en (name, goal, height...).
 // A tradução acontece AQUI — e é a razão de ser deste contrato.
@@ -135,7 +141,8 @@ function ageFromDob(dob, now) {
  *   nome, email, objetivo...). O id do doc deve vir em lead.id.
  * @param {object|null} avaliacao - documento correspondente em "avaliacoes"
  *   (opcional; usado apenas para rastrear o token da avaliação de origem).
- * @param {object} [opts] - { uid, leadId, payment, startDate, now, test }.
+ * @param {object} [opts] - { uid, leadId, payment, startDate, phase, genero,
+ *   externalLabel, status, now, test }.
  * @returns {object} documento pronto para gravar em athletes/{uid}.
  */
 function athleteFromLead(lead, avaliacao, opts = {}) {
@@ -168,6 +175,10 @@ function athleteFromLead(lead, avaliacao, opts = {}) {
     // chama (promote-lead.ts) — este contrato só grava o que recebe. Existe
     // para casos de uso de IA que ainda serão construídos sobre este campo.
     genero: opts.genero || null,
+    // Rótulo visto pelo delegado externo no lugar do nome (Adendo 02, D-14).
+    // Sorteado e conferido contra colisão por quem chama; nulo aqui significa
+    // que a rotina única de preenchimento ainda não passou por este atleta.
+    externalLabel: opts.externalLabel || null,
 
     // -- Progressão de ciclo (lista + Visão Geral) --
     week:  1,                                               // semana 1 de 13
