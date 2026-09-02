@@ -35,7 +35,18 @@ export const RAIZ_PROJETO = resolve(dirname(fileURLToPath(import.meta.url)), '..
 // (produção e homologação), um valor embutido faria a guarda avisar em toda
 // execução legítima de homologação — e aviso que aparece sempre é aviso que
 // ninguém lê no dia em que significa alguma coisa.
-const PROJETO_ESPERADO = process.env.PUBLIC_FIREBASE_PROJECT_ID;
+//
+// CORREÇÃO (02/09/2026): esta constante costumava ser lida aqui, no topo do
+// módulo — ou seja, na importação, antes de carregarEnvLocal() rodar dentro
+// de conectar(). Em ESM o topo do módulo executa inteiro antes de qualquer
+// função exportada ser chamada, então o valor ficava congelado como
+// `undefined` sempre que a variável só existisse em .env.local (e não já no
+// ambiente do processo). O sintoma era "PUBLIC_FIREBASE_PROJECT_ID ausente
+// no ambiente" mesmo com o arquivo preenchido corretamente — reproduzido
+// isoladamente fora deste arquivo antes da correção. Por isso a leitura desce
+// para dentro de conectar(), depois de carregarEnvLocal(). gerar-base.mjs não
+// exibia o sintoma porque roda dentro do build do Netlify, onde a variável já
+// está no ambiente antes do processo começar — nunca dependeu de .env.local.
 
 /**
  * `sePossivel: true` troca "derrubar o processo" por "avisar e devolver null" —
@@ -80,6 +91,7 @@ export function carregarEnvLocal() {
  */
 export function conectar({ sePossivel = false } = {}) {
   carregarEnvLocal();
+  const PROJETO_ESPERADO = process.env.PUBLIC_FIREBASE_PROJECT_ID;
   const bruto = (process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? '').trim();
   if (!bruto) {
     return abortar('FIREBASE_SERVICE_ACCOUNT_JSON não encontrada.\n'
