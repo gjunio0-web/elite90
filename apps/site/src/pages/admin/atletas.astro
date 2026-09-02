@@ -1881,8 +1881,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
       var data = [];
       var today = new Date();
       var seed = athlete ? idSeed(athlete.id) : 1;
-      var pesoBase = athlete ? (athlete.weight_init || 82) : 82;
-      var pesoFinal = athlete ? (athlete.weight_now || pesoBase) : pesoBase;
+      var pesoBase = athlete ? (athlete.weightInitialKg || 82) : 82;
+      var pesoFinal = athlete ? (athlete.weightCurrentKg || pesoBase) : pesoBase;
       var totalDays = athlete ? (athlete.day || days) : days;
       var dailyTrend = (pesoFinal - pesoBase) / Math.max(totalDays, 1);
       for (var i = days - 1; i >= 0; i--) {
@@ -2374,9 +2374,48 @@ import AdminHeader from '../../components/AdminHeader.astro';
     let filteredAthletes = [...athletes];
     let sortState = { column: null, direction: 'asc' };
 
-    function parseDate(str) {
-      const [d, m, y] = str.split('/');
-      return new Date(+y, +m - 1, +d);
+    // Fase 2 do plano de persistência (Esquema v3, seção 5): startDate deixou
+    // de ser string "DD/MM/AAAA" e passou a Timestamp do Firestore. O
+    // Firestore Web SDK devolve um objeto com .toDate(); um valor já
+    // convertido no cliente (ex.: em teste) pode chegar como Date nativo.
+    // A entrada em string fica como caminho defensivo, não o esperado —
+    // nenhum atleta gravado pela Fase 2 em diante produz mais essa forma.
+    function parseDate(v) {
+      if (!v) return null;
+      if (typeof v.toDate === 'function') return v.toDate();
+      if (v instanceof Date) return v;
+      if (typeof v === 'string') {
+        const [d, m, y] = v.split('/');
+        if (!d || !m || !y) return null;
+        return new Date(+y, +m - 1, +d);
+      }
+      return null;
+    }
+
+    // Formata Timestamp/Date de startDate para exibição, no mesmo formato
+    // DD/MM/AAAA que a tela sempre mostrou — a mudança é onde o dado mora,
+    // não como ele aparece (princípio P1 do Esquema v3: dado é dado,
+    // formatação é da interface).
+    function formatarDataBr(v) {
+      const d = parseDate(v);
+      if (!d || isNaN(d.getTime())) return null;
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    // Idade a partir de birthDate — derivada na leitura, nunca armazenada
+    // (Esquema v3, princípio P3; Fase 2 removeu o campo athlete.age).
+    function idadeDeNascimento(v) {
+      const d = parseDate(v);
+      if (!d || isNaN(d.getTime())) return null;
+      const hoje = new Date();
+      let idade = hoje.getFullYear() - d.getFullYear();
+      const antesDoAniversario = hoje.getMonth() < d.getMonth()
+        || (hoje.getMonth() === d.getMonth() && hoje.getDate() < d.getDate());
+      if (antesDoAniversario) idade -= 1;
+      return idade;
     }
 
     function sortAthletes(column) {
@@ -2474,8 +2513,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const statusLabel = { active: 'Ativo', checkin_sent: 'Check-in Enviado', awaiting_checkin: 'Aguardando Check-in' };
       const rows = filteredAthletes.map(a => [
         a.id, a.name, a.email, a.phase || '',
-        a.weight_init || '', a.weight_now || '', a.weight_change || '',
-        statusLabel[a.status] || a.status, a.startDate || '', a.week || ''
+        a.weightInitialKg || '', a.weightCurrentKg || '',
+        // weight_change saiu do contrato (Esquema v3, seção 5) — derivado aqui,
+        // no único ponto que o lia, em vez de gravado.
+        (a.weightInitialKg != null && a.weightCurrentKg != null) ? (a.weightCurrentKg - a.weightInitialKg) : '',
+        statusLabel[a.status] || a.status, formatarDataBr(a.startDate) || '', a.week || ''
       ]);
       const csv = [cols, ...rows].map(r =>
         r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')
@@ -2517,7 +2559,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         
         return `
         <tr class="athlete-row">
-          <td class="td--date">${athlete.startDate}</td>
+          <td class="td--date">${formatarDataBr(athlete.startDate) || '—'}</td>
           <td class="td--name-cell">
             <span class="td--name">${athlete.name}</span>
             <span class="td--email">${athlete.email}</span>
@@ -2673,7 +2715,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       // — o Coach continua vendo o nome. Atleta promovido antes da Fase 2 e
       // ainda não alcançado pela rotina de preenchimento mostra o traço.
       document.getElementById('drawer-external-label').textContent = athlete.externalLabel || '—';
-      document.getElementById('overview-cycle-label').innerHTML = `Progresso: <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">Semana ${athlete.week} de 13</span>. Em fase de <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">${athlete.phase}</span>. Iniciado em <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">${athlete.startDate || '—'}</span>.`;
+      document.getElementById('overview-cycle-label').innerHTML = `Progresso: <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">Semana ${athlete.week} de 13</span>. Em fase de <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">${athlete.phase}</span>. Iniciado em <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">${formatarDataBr(athlete.startDate) || '—'}</span>.`;
       document.getElementById('overview-progress').style.width = `${(athlete.day / 90) * 100}%`;
 
 
@@ -2689,13 +2731,35 @@ import AdminHeader from '../../components/AdminHeader.astro';
       // Vocabulário fechado gravado em minúsculas (promote-lead.ts); rótulo de
       // exibição mapeado aqui, não invertido na gravação.
       const GENERO_LABEL = { masculino: 'Masculino', feminino: 'Feminino', outro: 'Outro' };
-      if (profileStart)  profileStart.textContent  = athlete.startDate || '—';
-      if (profileAge)    profileAge.textContent    = athlete.age    ? `${athlete.age} anos`    : '—';
+      if (profileStart)  profileStart.textContent  = formatarDataBr(athlete.startDate) || '—';
+      // Idade não é mais gravada — deriva-se de birthDate na leitura
+      // (Esquema v3, princípio P3; Fase 2 removeu athlete.age).
+      if (profileAge) {
+        const idade = idadeDeNascimento(athlete.birthDate);
+        profileAge.textContent = idade !== null ? `${idade} anos` : '—';
+      }
       if (profileGenero) profileGenero.textContent = GENERO_LABEL[athlete.genero] || '—';
-      if (profileHeight) profileHeight.textContent = athlete.height  || '—';
-      if (profileYears)  profileYears.textContent  = athlete.years_active ? `${athlete.years_active} anos` : '—';
-      if (profileFreq)   profileFreq.textContent   = athlete.freq    || '—';
-      if (profileDur)    profileDur.textContent    = athlete.duration || '—';
+      // heightCm é número (centímetros); a tela volta a exibir em metros, no
+      // mesmo formato de sempre.
+      if (profileHeight) {
+        profileHeight.textContent = (athlete.heightCm != null)
+          ? `${String(athlete.heightCm / 100).replace('.', ',')} m`
+          : '—';
+      }
+      if (profileYears)  profileYears.textContent  = (athlete.trainingYears != null) ? `${athlete.trainingYears} anos` : '—';
+      if (profileFreq) {
+        profileFreq.textContent = (athlete.weeklyFrequency != null)
+          ? `${String(athlete.weeklyFrequency).replace('.', ',')}x / semana`
+          : '—';
+      }
+      // dailyMinutes é gravado em minutos (Esquema v3, seção 5); a tela volta
+      // a exibir em horas, formato que o Coach já conhecia antes da Fase 2.
+      // Escolha de exibição, não de gravação — sinalizada para revisão.
+      if (profileDur) {
+        profileDur.textContent = (athlete.dailyMinutes != null)
+          ? `${String(athlete.dailyMinutes / 60).replace('.', ',')} h/dia`
+          : '—';
+      }
       if (profileGoal)   profileGoal.textContent   = athlete.goal    || '—';
 
       // Check-in
@@ -3098,7 +3162,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
           // leitura entra, e a segunda situação deixa de existir.
           wkePlanCache[athlete.id] = { order: [], days: {}, isNew: true };
         } else {
-        const scale = (athlete.weight_now || 85) / 85;
+        const scale = (athlete.weightCurrentKg || 85) / 85;
         base.order.forEach(function(d) {
           base.days[d].exercises.forEach(function(ex) {
             ex.pr = wkeRound(ex.pr * scale);
@@ -3257,7 +3321,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     function wkeRenderCalcContext() {
       var a = wkeState.athlete;
       var phase = (a && a.phase) ? a.phase : 'Bulking';
-      var weight = (a && a.weight_now) ? a.weight_now : null;
+      var weight = (a && a.weightCurrentKg) ? a.weightCurrentKg : null;
       var chip = document.getElementById('wke-phasechip');
       var wv = document.getElementById('wke-weightval');
       if (chip) {
@@ -4602,7 +4666,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       if (!r) return;
       var sub = document.createElement('span');
       sub.className = 'evo-wk-dates';
-      sub.textContent = r.intervalo + ' \u00b7 ciclo iniciado em ' + a.startDate;
+      sub.textContent = r.intervalo + ' \u00b7 ciclo iniciado em ' + (formatarDataBr(a.startDate) || '—');
       el.appendChild(sub);
     }
 
@@ -5070,7 +5134,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     function nteBuildBasePlan(athlete) {
       // Metas de macro via fórmula parametrizável (nteFormulaConfig)
-      const w = athlete.weight_now || 80;
+      const w = athlete.weightCurrentKg || 80;
       const f = nteGetFormulaForPhase(athlete.phase);
       const target = {
         p: Math.round(w * f.p), c: Math.round(w * f.c), g: Math.round(w * f.g)
@@ -5214,7 +5278,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       if (!ctx) return;
       var a = nteState.athlete;
       var phase = (a && a.phase) ? a.phase : 'Bulking';
-      var weight = (a && a.weight_now) ? a.weight_now : null;
+      var weight = (a && a.weightCurrentKg) ? a.weightCurrentKg : null;
       var chip = document.getElementById('nte-phasechip');
       var wv = document.getElementById('nte-weightval');
       if (chip) {

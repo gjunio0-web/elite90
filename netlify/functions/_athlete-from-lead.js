@@ -16,19 +16,28 @@
 //   - name, email, status ("active"|"checkin_sent"|"awaiting_checkin")
 //   - phone -> NÃO lido pelo M2 hoje; existe para o compartilhamento de plano
 //             por mensagem. Normalizado em E.164 sem "+" (ver toPhoneE164).
-//   - startDate  (DD/MM/YYYY -- parseDate faz str.split("/"))
+//   - startDate  -> Date. Era string "DD/MM/YYYY" (Esquema v3, seção 5); a
+//                   interface formata na leitura, e o cálculo de dia/semana
+//                   do ciclo em promote-lead.ts segue lendo o parâmetro de
+//                   entrada, que continua string — a conversão é só na saída.
 //   - week, day, phase ("Bulking"|"Cutting"|"Diet Break")
-//   - weight_init, weight_now, weight_change
+//   - weightInitialKg, weightCurrentKg -> renomeação pura de weight_init/
+//     weight_now. weight_change SAIU do contrato (Esquema v3, seção 5: é
+//     campo que deixa de existir, derivado de inicial e atual na leitura).
 //
 //   DRAWER > VISÃO GERAL > "Perfil do Atleta"  (openAthleteDrawer, ~l.2285)
-//   - age           -> renderizado como `${age} anos`      => NÚMERO
-//   - height        -> renderizado cru                     => STRING ("1,75 m")
-//   - years_active  -> renderizado como `${years_active} anos` => NÚMERO
-//   - freq          -> renderizado cru                     => STRING ("4x / semana")
-//   - duration      -> renderizado cru                     => STRING ("1,5 h/dia")
-//   - goal          -> renderizado cru                     => STRING (o objetivo)
-//   - flags         -> array de códigos; o M2 filtra por FLAG_META
-//                      (CARDIO | SAUDE | LESAO | TRT_SEM_MEDICO)
+//   TIPOS NATIVOS (Esquema v3, seção 5; conversão de tipos da Fase 2 do plano
+//   de persistência). Idade deixou de ser gravada — é derivada de birthDate
+//   na leitura (princípio P3: o que pode ser derivado não é armazenado).
+//   - birthDate        -> Date | null. A interface formata e deriva a idade.
+//   - heightCm         -> number | null. Metros * 100, arredondado.
+//   - trainingYears    -> number | null. Renomeação pura de years_active.
+//   - weeklyFrequency  -> number | null. Renomeação de freq, sem sufixo de texto.
+//   - dailyMinutes     -> number | null. Horas * 60, arredondado — o campo
+//                         chegava do lead em horas; o esquema pede minutos.
+//   - goal             -> string | null. Sem mudança.
+//   - flags            -> array de códigos; o M2 filtra por FLAG_META
+//                         (CARDIO | SAUDE | LESAO | TRT_SEM_MEDICO)
 //
 //   OUTRAS ABAS
 //   - checkin (null até o 1º check-in), prev, avaliacao, baselinePhotos, planStatus
@@ -50,19 +59,6 @@
 'use strict';
 
 /**
- * Formata uma data como DD/MM/YYYY — formato que atletas.astro espera em
- * startDate (parseDate: const [d, m, y] = str.split("/")).
- * @param {Date} date
- * @returns {string}
- */
-function toBrDate(date) {
-  const dd = String(date.getDate()).padStart(2, '0');
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const yyyy = date.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-}
-
-/**
  * Converte "1,75" ou "1.75" (ou número) em Number. Retorna null se inválido.
  * O TriageModal normaliza os campos *_visual em campos ocultos, mas aceitamos
  * as duas grafias por segurança.
@@ -76,13 +72,21 @@ function toNum(v) {
 }
 
 /**
- * Formata número em pt-BR (separador decimal vírgula), sem casas desnecessárias.
- * @param {number|null} n
- * @returns {string|null}
+ * Converte "DD/MM/AAAA" em Date. Retorna null se ausente, malformada, ou se
+ * a data não existir no calendário (ex.: 31/02/2026) — mesma checagem de
+ * isValidBrDate em promote-lead.ts, aqui devolvendo o valor em vez de um
+ * booleano.
+ * @param {*} str
+ * @returns {Date|null}
  */
-function fmtNum(n) {
-  if (n === null) return null;
-  return String(n).replace('.', ',');
+function parseBrDate(str) {
+  if (!str || typeof str !== 'string') return null;
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(str);
+  if (!m) return null;
+  const [, dd, mm, yyyy] = m;
+  const d = new Date(+yyyy, +mm - 1, +dd);
+  const valida = d.getFullYear() === +yyyy && d.getMonth() + 1 === +mm && d.getDate() === +dd;
+  return valida ? d : null;
 }
 
 /**
@@ -116,22 +120,22 @@ function toPhoneE164(celular, idioma) {
 }
 
 /**
- * Idade a partir de data_nascimento no formato DD/MM/AAAA (formato do
- * TriageModal). Retorna null se ausente ou inválida.
+ * Data de nascimento a partir de data_nascimento no formato DD/MM/AAAA
+ * (formato do TriageModal). Substitui ageFromDob: o Esquema v3 (seção 5)
+ * grava a data de nascimento, não a idade — idade é derivada na leitura,
+ * nunca armazenada (princípio P3). Retorna null se ausente, malformada, no
+ * futuro, ou implausivelmente antiga (mais de 130 anos) — mesma faixa de
+ * sanidade que ageFromDob aplicava sobre o número resultante.
  * @param {string} dob
  * @param {Date} now
- * @returns {number|null}
+ * @returns {Date|null}
  */
-function ageFromDob(dob, now) {
-  if (!dob || typeof dob !== 'string') return null;
-  const parts = dob.split('/');
-  if (parts.length !== 3) return null;
-  const d = Number(parts[0]), m = Number(parts[1]), y = Number(parts[2]);
-  if (!d || !m || !y) return null;
-  let age = now.getFullYear() - y;
-  const antes = now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d);
-  if (antes) age -= 1;
-  return age >= 0 && age < 130 ? age : null;
+function birthDateFromDob(dob, now) {
+  const d = parseBrDate(dob);
+  if (!d) return null;
+  if (d > now) return null;
+  const idadeAprox = now.getFullYear() - d.getFullYear();
+  return idadeAprox >= 0 && idadeAprox < 130 ? d : null;
 }
 
 /**
@@ -150,7 +154,19 @@ function athleteFromLead(lead, avaliacao, opts = {}) {
     throw new Error('athleteFromLead: lead ausente ou inválido.');
   }
   const now = opts.now instanceof Date ? opts.now : new Date();
-  const startDate = opts.startDate || toBrDate(now);
+  // opts.startDate chega como string "DD/MM/AAAA" (mesmo formato que
+  // promote-lead.ts já valida com isValidBrDate antes de chamar este
+  // contrato); aqui é convertida para Date, o tipo que o Esquema v3 (seção 5)
+  // pede. Ausente (o runner de emulação não a informa) cai em `now`.
+  let startDate;
+  if (opts.startDate) {
+    startDate = parseBrDate(opts.startDate);
+    if (!startDate) {
+      throw new Error('athleteFromLead: startDate inválida — esperado "DD/MM/AAAA".');
+    }
+  } else {
+    startDate = now;
+  }
 
   const peso      = toNum(lead.peso);
   const altura    = toNum(lead.altura);
@@ -170,7 +186,7 @@ function athleteFromLead(lead, avaliacao, opts = {}) {
     // recomendado (conta criada, nenhum check-in ainda). Confirmar com o
     // Coach Fernando se esta semântica é a adequada antes de usar em produção.
     status: opts.status || 'awaiting_checkin',
-    startDate,                                              // DD/MM/YYYY
+    startDate,                                              // Date (Esquema v3, seção 5)
     // Vocabulário fechado ('masculino'|'feminino'|'outro'), validado por quem
     // chama (promote-lead.ts) — este contrato só grava o que recebe. Existe
     // para casos de uso de IA que ainda serão construídos sobre este campo.
@@ -186,19 +202,20 @@ function athleteFromLead(lead, avaliacao, opts = {}) {
     phase: opts.phase || 'Bulking',                         // fase inicial do ciclo
 
     // -- Perfil do Atleta (drawer > Visão Geral) --
-    // Tradução pt → en; os campos renderizados "crus" já saem formatados.
-    age:          ageFromDob(lead.data_nascimento, now),    // número (M2 concatena " anos")
-    height:       altura !== null ? `${fmtNum(altura)} m` : null,
-    years_active: tempoAtiv,                                // número (M2 concatena " anos")
-    freq:         freq !== null ? `${fmtNum(freq)}x / semana` : null,
-    duration:     disp !== null ? `${fmtNum(disp)} h/dia`  : null,
-    goal:         lead.objetivo || null,                    // lead.objetivo -> athlete.goal
-    flags:        Array.isArray(lead.score_flags) ? lead.score_flags : [],
+    // Tradução pt → en, em tipo nativo (Esquema v3, seção 5). A camada de
+    // formatação é da interface (princípio P1) — nenhum destes é mais texto
+    // pronto para exibir.
+    birthDate:       birthDateFromDob(lead.data_nascimento, now),  // idade é derivada na leitura
+    heightCm:        altura !== null ? Math.round(altura * 100) : null,
+    trainingYears:   tempoAtiv,                             // renomeação pura de years_active
+    weeklyFrequency: freq,                                  // renomeação pura de freq
+    dailyMinutes:    disp !== null ? Math.round(disp * 60) : null, // disponibilidade_diaria chega em horas
+    goal:            lead.objetivo || null,                 // lead.objetivo -> athlete.goal
+    flags:           Array.isArray(lead.score_flags) ? lead.score_flags : [],
 
     // -- Peso (lista + gráficos) --
-    weight_init:   peso,
-    weight_now:    peso,                                    // no dia 1, inicial == atual
-    weight_change: 0,
+    weightInitialKg: peso,
+    weightCurrentKg: peso,                                  // no dia 1, inicial == atual
 
     // -- Estados iniciais das demais abas --
     checkin:        null,                                   // até o Portal (PRT-05/FN-07) gravar o primeiro
@@ -215,10 +232,11 @@ function athleteFromLead(lead, avaliacao, opts = {}) {
     // No FN-08 real: { stripeSessionId, valor, metodo, paidAt }.
     payment: opts.payment || { emulated: true, source: 'emulate-fn08' },
 
-    createdAt: now.toISOString(),
+    createdAt: now,                                         // Date; era now.toISOString()
+    updatedAt: now,                                          // não existia; Esquema v3 seção 5 pede os dois
     _source:   'emulate-fn08',
     _test:     opts.test !== false,                         // default true — facilita purga de testes
   };
 }
 
-module.exports = { athleteFromLead, toBrDate };
+module.exports = { athleteFromLead, parseBrDate };
