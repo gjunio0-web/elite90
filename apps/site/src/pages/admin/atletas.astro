@@ -2627,6 +2627,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
         const drawer = document.getElementById('athlete-drawer');
         if (!drawer || !drawer.classList.contains('open')) return;
 
+        // Overlays de tela cheia (.evo-overlay: preview de treino/nutrição,
+        // editor de evolução) têm cabeçalho PRÓPRIO que reaproveita a classe
+        // .drawer-header por estilo — não por participar deste arrasto. Sem
+        // esta saída, tocar ali (inclusive no botão "✕" de fechar) iniciava
+        // o arrasto da GAVETA por trás, não do overlay: o toque virava
+        // translateY no painel da gaveta em vez de rolagem/fechamento do
+        // overlay, e podia deixá-lo parcialmente arrastado sem fechar nem
+        // voltar ao lugar — o "preso na parte inferior, não fecha" relatado.
+        if (e.target.closest('.evo-overlay')) return;
+
         // Puxador e cabeçalho: arrasto sempre, não há o que rolar ali.
         if (e.target.closest('.drawer-handle, .drawer-header')) { onTouchStart(e, false); return; }
 
