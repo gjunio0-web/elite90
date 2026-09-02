@@ -207,6 +207,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .drawer-content-wrap::-webkit-scrollbar { width: 4px; }
     .drawer-content-wrap::-webkit-scrollbar-thumb { background: rgba(166,195,0,0.5); border-radius: 2px; }
     .drawer-title { font-family: var(--font-display); font-size: var(--fs-display-md); letter-spacing: var(--tracking-display); color: var(--c-white); text-transform: uppercase; }
+    /* Rótulo externo (Adendo 02 — Delegação): identificador que o delegado
+       externo vê no lugar do nome. Raleway por ser rótulo, não título — o
+       peso visual não deve competir com o nome em Bebas Neue ao lado. */
+    .drawer-external-label { font-family: var(--font-label); font-size: var(--fs-label); color: var(--c-textsub); letter-spacing: var(--tracking-label); margin-left: 8px; }
     .drawer-title span { color: var(--c-lime); }
     .drawer-close { background: none; border: none; color: var(--c-textsub); font-size: 20px; cursor: pointer; line-height: 1; transition: color var(--dur-med) var(--ease-std); }
     .drawer-close:hover { color: var(--c-lime); }
@@ -1224,6 +1228,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       <span class="drawer-handle"></span>
       <div class="drawer-header">
         <span class="drawer-title">Atleta <span id="drawer-athlete-name"></span></span>
+        <span class="drawer-external-label" id="drawer-external-label"></span>
         <!-- Hamburger (mobile) / X (desktop) -->
         <div class="drawer-hamburger-wrap" id="drawer-hamburger-wrap">
           <button class="drawer-hamburger-btn" id="drawer-hamburger-btn" onclick="toggleDrawerMenu()" aria-label="Menu de navegação">
@@ -2663,6 +2668,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
       wke04CurrentAthlete = athlete;
 
       document.getElementById('drawer-athlete-name').textContent = athlete.name;
+      // Rótulo externo (Adendo 02 — Delegação): o que um delegado externo vê
+      // no lugar do nome. Mostrado aqui como referência, não como substituição
+      // — o Coach continua vendo o nome. Atleta promovido antes da Fase 2 e
+      // ainda não alcançado pela rotina de preenchimento mostra o traço.
+      document.getElementById('drawer-external-label').textContent = athlete.externalLabel || '—';
       document.getElementById('overview-cycle-label').innerHTML = `Progresso: <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">Semana ${athlete.week} de 13</span>. Em fase de <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">${athlete.phase}</span>. Iniciado em <span style="color: var(--c-white); font-weight: var(--fw-body-bold); font-size: var(--fs-body-md);">${athlete.startDate || '—'}</span>.`;
       document.getElementById('overview-progress').style.width = `${(athlete.day / 90) * 100}%`;
 
