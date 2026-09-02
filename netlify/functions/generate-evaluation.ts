@@ -5,6 +5,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
 import { getApp, getDb, storageBucketName } from "./_firebase";
+import { calcularIdade } from "./_scoring";
 
 
 async function downloadPhotosAsBase64(
@@ -63,6 +64,11 @@ function buildPrompt(lead: Record<string, any>, previousDocs: string[], hasPhoto
   // O documento é redigido no idioma declarado na ficha. Sem isto, um lead
   // captado pela versão em inglês do site receberia um e-mail em inglês com
   // uma prévia em português — pior que o e-mail inteiro em português.
+  // Idade calculada aqui (mesma lógica de _scoring.ts, não redigida em texto
+  // livre pelo modelo) porque delegar "nascimento em DD/MM/AAAA" ao Gemini
+  // produzia idade sistematicamente subestimada — o modelo não tem garantia
+  // de ancorar a conta na data real de hoje.
+  const idadeCalculada = calcularIdade(lead.data_nascimento ?? "");
   const idiomaSaida = lead.idioma === "en"
     ? "\n- IDIOMA DE SAÍDA: redija TODO o conteúdo das 5 seções em INGLÊS. A terminologia técnica de fisiculturismo deve usar os termos correntes em inglês (body fat, fasted cardio, TRT, bulking, cutting). As instruções acima continuam em português; apenas o texto produzido muda de idioma."
     : "";
@@ -75,7 +81,7 @@ Redija um documento de Diretrizes de Preparação e Planejamento Estratégico do
 
 DADOS DO ATLETA:
 - Nome: ${lead.nome}
-- Idade aproximada: ${lead.data_nascimento ? `nascimento em ${lead.data_nascimento}` : "não informada"}
+- Idade: ${idadeCalculada !== null ? `${idadeCalculada} anos` : "não informada"}
 - Altura: ${lead.altura || "não informada"}
 - Peso: ${lead.peso || "não informado"}
 - Objetivo principal: ${lead.objetivo || "não informado"}
