@@ -93,6 +93,18 @@ export const ACOES = [
   "atleta.promovido",
   "plano.compartilhado",
   "base.publicada",
+  // Delegação (Adendo 02, seção 7.2 — AD-10). Entram as TRÊS do ciclo de vida do
+  // cadastro profissional, que são as únicas com especificação de conteúdo
+  // publicada (seção 7.3 daquele adendo): ator, alvo, origem e o que pode ir em
+  // `detalhe`. As outras sete do AD-10 — sugestao.submetida, sugestao.devolvida,
+  // sugestao.recusada, carteira.atribuida, carteira.encerrada, janela.ativada e
+  // janela.encerrada — ficam RESERVADAS aqui em comentário, no mesmo padrão da
+  // reserva do M2 acima, até o adendo publicar o conteúdo de cada uma. Nomear a
+  // ação sem dizer o que ela grava é convite a gravar valor de campo, que a regra
+  // de `detalhe` proíbe por conformidade.
+  "profissional.cadastrado",
+  "profissional.editado",
+  "profissional.desativado",
 ] as const;
 
 export type Acao = (typeof ACOES)[number];
