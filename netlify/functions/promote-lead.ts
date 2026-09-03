@@ -221,9 +221,10 @@ export const handler = async (event: any) => {
     }
 
     // -- Guarda de idempotência --
-    // Sobrescrever devolveria o atleta ao dia 1 do ciclo, apagando semana, dia
-    // e peso atual já acumulados. O caso do atleta excluído depois (referência
-    // órfã na ficha) segue adiante e repromove.
+    // Sobrescrever devolveria startDate a hoje, deslocando o dia e a semana
+    // derivados (Esquema v3, seção 5) e apagando o peso atual já acumulado.
+    // O caso do atleta excluído depois (referência órfã na ficha) segue
+    // adiante e repromove.
     if (lead.convertedAt && lead.convertedAthleteUid) {
       const existente = await db.collection("athletes").doc(lead.convertedAthleteUid).get();
       if (existente.exists) {
@@ -339,22 +340,6 @@ export const handler = async (event: any) => {
     // Fotos do Dia 1 = as mesmas enviadas na ficha de triagem (decisão 15/08/2026).
     athleteDoc.baselinePhotos = Array.isArray(lead.fotos_paths) ? lead.fotos_paths : [];
 
-    // DATA NO PASSADO É INTENCIONAL (decisão de 15/08/2026): permite regularizar
-    // quem já começou o acompanhamento antes de existir registro no sistema.
-    // Por isso semana e dia NÃO podem ficar fixos em 1 como o contrato entrega por
-    // padrão — ficariam contradizendo a própria data de início desde o instante da
-    // criação. São derivados aqui, limitados ao tamanho do ciclo (13 semanas / 90
-    // dias). Data futura mantém dia 1: o ciclo ainda não começou.
-    const [ddS, mmS, yyyyS] = startDate.split("/").map(Number);
-    const inicio = new Date(yyyyS, mmS - 1, ddS);
-    const hoje = new Date();
-    const diasCorridos = Math.floor(
-      (Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
-       - Date.UTC(inicio.getFullYear(), inicio.getMonth(), inicio.getDate())) / 86400000
-    );
-    const dia = Math.min(90, Math.max(1, diasCorridos + 1));
-    athleteDoc.day  = dia;
-    athleteDoc.week = Math.min(13, Math.ceil(dia / 7));
     athleteDoc.payment         = null;   // entrada por decisão do Coach, não por pagamento
     athleteDoc._source         = "promote-lead";
     athleteDoc.promotedBy      = caller.uid;

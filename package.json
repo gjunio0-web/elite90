@@ -24,6 +24,7 @@
   "dependencies": {
     "@astrojs/check": "^0.9.9",
     "@elite90/busca": "*",
+    "@elite90/situacao": "*",
     "@faker-js/faker": "^10.5.0",
     "firebase-admin": "^12.7.0",
     "typescript": "^6.0.3"

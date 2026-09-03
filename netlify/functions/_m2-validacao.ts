@@ -9,10 +9,11 @@
 // faz com CAMPOS_EDITAVEIS.
 //
 // ESCOPO ATUAL: o rascunho de plano (Fase 1 do plano de persistência), o
-// rótulo externo do atleta (Fase 2, Adendo 02 — Delegação) e o cadastro
-// profissional com a carteira de atribuições (Fase 4-B, Adendo 02, seções 4.1
-// e 4.2). As demais estruturas do M2 — check-in, série de peso, avaliação
-// física, relatório — entram aqui quando as fases correspondentes forem
+// rótulo externo do atleta (Fase 2, Adendo 02 — Delegação), a situação de
+// acompanhamento derivada (Fase 2, Adendo 06) e o cadastro profissional com
+// a carteira de atribuições (Fase 4-B, Adendo 02, seções 4.1 e 4.2). As
+// demais estruturas do M2 — check-in, série de peso, avaliação física,
+// relatório — entram aqui quando as fases correspondentes forem
 // implementadas.
 // Não antecipar: validar estrutura que ainda não é gravada envelhece sozinho.
 
@@ -25,6 +26,15 @@ const { EXTERNAL_LABEL_PATTERN, isExternalLabel } = externalLabelModule as {
   isExternalLabel: (v: unknown) => boolean;
 };
 export { EXTERNAL_LABEL_PATTERN };
+
+// Situação de acompanhamento (Adendo 06, DA-01 a DA-06, DA-08). Único código
+// consumido também pelo painel — via ?raw em atletas.astro, não por import
+// (navegador não resolve import relativo do corpo da página; ver o
+// cabeçalho de packages/situacao/nucleo.js). Aqui é só reexportado, mesmo
+// arranjo do rótulo externo acima.
+import { SITUACOES, SITUACAO_LABEL, derivarSituacao } from "@elite90/situacao";
+export { SITUACOES, SITUACAO_LABEL, derivarSituacao };
+export type Situacao = (typeof SITUACOES)[number];
 
 /** Tipos de plano. Fechado — o esquema de persistência v3, seção 8, define dois. */
 export const PLAN_TYPES = ["training", "nutrition"] as const;

@@ -13,14 +13,16 @@
 // Levantamento exaustivo dos acessos athlete.* / a.* no arquivo:
 //
 //   LISTA (tabela + KPIs + CSV)
-//   - name, email, status ("active"|"checkin_sent"|"awaiting_checkin")
+//   - name, email (status SAIU — Adendo 06, DA-01: derivado na leitura,
+//     nunca gravado; ver @elite90/situacao)
 //   - phone -> NÃO lido pelo M2 hoje; existe para o compartilhamento de plano
 //             por mensagem. Normalizado em E.164 sem "+" (ver toPhoneE164).
 //   - startDate  -> Date. Era string "DD/MM/YYYY" (Esquema v3, seção 5); a
 //                   interface formata na leitura, e o cálculo de dia/semana
 //                   do ciclo em promote-lead.ts segue lendo o parâmetro de
 //                   entrada, que continua string — a conversão é só na saída.
-//   - week, day, phase ("Bulking"|"Cutting"|"Diet Break")
+//   - phase ("Bulking"|"Cutting"|"Diet Break") — week e day SAÍRAM
+//     (Esquema v3, seção 5: deriváveis de startDate)
 //   - weightInitialKg, weightCurrentKg -> renomeação pura de weight_init/
 //     weight_now. weight_change SAIU do contrato (Esquema v3, seção 5: é
 //     campo que deixa de existir, derivado de inicial e atual na leitura).
@@ -146,7 +148,7 @@ function birthDateFromDob(dob, now) {
  * @param {object|null} avaliacao - documento correspondente em "avaliacoes"
  *   (opcional; usado apenas para rastrear o token da avaliação de origem).
  * @param {object} [opts] - { uid, leadId, payment, startDate, phase, genero,
- *   externalLabel, status, now, test }.
+ *   externalLabel, now, test }. `status` não é mais aceito (Adendo 06, DA-01).
  * @returns {object} documento pronto para gravar em athletes/{uid}.
  */
 function athleteFromLead(lead, avaliacao, opts = {}) {
@@ -182,10 +184,12 @@ function athleteFromLead(lead, avaliacao, opts = {}) {
     // formulário — ao contrário de height/freq/duration, que ficaram como texto
     // de exibição e são a ressalva registrada no topo deste arquivo.
     phone:  toPhoneE164(lead.celular, lead.idioma),
-    // PONTO DE DECISÃO DE NEGÓCIO: "awaiting_checkin" é o estado inicial
-    // recomendado (conta criada, nenhum check-in ainda). Confirmar com o
-    // Coach Fernando se esta semântica é a adequada antes de usar em produção.
-    status: opts.status || 'awaiting_checkin',
+    // Adendo 06, DA-01: o campo status foi removido (era "awaiting_checkin"
+    // sempre, sem comportamento algum — a situação de acompanhamento agora é
+    // derivada na leitura por @elite90/situacao, a partir de createdAt e do
+    // último check-in enviado). O ponto de decisão de negócio que pedia
+    // confirmação do Coach saiu junto: o adendo encerrou a questão por outro
+    // caminho, removendo o campo em vez de confirmar o vocabulário.
     startDate,                                              // Date (Esquema v3, seção 5)
     // Vocabulário fechado ('masculino'|'feminino'|'outro'), validado por quem
     // chama (promote-lead.ts) — este contrato só grava o que recebe. Existe
@@ -196,9 +200,11 @@ function athleteFromLead(lead, avaliacao, opts = {}) {
     // que a rotina única de preenchimento ainda não passou por este atleta.
     externalLabel: opts.externalLabel || null,
 
-    // -- Progressão de ciclo (lista + Visão Geral) --
-    week:  1,                                               // semana 1 de 13
-    day:   1,                                               // dia 1 de 90
+    // -- Progressão de ciclo --
+    // week e day saíram (Esquema v3, seção 5: deriváveis de startDate, como
+    // já ocorre com a idade). O painel já os recalculava a cada leitura via
+    // normalizarCiclo, descartando o valor gravado sempre que startDate era
+    // válido — a redundância era silenciosa, nunca visível na tela.
     phase: opts.phase || 'Bulking',                         // fase inicial do ciclo
 
     // -- Perfil do Atleta (drawer > Visão Geral) --

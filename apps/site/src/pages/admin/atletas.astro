@@ -16,6 +16,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
 // funcionar tanto aqui quanto importado por netlify/functions/ e scripts/.
 // Ver M2-BUSCA-DE-ALIMENTOS-SEM-PONTUACAO-v1.1.md.
 import buscaNucleo from '@elite90/busca/nucleo.js?raw';
+// Mesmo arranjo acima, para a situação de acompanhamento (Adendo 06). Ver o
+// cabeçalho de packages/situacao/nucleo.js.
+import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -110,9 +113,10 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
     }
     .status-dropdown-menu li button:hover { background: rgba(255,255,255,0.06); }
     .status-dropdown-menu li button[data-value=""]                { color: var(--c-textsub); }
-    .status-dropdown-menu li button[data-value="active"]          { color: var(--c-status-active); }
-    .status-dropdown-menu li button[data-value="checkin_sent"]    { color: var(--c-status-checkin); }
-    .status-dropdown-menu li button[data-value="awaiting_checkin"]{ color: var(--c-status-pending); }
+    .status-dropdown-menu li button[data-value="recem-promovido"] { color: var(--c-status-progress); }
+    .status-dropdown-menu li button[data-value="no-prazo"]        { color: var(--c-status-active); }
+    .status-dropdown-menu li button[data-value="acima-7-dias"]    { color: var(--c-status-warning); }
+    .status-dropdown-menu li button[data-value="acima-14-dias"]   { color: var(--c-status-rejected); }
     .toolbar-count { font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-cta); text-transform: uppercase; color: var(--c-textsub); margin-left: auto; }
 
     /* ── TABLE (PADRÃO M1) ── */
@@ -174,9 +178,13 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
 
     /* Status Badge */
     .status-badge { display: inline-block; padding: var(--space-2) var(--space-3); border-radius: var(--radius-pill); font-size: 0.65rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-label); }
-    .status-badge.active { background: rgba(166, 195, 0, 0.12); color: var(--c-status-active); border: 1px solid var(--c-status-active); }
-    .status-badge.checkin_sent { background: rgba(230, 126, 34, 0.12); color: var(--c-status-checkin); border: 1px solid var(--c-status-checkin); }
-    .status-badge.awaiting_checkin { background: rgba(241, 196, 15, 0.12); color: var(--c-status-pending); border: 1px solid var(--c-status-pending); }
+    /* Situação de acompanhamento (Adendo 06, DA-05) — gradiente por urgência,
+       tokens já existentes, nenhum novo: azul (neutro) -> lima (em dia) ->
+       âmbar (atenção) -> vermelho (urgente). */
+    .status-badge.recem-promovido { background: rgba(74, 144, 217, 0.12); color: var(--c-status-progress); border: 1px solid var(--c-status-progress); }
+    .status-badge.no-prazo { background: rgba(166, 195, 0, 0.12); color: var(--c-status-active); border: 1px solid var(--c-status-active); }
+    .status-badge.acima-7-dias { background: rgba(234, 179, 8, 0.12); color: var(--c-status-warning); border: 1px solid var(--c-status-warning); }
+    .status-badge.acima-14-dias { background: rgba(192, 57, 43, 0.12); color: var(--c-status-rejected); border: 1px solid var(--c-status-rejected); }
 
     /* Coluna STATUS */
     .td--status { width: 18%; text-align: left; }
@@ -1178,16 +1186,20 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
       <div class="stat-card__value" id="kpi-total">12</div>
     </div>
     <div class="stat-card">
-      <div class="stat-card__label">Ativo</div>
-      <div class="stat-card__value" id="kpi-active" style="color: var(--c-lime);">—</div>
+      <div class="stat-card__label">Recém-promovido</div>
+      <div class="stat-card__value" id="kpi-recem-promovido" style="color: var(--c-status-progress);">—</div>
     </div>
     <div class="stat-card">
-      <div class="stat-card__label">Check-in Enviado</div>
-      <div class="stat-card__value" id="kpi-checkin" style="color: var(--c-status-checkin);">—</div>
+      <div class="stat-card__label">Check-in no Prazo</div>
+      <div class="stat-card__value" id="kpi-no-prazo" style="color: var(--c-lime);">—</div>
     </div>
     <div class="stat-card">
-      <div class="stat-card__label">Aguardando Check-in</div>
-      <div class="stat-card__value" id="kpi-awaiting" style="color: var(--c-status-pending);">—</div>
+      <div class="stat-card__label">Acima de 7 Dias</div>
+      <div class="stat-card__value" id="kpi-acima-7-dias" style="color: var(--c-status-warning);">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Acima de 14 Dias</div>
+      <div class="stat-card__value" id="kpi-acima-14-dias" style="color: var(--c-status-rejected);">—</div>
     </div>
   </div>
 
@@ -1199,9 +1211,10 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
     </div>
     <select class="filter-select" id="filter-status">
       <option value="">Todos</option>
-      <option value="active">Ativo</option>
-      <option value="checkin_sent">Check-in Enviado</option>
-      <option value="awaiting_checkin">Aguardando Check-in</option>
+      <option value="recem-promovido">Recém-promovido</option>
+      <option value="no-prazo">Check-in no Prazo</option>
+      <option value="acima-7-dias">Acima de 7 Dias</option>
+      <option value="acima-14-dias">Acima de 14 Dias</option>
     </select>
     <button type="button" id="filter-dropdown-btn" class="filter-select" aria-haspopup="listbox" aria-label="Filtrar por status">
       <span id="filter-dropdown-label">Todos</span>
@@ -1266,6 +1279,10 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
           <div class="drawer-row">
             <span class="drawer-label">Início do Programa</span>
             <span class="drawer-value" id="profile-start">—</span>
+          </div>
+          <div class="drawer-row">
+            <span class="drawer-label">Situação</span>
+            <span class="drawer-value" id="profile-situacao">—</span>
           </div>
           <div class="drawer-row">
             <span class="drawer-label">Idade</span>
@@ -2148,6 +2165,7 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
     }
 </script>
 <script is:inline set:html={buscaNucleo}></script>
+<script is:inline set:html={situacaoNucleo}></script>
 <script is:inline>
     // ── DOBRA DE BUSCA, TERMOS E CASAMENTO ──
     // dobraBusca, termosBusca, casaTodosTermos e pontuaAlimento vêm de
@@ -2399,6 +2417,29 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
       return FASE_LABEL[fase] || fase || '—';
     }
 
+    // Situação de acompanhamento (Adendo 06). Ponto único de chamada a
+    // derivarSituacao (packages/situacao, injetado acima) — antes da Fase 4,
+    // não existe subcoleção de check-ins, então o segundo argumento é sempre
+    // null (DA-06: derivação parcial aceita, contando a partir da promoção).
+    // Quando a Fase 4 existir, só este função muda — nenhum dos nove pontos
+    // de exibição que a chamam.
+    function situacaoDoAtleta(athlete) {
+      const createdAt = athlete && parseDate(athlete.createdAt);
+      if (!createdAt) return null;
+      return derivarSituacao(createdAt, null);
+    }
+
+    // Os quatro indicadores do topo são atualizados em dois pontos do painel
+    // (Adendo 06, §6) — mesma duplicação que já existia para o status antigo.
+    function atualizarKpisSituacao(lista) {
+      const contagem = { 'recem-promovido': 0, 'no-prazo': 0, 'acima-7-dias': 0, 'acima-14-dias': 0 };
+      lista.forEach(a => { const s = situacaoDoAtleta(a); if (s) contagem[s]++; });
+      document.getElementById('kpi-recem-promovido').textContent = contagem['recem-promovido'];
+      document.getElementById('kpi-no-prazo').textContent = contagem['no-prazo'];
+      document.getElementById('kpi-acima-7-dias').textContent = contagem['acima-7-dias'];
+      document.getElementById('kpi-acima-14-dias').textContent = contagem['acima-14-dias'];
+    }
+
     // Fase 2 do plano de persistência (Esquema v3, seção 5): startDate deixou
     // de ser string "DD/MM/AAAA" e passou a Timestamp do Firestore. O
     // Firestore Web SDK devolve um objeto com .toDate(); um valor já
@@ -2525,24 +2566,21 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
     function atualizarLista() {
       renderTable();
       document.getElementById('kpi-total').textContent = athletes.length;
-      document.getElementById('kpi-active').textContent = athletes.filter(a => a.status === 'active').length;
-      document.getElementById('kpi-checkin').textContent = athletes.filter(a => a.status === 'checkin_sent').length;
-      document.getElementById('kpi-awaiting').textContent = athletes.filter(a => a.status === 'awaiting_checkin').length;
+      atualizarKpisSituacao(athletes);
       renderIcons();
       const btn = document.querySelector('.btn-action-outline');
       if (btn) { btn.style.opacity = '0.5'; setTimeout(() => btn.style.opacity = '', 400); }
     }
 
     function exportarCSV() {
-      const cols = ['ID','Nome','Email','Fase','Peso Inicial (kg)','Peso Atual (kg)','Variação','Status','Início','Semana'];
-      const statusLabel = { active: 'Ativo', checkin_sent: 'Check-in Enviado', awaiting_checkin: 'Aguardando Check-in' };
+      const cols = ['ID','Nome','Email','Fase','Peso Inicial (kg)','Peso Atual (kg)','Variação','Situação','Início','Semana'];
       const rows = filteredAthletes.map(a => [
         a.id, a.name, a.email, rotuloFase(a.phase),
         a.weightInitialKg || '', a.weightCurrentKg || '',
         // weight_change saiu do contrato (Esquema v3, seção 5) — derivado aqui,
         // no único ponto que o lia, em vez de gravado.
         (a.weightInitialKg != null && a.weightCurrentKg != null) ? (a.weightCurrentKg - a.weightInitialKg) : '',
-        statusLabel[a.status] || a.status, formatarDataBr(a.startDate) || '', a.week || ''
+        SITUACAO_LABEL[situacaoDoAtleta(a)] || '', formatarDataBr(a.startDate) || '', a.week || ''
       ]);
       const csv = [cols, ...rows].map(r =>
         r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')
@@ -2560,9 +2598,7 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
 
       // ── KPIs dinâmicos ──
       document.getElementById('kpi-total').textContent = athletes.length;
-      document.getElementById('kpi-active').textContent = athletes.filter(a => a.status === 'active').length;
-      document.getElementById('kpi-checkin').textContent = athletes.filter(a => a.status === 'checkin_sent').length;
-      document.getElementById('kpi-awaiting').textContent = athletes.filter(a => a.status === 'awaiting_checkin').length;
+      atualizarKpisSituacao(athletes);
 
       // ── Contador filtrado ──
       const countEl = document.getElementById('athletes-count');
@@ -2576,12 +2612,9 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
       const today = new Date();
       
       tbody.innerHTML = filteredAthletes.map(athlete => {
-        const statusText = {
-          'active': 'ATIVO',
-          'checkin_sent': 'CHECK-IN ENVIADO',
-          'awaiting_checkin': 'AGUARDANDO CHECK-IN'
-        }[athlete.status];
-        
+        const situacao = situacaoDoAtleta(athlete);
+        const situacaoText = SITUACAO_LABEL[situacao] || '—';
+
         return `
         <tr class="athlete-row">
           <td class="td--date">${formatarDataBr(athlete.startDate) || '—'}</td>
@@ -2591,7 +2624,7 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
           </td>
           <td class="td--cycle">${athlete.day}/90</td>
           <td class="td--status">
-            <span class="status-badge ${athlete.status}">${statusText}</span>
+            <span class="status-badge ${situacao || ''}">${situacaoText}</span>
           </td>
           <td class="td--progress">
             <div class="progress-bar">
@@ -2746,6 +2779,7 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
 
       // Perfil do Atleta
       const profileStart  = document.getElementById('profile-start');
+      const profileSituacao = document.getElementById('profile-situacao');
       const profileAge    = document.getElementById('profile-age');
       const profileGenero = document.getElementById('profile-genero');
       const profileHeight = document.getElementById('profile-height');
@@ -2757,6 +2791,12 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
       // exibição mapeado aqui, não invertido na gravação.
       const GENERO_LABEL = { masculino: 'Masculino', feminino: 'Feminino', outro: 'Outro' };
       if (profileStart)  profileStart.textContent  = formatarDataBr(athlete.startDate) || '—';
+      if (profileSituacao) {
+        const situacao = situacaoDoAtleta(athlete);
+        profileSituacao.innerHTML = situacao
+          ? `<span class="status-badge ${situacao}">${SITUACAO_LABEL[situacao]}</span>`
+          : '—';
+      }
       // Idade não é mais gravada — deriva-se de birthDate na leitura
       // (Esquema v3, princípio P3; Fase 2 removeu athlete.age).
       if (profileAge) {
@@ -5907,8 +5947,8 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
     });
 
     document.getElementById('filter-status').addEventListener('change', (e) => {
-      const status = e.target.value;
-      filteredAthletes = status ? athletes.filter(a => a.status === status) : [...athletes];
+      const situacao = e.target.value;
+      filteredAthletes = situacao ? athletes.filter(a => situacaoDoAtleta(a) === situacao) : [...athletes];
       renderTable();
     });
 
@@ -5935,12 +5975,13 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
         ? `${r.bottom + 4}px`
         : `${r.top - menuH - 4}px`;
     }
-    const FILTER_LABELS = { '': 'Todos', active: 'Ativo', checkin_sent: 'Check-in Enviado', awaiting_checkin: 'Aguardando Check-in' };
+    const FILTER_LABELS = { '': 'Todos', 'recem-promovido': 'Recém-promovido', 'no-prazo': 'Check-in no Prazo', 'acima-7-dias': 'Acima de 7 Dias', 'acima-14-dias': 'Acima de 14 Dias' };
     const __filterMenu = __createMenu([
       { value: '', label: 'Todos' },
-      { value: 'active', label: 'Ativo' },
-      { value: 'checkin_sent', label: 'Check-in Enviado' },
-      { value: 'awaiting_checkin', label: 'Aguardando Check-in' },
+      { value: 'recem-promovido', label: 'Recém-promovido' },
+      { value: 'no-prazo', label: 'Check-in no Prazo' },
+      { value: 'acima-7-dias', label: 'Acima de 7 Dias' },
+      { value: 'acima-14-dias', label: 'Acima de 14 Dias' },
     ]);
     function __closeFilterMenu() { __filterMenu.hidden = true; }
     document.addEventListener('click', (e) => {
