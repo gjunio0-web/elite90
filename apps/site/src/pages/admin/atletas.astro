@@ -11,6 +11,11 @@ import '@fontsource/montserrat/700.css';
 import '../../styles/tokens.css';
 import '../../styles/global.css';
 import AdminHeader from '../../components/AdminHeader.astro';
+// Injetado como script clássico logo antes do <script is:inline> principal
+// (ver mais abaixo) — nucleo.js não tem import/export de propósito, para
+// funcionar tanto aqui quanto importado por netlify/functions/ e scripts/.
+// Ver M2-BUSCA-DE-ALIMENTOS-SEM-PONTUACAO-v1.1.md.
+import buscaNucleo from '@elite90/busca/nucleo.js?raw';
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -2142,23 +2147,25 @@ import AdminHeader from '../../components/AdminHeader.astro';
       sm('metric-vtaper',(vtL.perimetro_ombros/vtL.perimetro_cintura).toFixed(2).replace('.',',')+' x');
     }
 </script>
+<script is:inline set:html={buscaNucleo}></script>
 <script is:inline>
-    // ── DOBRA DE BUSCA: minúsculas E sem acento ──
-    // As três buscas do painel (exercícios, alimentos e atletas) comparavam com
-    // .toLowerCase() apenas. Acento não é removido por lowercase, então "tric"
-    // e "tríc" eram cadeias diferentes: 39% dos 519 exercícios têm diacrítico
-    // no nome, e metade dos grupos (Abdômen, Antebraço, Tríceps, Bíceps)
-    // também. Buscar "biceps" devolvia zero resultado — e "tric" devolvia UM,
-    // "Flexão Pliométrica sobre Kettlebells", que casou por acaso dentro de
-    // "Pliométrica". Resposta errada com cara de resposta certa.
+    // ── DOBRA DE BUSCA, TERMOS E CASAMENTO ──
+    // dobraBusca, termosBusca, casaTodosTermos e pontuaAlimento vêm de
+    // @elite90/busca (packages/busca/nucleo.js), injetado como script clássico
+    // logo acima — não por <script type="module"> import, porque estas
+    // funções são chamadas por dezenas de atributos onclick="…"/oninput="…"
+    // espalhados pela página, o que só funciona com o escopo global que um
+    // script clássico dá automaticamente (o único type="module" da página,
+    // mais abaixo, é o guard de autenticação, que não expõe nada ao escopo
+    // global por desenho). Mesma fonte usada pelas funções Netlify e pelos
+    // scripts de carga — ver M2-BUSCA-DE-ALIMENTOS-SEM-PONTUACAO-v1.1.md.
     //
-    // NFD separa a letra do sinal ("í" vira "i" + acento agudo combinante); o
-    // intervalo U+0300–U+036F é o bloco desses sinais, e removê-lo deixa a
-    // letra base. Vale para os dois lados da comparação: quem digita com
-    // acento continua encontrando o mesmo, e quem digita sem para de ser punido.
-    function dobraBusca(texto) {
-      return String(texto ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-    }
+    // Histórico: até 02/09/2026 esta função era uma cópia local que só
+    // removia acento (NFD, intervalo combinante U+0300–U+036F) e caixa, sem
+    // tratar pontuação — por isso "arroz integral" não achava "Arroz,
+    // integral, cozido" no plano nutricional (precisava da vírgula). A cópia
+    // foi substituída pela versão do pacote compartilhado, que também troca
+    // pontuação por espaço.
 
     // ── MENSAGEM DE FALHA DE ACESSO AO FIRESTORE ──
     // ESPELHA a função de mesmo nome em fichas.astro — não importa de um
@@ -5023,6 +5030,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
           return {
             id: a.id,
             name: a.nomeExibicao,
+            // Forma já normalizada para busca (D-03): grava sem pontuação,
+            // gerada pelo servidor quando o item é criado ou renomeado. Itens
+            // antigos sem este campo caem no fallback dobraBusca(f.name) em
+            // nteRunFoodSearch, que já trata pontuação também.
+            busca: a.nomeBusca || null,
             kcal: Number(mac.kcal) || 0,
             p: Number(mac.proteinaG) || 0,
             c: Number(mac.carboidratoG) || 0,
@@ -5617,10 +5629,14 @@ import AdminHeader from '../../components/AdminHeader.astro';
       nteSearchTimer = setTimeout(nteRunFoodSearch, 200); // debounce 200ms
     }
     function nteRunFoodSearch() {
-      const q = dobraBusca(document.getElementById('nte-search-input').value.trim());
+      const bruto = document.getElementById('nte-search-input').value.trim();
+      const termos = termosBusca(bruto);
+      const consultaNormalizada = termos.join(' ');
       const res = document.getElementById('nte-search-results');
       nteSearchSelIdx = -1;
-      if (q.length < 3) {
+      // D-06: mínimo de 3 letras somadas entre os termos, sem contar espaços
+      // — "ab" não busca, "ab c" busca.
+      if (termos.join('').length < 3) {
         nteSearchResults = [];
         res.innerHTML = '<div class="wke-search-hint">Digite ao menos 3 letras para buscar.</div>';
         return;
@@ -5639,11 +5655,25 @@ import AdminHeader from '../../components/AdminHeader.astro';
           : '<div class="wke-search-hint">Nenhum alimento revisado pelo Coach chegou a esta publicação.</div>';
         return;
       }
-      nteSearchResults = NTE_FOOD_DB.filter(function(f) {
-        return dobraBusca(f.name).includes(q);
-      }).slice(0, 10); // top 10
+      nteSearchResults = NTE_FOOD_DB
+        .map(function(f) {
+          const nomeNormalizado = dobraBusca(f.busca || f.name);
+          return { f: f, nomeNormalizado: nomeNormalizado };
+        })
+        .filter(function(x) {
+          return casaTodosTermos(x.nomeNormalizado, termos);
+        })
+        .sort(function(a, b) {
+          const pa = pontuaAlimento(a.nomeNormalizado, termos, consultaNormalizada);
+          const pb = pontuaAlimento(b.nomeNormalizado, termos, consultaNormalizada);
+          if (pb !== pa) return pb - pa;
+          if (a.f.name.length !== b.f.name.length) return a.f.name.length - b.f.name.length;
+          return a.f.name.localeCompare(b.f.name, 'pt-BR');
+        })
+        .slice(0, 10) // top 10
+        .map(function(x) { return x.f; });
       if (!nteSearchResults.length) {
-        res.innerHTML = '<div class="wke-search-hint">Nenhum alimento encontrado para "' + q + '".</div>';
+        res.innerHTML = '<div class="wke-search-hint">Nenhum alimento encontrado para "' + bruto + '".</div>';
         return;
       }
       res.innerHTML = nteSearchResults.map(function(f, i) {

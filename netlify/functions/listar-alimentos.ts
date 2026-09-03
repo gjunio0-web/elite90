@@ -31,7 +31,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
-import { CATEGORIAS, categoriaValida, dobraBusca, macrosFaltando } from "./_vocabulario-alimentos";
+import { CATEGORIAS, categoriaValida, dobraBusca, termosBusca, casaTodosTermos, macrosFaltando } from "./_vocabulario-alimentos";
 
 const COLECAO = "foods";
 const POR_PAGINA_PADRAO = 25;
@@ -76,11 +76,17 @@ export function filtrarEPaginar<T extends ItemCatalogo>(
   // campos ainda vazios, não o inverso de nenhum outro filtro.
   if (o.semMedidaCaseira) itens = itens.filter((a) => !a.medidaCaseira);
 
-  const busca = dobra(o.busca).trim();
-  if (busca) {
+  // Casamento por termos (D-01/D-02, M2-BUSCA-DE-ALIMENTOS-SEM-PONTUACAO-v1.1.md):
+  // cada termo da consulta precisa aparecer no nome, independente de ordem e
+  // de pontuação — "arroz integral" acha "Arroz, integral, cozido" sem
+  // exigir a vírgula. dobra() já normaliza pontuação (vem de @elite90/busca).
+  const termos = termosBusca(o.busca ?? "");
+  if (termos.length) {
     // nome (o nome de origem da TACO) além de nomeExibicao: se o Coach já
     // renomeou um item, buscar pelo nome oficial ainda precisa achá-lo.
-    itens = itens.filter((a) => dobra(a.nomeExibicao).includes(busca) || dobra(a.nome).includes(busca));
+    itens = itens.filter(
+      (a) => casaTodosTermos(dobra(a.nomeExibicao), termos) || casaTodosTermos(dobra(a.nome), termos)
+    );
   }
 
   itens = [...itens].sort((a, b) => String(a.nomeExibicao).localeCompare(String(b.nomeExibicao), "pt-BR"));
@@ -127,7 +133,7 @@ export const handler = async (event: any) => {
 
   const pagina = Math.max(1, Number(corpo.pagina) || 1);
   const porPagina = Math.min(POR_PAGINA_MAX, Math.max(1, Number(corpo.porPagina) || POR_PAGINA_PADRAO));
-  const busca = dobra(corpo.busca).trim();
+  const busca = typeof corpo.busca === "string" ? corpo.busca : "";
   const semMedidaCaseira = corpo.semMedidaCaseira === true;
 
   try {

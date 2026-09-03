@@ -14,17 +14,19 @@
 // DOCUMENTO, não só os campos do corpo: a mesma requisição de editar é válida
 // para um item e recusada para outro, dependendo de onde ele veio.
 //
-// DUPLICAÇÃO CONHECIDA, E POR QUE ELA EXISTE HOJE
-// FONTE_TACO precisa ser exatamente a string gravada por
-// scripts/carregar-alimentos.mjs ('taco-4ed-2011'), e normalizarNomeBusca
-// precisa produzir o mesmo valor que a função normalizarBusca de lá. Nenhuma
-// função deste projeto importa de fora de netlify/functions/ — mesma fronteira
-// registrada no cabeçalho de _vocabulario-exercicios.ts, mesma escolha aqui.
+// dobraBusca E normalizarNomeBusca VÊM DE @elite90/busca (packages/busca)
+// (M2-BUSCA-DE-ALIMENTOS-SEM-PONTUACAO-v1.1.md, 02/09/2026). Antes eram
+// definidas aqui e duplicadas em scripts/carregar-alimentos.mjs; a
+// duplicação foi eliminada movendo as duas para o pacote compartilhado, sem
+// alterar o texto delas — os documentos já gravados continuam válidos.
 //
-// SE VOCÊ ALTERAR FONTE_TACO OU normalizarNomeBusca AQUI, ALTERE TAMBÉM EM
-// scripts/carregar-alimentos.mjs. Um valor fora de sincronia faz a próxima
-// carga reescrever, em silêncio, o que o Coach acabou de editar pela tela — ou
-// faz a busca da tela de curadoria divergir da busca do catálogo publicado.
+// DUPLICAÇÃO CONHECIDA QUE PERMANECE
+// FONTE_TACO ainda precisa ser exatamente a string gravada por
+// scripts/carregar-alimentos.mjs ('taco-4ed-2011'). Nenhuma função deste
+// projeto importa de fora de netlify/functions/ além de @elite90/busca —
+// mesma fronteira registrada no cabeçalho de _vocabulario-exercicios.ts, que
+// continua valendo para FONTE_TACO. SE VOCÊ ALTERAR FONTE_TACO AQUI, ALTERE
+// TAMBÉM EM scripts/carregar-alimentos.mjs.
 //
 // CATEGORIAS: as 15 categorias da TACO, conferidas contra o arquivo-fonte real
 // (scripts/dados-alimentos/alimentos-fonte.json, carga de 26/08/2026). Não são
@@ -93,23 +95,18 @@ const inclui = (lista: readonly string[], v: unknown) => typeof v === 'string' &
  * coleção, e duplicar uma função pura de duas linhas custa menos do que abrir
  * uma dependência cruzada entre os dois vocabulários.
  */
-export const dobraBusca = (texto: unknown) =>
-  String(texto ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+export {
+  dobraBusca,
+  normalizarNomeBusca,
+  termosBusca,
+  casaTodosTermos,
+} from '@elite90/busca';
 
-/**
- * Recalcula nomeBusca a partir de um nomeExibicao novo — mesma fórmula de
- * scripts/carregar-alimentos.mjs (normalizarBusca), duplicada aqui pela razão
- * do cabeçalho: sem isso, editar o nome pela tela deixaria nomeBusca apontando
- * para o nome antigo, e o catálogo publicado (que lê nomeBusca do documento,
- * não recalcula) buscaria pelo que o Coach já trocou.
- */
-export const normalizarNomeBusca = (nome: string) =>
-  nome
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/,/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+// Recalcular nomeBusca a partir de um nomeExibicao novo continua necessário:
+// sem isso, editar o nome pela tela deixaria nomeBusca apontando para o nome
+// antigo, e o catálogo publicado (que lê nomeBusca do documento, não
+// recalcula) buscaria pelo que o Coach já trocou. A fórmula em si agora vem
+// de @elite90/busca — ver o comentário de cabeçalho acima.
 
 const MACRO_CAMPOS = ['kcal', 'proteinaG', 'carboidratoG', 'lipideosG'] as const;
 

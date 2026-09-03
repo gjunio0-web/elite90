@@ -45,6 +45,7 @@ import { randomUUID } from 'node:crypto';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import admin from 'firebase-admin';
+import { normalizarNomeBusca } from '@elite90/busca';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const RAIZ = process.cwd();
@@ -182,14 +183,11 @@ export function igual(a, b) {
   return ca.every((k) => Object.prototype.hasOwnProperty.call(b, k) && igual(a[k], b[k]));
 }
 
-export function normalizarBusca(nome) {
-  return nome
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/,/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+// normalizarBusca vem de @elite90/busca (normalizarNomeBusca), sem alteração
+// de texto (M2-BUSCA-DE-ALIMENTOS-SEM-PONTUACAO-v1.1.md, 02/09/2026). Mantido
+// com este nome como alias porque scripts/teste-reconciliacao.mjs importa
+// normalizarBusca daqui — trocar o nome quebraria esse teste sem necessidade.
+export const normalizarBusca = normalizarNomeBusca;
 
 // COMPARAÇÃO DE TRÊS PONTAS
 // -------------------------
