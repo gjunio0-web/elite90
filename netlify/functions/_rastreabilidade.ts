@@ -94,14 +94,15 @@ export const ACOES = [
   "plano.compartilhado",
   "base.publicada",
   // Delegação (Adendo 02, seção 7.2 — AD-10). Entram as TRÊS do ciclo de vida do
-  // cadastro profissional, que são as únicas com especificação de conteúdo
-  // publicada (seção 7.3 daquele adendo): ator, alvo, origem e o que pode ir em
-  // `detalhe`. As outras sete do AD-10 — sugestao.submetida, sugestao.devolvida,
-  // sugestao.recusada, carteira.atribuida, carteira.encerrada, janela.ativada e
+  // cadastro profissional, que são as únicas cuja função existe. As outras OITO
+  // do AD-10 — sugestao.submetida, sugestao.devolvida, sugestao.recusada,
+  // carteira.atribuida, carteira.encerrada, janela.ativada, janela.prorrogada e
   // janela.encerrada — ficam RESERVADAS aqui em comentário, no mesmo padrão da
-  // reserva do M2 acima, até o adendo publicar o conteúdo de cada uma. Nomear a
-  // ação sem dizer o que ela grava é convite a gravar valor de campo, que a regra
-  // de `detalhe` proíbe por conformidade.
+  // reserva do M2 acima, até que a operação correspondente seja implementada.
+  // Todas as onze já têm conteúdo especificado nas seções 7.3 e 7.4 daquele
+  // adendo: ator, alvo, origem e o que pode ir em `detalhe`. Nomear a ação sem
+  // dizer o que ela grava é convite a gravar valor de campo, que a regra de
+  // `detalhe` proíbe por conformidade.
   "profissional.cadastrado",
   "profissional.editado",
   "profissional.desativado",
