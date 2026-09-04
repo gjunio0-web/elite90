@@ -71,9 +71,14 @@ const LIMITE_ALVOS = 50;
  * rastreabilidade precisa preservar.
  *
  * RESERVADO PARA O M2, a acrescentar quando as fases correspondentes forem
- * implementadas: 'plano.publicado', 'checkin.registrado', 'peso.registrado',
- * 'atleta.status-alterado'. Constam aqui em comentário para que o M2 não
- * precise reabrir o vocabulário.
+ * implementadas: 'checkin.registrado' (Fase 4) e 'peso.registrado' (Fase 3).
+ * 'atleta.status-alterado' segue reservada SEM destino, e assim permanece:
+ * remover reserva de vocabulário custa mais do que mantê-la. Constam aqui em
+ * comentário para que o M2 não precise reabrir o vocabulário.
+ *
+ * 'plano.publicado' SAIU desta reserva na Fase 4-C (Adendo 07, seção 6, passo
+ * 5): a função de aprovação de sugestão a emite. Entra agrupada com as ações de
+ * delegação abaixo, junto do comentário que declara o que ela grava.
  */
 export const ACOES = [
   "catalogo.criar",
@@ -93,22 +98,41 @@ export const ACOES = [
   "atleta.promovido",
   "plano.compartilhado",
   "base.publicada",
-  // Delegação (Adendo 02, seção 7.2 — AD-10). Entram as CINCO cujas funções
-  // existem: as três do ciclo de vida do cadastro profissional, e as duas de
-  // carteira (atribuição e encerramento, seção 7.4.2). As outras SEIS do AD-10
-  // — sugestao.submetida, sugestao.devolvida, sugestao.recusada,
-  // janela.ativada, janela.prorrogada e janela.encerrada — ficam RESERVADAS
-  // aqui em comentário, no mesmo padrão da reserva do M2 acima, até que a
-  // operação correspondente seja implementada. Todas as onze já têm conteúdo
-  // especificado nas seções 7.3 e 7.4 daquele adendo: ator, alvo, origem e o
-  // que pode ir em `detalhe`. Nomear a ação sem dizer o que ela grava é
-  // convite a gravar valor de campo, que a regra de `detalhe` proíbe por
-  // conformidade.
+  // Delegação (Adendo 02, seção 7.2 — AD-10). Entraram na Fase 4-B as CINCO
+  // cujas funções passaram a existir: as três do ciclo de vida do cadastro
+  // profissional, e as duas de carteira (atribuição e encerramento, seção
+  // 7.4.2). A Fase 4-C acrescenta as TRÊS de sugestão (seção 7.4.1), emitidas
+  // pela tela restrita do profissional e pela tela de aprovação do Coach
+  // (Adendo 07, seções 4 e 5).
+  //
+  // Restam RESERVADAS as TRÊS de janela — janela.ativada, janela.prorrogada e
+  // janela.encerrada —, no mesmo padrão da reserva do M2 acima: dependem do
+  // papel de Substituto, declarado fora do escopo desta fase.
+  //
+  // Todas as onze já têm conteúdo especificado nas seções 7.3 e 7.4 daquele
+  // adendo: ator, alvo, origem e o que pode ir em `detalhe`. Nomear a ação sem
+  // dizer o que ela grava é convite a gravar valor de campo, que a regra de
+  // `detalhe` proíbe por conformidade.
   "profissional.cadastrado",
   "profissional.editado",
   "profissional.desativado",
   "carteira.atribuida",
   "carteira.encerrada",
+  // As três de sugestão gravam `detalhe` com transição entre valores de
+  // vocabulário fechado — `{ de: "pending", para: "returned" }` e equivalentes
+  // —, nunca o conteúdo proposto. `reviewNote` é texto livre sobre trabalho de
+  // terceiro e vive no documento da sugestão, JAMAIS no evento.
+  "sugestao.submetida",
+  "sugestao.devolvida",
+  "sugestao.recusada",
+  // M2 — Fase 4-C (Adendo 07, seção 6, passo 5). Publicação de versão de plano
+  // a partir de sugestão aprovada. `detalhe: nenhum`: o conteúdo do plano é
+  // dado protegido pela DR-04, e a versão publicada já tem histórico próprio e
+  // permanente em `athletes/{uid}/plans/{planType}/versions/{vNNN}`. O evento
+  // prova que a publicação ocorreu, quando e por quem — não o que foi
+  // publicado. A Fase 5 reusa esta MESMA ação para a publicação direta do
+  // Coach, sem sugestão de por meio.
+  "plano.publicado",
 ] as const;
 
 export type Acao = (typeof ACOES)[number];
@@ -128,9 +152,22 @@ export type Acao = (typeof ACOES)[number];
  * Em 'publico' NÃO gravar endereço de rede nem identificador de navegador:
  * seriam dados pessoais de titular que consentiu apenas com o tratamento
  * declarado no formulário.
+ *
+ * `papel` descreve o VÍNCULO de quem age, não o nível de permissão: a
+ * autorização continua sendo decidida por reivindicação, em cada função, e o
+ * papel gravado aqui apenas preserva sob que condição a pessoa agia no momento
+ * do ato. 'professional' entra na Fase 4-C (Adendo 07, AC-01) — é o ator das
+ * três ações de sugestão. 'substitute', previsto no Adendo 02, NÃO entra:
+ * nenhuma função implementada o usa, e o papel de Substituto está fora do
+ * escopo desta fase.
  */
 export type Ator =
-  | { tipo: "humano"; uid: string; email: string | null; papel: "admin" | "athlete" }
+  | {
+      tipo: "humano";
+      uid: string;
+      email: string | null;
+      papel: "admin" | "athlete" | "professional";
+    }
   | { tipo: "sistema"; processo: string }
   | { tipo: "publico" };
 
