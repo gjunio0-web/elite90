@@ -7,11 +7,15 @@
 //
 // O QUE ESTA FUNÇÃO NÃO FAZ, DELIBERADAMENTE
 //
-// Não aceita `active`. Desativar tem porta própria, com ação própria de
-// rastreabilidade. Aceitá-lo aqui esconderia a desativação dentro de uma edição,
-// entre trocas de telefone — exatamente o que a seção 7.3 recusa ao dar ação
-// separada ao ato. Consequência assumida: a REATIVAÇÃO não existe ainda, e quando
-// existir esta decisão precisa ser revista em conjunto com o adendo.
+// Não aceita `active: false`. Desativar tem porta própria, com ação própria de
+// rastreabilidade (seção 7.3), e é encontrável pelo nome na auditoria — colapsá-la
+// aqui a esconderia entre trocas de telefone.
+//
+// ACEITA `active: true`, e só nessa direção. A seção 7.2 do adendo determina que a
+// reativação É edição do campo `active`, e que um quarto nome de ação duplicaria o
+// que `profissional.editado` já cobre. A transição é validada: só é aceita partindo
+// de `active: false` no documento atual — reativar quem já está ativo não é
+// transição, é no-op, e cai na regra geral de "nada mudou" mais abaixo.
 //
 // Não grava quando nada muda. Carga que repete os valores atuais devolve sucesso
 // sem escrita e sem evento: evento de edição sem edição é ruído na auditoria.
@@ -40,6 +44,7 @@ const CAMPOS_EDITAVEIS = [
   "councilState",
   "classification",
   "specialties",
+  "active",
 ] as const;
 
 type CampoEditavel = (typeof CAMPOS_EDITAVEIS)[number];
@@ -105,14 +110,21 @@ export const handler = async (event: any) => {
   for (const chave of Object.keys(corpo)) {
     if (chave === "professionalId") continue;
     if (!CAMPOS_EDITAVEIS.includes(chave as CampoEditavel)) {
-      return json(400, {
-        erro:
-          chave === "active"
-            ? "O campo active não é editável aqui. Use a função de desativação."
-            : `Campo não editável: ${chave}.`,
-      });
+      return json(400, { erro: `Campo não editável: ${chave}.` });
     }
     alteracoes[chave as CampoEditavel] = corpo[chave];
+  }
+
+  // `active` só entra na direção de reativação (seção 7.2). `false` aqui seria a
+  // desativação por outra porta — a mesma coisa duas vezes, com dois eventos
+  // possíveis para o mesmo fato. Essa função grava só o sentido que o adendo lhe
+  // atribuiu; o outro sentido tem função própria.
+  if ("active" in alteracoes && alteracoes.active !== true) {
+    return json(400, {
+      erro:
+        "active só pode ser definido como true nesta função (reativação). " +
+        "Para desativar, use a função de desativação.",
+    });
   }
 
   if (Object.keys(alteracoes).length === 0) {
