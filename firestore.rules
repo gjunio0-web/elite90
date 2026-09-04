@@ -109,6 +109,38 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ── DELEGAÇÃO (Adendo 02) — as quatro coleções, nenhum acesso direto do
+    // navegador, nem para admin. Mesmo padrão de exercises/ e foods/ acima: a
+    // negação genérica do fim já cobria estas coleções antes destes blocos
+    // existirem, e nomeá-las aqui é clareza, não correção.
+    //
+    // `professionals`: leitura por listar-profissionais.ts, escrita por
+    // cadastrar-/atualizar-/desativar-profissional.ts — as quatro usam o
+    // Admin SDK.
+    match /professionals/{professionalId} {
+      allow read, write: if false;
+    }
+
+    // `assignments`: nenhuma função existe ainda (Fase 4-B ainda não chegou à
+    // carteira). A regra entra desde já — proteger a coleção não depende de a
+    // função existir, e omitir o bloco a deixaria correta só por acidente, na
+    // negação genérica do fim.
+    match /assignments/{assignmentId} {
+      allow read, write: if false;
+    }
+
+    // `suggestions`: reservada no esquema (versão 3, seção 4), sem função de
+    // escrita — depende de ator profissional autenticado, que é o M4.
+    match /suggestions/{suggestionId} {
+      allow read, write: if false;
+    }
+
+    // `publicationWindows`: sem função de escrita — depende do papel de
+    // Substituto, que é o M4.
+    match /publicationWindows/{windowId} {
+      allow read, write: if false;
+    }
+
     // ── RASTREABILIDADE (registro imutável de atos) — nenhum acesso direto do
     // navegador, NEM PARA admin. A escrita é exclusiva de _rastreabilidade.ts
     // via Admin SDK, que ignora estas regras por ser servidor; a leitura, quando
