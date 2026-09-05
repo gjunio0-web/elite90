@@ -3054,24 +3054,17 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
           // leitura entra, e a segunda situação deixa de existir.
           wkePlanCache[athlete.id] = { order: [], days: {}, isNew: true };
         } else {
-        const scale = (athlete.weightCurrentKg || 85) / 85;
-        base.order.forEach(function(d) {
-          base.days[d].exercises.forEach(function(ex) {
-            ex.pr = wkeRound(ex.pr * scale);
-            ex.sets.forEach(function(s) { s.load = wkeRound(s.load * scale); });
-            // C-04: descanso a nível de exercício (default = descanso da 1ª série)
-            ex.rest_default = (ex.sets[0] && ex.sets[0].rest) || 60;
-            // C-05: máximo histórico registrado = PR calibrado (nunca null p/ exercícios do plano-base)
-            ex.last_max = ex.pr;
-          });
-        });
-        wkePlanCache[athlete.id] = base;
+          // AC-18: a calibração é do núcleo, e roda SÓ neste ramo. O rascunho
+          // persistido e o cache já vêm com as cargas deste atleta; recalibrá-los
+          // a cada abertura faria as cargas subirem a cada vez.
+          wkePlanCache[athlete.id] = wkeCalibrarPlano(base, athlete);
         }
       }
-      wkeState.athlete = athlete;
-      wkeState.plan = wkePlanCache[athlete.id];
-      if (wkeState.plan.order.length && !wkeState.plan.days[wkeState.activeDay]) wkeState.activeDay = wkeState.plan.order[0];
-      renderWorkout();
+      // AC-18: aplicar ao estado e desenhar é do núcleo. O que fica aqui, acima,
+      // é a ORIGEM do plano — e ela é da hospedeira porque `m2CarregarRascunho`
+      // lê o campo `draft` do plano, onde a RN-14 proíbe o trabalho do delegado
+      // de viver. A rota restrita tem origem própria.
+      wkeAplicarPlano(athlete, wkePlanCache[athlete.id]);
     }
 
 
@@ -4093,9 +4086,11 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
           ntePlanCache[athlete.id] = nteBuildBasePlan(athlete);
         }
       }
-      nteState.athlete = athlete;
-      nteState.plan = ntePlanCache[athlete.id];
-      renderNutrition();
+      // AC-18: aplicar ao estado e desenhar é do núcleo. O que fica aqui é a
+      // ORIGEM do plano, pela mesma razão da aba de Treino. A nutrição não tem
+      // passo de calibração separado: `nteBuildBasePlan` já recebe o atleta e
+      // resolve as metas pelo peso e pela fase, e já vive no núcleo.
+      nteAplicarPlano(athlete, ntePlanCache[athlete.id]);
     }
 
     // ── Observações do Coach (aba Nutricional) ──

@@ -1758,3 +1758,78 @@ function docNotesSection(notes, sectionNum) {
       '<div class="doc-section-body doc-notes">' + wkeEsc(txt) + '</div>' +
     '</div>';
 }
+
+
+// ---------- abertura de plano: a parte comum aos dois consumidores ----------
+//
+// AC-18 do Adendo 07 — a origem do plano é a SEGUNDA COSTURA DECLARADA do editor,
+// ao lado da publicação. As duas existem pela mesma razão: são coisas que a
+// hospedeira faz POR SER QUEM É, e que o núcleo não pode presumir.
+//
+// O QUE FICA POR HOSPEDEIRA, E POR QUÊ
+//
+// A ORIGEM do plano. O Coach abre por rascunho persistido, cache de sessão e
+// plano-base, nessa precedência. O profissional abre por sugestão própria não
+// resolvida, senão pela última versão publicada, senão vazio.
+//
+// A rotina do Coach lê o campo `draft` de `athletes/{uid}/plans/{planType}` —
+// EXATAMENTE o lugar onde a RN-14 proíbe que o trabalho do delegado viva. Um
+// núcleo que abrisse por ali faria o profissional ler o rascunho do Coach. É
+// falha de confidencialidade, não de arquitetura. E o plano-base de demonstração
+// é artefato de homologação da gaveta, não conteúdo de atleta.
+//
+// O QUE VEM PARA CÁ
+//
+// Calibrar e aplicar. Servem aos dois consumidores igualmente, e é isso que as
+// torna do núcleo.
+//
+// POR QUE DUAS FUNÇÕES, E NÃO UMA
+//
+// A calibração roda APENAS sobre plano que precise dela — hoje, o plano-base.
+// Fundi-la com a aplicação faria o Coach escalar também o rascunho persistido,
+// que já vem com as cargas do atleta: um plano gravado seria reescalado a cada
+// abertura, e as cargas subiriam a cada vez. Comportamento diferente do de hoje,
+// e silencioso.
+//
+// A nutrição não tem par de `wkeCalibrarPlano`: `nteBuildBasePlan` já recebe o
+// atleta e resolve as metas pelo peso e pela fase, e já vive aqui desde o passo
+// 1a. Uma função de calibração vazia, só por simetria, seria pior que a
+// assimetria.
+
+/**
+ * Calibra um plano de treino DE MODELO para um atleta: escala cargas e PR pelo
+ * peso, e preenche os dois campos derivados.
+ *
+ * NÃO chamar sobre plano já gravado — ver a razão acima. Devolve o mesmo objeto,
+ * alterado no lugar, como a rotina de origem fazia.
+ */
+function wkeCalibrarPlano(plano, athlete) {
+  if (!plano || !plano.order) return plano;
+  const scale = (athlete.weightCurrentKg || 85) / 85;
+  plano.order.forEach(function(d) {
+    plano.days[d].exercises.forEach(function(ex) {
+      ex.pr = wkeRound(ex.pr * scale);
+      ex.sets.forEach(function(s) { s.load = wkeRound(s.load * scale); });
+      // C-04: descanso a nível de exercício (default = descanso da 1ª série)
+      ex.rest_default = (ex.sets[0] && ex.sets[0].rest) || 60;
+      // C-05: máximo histórico registrado = PR calibrado (nunca null p/ exercícios do plano-base)
+      ex.last_max = ex.pr;
+    });
+  });
+  return plano;
+}
+
+/** Aplica ao estado do editor de treino e desenha. Comum aos dois consumidores. */
+function wkeAplicarPlano(athlete, plano) {
+  wkeState.athlete = athlete;
+  wkeState.plan = plano;
+  if (wkeState.plan.order.length && !wkeState.plan.days[wkeState.activeDay]) wkeState.activeDay = wkeState.plan.order[0];
+  renderWorkout();
+}
+
+/** Aplica ao estado do editor nutricional e desenha. Comum aos dois consumidores. */
+function nteAplicarPlano(athlete, plano) {
+  nteState.athlete = athlete;
+  nteState.plan = plano;
+  renderNutrition();
+}
