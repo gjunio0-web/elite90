@@ -148,6 +148,11 @@ export const handler = async (event: any) => {
   const emHomologacao = process.env.CONTEXT !== "production";
 
   let camposAlterados: string[] = [];
+  // O endereço RESULTANTE, capturado dentro da transação: é por ele que a conta
+  // de autenticação é localizada adiante, e ele pode ter mudado nesta mesma
+  // edição. Ler o documento de novo depois abriria espaço para outra escrita
+  // entre uma leitura e a outra.
+  let emailResultante: string | null = null;
 
   try {
     await db.runTransaction(async (tx) => {
@@ -166,6 +171,9 @@ export const handler = async (event: any) => {
       const resultante = { ...dados, ...alteracoes };
       const v = validarProfissional(resultante);
       if (!v.ok) throw new Error("VALIDACAO:" + v.erro);
+
+      emailResultante =
+        typeof resultante.email === "string" ? resultante.email : null;
 
       if (camposAlterados.includes("email")) {
         const duplicado = await tx.get(
@@ -208,5 +216,57 @@ export const handler = async (event: any) => {
     _test: emHomologacao,
   });
 
-  return json(200, { ok: true, alterado: true, campos: camposAlterados });
+  // AC-08 do Adendo 07 — decisão de origem na Fase 4-B, execução na 4-C, porque
+  // a 4-B fechou sem esta rotina.
+  //
+  // `classification` está EMBUTIDA na reivindicação customizada do profissional
+  // (AC-01). Editar o cadastro sem reatribuir deixaria o token afirmando uma
+  // classificação que o cadastro já não tem — e é o token que o navegador
+  // apresenta.
+  //
+  // ISTO REDUZ A JANELA, NÃO A FECHA, e o comentário diz isso de propósito.
+  // Reivindicação é cache: um token já emitido segue com o valor antigo até ser
+  // renovado. Quem precisar de certeza sobre a classificação vigente lê o
+  // documento do cadastro; esta chamada apenas encurta o intervalo em que as
+  // duas fontes discordam.
+  //
+  // Roda DEPOIS do evento de auditoria, e falha sem desfazer nada. A edição
+  // aconteceu e ficou registrada; a auditoria não pode passar a negá-la porque
+  // um efeito posterior falhou. O resultado volta na resposta, para que a
+  // interface possa avisar em vez de supor.
+  let reivindicacaoAtualizada: boolean | null = null;
+  if (camposAlterados.includes("classification") && emailResultante) {
+    reivindicacaoAtualizada = false;
+    try {
+      const auth = getAuth(app);
+      const usuario = await auth.getUserByEmail(emailResultante);
+      const claimsAtuais = usuario.customClaims ?? {};
+      // Só reatribui em conta que JÁ responde por este cadastro. Conta sem
+      // reivindicação de profissional nunca recebeu acesso, e conceder acesso é
+      // ato de outra função, com autorização própria. Conta vinculada a OUTRO
+      // cadastro não é desta pessoa, e sobrescrevê-la trocaria o vínculo em
+      // silêncio — a mesma falha que a guarda de conta já vinculada evita do
+      // outro lado.
+      if (claimsAtuais.professionalId === ref.id) {
+        await auth.setCustomUserClaims(usuario.uid, {
+          ...claimsAtuais,
+          classification: alteracoes.classification,
+        });
+        reivindicacaoAtualizada = true;
+      }
+    } catch (e) {
+      // Conta inexistente é o caso comum, não exceção: profissional cadastrado
+      // que ainda não recebeu acesso. Não vira ruído no log.
+      if ((e as any)?.code !== "auth/user-not-found") {
+        console.error("[atualizar-profissional] falha ao reatribuir reivindicação:", e);
+      }
+    }
+  }
+
+  return json(200, {
+    ok: true,
+    alterado: true,
+    campos: camposAlterados,
+    reivindicacaoAtualizada,
+  });
 };
