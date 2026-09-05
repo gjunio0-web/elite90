@@ -1,0 +1,191 @@
+---
+export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../../styles/tokens.css';
+import '../../styles/global.css';
+import AdminHeader from '../../components/AdminHeader.astro';
+---
+{/*
+  ELITE90 PRO · rota restrita do profissional — passo 2 da AC-16.
+  Adendo 07: AC-04, AC-10, AC-13. Critérios CA-31, CA-32, CA-43, CA-44, CA-47.
+
+  O QUE ESTE ARQUIVO NÃO CONTÉM, E POR QUÊ ISSO É O PONTO
+  Nenhuma marcação de Publicar, de Compartilhar, de configuração da fórmula de
+  macros ou de exclusão de atleta. A CA-33 é verificável por AUSÊNCIA neste
+  arquivo — não por condição em tempo de execução. Foi para isso que a AC-10
+  recusou renderização condicional dentro de `atletas.astro`, e para isso que a
+  AC-15 declarou a fronteira do núcleo compartilhado.
+
+  Provar ausência aqui é barato: o arquivo é curto e o `grep` fecha a questão.
+  Prová-la dentro de um arquivo de milhares de linhas exigiria demonstrar que
+  não há caminho de execução que revele o botão, para toda edição futura.
+
+  ESTE BLOCO NÃO TRAZ O EDITOR. Ele traz a via de acesso e a carteira. Os seis
+  componentes compartilhados e o `EditorPlanoHost` sem publicação entram no bloco
+  seguinte, junto da gravação em `suggestions/`.
+
+  NADA É LIDO DIRETO DO BANCO POR ESTA PÁGINA. `assignments` nega leitura a
+  todos e `athletes` só a libera ao administrador; a AD-06 do Adendo 02 manda
+  que a leitura do delegado passe por projeção de servidor. Daí a única fonte
+  desta tela ser `listar-atletas-do-profissional`.
+*/}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELITE90 PRO — Área do Profissional</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+  <meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+  <meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+  <meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
+  <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
+  <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
+
+  <style>
+    .prof-main { max-width: 1040px; margin: 0 auto; padding: 32px 24px 64px; }
+    .prof-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
+                  letter-spacing: .04em; margin: 0 0 8px; }
+    .prof-sub { font-family: Montserrat, sans-serif; font-size: .9rem;
+                opacity: .75; margin: 0 0 32px; }
+    .prof-msg { font-family: Montserrat, sans-serif; padding: 24px;
+                border: 1px solid rgba(255,255,255,.12); border-radius: 8px; }
+    .prof-grid { display: grid; gap: 16px;
+                 grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .prof-card { border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
+                 padding: 20px; background: #1A1A1A; }
+    .prof-card__nome { font-family: Raleway, sans-serif; font-weight: 700;
+                       font-size: 1.05rem; margin: 0 0 4px; }
+    .prof-card__meta { font-family: Montserrat, sans-serif; font-size: .8rem;
+                       opacity: .7; margin: 0 0 14px; }
+    .prof-abas { display: flex; gap: 8px; flex-wrap: wrap; }
+    .prof-aba { font-family: Raleway, sans-serif; font-size: .72rem;
+                text-transform: uppercase; letter-spacing: .06em;
+                padding: 5px 10px; border-radius: 4px;
+                border: 1px solid var(--lima, #A6C300); color: var(--lima, #A6C300); }
+  </style>
+</head>
+<body>
+  <AdminHeader badge="Profissional" />
+
+  <main class="prof-main">
+    <h1 class="prof-title">Sua carteira</h1>
+    <p class="prof-sub" id="prof-sub">Carregando…</p>
+
+    <div id="prof-msg" class="prof-msg" hidden></div>
+    <div id="prof-grid" class="prof-grid" hidden></div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const cfg = {
+      apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
+      authDomain:        document.querySelector('meta[name="fb-auth"]')?.content,
+      projectId:         document.querySelector('meta[name="fb-proj"]')?.content,
+      storageBucket:     document.querySelector('meta[name="fb-bucket"]')?.content,
+      messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
+      appId:             document.querySelector('meta[name="fb-appid"]')?.content,
+    };
+    const auth = getAuth(initializeApp(cfg));
+
+    const sub  = document.getElementById("prof-sub");
+    const msg  = document.getElementById("prof-msg");
+    const grid = document.getElementById("prof-grid");
+
+    const ROTULO_ABA = { training: "Treino", nutrition: "Nutricional" };
+
+    function mostrarMensagem(texto) {
+      sub.textContent = "";
+      grid.hidden = true;
+      msg.textContent = texto;
+      msg.hidden = false;
+    }
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) { window.location.href = "/admin/login"; return; }
+      try {
+        // `true` força token novo: quem acabou de receber o acesso não deveria
+        // precisar sair e entrar de novo para que a reivindicação chegue.
+        const token = await user.getIdToken(true);
+        const resp = await fetch("/.netlify/functions/listar-atletas-do-profissional", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: "{}",
+        });
+
+        // 403 cobre três recusas do servidor: sem papel de profissional, sem
+        // vínculo no token, e cadastro inativo (AC-13). A tela NÃO distingue
+        // qual delas ocorreu — quem porta token revogado não precisa saber em
+        // que estado está o cadastro. O servidor devolve o motivo para registro,
+        // e a tela não o exibe.
+        if (resp.status === 403) {
+          mostrarMensagem("Esta conta não tem acesso à área do profissional. Procure o Coach.");
+          return;
+        }
+        if (!resp.ok) throw new Error(String(resp.status));
+
+        const { atletas } = await resp.json();
+        render(atletas ?? []);
+      } catch {
+        // Falha de rede não é falha de autorização, e dizer "sem acesso" aqui
+        // mandaria a pessoa procurar o Coach por um problema que não é dela.
+        mostrarMensagem("Não foi possível carregar a carteira agora. Tente novamente em instantes.");
+      }
+    });
+
+    function render(atletas) {
+      if (atletas.length === 0) {
+        sub.textContent = "";
+        mostrarMensagem("Nenhum atleta atribuído a você no momento.");
+        return;
+      }
+      sub.textContent = atletas.length === 1
+        ? "1 atleta sob sua responsabilidade."
+        : `${atletas.length} atletas sob sua responsabilidade.`;
+
+      grid.innerHTML = "";
+      for (const item of atletas) {
+        const a = item.atleta ?? {};
+        // Nome OU rótulo, nunca os dois: o servidor projeta um só, conforme a
+        // classificação do cadastro (D-14). A tela não escolhe — apenas exibe o
+        // que veio, e o `??` aqui é fallback de renderização, não regra.
+        const identidade = a.name ?? a.externalLabel ?? "—";
+
+        const card = document.createElement("div");
+        card.className = "prof-card";
+
+        const h = document.createElement("p");
+        h.className = "prof-card__nome";
+        h.textContent = identidade;
+
+        const meta = document.createElement("p");
+        meta.className = "prof-card__meta";
+        meta.textContent = a.phase ? `Fase: ${a.phase}` : "Fase não definida";
+
+        const abas = document.createElement("div");
+        abas.className = "prof-abas";
+        for (const s of (item.specialties ?? [])) {
+          const tag = document.createElement("span");
+          tag.className = "prof-aba";
+          tag.textContent = ROTULO_ABA[s] ?? s;
+          abas.appendChild(tag);
+        }
+
+        card.append(h, meta, abas);
+        grid.appendChild(card);
+      }
+      msg.hidden = true;
+      grid.hidden = false;
+    }
+  </script>
+</body>
+</html>
