@@ -98,24 +98,37 @@ export const ACOES = [
   "atleta.promovido",
   "plano.compartilhado",
   "base.publicada",
-  // Delegação (Adendo 02, seção 7.2 — AD-10). Entraram na Fase 4-B as CINCO
-  // cujas funções passaram a existir: as três do ciclo de vida do cadastro
+  // Delegação (Adendo 02, seção 7.2 — AD-10, e AD-15). Entraram na Fase 4-B as
+  // CINCO cujas funções passaram a existir: as três do ciclo de vida do cadastro
   // profissional, e as duas de carteira (atribuição e encerramento, seção
   // 7.4.2). A Fase 4-C acrescenta as TRÊS de sugestão (seção 7.4.1), emitidas
   // pela tela restrita do profissional e pela tela de aprovação do Coach
-  // (Adendo 07, seções 4 e 5).
+  // (Adendo 07, seções 4 e 5), e a de CONCESSÃO DE ACESSO (AC-11), que fecha uma
+  // assimetria: tirar acesso deixava rastro e dar acesso não.
   //
   // Restam RESERVADAS as TRÊS de janela — janela.ativada, janela.prorrogada e
   // janela.encerrada —, no mesmo padrão da reserva do M2 acima: dependem do
   // papel de Substituto, declarado fora do escopo desta fase.
   //
-  // Todas as onze já têm conteúdo especificado nas seções 7.3 e 7.4 daquele
+  // Todas as doze já têm conteúdo especificado nas seções 7.3 e 7.4 daquele
   // adendo: ator, alvo, origem e o que pode ir em `detalhe`. Nomear a ação sem
   // dizer o que ela grava é convite a gravar valor de campo, que a regra de
   // `detalhe` proíbe por conformidade.
   "profissional.cadastrado",
   "profissional.editado",
   "profissional.desativado",
+  // AC-11 do Adendo 07, especificada na seção 7.3 do Adendo 02. `detalhe`
+  // AUSENTE — não `{}`, ausente. O alvo já diz de quem se trata, e considerou-se
+  // e descartou-se gravar se a conta era nova ou reaproveitada: a pergunta que
+  // esse campo responderia deixa de poder ter resposta perigosa por força da
+  // recusa da AC-14. Quando a informação que um registro de auditoria guardaria
+  // descreve um estado que não deveria ocorrer, a resposta é a guarda que o
+  // impede, não o campo que o documenta.
+  //
+  // NÃO existe ação simétrica de revogação: revogar é consequência de desativar,
+  // e `profissional.desativado` já registra o ato (AD-15, AC-12). Dar duas ações
+  // a um ato repetiria, invertido, o problema que esta ação corrige.
+  "profissional.acesso-concedido",
   "carteira.atribuida",
   "carteira.encerrada",
   // As três de sugestão gravam `detalhe` com transição entre valores de

@@ -288,11 +288,35 @@ import '../../styles/global.css';
       "auth/invalid-credential": "E-mail ou senha incorretos.",
     };
 
-    async function verificarAdminEAcessar(errorEl) {
+    // Destino por papel, num lugar só. Este arquivo redireciona em DOIS pontos
+    // distantes um do outro, e a Fase 4-C acrescenta um ramo a cada um deles:
+    // manter os caminhos escritos à mão nos dois é como se acrescenta o terceiro
+    // ramo em um e se esquece do outro.
+    const ROTA_ADMIN = "/admin";
+    const ROTA_PROFISSIONAL = "/profissional";
+
+    // Adendo 07, AC-03: três ramos. O ramo do profissional testa `professional`
+    // como SINALIZADOR BOOLEANO e nada além — não lê `professionalId` nem
+    // `classification` para decidir destino. Especialidade não existe no token
+    // (AC-01), e a aba de cada atleta sai da atribuição, já dentro da tela
+    // restrita.
+    //
+    // A ordem importa. `admin` é testado primeiro: uma conta que acumule os dois
+    // papéis — o Coach também cadastrado como profissional — entra pelo painel
+    // completo, que é o superconjunto do que a tela restrita oferece.
+    function destinoPara(claims) {
+      if (!claims) return null;
+      if (claims.admin) return ROTA_ADMIN;
+      if (claims.professional) return ROTA_PROFISSIONAL;
+      return null;
+    }
+
+    async function verificarAcessoERedirecionar(errorEl) {
       try {
         const tokenResult = await auth.currentUser.getIdTokenResult(true);
-        if (tokenResult.claims.admin) {
-          window.location.href = "/admin";
+        const destino = destinoPara(tokenResult.claims);
+        if (destino) {
+          window.location.href = destino;
         } else {
           await signOut(auth);
           if (errorEl) errorEl.textContent = "Acesso não autorizado para esta conta.";
@@ -307,7 +331,8 @@ import '../../styles/global.css';
     auth.onAuthStateChanged(async user => {
       if (!user) return;
       const tokenResult = await user.getIdTokenResult(true).catch(() => null);
-      if (tokenResult?.claims.admin) window.location.href = "/admin";
+      const destino = destinoPara(tokenResult?.claims);
+      if (destino) window.location.href = destino;
     });
 
     // Login com e-mail/senha
@@ -326,7 +351,7 @@ import '../../styles/global.css';
           document.getElementById("l-email").value,
           document.getElementById("l-password").value
         );
-        await verificarAdminEAcessar(loginErr);
+        await verificarAcessoERedirecionar(loginErr);
       } catch (err) {
         loginErr.textContent = ERROR_MESSAGES[err.code] ?? "Erro ao autenticar.";
       } finally {
@@ -347,7 +372,7 @@ import '../../styles/global.css';
       googleErr.textContent = "";
       try {
         await signInWithPopup(auth, provider);
-        await verificarAdminEAcessar(googleErr);
+        await verificarAcessoERedirecionar(googleErr);
       } catch (err) {
         console.error("Erro na autenticação Google:", err);
         googleErr.textContent = "Erro ao autenticar com o Google.";
