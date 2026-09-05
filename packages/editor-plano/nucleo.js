@@ -377,7 +377,7 @@ function wkeRenderCalcContext() {
     else if (key.indexOf('diet') > -1) cls = 'dietbreak';
     else if (key.indexOf('manu') > -1) cls = 'manutencao';
     chip.className = 'nte-phasechip ' + cls;
-    chip.textContent = EditorPlanoHost.rotuloFase(phase);
+    chip.textContent = rotuloFase(phase);
   }
   if (wv) wv.textContent = weight ? (weight + ' kg') : '—';
 }
@@ -410,11 +410,11 @@ function wkeOpenPreview() {
     '</div>';
     return sec + (idx < plan.order.length - 1 ? '<div class="doc-divider"></div>' : '');
   }).join('');
-  inner += EditorPlanoHost.docNotesSection(plan.coachNotes, plan.order.length + 1);
+  inner += docNotesSection(plan.coachNotes, plan.order.length + 1);
   document.getElementById('wke-preview-body').innerHTML =
-    EditorPlanoHost.docEnvelope('Plano de Treino', 'Plano de Treino', a && a.name, ' com base na sua fase e objetivo do ciclo', inner);
+    docEnvelope('Plano de Treino', 'Plano de Treino', a && a.name, ' com base na sua fase e objetivo do ciclo', inner);
   document.getElementById('wke-preview').style.display = 'flex';
-  EditorPlanoHost.renderIcons();
+  renderIcons();
 }
 
 function wkeClosePreview() { document.getElementById('wke-preview').style.display = 'none'; }
@@ -607,11 +607,11 @@ function wkeEditRest(exIdx, input) {
 
 function wkeRerenderCard(exIdx) {
   const card = document.querySelector('.wke-exercise[data-ex="' + exIdx + '"]');
-  if (!card) { EditorPlanoHost.renderWorkout(); return; }
+  if (!card) { renderWorkout(); return; }
   const tmp = document.createElement('div');
   tmp.innerHTML = wkeExerciseCard(wkeCurrentDay().exercises[exIdx], exIdx);
   card.replaceWith(tmp.firstElementChild);
-  EditorPlanoHost.renderIcons();
+  renderIcons();
 }
 
 function wkeRefreshStats() {
@@ -670,7 +670,7 @@ function wkeToggleDayMenu(d, btn) {
   menu.style.visibility = '';
   btn.setAttribute('aria-expanded', 'true');
   wkeDayMenuFor = d;
-  EditorPlanoHost.renderIcons();
+  renderIcons();
   if (!document.body.dataset.wkeDayMenuBound) {
     // Trata os itens do menu AQUI, não em wkeOnDayTabsClick: aquele
     // listener está preso a #wke-daytabs (delegação), e o menu agora vive
@@ -727,7 +727,7 @@ function wkeOnDayTabsDblClick(e) {
 function wkeSelectDay(d) {
   if (d === wkeState.activeDay) return; // evita re-render inútil da aba inteira
   wkeState.activeDay = d;
-  EditorPlanoHost.renderWorkout();
+  renderWorkout();
 }
 
 function wkeSetCoachNotes(v) {
@@ -757,11 +757,11 @@ function wkeStartRenameDay(d, btn) {
 }
 
 function wkeCommitRenameDay(d, inp) {
-  if (inp.dataset.cancel) { EditorPlanoHost.renderWorkout(); return; }
+  if (inp.dataset.cancel) { renderWorkout(); return; }
   const name = inp.value.trim();
-  if (!name) { EditorPlanoHost.renderWorkout(); return; } // validação: não vazio
+  if (!name) { renderWorkout(); return; } // validação: não vazio
   wkeState.plan.days[d].label = name.slice(0, 20); // máx 20 caracteres
-  EditorPlanoHost.renderWorkout();
+  renderWorkout();
   wkeToast('Dia renomeado');
   wkeAutoSave();
 }
@@ -774,7 +774,7 @@ function wkeDeleteDay(d) {
     plan.order.splice(idx, 1);
     delete plan.days[d];
     if (wkeState.activeDay === d) wkeState.activeDay = plan.order[Math.max(0, idx - 1)];
-    EditorPlanoHost.renderWorkout();
+    renderWorkout();
     wkeToast('Dia removido');
     wkeAutoSave();
   });
@@ -924,7 +924,7 @@ function wkeDragOnEnd(e) {
   arr.splice(insertAt, 0, moved);
   // P-05: FLIP — captura ANTES do render, anima depois
   var flipBefore = wkeCaptureFlip();
-  EditorPlanoHost.renderWorkout();
+  renderWorkout();
   wkePlayFlip(flipBefore);
   wkeToast('Ordem atualizada');
   wkeAutoSave();
@@ -960,7 +960,7 @@ function wkeCreateFirstDay() {
   plan.days['A'] = { label: 'Dia A — Novo treino', exercises: [] };
   plan.isNew = false;
   wkeState.activeDay = 'A';
-  EditorPlanoHost.renderWorkout();
+  renderWorkout();
   wkeToast('Primeiro dia criado');
   wkeAutoSave();
 }
@@ -971,7 +971,7 @@ function wkeAddDay() {
   plan.order.push(next);
   plan.days[next] = { label: 'Dia ' + next + ' — Novo treino', exercises: [] };
   wkeState.activeDay = next;
-  EditorPlanoHost.renderWorkout();
+  renderWorkout();
   wkeAutoSave();
 }
 
@@ -979,7 +979,7 @@ function wkeDuplicateExercise(exIdx) {
   const day = wkeCurrentDay();
   const copy = JSON.parse(JSON.stringify(day.exercises[exIdx]));
   day.exercises.splice(exIdx + 1, 0, copy);
-  EditorPlanoHost.renderWorkout();
+  renderWorkout();
   wkeToast('Exercício duplicado');
   wkeAutoSave();
 }
@@ -991,7 +991,7 @@ function wkeDeleteExercise(exIdx) {
   // por iframes sandbox (sem allow-modals), o que tornava a exclusão inerte.
   wkeConfirm('Remover "' + ex.name + '" deste dia?', function() {
     day.exercises.splice(exIdx, 1);
-    EditorPlanoHost.renderWorkout();
+    renderWorkout();
     wkeToast('Exercício removido');
     wkeAutoSave();
   });
@@ -1064,7 +1064,7 @@ function wkeRunExerciseSearch() {
       '</span>' +
     '</div>';
   }).join('');
-  EditorPlanoHost.renderIcons();
+  renderIcons();
 }
 
 function onExerciseSearchKey(e) {
@@ -1095,7 +1095,7 @@ function wkePickExercise(i) {
     sets: [ { reps: '8-12', load: null, rest: 60, obs: '' }, { reps: '8-12', load: null, rest: 60, obs: '' }, { reps: '8-12', load: null, rest: 60, obs: '' } ]
   });
   closeExerciseSearch();
-  EditorPlanoHost.renderWorkout();
+  renderWorkout();
   wkeToast(pick.name + ' adicionado');
   wkeAutoSave();
 }
@@ -1114,7 +1114,7 @@ function wkeToast(msg, opts) {
   t.className = 'wke-toast wke-toast-' + type;
   t.innerHTML = '<span data-lucide="' + (icons[type] || 'check') + '"></span><span>' + msg + '</span>';
   wkeToastWrap.appendChild(t);
-  EditorPlanoHost.renderIcons();
+  renderIcons();
   const dur = (type === 'pr' || type === 'error' || type === 'warning') ? 2600 : 1600;
   setTimeout(function() { t.style.transition = 'opacity 200ms ease'; t.style.opacity = '0'; setTimeout(function() { t.remove(); }, 220); }, dur);
 }
@@ -1204,7 +1204,7 @@ function nteRenderCalcContext() {
     else if (key.indexOf('diet') > -1) cls = 'dietbreak';
     else if (key.indexOf('manu') > -1) cls = 'manutencao';
     chip.className = 'nte-phasechip ' + cls;
-    chip.textContent = EditorPlanoHost.rotuloFase(phase);
+    chip.textContent = rotuloFase(phase);
   }
   if (wv) wv.textContent = weight ? (weight + ' kg') : '—';
   ctx.style.display = 'flex';
@@ -1222,19 +1222,19 @@ function nteOpenPreview() {
     { num: '02', title: 'Dia de Descanso', meals: (days.descanso && days.descanso.meals) || [] }
   ];
   var inner = dayDefs.map(function(d, i){
-    var t = EditorPlanoHost.docDayTotals(d.meals);
+    var t = docDayTotals(d.meals);
     var sec = '<div class="doc-section">' +
       '<div class="doc-section-h"><span class="doc-section-num">' + d.num + '</span><span class="doc-section-title">' + d.title + '</span></div>' +
-      EditorPlanoHost.docMacrosBlock(t) +
-      EditorPlanoHost.docMealsBlock(d.meals) +
+      docMacrosBlock(t) +
+      docMealsBlock(d.meals) +
     '</div>';
     return sec + (i < dayDefs.length - 1 ? '<div class="doc-divider"></div>' : '');
   }).join('');
-  inner += EditorPlanoHost.docNotesSection(nteState.plan.coachNotes, dayDefs.length + 1);
+  inner += docNotesSection(nteState.plan.coachNotes, dayDefs.length + 1);
   document.getElementById('nte-preview-body').innerHTML =
-    EditorPlanoHost.docEnvelope('Plano Nutricional', 'Plano Nutricional', a && a.name, ' com base na sua fase e composição corporal', inner);
+    docEnvelope('Plano Nutricional', 'Plano Nutricional', a && a.name, ' com base na sua fase e composição corporal', inner);
   document.getElementById('nte-preview').style.display = 'flex';
-  EditorPlanoHost.renderIcons();
+  renderIcons();
 }
 
 function nteClosePreview() { document.getElementById('nte-preview').style.display = 'none'; }
@@ -1245,7 +1245,7 @@ function nteCreateFirstPlan() {
   nteState.plan.dayType = 'treino';
   nteState.plan.days = { treino: { meals: [ { name: 'Café da manhã', foods: [] } ] }, descanso: { meals: [] } };
   nteState.plan.isNew = false;
-  EditorPlanoHost.renderNutrition();
+  renderNutrition();
   wkeToast('Plano nutricional criado');
   nteAutoSave();
 }
@@ -1316,7 +1316,7 @@ function nteMealCard(meal, mealIdx) {
 
 function nteSelectDayType(type) {
   nteState.plan.dayType = type;
-  EditorPlanoHost.renderNutrition();
+  renderNutrition();
 }
 
 function nteRefreshTotals() {
@@ -1355,7 +1355,7 @@ function nteEditQty(mealIdx, foodIdx, input) {
 
 function nteDeleteFood(mealIdx, foodIdx) {
   nteCurrentDay().meals[mealIdx].foods.splice(foodIdx, 1);
-  EditorPlanoHost.renderNutrition();
+  renderNutrition();
   wkeToast('Alimento removido');
   nteAutoSave();
 }
@@ -1372,7 +1372,7 @@ function nteDuplicateMeal(mealIdx) {
   const copy = JSON.parse(JSON.stringify(day.meals[mealIdx]));
   copy.name = copy.name + ' (cópia)';
   day.meals.splice(mealIdx + 1, 0, copy);
-  EditorPlanoHost.renderNutrition();
+  renderNutrition();
   wkeToast('Refeição duplicada');
   nteAutoSave();
 }
@@ -1383,7 +1383,7 @@ function nteDeleteMeal(mealIdx) {
   // wkeConfirm em vez de confirm() nativo (iframes sandbox bloqueiam confirm)
   wkeConfirm('Remover "' + name + '"?', function() {
     day.meals.splice(mealIdx, 1);
-    EditorPlanoHost.renderNutrition();
+    renderNutrition();
     wkeToast('Refeição removida');
     nteAutoSave();
   });
@@ -1391,7 +1391,7 @@ function nteDeleteMeal(mealIdx) {
 
 function nteAddMeal() {
   nteCurrentDay().meals.push({ name: 'Nova refeição', foods: [] });
-  EditorPlanoHost.renderNutrition();
+  renderNutrition();
   wkeToast('Refeição adicionada');
   nteAutoSave();
 }
@@ -1537,7 +1537,7 @@ function nteConfirmFood() {
     name: ntePendingFood.name, qty: qty, base: ntePendingFood });
   const added = ntePendingFood.name;
   closeFoodQty();
-  EditorPlanoHost.renderNutrition();
+  renderNutrition();
   wkeToast(added + ' adicionado');
   nteAutoSave();
 }
@@ -1547,4 +1547,214 @@ function nteAutoSave() {
   nteSaveTimer = setTimeout(function() { EditorPlanoHost.m2SalvarRascunho('nutrition', nteState.plan); }, 500);
   var _nup = EditorPlanoHost.getPlanRef('nutrition');
   if (_nup && _nup.status === 'publicado' && !_nup.hasUnpublishedChanges) { _nup.hasUnpublishedChanges = true; EditorPlanoHost.renderPubHeader('nutrition'); }
+}
+
+
+// ---------- corpo do editor movido pela AC-17 (correção da fronteira) ----------
+//
+// O passo 1b particionou as funções do script pelo PREFIXO DO NOME — `wke`,
+// `nte` —, onde a AC-15 particiona POR CONTEÚDO. As sete abaixo são corpo do
+// editor e não carregam o prefixo, e por isso ficaram na hospedeira, entrando no
+// contrato de gancho. Convenção de nome é pista, não critério.
+//
+// `renderWorkout` desenha a aba de treino e era chamada DOZE vezes daqui contra
+// três da hospedeira; `renderNutrition` desenha a aba nutricional. Os cinco
+// `doc*` montam o documento que o atleta recebe — o mesmo que a pré-visualização
+// exibe, e a pré-visualização já estava aqui desde o passo 1b.
+//
+// O QUE TORNAVA A CORREÇÃO OBRIGATÓRIA, E NÃO APENAS DESEJÁVEL: o núcleo desenhava
+// a prévia CHAMANDO DE VOLTA A HOSPEDEIRA para montar o conteúdo dela. A fronteira
+// não estava só larga — estava invertida. Quem desenha dependia de quem hospeda
+// para produzir o que desenha.
+//
+// A AC-15 não foi reaberta e não mudou uma vírgula: as sete são corpo do editor
+// pelo critério que ela já tinha. O que se corrigiu foi a execução.
+//
+// `DOC_LOGO_IMG` veio junto: tinha dois usos no script de origem, a declaração e
+// `docEnvelope`.
+
+var DOC_LOGO_IMG = '<img src="/images/brand/logo-emblema.webp" srcset="/images/brand/logo-emblema.webp 1x, /images/brand/logo-emblema@2x.webp 2x" alt="" width="51" height="56" decoding="async" aria-hidden="true"/>';
+
+function renderWorkout() {
+  if (!wkeState.plan) return;
+  const plan = wkeState.plan;
+  const tabsEl = document.getElementById('wke-daytabs');
+  const statsEl = document.getElementById('wke-stats');
+  const exEl = document.getElementById('wke-exercises');
+  const addBtn = document.getElementById('wke-add-ex-btn');
+  const notesEl = document.getElementById('wke-coach-notes-section');
+  // Estado de primeira vez: nenhum dia criado ainda
+  if (!plan.order.length) {
+    if (tabsEl) tabsEl.innerHTML = '';
+    if (statsEl) statsEl.innerHTML = '';
+    var wkeCtxEmpty = document.getElementById('wke-calcctx');
+    if (wkeCtxEmpty) wkeCtxEmpty.style.display = 'none';
+    if (addBtn) addBtn.style.display = 'none';
+    if (notesEl) notesEl.style.display = 'none';
+    const nome = (wkeState.athlete && wkeState.athlete.name.split(' ')[0]) || 'O atleta';
+    if (exEl) {
+      exEl.innerHTML = '<div class="wke-empty"><div class="wke-empty-icon"><span data-lucide="dumbbell"></span></div>' +
+        '<div class="wke-empty-title">Nenhum plano de treino ainda</div>' +
+        '<div class="wke-empty-sub">' + nome + ' ainda não tem um treino publicado. Crie o primeiro dia para começar a montar o plano.</div>' +
+        '<button class="wke-firsttime-cta" onclick="wkeCreateFirstDay()"><span data-lucide="plus"></span> Criar primeiro dia</button></div>';
+    }
+    renderIcons();
+    return;
+  }
+  if (addBtn) addBtn.style.display = '';
+  if (notesEl) notesEl.style.display = '';
+  wkeSyncCoachNotes();
+  var wkeCtxEl = document.getElementById('wke-calcctx');
+  if (wkeCtxEl) wkeCtxEl.style.display = 'flex';
+  wkeRenderCalcContext();
+  // DayTabs
+  if (tabsEl) {
+    wkeCloseDayMenu();
+    // O clique é tratado por delegação em #wke-daytabs (wkeOnDayTabsClick),
+    // não por onclick embutido: renderWorkout reconstrói esta lista inteira,
+    // e o nó que recebeu o primeiro clique deixa de existir antes do
+    // segundo — o que tornava o ondblclick dependente de como cada
+    // navegador reconcilia alvos destruídos.
+    const coarse = wkeCoarsePointer();
+    tabsEl.innerHTML = plan.order.map(function(d) {
+      const active = d === wkeState.activeDay;
+      const hint = active
+        ? (coarse ? 'Toque de novo para renomear' : 'Duplo-clique para renomear')
+        : 'Selecionar dia';
+      return '<span class="wke-daytab-wrap">' +
+        '<button class="wke-daytab' + (active ? ' active' : '') + '" data-day="' + wkeEsc(d) + '" title="' + hint + '">' +
+          wkeEsc(wkeDayName(d)) +
+          (active && coarse ? '<span class="wke-daytab-pencil"><span data-lucide="pencil"></span></span>' : '') +
+        '</button>' +
+        '<button class="wke-daytab-menubtn' + (active && coarse ? ' always' : '') + '" title="Ações do dia" aria-label="Ações do dia" aria-haspopup="true" aria-expanded="false" data-day-menu="' + wkeEsc(d) + '"><span data-lucide="more-horizontal"></span></button>' +
+      '</span>';
+    }).join('') + '<button class="wke-daytab add" data-day-add="1">+ Adicionar dia</button>';
+    if (!tabsEl.dataset.bound) {
+      tabsEl.addEventListener('click', wkeOnDayTabsClick);
+      tabsEl.addEventListener('dblclick', wkeOnDayTabsDblClick);
+      tabsEl.dataset.bound = '1';
+    }
+  }
+  const day = plan.days[wkeState.activeDay];
+  // Stats
+  const stats = wkeComputeStats(day);
+  const vol = wkeFmtVolume(stats.volume);
+  const volSub = stats.pendingCount > 0
+    ? ((stats.exCount - stats.pendingCount) + ' de ' + stats.exCount + ' com carga')
+    : '';
+  if (statsEl) {
+    statsEl.innerHTML =
+      wkeStatCard(stats.exCount, '', 'Exercícios') +
+      wkeStatCard(stats.groups, '', 'Grupos') +
+      wkeStatCard(vol.val, vol.unit, stats.pendingCount > 0 ? 'Volume parcial' : 'Volume', volSub) +
+      wkeStatCard(stats.durMin, 'min', 'Duração');
+  }
+  // Exercises
+  if (exEl) {
+    if (!day.exercises.length) {
+      exEl.innerHTML = '<div class="wke-empty"><div class="wke-empty-icon"><span data-lucide="dumbbell"></span></div>' +
+        '<div class="wke-empty-title">Nenhum exercício neste dia</div>' +
+        '<div class="wke-empty-sub">Adicione o primeiro exercício para começar a montar o treino.</div></div>';
+    } else {
+      exEl.innerHTML = day.exercises.map(function(ex, i) { return wkeExerciseCard(ex, i); }).join('');
+    }
+  }
+  renderIcons();
+}
+
+function renderNutrition() {
+  if (!nteState.plan) return;
+  const dayselEl = document.getElementById('nte-dayselector');
+  const macrosEl = document.getElementById('nte-macros');
+  const mealsEl = document.getElementById('nte-meals');
+  const addBtn = document.getElementById('nte-add-meal-btn');
+  const notesEl = document.getElementById('nte-coach-notes-section');
+  // Estado de primeira vez: nenhum plano definido ainda
+  if (nteState.plan.isNew || !nteState.plan.target) {
+    if (dayselEl) dayselEl.innerHTML = '';
+    if (macrosEl) macrosEl.innerHTML = '';
+    var ctxEl = document.getElementById('nte-calcctx');
+    if (ctxEl) ctxEl.style.display = 'none';
+    if (addBtn) addBtn.style.display = 'none';
+    if (notesEl) notesEl.style.display = 'none';
+    const nome = (nteState.athlete && nteState.athlete.name.split(' ')[0]) || 'O atleta';
+    if (mealsEl) {
+      mealsEl.innerHTML = '<div class="wke-empty"><div class="wke-empty-icon"><span data-lucide="utensils"></span></div>' +
+        '<div class="wke-empty-title">Nenhum plano nutricional ainda</div>' +
+        '<div class="wke-empty-sub">' + nome + ' ainda não tem um plano publicado. Crie o plano para definir as metas de macros e a primeira refeição.</div>' +
+        '<button class="wke-firsttime-cta" onclick="nteCreateFirstPlan()"><span data-lucide="plus"></span> Criar plano</button></div>';
+    }
+    renderIcons();
+    return;
+  }
+  if (addBtn) addBtn.style.display = '';
+  if (notesEl) notesEl.style.display = '';
+  nteSyncCoachNotes();
+  nteRenderCalcContext();
+  nteRenderDaySelector();
+  nteRenderMacros();
+  nteRenderMeals();
+  renderIcons();
+}
+
+function docEnvelope(badgeText, title, athleteName, summaryExtra, innerHtml) {
+  return '<div class="doc-sheet">' +
+    '<div class="doc-header">' +
+      '<div class="doc-logo">' + DOC_LOGO_IMG +
+        '<div><div class="doc-logo-h"><span>Coach Ruiz</span><span class="doc-logo-sep">·</span><span>ELITE90 PRO</span></div><div class="doc-logo-p">Estratégia de Alta Performance</div></div>' +
+      '</div>' +
+      '<span class="doc-badge">' + badgeText + '</span>' +
+    '</div>' +
+    '<div class="doc-card">' +
+      '<div class="doc-title">' + title + '</div>' +
+      '<div class="doc-summary">Documento preparado pelo Coach Ruiz para <strong>' + (athleteName || 'o atleta') + '</strong>' + (summaryExtra || '') + '. Confidencial, elaborado exclusivamente para este atleta.</div>' +
+      innerHtml +
+    '</div>' +
+    '<div class="doc-footer"><div class="doc-footer-div"></div>' +
+      '<div class="doc-footer-copy">Coach Ruiz 2026 © Todos os direitos reservados</div>' +
+      '<div class="doc-footer-credit">Criado por GM Digital Bunker ©, 2026</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function docDayTotals(meals) {
+  var t = { kcal:0, p:0, c:0, g:0 };
+  (meals || []).forEach(function(m){ (m.foods||[]).forEach(function(f){ var x = nteMacrosOf(f); t.kcal+=x.kcal; t.p+=x.p; t.c+=x.c; t.g+=x.g; }); });
+  return t;
+}
+
+function docMacrosBlock(t) {
+  return '<div class="doc-macros">' +
+    '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.p) + 'g</div><div class="doc-macro-l">Proteína</div></div>' +
+    '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.c) + 'g</div><div class="doc-macro-l">Carboidrato</div></div>' +
+    '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.g) + 'g</div><div class="doc-macro-l">Gordura</div></div>' +
+    '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.kcal) + '</div><div class="doc-macro-l">Calorias</div></div>' +
+  '</div>';
+}
+
+function docMealsBlock(meals) {
+  if (!meals || !meals.length) return '<div class="doc-empty">Nenhuma refeição definida para este dia.</div>';
+  return meals.map(function(m){
+    var foods;
+    if (!m.foods || !m.foods.length) {
+      foods = '<div class="doc-empty">Sem alimentos nesta refeição.</div>';
+    } else {
+      foods = m.foods.map(function(f){
+        var qty = f.qty ? (f.qty + (f.base && f.base.unit ? f.base.unit : 'g')) : '';
+        return '<div class="doc-food"><span class="doc-food-name">' + (f.name || '') + '</span><span class="doc-food-qty">' + qty + '</span></div>';
+      }).join('');
+    }
+    return '<div class="doc-meal"><div class="doc-meal-h"><span class="doc-meal-name">' + (m.name || 'Refeição') + '</span><span class="doc-meal-kcal">' + Math.round(nteMealKcal(m)) + ' kcal</span></div>' + foods + '</div>';
+  }).join('');
+}
+
+function docNotesSection(notes, sectionNum) {
+  var txt = (notes == null ? '' : String(notes)).trim();
+  if (!txt) return '';
+  var num = ('0' + sectionNum).slice(-2);
+  return '<div class="doc-divider"></div>' +
+    '<div class="doc-section">' +
+      '<div class="doc-section-h"><span class="doc-section-num">' + num + '</span><span class="doc-section-title">Orientações do Coach</span></div>' +
+      '<div class="doc-section-body doc-notes">' + wkeEsc(txt) + '</div>' +
+    '</div>';
 }

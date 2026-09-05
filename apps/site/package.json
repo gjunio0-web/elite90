@@ -11,6 +11,7 @@
     "@astrojs/netlify": "^7.0.13",
     "@astrojs/sitemap": "^3.7.3",
     "@elite90/busca": "*",
+    "@elite90/editor-comuns": "*",
     "@elite90/editor-plano": "*",
     "@elite90/situacao": "*",
     "@fontsource/bebas-neue": "*",

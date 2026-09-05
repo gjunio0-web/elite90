@@ -28,6 +28,9 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
 // Núcleo compartilhado do editor de plano (AC-15 e AC-16 do Adendo 07). Mesmo
 // arranjo dos dois acima. Esta página é o ÚNICO consumidor no passo 1; a rota
 // restrita do profissional entra como segundo consumidor no passo 2.
+// Utilitários compartilhados que não são corpo do editor nem publicação
+// (AC-17): a tabela de rótulos de fase do Adendo 03 e os ícones da interface.
+import editorComunsNucleo from '@elite90/editor-comuns/nucleo.js?raw';
 import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
 ---
 <!DOCTYPE html>
@@ -2071,6 +2074,7 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
 </script>
 <script is:inline set:html={buscaNucleo}></script>
 <script is:inline set:html={situacaoNucleo}></script>
+<script is:inline set:html={editorComunsNucleo}></script>
 <script is:inline set:html={editorPlanoNucleo}></script>
 <script is:inline>
     // ---------- contrato de gancho do editor de plano (AC-16) ----------
@@ -2087,22 +2091,23 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     //
     // Declarado com `var`, no topo, e apontando direto para as funções: declaração
     // de função é içada e já está inicializada quando este objeto é construído.
+    // AC-17 · O gancho contém APENAS PUBLICAÇÃO. Três entradas, e nada além
+    // (CA-53). Quem lê este objeto vê a fronteira de publicação inteira de uma
+    // vez, que é o que a AC-16 descreve.
+    //
+    // Ele já teve doze. As outras nove eram corpo do editor e utilitários que o
+    // passo 1b classificou pelo PREFIXO DO NOME, onde a AC-15 classifica por
+    // conteúdo: sete foram para `@elite90/editor-plano`, duas para
+    // `@elite90/editor-comuns`. Nenhuma virou cópia (CA-54).
+    //
+    // É por aqui que a ausência da publicação continua ESTRUTURAL: a rota
+    // restrita do profissional monta este mesmo objeto vazio, e o botão que o
+    // acionaria não existe naquele arquivo (CA-33). O núcleo não decide o que
+    // pode publicar — ele não sabe publicar.
     var EditorPlanoHost = {
-      // publicação e persistência — NÃO ligadas pela rota restrita
       getPlanRef: getPlanRef,
       renderPubHeader: renderPubHeader,
       m2SalvarRascunho: m2SalvarRascunho,
-      // documento entregue ao atleta
-      docEnvelope: docEnvelope,
-      docDayTotals: docDayTotals,
-      docMacrosBlock: docMacrosBlock,
-      docMealsBlock: docMealsBlock,
-      docNotesSection: docNotesSection,
-      // utilitários da página
-      renderWorkout: renderWorkout,
-      renderNutrition: renderNutrition,
-      renderIcons: renderIcons,
-      rotuloFase: rotuloFase,
     };
 
     // ── DOBRA DE BUSCA, TERMOS E CASAMENTO ──
@@ -2165,47 +2170,6 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     //    consistente com o resto do repo — nenhum outro componente usa uma
     //    lib de ícones). Mesmos nomes data-lucide já usados no HTML/JS
     //    portado; renderIcons() varre [data-lucide] e injeta o SVG. ──
-    const ICONS = {
-      "search": '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
-      "menu": '<line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/>',
-      "refresh-cw": '<path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>',
-      "download": '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
-      "eye": '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/>',
-      "plus": '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
-      "check": '<polyline points="20 6 9 17 4 12"/>',
-      "sliders-horizontal": '<line x1="21" y1="4" x2="14" y2="4"/><line x1="10" y1="4" x2="3" y2="4"/><line x1="21" y1="12" x2="12" y2="12"/><line x1="8" y1="12" x2="3" y2="12"/><line x1="21" y1="20" x2="16" y2="20"/><line x1="12" y1="20" x2="3" y2="20"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="16" y1="18" x2="16" y2="22"/>',
-      "chevron-right": '<polyline points="9 18 15 12 9 6"/>',
-      "copy": '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
-      "dumbbell": '<rect x="2" y="9" width="4" height="6" rx="1"/><rect x="18" y="9" width="4" height="6" rx="1"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="9" y1="7" x2="9" y2="17"/><line x1="15" y1="7" x2="15" y2="17"/>',
-      "grip-vertical": '<circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>',
-      "history": '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
-      "trophy": '<path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
-      "upload": '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
-      "utensils": '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
-      "x": '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
-      "trash-2": '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
-      "alert-triangle": '<path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
-      "x-circle": '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
-      "info": '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
-      // SHR — escolha de canal no compartilhamento de plano
-      "mail": '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
-      "message-circle": '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>',
-      "external-link": '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>',
-      "share-2": '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>',
-      // Menu de ações do dia (aba Treino). "pencil" também é usado no
-      // indicador de renomeação da aba ativa em ponteiro grosso — sem esta
-      // entrada, renderIcons() sai calado e o indicador não é desenhado.
-      "more-horizontal": '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
-      "pencil": '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>',
-    };
-    function renderIcons(root) {
-      (root || document).querySelectorAll('[data-lucide]').forEach(el => {
-        const inner = ICONS[el.dataset.lucide];
-        if (!inner || el.querySelector('svg')) return;
-        const extraStyle = el.getAttribute('style') || '';
-        el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="' + extraStyle + '">' + inner + '</svg>';
-      });
-    }
 
     // ── FOTOS DO CHECK-IN (get-foto-urls.ts real, sem persistência mock) ──
     // Convenção de paths no Storage (a popular pelo time/app do atleta):
@@ -2345,15 +2309,6 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     // em nada que já funciona. Mudar o texto da tela deixa de ser alteração
     // de banco — é exatamente o problema que a AF-08 teve de resolver, agora
     // resolvido de vez.
-    const FASE_LABEL = {
-      'Bulking':    'Bulking',
-      'Cutting':    'Cutting',
-      'Diet Break': 'Diet Break',
-      'Maintenance': 'Manutenção',
-    };
-    function rotuloFase(fase) {
-      return FASE_LABEL[fase] || fase || '—';
-    }
 
     // Situação de acompanhamento (Adendo 06). Ponto único de chamada a
     // derivarSituacao (packages/situacao, injetado acima) — antes da Fase 4,
@@ -3122,92 +3077,6 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
 
 
 
-    function renderWorkout() {
-      if (!wkeState.plan) return;
-      const plan = wkeState.plan;
-      const tabsEl = document.getElementById('wke-daytabs');
-      const statsEl = document.getElementById('wke-stats');
-      const exEl = document.getElementById('wke-exercises');
-      const addBtn = document.getElementById('wke-add-ex-btn');
-      const notesEl = document.getElementById('wke-coach-notes-section');
-      // Estado de primeira vez: nenhum dia criado ainda
-      if (!plan.order.length) {
-        if (tabsEl) tabsEl.innerHTML = '';
-        if (statsEl) statsEl.innerHTML = '';
-        var wkeCtxEmpty = document.getElementById('wke-calcctx');
-        if (wkeCtxEmpty) wkeCtxEmpty.style.display = 'none';
-        if (addBtn) addBtn.style.display = 'none';
-        if (notesEl) notesEl.style.display = 'none';
-        const nome = (wkeState.athlete && wkeState.athlete.name.split(' ')[0]) || 'O atleta';
-        if (exEl) {
-          exEl.innerHTML = '<div class="wke-empty"><div class="wke-empty-icon"><span data-lucide="dumbbell"></span></div>' +
-            '<div class="wke-empty-title">Nenhum plano de treino ainda</div>' +
-            '<div class="wke-empty-sub">' + nome + ' ainda não tem um treino publicado. Crie o primeiro dia para começar a montar o plano.</div>' +
-            '<button class="wke-firsttime-cta" onclick="wkeCreateFirstDay()"><span data-lucide="plus"></span> Criar primeiro dia</button></div>';
-        }
-        renderIcons();
-        return;
-      }
-      if (addBtn) addBtn.style.display = '';
-      if (notesEl) notesEl.style.display = '';
-      wkeSyncCoachNotes();
-      var wkeCtxEl = document.getElementById('wke-calcctx');
-      if (wkeCtxEl) wkeCtxEl.style.display = 'flex';
-      wkeRenderCalcContext();
-      // DayTabs
-      if (tabsEl) {
-        wkeCloseDayMenu();
-        // O clique é tratado por delegação em #wke-daytabs (wkeOnDayTabsClick),
-        // não por onclick embutido: renderWorkout reconstrói esta lista inteira,
-        // e o nó que recebeu o primeiro clique deixa de existir antes do
-        // segundo — o que tornava o ondblclick dependente de como cada
-        // navegador reconcilia alvos destruídos.
-        const coarse = wkeCoarsePointer();
-        tabsEl.innerHTML = plan.order.map(function(d) {
-          const active = d === wkeState.activeDay;
-          const hint = active
-            ? (coarse ? 'Toque de novo para renomear' : 'Duplo-clique para renomear')
-            : 'Selecionar dia';
-          return '<span class="wke-daytab-wrap">' +
-            '<button class="wke-daytab' + (active ? ' active' : '') + '" data-day="' + wkeEsc(d) + '" title="' + hint + '">' +
-              wkeEsc(wkeDayName(d)) +
-              (active && coarse ? '<span class="wke-daytab-pencil"><span data-lucide="pencil"></span></span>' : '') +
-            '</button>' +
-            '<button class="wke-daytab-menubtn' + (active && coarse ? ' always' : '') + '" title="Ações do dia" aria-label="Ações do dia" aria-haspopup="true" aria-expanded="false" data-day-menu="' + wkeEsc(d) + '"><span data-lucide="more-horizontal"></span></button>' +
-          '</span>';
-        }).join('') + '<button class="wke-daytab add" data-day-add="1">+ Adicionar dia</button>';
-        if (!tabsEl.dataset.bound) {
-          tabsEl.addEventListener('click', wkeOnDayTabsClick);
-          tabsEl.addEventListener('dblclick', wkeOnDayTabsDblClick);
-          tabsEl.dataset.bound = '1';
-        }
-      }
-      const day = plan.days[wkeState.activeDay];
-      // Stats
-      const stats = wkeComputeStats(day);
-      const vol = wkeFmtVolume(stats.volume);
-      const volSub = stats.pendingCount > 0
-        ? ((stats.exCount - stats.pendingCount) + ' de ' + stats.exCount + ' com carga')
-        : '';
-      if (statsEl) {
-        statsEl.innerHTML =
-          wkeStatCard(stats.exCount, '', 'Exercícios') +
-          wkeStatCard(stats.groups, '', 'Grupos') +
-          wkeStatCard(vol.val, vol.unit, stats.pendingCount > 0 ? 'Volume parcial' : 'Volume', volSub) +
-          wkeStatCard(stats.durMin, 'min', 'Duração');
-      }
-      // Exercises
-      if (exEl) {
-        if (!day.exercises.length) {
-          exEl.innerHTML = '<div class="wke-empty"><div class="wke-empty-icon"><span data-lucide="dumbbell"></span></div>' +
-            '<div class="wke-empty-title">Nenhum exercício neste dia</div>' +
-            '<div class="wke-empty-sub">Adicione o primeiro exercício para começar a montar o treino.</div></div>';
-        } else {
-          exEl.innerHTML = day.exercises.map(function(ex, i) { return wkeExerciseCard(ex, i); }).join('');
-        }
-      }
-      renderIcons();
-    }
 
 
     // Faixa de contexto da aba Treino: fase (chip) + peso atual
@@ -4237,40 +4106,6 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
 
 
     // ── NTE render ──
-    function renderNutrition() {
-      if (!nteState.plan) return;
-      const dayselEl = document.getElementById('nte-dayselector');
-      const macrosEl = document.getElementById('nte-macros');
-      const mealsEl = document.getElementById('nte-meals');
-      const addBtn = document.getElementById('nte-add-meal-btn');
-      const notesEl = document.getElementById('nte-coach-notes-section');
-      // Estado de primeira vez: nenhum plano definido ainda
-      if (nteState.plan.isNew || !nteState.plan.target) {
-        if (dayselEl) dayselEl.innerHTML = '';
-        if (macrosEl) macrosEl.innerHTML = '';
-        var ctxEl = document.getElementById('nte-calcctx');
-        if (ctxEl) ctxEl.style.display = 'none';
-        if (addBtn) addBtn.style.display = 'none';
-        if (notesEl) notesEl.style.display = 'none';
-        const nome = (nteState.athlete && nteState.athlete.name.split(' ')[0]) || 'O atleta';
-        if (mealsEl) {
-          mealsEl.innerHTML = '<div class="wke-empty"><div class="wke-empty-icon"><span data-lucide="utensils"></span></div>' +
-            '<div class="wke-empty-title">Nenhum plano nutricional ainda</div>' +
-            '<div class="wke-empty-sub">' + nome + ' ainda não tem um plano publicado. Crie o plano para definir as metas de macros e a primeira refeição.</div>' +
-            '<button class="wke-firsttime-cta" onclick="nteCreateFirstPlan()"><span data-lucide="plus"></span> Criar plano</button></div>';
-        }
-        renderIcons();
-        return;
-      }
-      if (addBtn) addBtn.style.display = '';
-      if (notesEl) notesEl.style.display = '';
-      nteSyncCoachNotes();
-      nteRenderCalcContext();
-      nteRenderDaySelector();
-      nteRenderMacros();
-      nteRenderMeals();
-      renderIcons();
-    }
 
     // Faixa de contexto de cálculo: fase (chip colorido) + peso atual
 
@@ -4290,67 +4125,9 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     // mexa lá também — ver o cabeçalho de plano-documento.ts para a única
     // diferença real (lá lê o retrato congelado da publicação; aqui lê ao
     // vivo, de propósito, porque isto é o preview de edição).
-    var DOC_LOGO_IMG = '<img src="/images/brand/logo-emblema.webp" srcset="/images/brand/logo-emblema.webp 1x, /images/brand/logo-emblema@2x.webp 2x" alt="" width="51" height="56" decoding="async" aria-hidden="true"/>';
-    function docEnvelope(badgeText, title, athleteName, summaryExtra, innerHtml) {
-      return '<div class="doc-sheet">' +
-        '<div class="doc-header">' +
-          '<div class="doc-logo">' + DOC_LOGO_IMG +
-            '<div><div class="doc-logo-h"><span>Coach Ruiz</span><span class="doc-logo-sep">·</span><span>ELITE90 PRO</span></div><div class="doc-logo-p">Estratégia de Alta Performance</div></div>' +
-          '</div>' +
-          '<span class="doc-badge">' + badgeText + '</span>' +
-        '</div>' +
-        '<div class="doc-card">' +
-          '<div class="doc-title">' + title + '</div>' +
-          '<div class="doc-summary">Documento preparado pelo Coach Ruiz para <strong>' + (athleteName || 'o atleta') + '</strong>' + (summaryExtra || '') + '. Confidencial, elaborado exclusivamente para este atleta.</div>' +
-          innerHtml +
-        '</div>' +
-        '<div class="doc-footer"><div class="doc-footer-div"></div>' +
-          '<div class="doc-footer-copy">Coach Ruiz 2026 © Todos os direitos reservados</div>' +
-          '<div class="doc-footer-credit">Criado por GM Digital Bunker ©, 2026</div>' +
-        '</div>' +
-      '</div>';
-    }
     // Observações do Coach como seção final do documento entregue ao atleta —
     // mesma função para os dois planos. Sem conteúdo, a seção não é renderizada:
     // um "sem conteúdo registrado" num documento entregue não informa nada.
-    function docNotesSection(notes, sectionNum) {
-      var txt = (notes == null ? '' : String(notes)).trim();
-      if (!txt) return '';
-      var num = ('0' + sectionNum).slice(-2);
-      return '<div class="doc-divider"></div>' +
-        '<div class="doc-section">' +
-          '<div class="doc-section-h"><span class="doc-section-num">' + num + '</span><span class="doc-section-title">Orientações do Coach</span></div>' +
-          '<div class="doc-section-body doc-notes">' + wkeEsc(txt) + '</div>' +
-        '</div>';
-    }
-    function docMealsBlock(meals) {
-      if (!meals || !meals.length) return '<div class="doc-empty">Nenhuma refeição definida para este dia.</div>';
-      return meals.map(function(m){
-        var foods;
-        if (!m.foods || !m.foods.length) {
-          foods = '<div class="doc-empty">Sem alimentos nesta refeição.</div>';
-        } else {
-          foods = m.foods.map(function(f){
-            var qty = f.qty ? (f.qty + (f.base && f.base.unit ? f.base.unit : 'g')) : '';
-            return '<div class="doc-food"><span class="doc-food-name">' + (f.name || '') + '</span><span class="doc-food-qty">' + qty + '</span></div>';
-          }).join('');
-        }
-        return '<div class="doc-meal"><div class="doc-meal-h"><span class="doc-meal-name">' + (m.name || 'Refeição') + '</span><span class="doc-meal-kcal">' + Math.round(nteMealKcal(m)) + ' kcal</span></div>' + foods + '</div>';
-      }).join('');
-    }
-    function docDayTotals(meals) {
-      var t = { kcal:0, p:0, c:0, g:0 };
-      (meals || []).forEach(function(m){ (m.foods||[]).forEach(function(f){ var x = nteMacrosOf(f); t.kcal+=x.kcal; t.p+=x.p; t.c+=x.c; t.g+=x.g; }); });
-      return t;
-    }
-    function docMacrosBlock(t) {
-      return '<div class="doc-macros">' +
-        '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.p) + 'g</div><div class="doc-macro-l">Proteína</div></div>' +
-        '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.c) + 'g</div><div class="doc-macro-l">Carboidrato</div></div>' +
-        '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.g) + 'g</div><div class="doc-macro-l">Gordura</div></div>' +
-        '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.kcal) + '</div><div class="doc-macro-l">Calorias</div></div>' +
-      '</div>';
-    }
 
     // ── Preview: plano nutricional como o atleta o vê (PRT-10) — sempre as duas abas ──
 
