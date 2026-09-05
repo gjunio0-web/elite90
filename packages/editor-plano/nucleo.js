@@ -1591,7 +1591,7 @@ function renderWorkout() {
     if (wkeCtxEmpty) wkeCtxEmpty.style.display = 'none';
     if (addBtn) addBtn.style.display = 'none';
     if (notesEl) notesEl.style.display = 'none';
-    const nome = (wkeState.athlete && wkeState.athlete.name.split(' ')[0]) || 'O atleta';
+    const nome = (wkeState.athlete && wkeState.athlete.displayLabel) || 'O atleta';
     if (exEl) {
       exEl.innerHTML = '<div class="wke-empty"><div class="wke-empty-icon"><span data-lucide="dumbbell"></span></div>' +
         '<div class="wke-empty-title">Nenhum plano de treino ainda</div>' +
@@ -1677,7 +1677,7 @@ function renderNutrition() {
     if (ctxEl) ctxEl.style.display = 'none';
     if (addBtn) addBtn.style.display = 'none';
     if (notesEl) notesEl.style.display = 'none';
-    const nome = (nteState.athlete && nteState.athlete.name.split(' ')[0]) || 'O atleta';
+    const nome = (nteState.athlete && nteState.athlete.displayLabel) || 'O atleta';
     if (mealsEl) {
       mealsEl.innerHTML = '<div class="wke-empty"><div class="wke-empty-icon"><span data-lucide="utensils"></span></div>' +
         '<div class="wke-empty-title">Nenhum plano nutricional ainda</div>' +
@@ -1833,3 +1833,55 @@ function nteAplicarPlano(athlete, plano) {
   nteState.plan = plano;
   renderNutrition();
 }
+
+
+// ---------- contrato mínimo do objeto de atleta (AC-22) ----------
+//
+// ESTE ARQUIVO LÊ DO OBJETO DE ATLETA APENAS OS TRÊS CAMPOS ABAIXO. Lista
+// FECHADA — não inventário.
+//
+//   displayLabel      rótulo de exibição JÁ RESOLVIDO pela hospedeira (AC-21)
+//   phase             projetado no Nível 1
+//   weightCurrentKg   projetado no Nível 1
+//
+// ACRESCENTAR CAMPO A ESTA LISTA É DECISÃO DE ESPECIFICAÇÃO, NÃO DE
+// IMPLEMENTAÇÃO. Se a varredura de `athlete.` neste arquivo devolver campo fora
+// da lista, a CA-58 reprova — e a correção é especificar, não acrescentar aqui.
+// Uma lista que é atualizada para refletir o código não restringe nada.
+//
+// POR QUE O CONTRATO EXISTE
+//
+// Enquanto a gaveta do Coach era o único consumidor, o núcleo recebia o
+// documento do atleta inteiro e lia o que quisesse, sem custo — o Coach tem o
+// documento todo. Com a rota restrita, o objeto vem de uma PROJEÇÃO com lista de
+// permitidos (AD-06 do Adendo 02), e cada campo novo que este arquivo passe a
+// ler vira quebra em potencial, descoberta só ao ligar.
+//
+// POR QUE `displayLabel`, E POR QUE ELE NÃO É `name`
+//
+// A projeção NÃO devolve o nome real no Nível 1: devolve o rótulo externo no
+// lugar, porque a D-14 do Adendo 02 impede que o delegado externo associe o
+// plano a uma pessoa identificável. Este arquivo lia o campo de nome real e o
+// reduzia ao primeiro termo, e a falha era SELETIVA — passava com delegado
+// interno, que o recebe, e lançava com o externo. Falha que depende do perfil
+// passa na homologação feita com a própria equipe e reprova com quem a norma
+// protege.
+//
+// Os dois nomes de campo — o do nome real e o do rótulo externo — estão FORA
+// deste arquivo de propósito, inclusive nestes comentários: a CA-58 e a CA-59
+// são verificadas por varredura, e menção em comentário produziria falso
+// positivo que custaria a quem for conferir.
+//
+// A decisão entre nome e rótulo permanece INTEIRAMENTE na projeção do servidor.
+// Este arquivo exibe o que recebeu e NÃO SABE QUAL DOS DOIS FOI — não há, e não
+// pode haver, ramo aqui que decida entre eles (CA-59).
+//
+// A REDUÇÃO AO PRIMEIRO NOME SAIU DAQUI JUNTO. Ela ficava aplicada sobre o campo
+// de identidade, e reduzir ao primeiro nome é escolha de quem SABE que aquilo é
+// um nome. `ATL-7K2M` sobreviveria intacto por não ter espaço, mas o núcleo
+// estaria decidindo como apresentar identidade — que é justamente o que a AC-21
+// tira dele. Quem resolve `displayLabel` resolve-o por inteiro.
+//
+// O QUE FICA FORA, DELIBERADAMENTE: `id` e `planStatus`. As duas leituras vivem
+// na ORIGEM DO PLANO, que a AC-18 declarou território da hospedeira. São da
+// outra costura, e misturá-las aqui confundiria as duas.

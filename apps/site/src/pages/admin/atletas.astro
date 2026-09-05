@@ -2852,6 +2852,22 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
       // O .catch existe para que uma falha não vire rejeição não tratada no
       // console. m2CarregarRascunho já não lança, mas o encadeamento pode
       // quebrar por outro motivo, e silêncio aqui esconderia o defeito.
+      // AC-21 · A TERCEIRA COSTURA: como o atleta é identificado.
+      //
+      // O núcleo compartilhado lê `displayLabel`, rótulo de exibição JÁ
+      // RESOLVIDO, e não sabe se recebeu nome real ou rótulo externo. Quem
+      // resolve é a hospedeira, porque é ela que sabe a quem serve.
+      //
+      // Aqui, a hospedeira é a gaveta do Coach: ele vê o nome, e a redução ao
+      // primeiro termo é dele. A hospedeira restrita resolverá o mesmo campo com
+      // o que a projeção lhe devolveu — e a escolha entre nome e rótulo continua
+      // na projeção do servidor, onde a D-14 do Adendo 02 a pôs.
+      //
+      // Resolvido AQUI, num ponto só, e não dentro de `initWorkout` e
+      // `initNutrition`: o campo é da identidade do atleta, não da abertura de
+      // cada aba, e duplicá-lo nas duas rotinas convidaria a divergirem.
+      athlete.displayLabel = String(athlete.name || '').split(' ')[0];
+
       initWorkout(athlete).catch(function (e) { console.error('initWorkout:', e); });
       initNutrition(athlete).catch(function (e) { console.error('initNutrition:', e); });
 
