@@ -38,6 +38,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 import { CLASSIFICATIONS, type Classification } from "./_m2-validacao";
+import { conferirProfissionalAtivo } from "./_profissional-ativo";
 
 const COLECAO = "professionals";
 
@@ -94,17 +95,21 @@ export const handler = async (event: any) => {
 
   const db = getFirestore(app);
   const snap = await db.collection(COLECAO).doc(professionalId).get();
-  if (!snap.exists) {
-    return json(404, { erro: "Profissional não encontrado." });
-  }
-  const prof = snap.data() ?? {};
 
-  // Profissional desativado não ganha via de acesso. A desativação (AD-13) é o
-  // ato pelo qual o Coach retira alguém de operação; criar conta logo depois
-  // devolveria em silêncio o que a desativação tirou.
-  if (prof.active !== true) {
-    return json(409, { erro: "Profissional desativado. Reative o cadastro antes de criar o acesso." });
+  // AC-13 · conferência única, no módulo compartilhado. Aqui ela impede
+  // CONCEDER acesso a cadastro inativo; a desativação é que revoga o já
+  // concedido (AC-12). Duas coisas distintas, e nenhuma dispensa a outra.
+  const verdicto = conferirProfissionalAtivo(snap);
+  if (!verdicto.ok) {
+    return json(verdicto.reason === "nao-encontrado" ? 404 : 409, {
+      erro:
+        verdicto.reason === "inativo"
+          ? "Profissional desativado. Reative o cadastro antes de conceder o acesso."
+          : verdicto.erro,
+      reason: verdicto.reason,
+    });
   }
+  const prof = verdicto.dados;
 
   const email = typeof prof.email === "string" ? prof.email.trim().toLowerCase() : "";
   if (!email) {

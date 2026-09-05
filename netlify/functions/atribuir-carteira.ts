@@ -32,6 +32,7 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 import { validarUid, validarIdDocumento, validarSpecialty } from "./_m2-validacao";
+import { conferirProfissionalAtivo } from "./_profissional-ativo";
 
 const COLECAO = "assignments";
 const COLECAO_ATLETAS = "athletes";
@@ -109,12 +110,13 @@ export const handler = async (event: any) => {
       const atletaSnap = await tx.get(db.collection(COLECAO_ATLETAS).doc(athleteUid));
       if (!atletaSnap.exists) throw new AtletaNaoEncontrado();
 
+      // AC-13: a conferência de `active` saiu daqui para `_profissional-ativo.ts`,
+      // e este passou a ser um dos seus chamadores. A leitura continua dentro da
+      // transação — é o que a mantém válida no instante da escrita.
       const profSnap = await tx.get(db.collection(COLECAO_PROFISSIONAIS).doc(professionalId));
-      if (!profSnap.exists) throw new ProfissionalInvalido("Profissional não encontrado.");
-      const prof = profSnap.data() as Record<string, any>;
-      if (prof.active !== true) {
-        throw new ProfissionalInvalido("Profissional está inativo.");
-      }
+      const verdicto = conferirProfissionalAtivo(profSnap);
+      if (!verdicto.ok) throw new ProfissionalInvalido(verdicto.erro);
+      const prof = verdicto.dados;
       if (!Array.isArray(prof.specialties) || !prof.specialties.includes(specialty)) {
         throw new ProfissionalInvalido(
           "Profissional não tem a especialidade requerida.",
