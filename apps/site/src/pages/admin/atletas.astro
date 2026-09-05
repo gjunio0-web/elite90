@@ -19,6 +19,10 @@ import buscaNucleo from '@elite90/busca/nucleo.js?raw';
 // Mesmo arranjo acima, para a situação de acompanhamento (Adendo 06). Ver o
 // cabeçalho de packages/situacao/nucleo.js.
 import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
+// Núcleo compartilhado do editor de plano (AC-15 e AC-16 do Adendo 07). Mesmo
+// arranjo dos dois acima. Esta página é o ÚNICO consumidor no passo 1; a rota
+// restrita do profissional entra como segundo consumidor no passo 2.
+import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -2166,6 +2170,7 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
 </script>
 <script is:inline set:html={buscaNucleo}></script>
 <script is:inline set:html={situacaoNucleo}></script>
+<script is:inline set:html={editorPlanoNucleo}></script>
 <script is:inline>
     // ── DOBRA DE BUSCA, TERMOS E CASAMENTO ──
     // dobraBusca, termosBusca, casaTodosTermos e pontuaAlimento vêm de
@@ -3099,10 +3104,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     // O arquivo traz somente os exercícios PUBLICADOS pelo Coach (seção 9).
     // Enquanto nenhum lote tiver sido aprovado, a busca fica legitimamente
     // vazia, e a mensagem abaixo diz isso em vez de fingir um catálogo.
-    let WKE_EXERCISE_DB = [];
-    let wkeCatalogoEstado = 'nao-carregado'; // nao-carregado | carregando | pronto | erro
-    let wkeCatalogoMotivo = '';
-    let wkeCatalogoSemente = false;
 
     async function wkeCarregarCatalogo() {
       if (wkeCatalogoEstado === 'pronto' || wkeCatalogoEstado === 'carregando') return;
@@ -3153,7 +3154,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     //
     // No dia em que initWorkout passar a ler plano do banco, isto sai inteiro:
     // este carregador, scripts/dados-demo/ e scripts/filtrar-demo.mjs.
-    let WKE_DEMO_PLAN = null;
 
     async function wkeCarregarPlanoDemo() {
       try {
@@ -3171,24 +3171,13 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     // alterando o objeto no lugar; sem cópia, o segundo atleta seria escalado
     // sobre o primeiro. A versão anterior devolvia um literal novo a cada
     // chamada e não tinha esse risco.
-    function wkeBuildBasePlan() {
-      return WKE_DEMO_PLAN ? JSON.parse(JSON.stringify(WKE_DEMO_PLAN)) : null;
-    }
 
-    let wkeState = { athlete: null, plan: null, activeDay: 'A' };
-    const wkePlanCache = {}; // por id de atleta — preserva edições na sessão
-    let wkeSearchSelIdx = -1;
 
     // Escapa texto digitado pelo Coach antes de concatená-lo em innerHTML.
     // Hoje o nome do dia e as observações só existem na memória desta página,
     // mas passam a vir do banco na Etapa 1 do M2 — e, com a delegação (M4),
     // passam a ser escritos por uma pessoa e renderizados no navegador de
     // outra. Sem escape, isso é injeção de script armazenada.
-    function wkeEsc(s) {
-      return String(s == null ? '' : s)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
 
     // Ponteiro grosso (dedo) — decide se renomear é o segundo toque na aba já
     // ativa ou o duplo clique. Avaliado a cada render: um tablet com teclado
@@ -3197,7 +3186,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
       return typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
     }
 
-    function wkeRound(v) { return Math.round(v / 2.5) * 2.5; }
 
     async function initWorkout(athlete) {
       if (!athlete) return;
@@ -3247,45 +3235,8 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
       renderWorkout();
     }
 
-    function wkeRepsMid(reps) {
-      if (!reps) return 10;
-      const m = String(reps).match(/(\d+)\s*-\s*(\d+)/);
-      if (m) return (parseInt(m[1]) + parseInt(m[2])) / 2;
-      const n = String(reps).match(/\d+/);
-      return n ? parseInt(n[0]) : 10;
-    }
 
-    var WKE_SETUP_TIME = 60; // s de montagem por exercício (C-04)
-    function wkeComputeStats(day) {
-      let exCount = day.exercises.length;
-      let groups = new Set();
-      let volume = 0, restTotal = 0;
-      // P-04: exercícios com carga "a definir" (load null em todas as séries) não
-      // entram no Volume — evitam que o número caia/zere só porque um exercício
-      // novo ainda não teve a carga preenchida pelo Coach.
-      let pendingCount = 0;
-      day.exercises.forEach(function(ex) {
-        groups.add(ex.group);
-        var exHasAnyLoad = false;
-        ex.sets.forEach(function(s) {
-          if (s.load != null && s.load !== '') {
-            volume += wkeRepsMid(s.reps) * (parseFloat(s.load) || 0);
-            exHasAnyLoad = true;
-          }
-        });
-        if (!exHasAnyLoad) pendingCount++;
-        // C-04: descanso a nível de exercício
-        restTotal += ex.sets.length * (parseInt(ex.rest_default) || 60);
-      });
-      // Duração = Σ(séries × descanso do exercício) + (nº exercícios × setup)
-      const durMin = Math.round((restTotal + exCount * WKE_SETUP_TIME) / 60);
-      return { exCount: exCount, groups: groups.size, volume: volume, durMin: durMin, pendingCount: pendingCount };
-    }
 
-    function wkeFmtVolume(v) {
-      if (v >= 1000) return { val: (v / 1000).toFixed(1).replace('.', ','), unit: 't' };
-      return { val: Math.round(v), unit: 'kg' };
-    }
 
     function renderWorkout() {
       if (!wkeState.plan) return;
@@ -3374,13 +3325,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
       renderIcons();
     }
 
-    function wkeStatCard(val, unit, label, sublabel) {
-      return '<div class="wke-stat"><div class="wke-stat-value">' + val +
-        (unit ? '<span class="wke-stat-unit">' + unit + '</span>' : '') +
-        '</div><div class="wke-stat-label">' + label + '</div>' +
-        (sublabel ? '<div class="wke-stat-sublabel">' + sublabel + '</div>' : '') +
-        '</div>';
-    }
 
     // Faixa de contexto da aba Treino: fase (chip) + peso atual
     function wkeRenderCalcContext() {
@@ -3524,7 +3468,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
       else      { el.setAttribute('hidden', '');  btn.setAttribute('aria-expanded', 'false'); btn.textContent = btn.dataset.openLabel || ('Ver histórico completo (+' + (el.querySelectorAll('tbody tr').length - 4) + ')'); }
     }
 
-    function wkeCurrentDay() { return wkeState.plan.days[wkeState.activeDay]; }
 
     function wkeShowError(exIdx, si, msg) {
       const row = document.getElementById('wke-err-' + exIdx + '-' + si);
@@ -3654,7 +3597,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     // ── Menu de ações do dia ──
     // Renomear e Remover moram aqui. A exclusão continua pedindo confirmação
     // (wkeConfirm) e só é oferecida quando há mais de um dia no plano.
-    let wkeDayMenuFor = null;
 
     function wkeCloseDayMenu() {
       const open = document.querySelector('.wke-daymenu');
@@ -3778,10 +3720,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     }
 
     // C-03: nome de exibição do dia
-    function wkeDayName(d) {
-      const l = (wkeState.plan.days[d] && wkeState.plan.days[d].label) || ('Dia ' + d);
-      return l.split('—')[0].trim();
-    }
 
     function wkeStartRenameDay(d, btn) {
       const cur = wkeDayName(d);
@@ -3821,7 +3759,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     // ════════════════════════════════════════════════════════
     //  WKE-02 — DRAG-AND-DROP (Reordenação de Exercícios)
     // ════════════════════════════════════════════════════════
-    var wkeDragState = null;
 
     // P-05: FLIP (First-Last-Invert-Play) — animação de deslize 150ms ao reordenar.
     // Captura posições antes de mutar o estado; depois do renderWorkout, inverte
@@ -4069,7 +4006,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     }
 
     // ── AddExerciseSearch (autocomplete) ──
-    let wkeSearchResults = [];
     function openExerciseSearch() {
       const ov = document.getElementById('wke-search-overlay');
       const inp = document.getElementById('wke-search-input');
@@ -4084,7 +4020,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     function closeExerciseSearch() {
       document.getElementById('wke-search-overlay').hidden = true;
     }
-    let wkeSearchTimer = null;
     function onExerciseSearchInput() {
       clearTimeout(wkeSearchTimer);
       wkeSearchTimer = setTimeout(wkeRunExerciseSearch, 200); // debounce 200ms
@@ -4169,7 +4104,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     }
 
     // ── Toast + auto-save (mock) ──
-    let wkeToastWrap = null;
     function wkeToast(msg, opts) {
       // compatibilidade retroativa: opts === true → PR
       const o = (opts === true) ? { pr: true } : (opts || {});
@@ -4247,36 +4181,7 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     //
     // Note a diferença em relação aos exercícios: lá congela-se o NOME, por ser
     // peça de comunicação. Aqui é preciso congelar o VALOR.
-    function nteCongelarItem(f) {
-      const b = f.base || {};
-      return {
-        foodId: f.foodId || (b.id || null),
-        quantidadeG: f.qty,
-        nomeSnapshot: f.name,
-        medidaCaseiraSnapshot: b.medidaCaseira || null,
-        // Macros por 100 g no instante da publicação.
-        macrosSnapshot: { kcal: b.kcal || 0, p: b.p || 0, c: b.c || 0, g: b.g || 0 },
-        fonteSnapshot: b.categoria ? { base: 'foods', categoria: b.categoria } : { base: 'foods' },
-        // Marca de tempo do servidor quando a persistência existir. Enquanto o
-        // plano vive em memória, o relógio do cliente é o que há — e o campo
-        // fica explicitamente marcado como provisório, para não passar por
-        // registro confiável.
-        congeladoEm: null,
-        _congeladoNoCliente: new Date().toISOString()
-      };
-    }
 
-    function nteCongelarPlano(plan) {
-      if (!plan || !plan.days) return;
-      Object.keys(plan.days).forEach(function(dk) {
-        const dia = plan.days[dk];
-        (dia.meals || []).forEach(function(meal) {
-          (meal.foods || []).forEach(function(f) {
-            f.snapshot = nteCongelarItem(f);
-          });
-        });
-      });
-    }
 
     function doPublish(kind, label) {
       const p = getPlanRef(kind);
@@ -4903,7 +4808,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     function evoResolveAlert(i) { EVO_ED_ALERTS[i].resolved = true; evoRenderEditAlerts(); evoTriggerAutosave(); }
     function evoUnresolveAlert(i) { EVO_ED_ALERTS[i].resolved = false; evoRenderEditAlerts(); evoTriggerAutosave(); }
 
-    let wkeSaveTimer = null;
     // ════════════════════════════════════════════════════════
     //  M2-01 — CLIENTE ÚNICO DE ESCRITA (Fase 1 da persistência)
     // ════════════════════════════════════════════════════════
@@ -5049,10 +4953,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     // O arquivo publicado usa nomeExibicao e macros{kcal,proteinaG,...}. A
     // tradução acontece no carregamento, num lugar só, em vez de espalhar o
     // formato do banco por toda a tela.
-    let NTE_FOOD_DB = [];
-    let nteCatalogoEstado = 'nao-carregado'; // nao-carregado | carregando | pronto | erro
-    let nteCatalogoMotivo = '';
-    let nteCatalogoSemente = false;
 
     async function nteCarregarCatalogo() {
       if (nteCatalogoEstado === 'pronto' || nteCatalogoEstado === 'carregando') return;
@@ -5102,13 +5002,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     }
 
     // ── Fórmula de Macros — configuração parametrizável ──
-    const NTE_FORMULA_DEFAULTS = {
-      'Bulking':     { p: 2.0, c: 5.0, g: 1.1 },
-      'Cutting':     { p: 2.4, c: 3.0, g: 0.8 },
-      'Manutenção':  { p: 2.0, c: 4.0, g: 1.0 },
-      'Diet Break':  { p: 2.2, c: 3.5, g: 0.9 }
-    };
-    let nteFormulaConfig;
     (function() {
       try {
         const s = localStorage.getItem('elite90_nte_formula');
@@ -5116,13 +5009,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
       } catch(e) { nteFormulaConfig = JSON.parse(JSON.stringify(NTE_FORMULA_DEFAULTS)); }
     })();
 
-    function nteGetFormulaForPhase(phase) {
-      const p = (phase || '').toLowerCase();
-      if (p.includes('cut')) return nteFormulaConfig['Cutting'] || NTE_FORMULA_DEFAULTS['Cutting'];
-      if (p.includes('diet break')) return nteFormulaConfig['Diet Break'] || NTE_FORMULA_DEFAULTS['Diet Break'];
-      if (p.includes('manu')) return nteFormulaConfig['Manutenção'] || NTE_FORMULA_DEFAULTS['Manutenção'];
-      return nteFormulaConfig['Bulking'] || NTE_FORMULA_DEFAULTS['Bulking'];
-    }
 
     function nteToggleFormulaPanel() {
       const panel = document.getElementById('nte-formula-panel');
@@ -5202,52 +5088,7 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
       wkeToast('Fórmula restaurada ao padrão', {type:'info'});
     }
 
-    function nteBuildBasePlan(athlete) {
-      // Metas de macro via fórmula parametrizável (nteFormulaConfig)
-      const w = athlete.weightCurrentKg || 80;
-      const f = nteGetFormulaForPhase(athlete.phase);
-      const target = {
-        p: Math.round(w * f.p), c: Math.round(w * f.c), g: Math.round(w * f.g)
-      };
-      target.kcal = Math.round(target.p * 4 + target.c * 4 + target.g * 9);
-      // MOCK AGUARDANDO REFAÇÃO — resolve por NOME num catálogo que já não é
-      // fixo. Com o vetor literal removido, esta busca não encontra nada até o
-      // carregamento assíncrono terminar, e os itens saem sem `base`. As guardas
-      // de renderização absorvem isso exibindo zeros (ver `food.base ||` abaixo),
-      // então a tela não quebra — mas os macros do plano de demonstração
-      // aparecem zerados, e isso é esperado, não defeito.
-      //
-      // Refazer este construtor com foodId reais do catálogo carregado é item
-      // próprio, já combinado, junto com o mock de exercícios. Enquanto isso não
-      // acontece, o plano-base serve para exercitar a interface, não os números.
-      const F = function(name, qty) {
-        const f = NTE_FOOD_DB.find(function(x){ return x.name === name; });
-        return { foodId: f ? f.id : null, name: name, qty: qty, base: f };
-      };
-      return {
-        target: target,
-        dayType: 'treino',
-        days: {
-          treino: { meals: [
-            { name: 'Café da manhã', foods: [ F('Ovo inteiro', 150), F('Aveia em flocos', 60), F('Banana', 120) ] },
-            { name: 'Almoço', foods: [ F('Peito de frango grelhado', 200), F('Arroz branco cozido', 200), F('Feijão preto cozido', 100), F('Brócolis cozido', 80) ] },
-            { name: 'Pré-treino', foods: [ F('Batata doce cozida', 150), F('Whey protein (pó)', 30) ] },
-            { name: 'Pós-treino', foods: [ F('Whey protein (pó)', 30), F('Banana', 120), F('Dextrose (pó)', 30) ] },
-            { name: 'Jantar', foods: [ F('Patinho moído (95%)', 180), F('Arroz integral cozido', 150), F('Espinafre cru', 60) ] }
-          ] },
-          descanso: { meals: [
-            { name: 'Café da manhã', foods: [ F('Ovo inteiro', 150), F('Pão integral', 60) ] },
-            { name: 'Almoço', foods: [ F('Peito de frango grelhado', 180), F('Arroz integral cozido', 150), F('Feijão preto cozido', 100) ] },
-            { name: 'Lanche', foods: [ F('Iogurte natural integral', 170), F('Pasta de amendoim', 20) ] },
-            { name: 'Jantar', foods: [ F('Tilápia grelhada', 180), F('Batata doce cozida', 120), F('Brócolis cozido', 80) ] }
-          ] }
-        }
-      };
-    }
 
-    let nteState = { athlete: null, plan: null };
-    const ntePlanCache = {};
-    let nteSearchResults = [], nteSearchSelIdx = -1, ntePendingFood = null, ntePendingMeal = null;
 
     async function initNutrition(athlete) {
       if (!athlete) return;
@@ -5285,26 +5126,7 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
       el.value = (nteState.plan && nteState.plan.coachNotes) || '';
     }
 
-    function nteMacrosOf(food) {
-      const k = (parseFloat(food.qty) || 0) / 100;
-      const b = food.base || { kcal: 0, p: 0, c: 0, g: 0 };
-      return { kcal: b.kcal * k, p: b.p * k, c: b.c * k, g: b.g * k };
-    }
-    function nteCurrentDay() { return nteState.plan.days[nteState.plan.dayType]; }
-    function nteDayTotals() {
-      const t = { kcal: 0, p: 0, c: 0, g: 0 };
-      nteCurrentDay().meals.forEach(function(m){ m.foods.forEach(function(f){ const x = nteMacrosOf(f); t.kcal+=x.kcal; t.p+=x.p; t.c+=x.c; t.g+=x.g; }); });
-      return t;
-    }
-    function nteMealKcal(meal) { let k=0; meal.foods.forEach(function(f){ k += nteMacrosOf(f).kcal; }); return k; }
 
-    function nteBarClass(current, target) {
-      if (!target) return 'on';
-      const pct = Math.abs(current - target) / target * 100;
-      if (pct <= 5) return 'on';
-      if (pct <= 10) return 'near';
-      return 'off';
-    }
 
     // ── NTE render ──
     function renderNutrition() {
@@ -5503,22 +5325,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
         nteMacroCard('Calorias', t.kcal, tg.kcal, '');
     }
 
-    function nteMacroCard(label, current, target, unit) {
-      const pct = target ? Math.min(100, current / target * 100) : 0;
-      const cls = nteBarClass(current, target);
-      const rounded = Math.round(current);
-      const delta = target ? Math.round(current - target) : 0;
-      const deltaStr = delta === 0 ? '' : (delta > 0 ? '+' + delta : '' + delta) + unit;
-      return '<div class="nte-macro">' +
-        '<div class="nte-macro-top">' +
-          '<span class="nte-macro-value">' + rounded + unit + '</span>' +
-          '<span class="nte-macro-target">/ ' + target + unit + '</span>' +
-        '</div>' +
-        (deltaStr ? '<div class="nte-macro-delta">' + deltaStr + '</div>' : '') +
-        '<div class="nte-macro-label">' + label + '</div>' +
-        '<div class="nte-macro-bar"><div class="nte-macro-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
-      '</div>';
-    }
 
     function nteRenderMeals() {
       const el = document.getElementById('nte-meals');
@@ -5647,7 +5453,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
     }
 
     // ── AddFoodSearch (autocomplete) ──
-    let nteSearchTimer = null;
     function openFoodSearch(mealIdx) {
       ntePendingMeal = mealIdx;
       const ov = document.getElementById('nte-search-overlay');
@@ -5766,9 +5571,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
         nteQtyPrevCell((b.c * k).toFixed(1), 'CHO') +
         nteQtyPrevCell((b.g * k).toFixed(1), 'GORD');
     }
-    function nteQtyPrevCell(val, lbl) {
-      return '<div class="nte-qty-prev-cell"><div class="nte-qty-prev-val">' + val + '</div><div class="nte-qty-prev-lbl">' + lbl + '</div></div>';
-    }
     function nteConfirmFood() {
       if (!ntePendingFood || ntePendingMeal === null) return;
       const qty = parseFloat(String(document.getElementById('nte-qty-input').value).replace(',', '.'));
@@ -5790,7 +5592,6 @@ import situacaoNucleo from '@elite90/situacao/nucleo.js?raw';
       nteAutoSave();
     }
 
-    let nteSaveTimer = null;
     function nteAutoSave() {
       clearTimeout(nteSaveTimer);
       nteSaveTimer = setTimeout(function() { m2SalvarRascunho('nutrition', nteState.plan); }, 500);
