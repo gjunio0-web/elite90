@@ -1,0 +1,47 @@
+---
+// @elite90/site — componente compartilhado do editor de plano.
+// Sobreposições de busca de alimento e de quantidade (AC-15). Contém os
+// controles de quantidade; a remoção de refeição vive no corpo do editor
+// (CA-50).
+//
+// CA-42: a gaveta do Coach e a rota restrita do profissional importam ESTE
+// arquivo. Não existe cópia. Alterar aqui altera as duas.
+// A lógica vive em @elite90/editor-plano/nucleo.js, injetada pela hospedeira.
+---
+      <div class="wke-search-overlay" id="nte-search-overlay" hidden onclick="if(event.target===this)closeFoodSearch()">
+        <div class="wke-search-box">
+          <div class="wke-search-inputwrap">
+            <span data-lucide="search"></span>
+            <input type="text" class="wke-search-input" id="nte-search-input" placeholder="Buscar alimento (mín. 3 letras)…" autocomplete="off" oninput="onFoodSearchInput()" onkeydown="onFoodSearchKey(event)" />
+          </div>
+          <div class="wke-search-results" id="nte-search-results">
+            <div class="wke-search-hint">Digite ao menos 3 letras para buscar.</div>
+          </div>
+          <!-- Atalho para a base de alimentos — mesmo papel e mesma razão do
+               atalho ao catálogo de exercícios logo acima (spec da tela de
+               alimentos, seção 3): a vontade de corrigir um nome ou de
+               preencher uma medida caseira que falta nasce AQUI, com o plano
+               aberto, não no hub. Aba nova pelo mesmo motivo: o plano em
+               edição só vive na memória da página. -->
+          <a class="wke-search-catalogo" href="/admin/alimentos" target="_blank" rel="noopener">
+            Gerenciar base
+            <span data-lucide="external-link"></span>
+          </a>
+        </div>
+      </div>
+
+      <!-- AddFood: quantidade + preview de macros -->
+      <div class="nte-qty-overlay" id="nte-qty-overlay" hidden onclick="if(event.target===this)closeFoodQty()">
+        <div class="nte-qty-box">
+          <div class="nte-qty-title" id="nte-qty-title">Quantidade</div>
+          <div class="nte-qty-field">
+            <input type="number" id="nte-qty-input" inputmode="decimal" value="100" oninput="nteUpdateQtyPreview()" onkeydown="if(event.key==='Enter')nteConfirmFood();if(event.key==='Escape')closeFoodQty()" />
+            <span class="nte-qty-unit">g</span>
+          </div>
+          <div class="nte-qty-preview" id="nte-qty-preview"></div>
+          <div class="nte-qty-actions">
+            <button class="nte-qty-cancel" onclick="closeFoodQty()">Cancelar</button>
+            <button class="nte-qty-confirm" onclick="nteConfirmFood()">Adicionar</button>
+          </div>
+        </div>
+      </div>

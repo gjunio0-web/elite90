@@ -1,0 +1,16 @@
+---
+// @elite90/site — componente compartilhado do editor de plano.
+// Pré-visualização "Ver como o atleta recebe", do plano nutricional (AC-15).
+// Mesma razão de PreviaTreino para ser componente próprio.
+//
+// CA-42: a gaveta do Coach e a rota restrita do profissional importam ESTE
+// arquivo. Não existe cópia. Alterar aqui altera as duas.
+// A lógica vive em @elite90/editor-plano/nucleo.js, injetada pela hospedeira.
+---
+        <div class="evo-overlay" id="nte-preview" style="display:none">
+          <div class="drawer-header evo-ovl-head">
+            <span class="drawer-title">Visão do <span>atleta</span></span>
+            <button class="drawer-close" onclick="nteClosePreview()" aria-label="Fechar">✕</button>
+          </div>
+          <div class="evo-ovl-body" id="nte-preview-body"></div>
+        </div>

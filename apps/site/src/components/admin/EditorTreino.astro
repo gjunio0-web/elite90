@@ -1,0 +1,31 @@
+---
+// @elite90/site — componente compartilhado do editor de plano.
+// Corpo do editor de treino (AC-15). Começa em `wke-daytabs`: o cabeçalho de
+// publicação fica em atletas.astro, fora do núcleo.
+//
+// CA-42: a gaveta do Coach e a rota restrita do profissional importam ESTE
+// arquivo. Não existe cópia. Alterar aqui altera as duas.
+// A lógica vive em @elite90/editor-plano/nucleo.js, injetada pela hospedeira.
+---
+          <div class="wke-daytabs" id="wke-daytabs"></div>
+          <div class="nte-calcctx" id="wke-calcctx">
+            <span class="nte-calcctx-lbl">Fase</span>
+            <span class="nte-phasechip" id="wke-phasechip">—</span>
+            <span class="nte-calcctx-sep">·</span>
+            <span class="nte-calcctx-lbl">peso atual</span>
+            <span class="nte-weightval" id="wke-weightval">—</span>
+            <button class="nte-previewbtn" onclick="wkeOpenPreview()"><span data-lucide="eye"></span> Ver como o atleta recebe</button>
+          </div>
+          <div class="wke-stats" id="wke-stats"></div>
+          <div id="wke-exercises"></div>
+          <button class="wke-add-ex" id="wke-add-ex-btn" onclick="openExerciseSearch()"><span data-lucide="plus"></span> Adicionar exercício</button>
+
+          <!-- Observações do Coach — orientação DIRIGIDA AO ATLETA: sai também
+               no documento de "Ver como o atleta recebe" (wkeOpenPreview). O
+               conteúdo vive em wkeState.plan.coachNotes, portanto é por atleta;
+               o campo nasce vazio de propósito. Espelho exato do bloco da aba
+               Nutricional. -->
+          <div class="drawer-section" id="wke-coach-notes-section" style="margin-top: var(--space-7); padding-top: var(--space-6); border-top: 1px solid rgba(255, 255, 255, 0.08);">
+            <div class="drawer-section-title">Observações do Coach</div>
+            <textarea class="note-textarea" id="wke-coach-notes" rows="3" placeholder="Orientações para o atleta sobre este treino…" oninput="wkeSetCoachNotes(this.value)"></textarea>
+          </div>

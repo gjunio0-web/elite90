@@ -1,0 +1,31 @@
+---
+// @elite90/site — componente compartilhado do editor de plano.
+// Sobreposição de busca de exercício (AC-15). Irmã do painel de treino, e não
+// filha dele — reparentá-la a poria sob um contêiner que se oculta ao trocar
+// de aba.
+//
+// CA-42: a gaveta do Coach e a rota restrita do profissional importam ESTE
+// arquivo. Não existe cópia. Alterar aqui altera as duas.
+// A lógica vive em @elite90/editor-plano/nucleo.js, injetada pela hospedeira.
+---
+      <div class="wke-search-overlay" id="wke-search-overlay" hidden onclick="if(event.target===this)closeExerciseSearch()">
+        <div class="wke-search-box">
+          <div class="wke-search-inputwrap">
+            <span data-lucide="search"></span>
+            <input type="text" class="wke-search-input" id="wke-search-input" placeholder="Buscar exercício (mín. 3 letras)…" autocomplete="off" oninput="onExerciseSearchInput()" onkeydown="onExerciseSearchKey(event)" />
+          </div>
+          <div class="wke-search-results" id="wke-search-results">
+            <div class="wke-search-hint">Digite ao menos 3 letras para buscar.</div>
+          </div>
+          <!-- Atalho para o catálogo. A especificação o chama de entrada de uso
+               diário, e com razão: a vontade de corrigir um nome ou de procurar
+               um exercício que não existe nasce AQUI, com o plano aberto — não
+               no hub. Abre em ABA NOVA de propósito: o plano em edição vive só
+               na memória da página (wkePlanCache; o auto-salvamento ainda é um
+               comentário), e sair da página o perderia. -->
+          <a class="wke-search-catalogo" href="/admin/exercicios" target="_blank" rel="noopener">
+            Gerenciar catálogo
+            <span data-lucide="external-link"></span>
+          </a>
+        </div>
+      </div>

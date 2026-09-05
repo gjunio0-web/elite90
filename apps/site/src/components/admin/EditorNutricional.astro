@@ -1,0 +1,27 @@
+---
+// @elite90/site — componente compartilhado do editor de plano.
+// Corpo do editor nutricional (AC-15). Começa em `nte-dayselector`: o cabeçalho
+// de publicação E o painel de configuração da fórmula de macros ficam em
+// atletas.astro, fora do núcleo (CA-51).
+//
+// CA-42: a gaveta do Coach e a rota restrita do profissional importam ESTE
+// arquivo. Não existe cópia. Alterar aqui altera as duas.
+// A lógica vive em @elite90/editor-plano/nucleo.js, injetada pela hospedeira.
+---
+          <div class="nte-dayselector" id="nte-dayselector"></div>
+          <div class="nte-calcctx" id="nte-calcctx">
+            <span class="nte-calcctx-lbl">Fase</span>
+            <span class="nte-phasechip" id="nte-phasechip">—</span>
+            <span class="nte-calcctx-sep">·</span>
+            <span class="nte-calcctx-lbl">peso atual</span>
+            <span class="nte-weightval" id="nte-weightval">—</span>
+            <button class="nte-previewbtn" onclick="nteOpenPreview()"><span data-lucide="eye"></span> Ver como o atleta recebe</button>
+          </div>
+          <div class="nte-macros" id="nte-macros" aria-live="polite"></div>
+          <div id="nte-meals"></div>
+          <button class="wke-add-ex" id="nte-add-meal-btn" onclick="nteAddMeal()"><span data-lucide="plus"></span> Adicionar refeição</button>
+
+          <div class="drawer-section" id="nte-coach-notes-section" style="margin-top: var(--space-7); padding-top: var(--space-6); border-top: 1px solid rgba(255, 255, 255, 0.08);">
+            <div class="drawer-section-title">Observações do Coach</div>
+            <textarea class="note-textarea" id="nte-coach-notes" rows="3" placeholder="Orientações para o atleta sobre este plano…" oninput="nteSetCoachNotes(this.value)"></textarea>
+          </div>

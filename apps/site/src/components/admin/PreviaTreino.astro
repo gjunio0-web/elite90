@@ -1,0 +1,17 @@
+---
+// @elite90/site — componente compartilhado do editor de plano.
+// Pré-visualização "Ver como o atleta recebe", do treino (AC-15). Componente
+// separado porque é filha do painel, e não da seção do editor: a extração
+// preserva a posição exata no documento, sem reparentar nada.
+//
+// CA-42: a gaveta do Coach e a rota restrita do profissional importam ESTE
+// arquivo. Não existe cópia. Alterar aqui altera as duas.
+// A lógica vive em @elite90/editor-plano/nucleo.js, injetada pela hospedeira.
+---
+        <div class="evo-overlay" id="wke-preview" style="display:none">
+          <div class="drawer-header evo-ovl-head">
+            <span class="drawer-title">Visão do <span>atleta</span></span>
+            <button class="drawer-close" onclick="wkeClosePreview()" aria-label="Fechar">✕</button>
+          </div>
+          <div class="evo-ovl-body" id="wke-preview-body"></div>
+        </div>
