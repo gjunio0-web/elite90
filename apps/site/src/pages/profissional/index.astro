@@ -8,30 +8,35 @@ import '@fontsource/montserrat/700.css';
 import '../../styles/tokens.css';
 import '../../styles/global.css';
 import AdminHeader from '../../components/AdminHeader.astro';
+
+// CA-42 · Os MESMOS componentes que a gaveta do Coach importa. Não existe cópia:
+// alterar qualquer um deles altera as duas telas.
+import EditorTreino from '../../components/admin/EditorTreino.astro';
+import PreviaTreino from '../../components/admin/PreviaTreino.astro';
+import SobreposicoesTreino from '../../components/admin/SobreposicoesTreino.astro';
+import EditorNutricional from '../../components/admin/EditorNutricional.astro';
+import PreviaNutricional from '../../components/admin/PreviaNutricional.astro';
+import SobreposicoesNutricional from '../../components/admin/SobreposicoesNutricional.astro';
+
+// Os três núcleos, no padrão de injeção por `?raw` (F-16).
+import buscaNucleo from '@elite90/busca/nucleo.js?raw';
+import editorComunsNucleo from '@elite90/editor-comuns/nucleo.js?raw';
+import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
 ---
 {/*
-  ELITE90 PRO · rota restrita do profissional — passo 2 da AC-16.
-  Adendo 07: AC-04, AC-10, AC-13. Critérios CA-31, CA-32, CA-43, CA-44, CA-47.
+  ELITE90 PRO · rota restrita do profissional — passo 2 da AC-16, a ligação.
 
-  O QUE ESTE ARQUIVO NÃO CONTÉM, E POR QUÊ ISSO É O PONTO
-  Nenhuma marcação de Publicar, de Compartilhar, de configuração da fórmula de
-  macros ou de exclusão de atleta. A CA-33 é verificável por AUSÊNCIA neste
-  arquivo — não por condição em tempo de execução. Foi para isso que a AC-10
-  recusou renderização condicional dentro de `atletas.astro`, e para isso que a
-  AC-15 declarou a fronteira do núcleo compartilhado.
+  O QUE ESTE ARQUIVO NÃO CONTÉM, E POR QUE ISSO É O PONTO
+  Nenhuma marcação de Publicar, de Compartilhar, do painel de configuração da
+  fórmula de macros, nem de exclusão de atleta. A CA-33 e a CA-51 são
+  verificáveis por AUSÊNCIA neste arquivo — não por condição em tempo de
+  execução. Foi para isso que a AC-10 recusou renderização condicional dentro de
+  `atletas.astro`, e para isso que a AC-15 declarou a fronteira do núcleo.
 
-  Provar ausência aqui é barato: o arquivo é curto e o `grep` fecha a questão.
-  Prová-la dentro de um arquivo de milhares de linhas exigiria demonstrar que
-  não há caminho de execução que revele o botão, para toda edição futura.
-
-  ESTE BLOCO NÃO TRAZ O EDITOR. Ele traz a via de acesso e a carteira. Os seis
-  componentes compartilhados e o `EditorPlanoHost` sem publicação entram no bloco
-  seguinte, junto da gravação em `suggestions/`.
-
-  NADA É LIDO DIRETO DO BANCO POR ESTA PÁGINA. `assignments` nega leitura a
-  todos e `athletes` só a libera ao administrador; a AD-06 do Adendo 02 manda
-  que a leitura do delegado passe por projeção de servidor. Daí a única fonte
-  desta tela ser `listar-atletas-do-profissional`.
+  AS TRÊS COSTURAS, TODAS RESOLVIDAS AQUI PELA HOSPEDEIRA RESTRITA
+    onde persiste   → o gancho, no primeiro script (AC-19)
+    de onde abre    → `abrir-plano-profissional` (AC-18, AC-23)
+    identificação   → `displayLabel`, montado com o que a projeção devolveu (AC-21)
 */}
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -68,20 +73,140 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prof-abas { display: flex; gap: 8px; flex-wrap: wrap; }
     .prof-aba { font-family: Raleway, sans-serif; font-size: .72rem;
                 text-transform: uppercase; letter-spacing: .06em;
-                padding: 5px 10px; border-radius: 4px;
+                padding: 5px 10px; border-radius: 4px; cursor: pointer;
+                background: none;
                 border: 1px solid var(--lima, #A6C300); color: var(--lima, #A6C300); }
+    .prof-editor__topo { display: flex; align-items: center; gap: 16px;
+                         flex-wrap: wrap; margin-bottom: 20px; }
+    .prof-voltar { font-family: Raleway, sans-serif; font-size: .78rem;
+                   background: none; cursor: pointer; padding: 6px 12px;
+                   border-radius: 4px; border: 1px solid rgba(255,255,255,.2);
+                   color: #CCCCCC; }
+    .prof-estado { font-family: Montserrat, sans-serif; font-size: .82rem;
+                   line-height: 1.5; padding: 12px 16px; border-radius: 6px;
+                   margin-bottom: 20px; border: 1px solid #E67E22; color: #E67E22; }
+    .prof-enviar { font-family: Raleway, sans-serif; font-weight: 700;
+                   text-transform: uppercase; letter-spacing: .06em;
+                   font-size: .8rem; padding: 10px 20px; border-radius: 4px;
+                   cursor: pointer; border: none; margin-left: auto;
+                   background: var(--lima, #A6C300); color: #0D0D0D; }
+    .prof-enviar[disabled] { opacity: .35; cursor: not-allowed; }
+    /* Modo de leitura (AC-24). A opacidade apenas ACOMPANHA o modo; a garantia
+       é o `disabled` controle a controle, no roteiro — CSS não impede teclado. */
+    .prof-leitura .drawer-section { opacity: .72; }
   </style>
 </head>
 <body>
   <AdminHeader badge="Profissional" />
 
   <main class="prof-main">
-    <h1 class="prof-title">Sua carteira</h1>
+    <h1 class="prof-title" id="prof-title">Sua carteira</h1>
     <p class="prof-sub" id="prof-sub">Carregando…</p>
 
     <div id="prof-msg" class="prof-msg" hidden></div>
     <div id="prof-grid" class="prof-grid" hidden></div>
+
+    <section id="prof-editor" hidden>
+      <div class="prof-editor__topo">
+        <button type="button" class="prof-voltar" id="prof-voltar">← Voltar à carteira</button>
+        <button type="button" class="prof-enviar" id="prof-enviar">Enviar ao Coach</button>
+      </div>
+
+      <div id="prof-estado" class="prof-estado" hidden></div>
+
+      <div id="prof-aba-training" hidden>
+        <div class="drawer-section">
+          <EditorTreino />
+        </div>
+        <PreviaTreino />
+      </div>
+
+      <div id="prof-aba-nutrition" hidden>
+        <div class="drawer-section">
+          <EditorNutricional />
+        </div>
+        <PreviaNutricional />
+      </div>
+    </section>
   </main>
+
+  <SobreposicoesTreino />
+  <SobreposicoesNutricional />
+
+  <script is:inline>
+    // ---------- CONTRATO DE GANCHO NA ROTA RESTRITA (AC-19) ----------
+    //
+    // AS TRÊS ENTRADAS ESTÃO LIGADAS. Nenhuma fica ausente, e o núcleo NÃO foi
+    // alterado para tolerar ausência — tolerância no núcleo devolveria a
+    // garantia condicional que a AC-10 recusou.
+    //
+    // As três são chamadas pelo AUTOSSALVO, que dispara a cada tecla (F-21), e
+    // NENHUMA por botão. Por isso "não existe botão neste arquivo" não bastaria:
+    // ausência de ligação não é ausência de botão.
+    //
+    // `getPlanRef` devolve nulo e `renderPubHeader` não faz nada — INERTES
+    // DECLARADAS aqui, por escrito. Quem lê este arquivo vê que aqui não se
+    // publica, e o ramo condicional do autossalvo nunca executa porque a
+    // referência vem nula.
+    //
+    // Script clássico, e não módulo, de propósito: o núcleo é injetado como
+    // script clássico e alcança `EditorPlanoHost` pelo escopo global. Declarado
+    // com `var` pela mesma razão — `const` no topo de script clássico é de
+    // escopo de script, e o núcleo não o enxergaria.
+    var E90 = {
+      token: null,
+      athleteUid: null,
+      planType: null,
+      suggestionId: null,
+      status: null,
+      somenteLeitura: false,
+    };
+
+    var EditorPlanoHost = {
+      // Persistência: implementação PRÓPRIA, gravando rascunho em `suggestions/`
+      // e nunca no campo `draft` do plano (CA-55).
+      m2SalvarRascunho: function (planType, plano) {
+        // CA-61 · No modo de leitura NÃO SE PRODUZ REQUISIÇÃO ALGUMA. Não é erro
+        // tolerado nem resposta ignorada: a chamada termina aqui, antes do
+        // `fetch`. Um laço de 409 silenciado reprovaria este critério tanto
+        // quanto um laço não silenciado.
+        if (E90.somenteLeitura) return;
+        if (!E90.token || !E90.athleteUid) return;
+        fetch('/.netlify/functions/rascunhar-sugestao', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + E90.token,
+          },
+          body: JSON.stringify({
+            athleteUid: E90.athleteUid,
+            planType: planType,
+            content: plano,
+          }),
+        }).then(function (r) {
+          return r.ok ? r.json() : null;
+        }).then(function (d) {
+          // O identificador só nasce na primeira gravação; guardá-lo evita que a
+          // submissão adiante crie um segundo documento para o mesmo par.
+          if (d && d.suggestionId) E90.suggestionId = d.suggestionId;
+        }).catch(function () {
+          // O rascunho é oportunista — o ato que conta é a submissão, e ela
+          // informa o resultado ao profissional. Falhar em silêncio aqui é
+          // preferível a interromper a digitação.
+        });
+      },
+
+      // Inerte declarada: aqui não há plano publicável a referenciar.
+      getPlanRef: function () { return null; },
+
+      // Inerte declarada: aqui não há cabeçalho de publicação a desenhar.
+      renderPubHeader: function () { return; },
+    };
+  </script>
+
+  <script is:inline set:html={buscaNucleo}></script>
+  <script is:inline set:html={editorComunsNucleo}></script>
+  <script is:inline set:html={editorPlanoNucleo}></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -97,44 +222,51 @@ import AdminHeader from '../../components/AdminHeader.astro';
     };
     const auth = getAuth(initializeApp(cfg));
 
-    const sub  = document.getElementById("prof-sub");
-    const msg  = document.getElementById("prof-msg");
-    const grid = document.getElementById("prof-grid");
+    const $ = (id) => document.getElementById(id);
+    const titulo = $("prof-title"), sub = $("prof-sub"), msg = $("prof-msg");
+    const grid = $("prof-grid"), editor = $("prof-editor"), estado = $("prof-estado");
+    const enviar = $("prof-enviar");
 
     const ROTULO_ABA = { training: "Treino", nutrition: "Nutricional" };
+    const ROTULO_ESTADO = {
+      draft: "Rascunho — ainda não enviado ao Coach.",
+      returned: "Devolvida pelo Coach para ajuste.",
+      pending: "Enviada ao Coach e em revisão.",
+    };
 
     function mostrarMensagem(texto) {
-      sub.textContent = "";
-      grid.hidden = true;
-      msg.textContent = texto;
-      msg.hidden = false;
+      sub.textContent = ""; grid.hidden = true; editor.hidden = true;
+      msg.textContent = texto; msg.hidden = false;
+    }
+
+    function chamar(fn, corpo) {
+      return fetch("/.netlify/functions/" + fn, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${window.E90.token}`,
+        },
+        body: JSON.stringify(corpo ?? {}),
+      });
     }
 
     onAuthStateChanged(auth, async user => {
       if (!user) { window.location.href = "/admin/login"; return; }
       try {
-        // `true` força token novo: quem acabou de receber o acesso não deveria
-        // precisar sair e entrar de novo para que a reivindicação chegue.
-        const token = await user.getIdToken(true);
-        const resp = await fetch("/.netlify/functions/listar-atletas-do-profissional", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-          body: "{}",
-        });
-
-        // 403 cobre três recusas do servidor: sem papel de profissional, sem
-        // vínculo no token, e cadastro inativo (AC-13). A tela NÃO distingue
-        // qual delas ocorreu — quem porta token revogado não precisa saber em
-        // que estado está o cadastro. O servidor devolve o motivo para registro,
-        // e a tela não o exibe.
+        // Token novo: quem acabou de receber o acesso não deveria precisar sair
+        // e entrar de novo para que a reivindicação chegue.
+        window.E90.token = await user.getIdToken(true);
+        const resp = await chamar("listar-atletas-do-profissional");
+        // 403 cobre as três recusas do servidor. A tela NÃO distingue qual:
+        // quem porta token revogado não precisa saber em que estado está o
+        // cadastro dele.
         if (resp.status === 403) {
           mostrarMensagem("Esta conta não tem acesso à área do profissional. Procure o Coach.");
           return;
         }
         if (!resp.ok) throw new Error(String(resp.status));
-
         const { atletas } = await resp.json();
-        render(atletas ?? []);
+        renderCarteira(atletas ?? []);
       } catch {
         // Falha de rede não é falha de autorização, e dizer "sem acesso" aqui
         // mandaria a pessoa procurar o Coach por um problema que não é dela.
@@ -142,9 +274,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
       }
     });
 
-    function render(atletas) {
+    function renderCarteira(atletas) {
+      editor.hidden = true; msg.hidden = true; estado.hidden = true;
+      titulo.textContent = "Sua carteira";
       if (atletas.length === 0) {
-        sub.textContent = "";
         mostrarMensagem("Nenhum atleta atribuído a você no momento.");
         return;
       }
@@ -156,8 +289,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
       for (const item of atletas) {
         const a = item.atleta ?? {};
         // Nome OU rótulo, nunca os dois: o servidor projeta um só, conforme a
-        // classificação do cadastro (D-14). A tela não escolhe — apenas exibe o
-        // que veio, e o `??` aqui é fallback de renderização, não regra.
+        // classificação do cadastro (D-14). A tela exibe o que veio, e o `??`
+        // é recurso de renderização, não regra.
         const identidade = a.name ?? a.externalLabel ?? "—";
 
         const card = document.createElement("div");
@@ -173,19 +306,141 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
         const abas = document.createElement("div");
         abas.className = "prof-abas";
+        // CA-44 · uma aba por ATRIBUIÇÃO ATIVA NAQUELE ATLETA, e não pelas
+        // especialidades do cadastro do profissional.
         for (const s of (item.specialties ?? [])) {
-          const tag = document.createElement("span");
-          tag.className = "prof-aba";
-          tag.textContent = ROTULO_ABA[s] ?? s;
-          abas.appendChild(tag);
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "prof-aba";
+          b.textContent = ROTULO_ABA[s] ?? s;
+          b.addEventListener("click", () => abrir(a.uid, s, identidade));
+          abas.appendChild(b);
         }
 
         card.append(h, meta, abas);
         grid.appendChild(card);
       }
-      msg.hidden = true;
       grid.hidden = false;
     }
+
+    async function abrir(athleteUid, planType, identidade) {
+      msg.hidden = true; grid.hidden = true;
+      titulo.textContent = `${identidade} · ${ROTULO_ABA[planType] ?? planType}`;
+      sub.textContent = "Abrindo…";
+
+      const resp = await chamar("abrir-plano-profissional", { athleteUid, planType });
+      if (resp.status === 403) {
+        mostrarMensagem("Este atleta não está mais na sua carteira.");
+        return;
+      }
+      if (!resp.ok) { mostrarMensagem("Não foi possível abrir este plano agora."); return; }
+      const dados = await resp.json();
+
+      Object.assign(window.E90, {
+        athleteUid, planType,
+        suggestionId: dados.suggestionId,
+        status: dados.status,
+        // AC-24 · a precedência escolheu O QUÊ; o estado determina COMO.
+        somenteLeitura: dados.status === "pending",
+      });
+
+      // AC-21 · terceira costura. `displayLabel` é montado AQUI, com o que a
+      // projeção devolveu — nome no Nível 2, rótulo externo no Nível 1 —, e o
+      // núcleo não sabe qual dos dois recebeu. A escolha entre eles ficou no
+      // servidor, onde a D-14 a pôs.
+      const atleta = dados.atleta ?? {};
+      atleta.displayLabel = atleta.name ?? atleta.externalLabel ?? "O atleta";
+
+      // Estado de primeira vez, quando não há sugestão. `isNew` é o que o núcleo
+      // já reconhece como "nenhum plano definido ainda". NUNCA o plano-base:
+      // ele é artefato de homologação da gaveta do Coach (AC-18).
+      const vazio = planType === "training"
+        ? { order: [], days: {}, isNew: true }
+        : { days: {}, isNew: true };
+      const plano = dados.content ?? vazio;
+
+      // A aplicação ao estado e a renderização são do núcleo (AC-18).
+      if (planType === "training") window.wkeAplicarPlano(atleta, plano);
+      else window.nteAplicarPlano(atleta, plano);
+
+      $("prof-aba-training").hidden = planType !== "training";
+      $("prof-aba-nutrition").hidden = planType !== "nutrition";
+      editor.hidden = false;
+      sub.textContent = "";
+
+      declararEstado(dados);
+      aplicarModo();
+    }
+
+    // CA-62 · o estado é DECLARADO, e com a via de retomada junto. Declarar o
+    // estado sem dizer a saída deixaria o profissional sem ação — e a via
+    // existe: pending → o Coach devolve → returned → editável (AD-08).
+    function declararEstado(dados) {
+      if (!dados.status) { estado.hidden = true; return; }
+      let texto = ROTULO_ESTADO[dados.status] ?? "";
+      if (dados.status === "pending") {
+        texto += " Enquanto estiver em revisão o conteúdo fica em somente leitura;"
+              +  " para voltar a editar, peça ao Coach que devolva a sugestão.";
+      }
+      if (dados.status === "returned" && dados.reviewNote) {
+        texto += " Observação do Coach: " + dados.reviewNote;
+      }
+      estado.textContent = texto;
+      estado.hidden = false;
+    }
+
+    // CA-62 · os campos ficam DESABILITADOS, controle a controle. Não por camada
+    // visual: `pointer-events` não impede teclado, e opacidade não impede nada.
+    function aplicarModo() {
+      const ro = window.E90.somenteLeitura;
+      editor.classList.toggle("prof-leitura", ro);
+      enviar.disabled = ro;
+      const alvos = editor.querySelectorAll("input, select, textarea, button");
+      for (const el of alvos) {
+        if (el === enviar || el.id === "prof-voltar") continue;
+        el.disabled = ro;
+      }
+    }
+
+    enviar.addEventListener("click", async () => {
+      if (window.E90.somenteLeitura) return;
+      const plano = window.E90.planType === "training"
+        ? window.wkeState.plan
+        : window.nteState.plan;
+      enviar.disabled = true;
+      const resp = await chamar("submeter-sugestao", {
+        athleteUid: window.E90.athleteUid,
+        planType: window.E90.planType,
+        content: plano,
+        suggestionId: window.E90.suggestionId ?? undefined,
+      });
+      if (resp.ok) {
+        const d = await resp.json();
+        // Submeter põe a sugestão sob revisão — e o modo de leitura entra na
+        // mesma hora, sem exigir recarregar a tela. É a AC-24 valendo para o
+        // estado que a própria submissão acabou de criar.
+        Object.assign(window.E90, {
+          suggestionId: d.suggestionId, status: "pending", somenteLeitura: true,
+        });
+        declararEstado({ status: "pending" });
+        aplicarModo();
+      } else {
+        enviar.disabled = false;
+        estado.textContent = "Não foi possível enviar agora. Tente novamente em instantes.";
+        estado.hidden = false;
+      }
+    });
+
+    $("prof-voltar").addEventListener("click", () => {
+      Object.assign(window.E90, {
+        athleteUid: null, planType: null, suggestionId: null,
+        status: null, somenteLeitura: false,
+      });
+      estado.hidden = true;
+      editor.hidden = true;
+      titulo.textContent = "Sua carteira";
+      grid.hidden = false;
+    });
   </script>
 </body>
 </html>
