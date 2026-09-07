@@ -139,13 +139,18 @@ export const ACOES = [
   "sugestao.submetida",
   "sugestao.devolvida",
   "sugestao.recusada",
-  // M2 — Fase 4-C (Adendo 07, seção 6, passo 5). Publicação de versão de plano
-  // a partir de sugestão aprovada. `detalhe: nenhum`: o conteúdo do plano é
-  // dado protegido pela DR-04, e a versão publicada já tem histórico próprio e
-  // permanente em `athletes/{uid}/plans/{planType}/versions/{vNNN}`. O evento
-  // prova que a publicação ocorreu, quando e por quem — não o que foi
-  // publicado. A Fase 5 reusa esta MESMA ação para a publicação direta do
-  // Coach, sem sugestão de por meio.
+  // M2 — Fase 4-C (Adendo 07, seção 6, passo 5). Publicação de versão de plano,
+  // por DOIS caminhos: a partir de sugestão aprovada (`aprovar-sugestao.ts`), ou
+  // publicação direta do Coach (`publicar-plano-direto.ts`, AC-25). `detalhe:
+  // nenhum` nos dois: o conteúdo do plano é dado protegido pela DR-04, e a
+  // versão publicada já tem histórico próprio e permanente em
+  // `athletes/{uid}/plans/{planType}/versions/{vNNN}`. O evento prova que a
+  // publicação ocorreu, quando e por quem — não o que foi publicado.
+  //
+  // A publicação direta esteve reservada para a Fase 5 até a AC-25: a reserva
+  // foi escrita quando a função de versão não existia, e a condição dela foi
+  // satisfeita pela AC-06. Corrigido aqui por força da CA-67 — reserva
+  // justificada por texto errado é lida antes de qualquer decisão.
   "plano.publicado",
   // M2 — Fase 4-D (Adendo 09, AT-09; Adendo 02, AD-10). Décima terceira ação da
   // delegação, e a ÚNICA cujo alvo é um documento de configuração:

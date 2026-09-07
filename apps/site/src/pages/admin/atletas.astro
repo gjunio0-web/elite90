@@ -3235,39 +3235,54 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     // peça de comunicação. Aqui é preciso congelar o VALOR.
 
 
-    function doPublish(kind, label) {
+    async function doPublish(kind, label) {
       const p = getPlanRef(kind);
       if (!p) return;
-      // AGUARDA A PERSISTÊNCIA DO M2 (Etapa 1, spec v2 no Drive, seção 8.2).
-      // Hoje o congelamento grava numa estrutura em memória que some ao
-      // recarregar a página: a regra está correta, mas nunca foi exercitada de
-      // verdade. Quem implementar a persistência deve mover este bloco para a
-      // função serverless que cria a versão, trocar _congeladoNoCliente pelo
-      // carimbo do servidor em congeladoEm, e gravar o retrato dentro de
-      // versions/{vNNN}.content — que é imutável.
-      //
-      // CORREÇÃO (26/08/2026): `p` é getPlanRef(kind) — só {status, publishedAt,
-      // hasUnpublishedChanges}. NUNCA teve .days; nenhum outro ponto do arquivo
-      // grava .days nele. O plano de verdade que o Coach edita mora em
-      // ntePlanCache[athlete.id] (nteState.plan é a mesma referência, mas só
-      // enquanto a gaveta daquele atleta está aberta — buscar pelo id, não pelo
-      // estado da aba, é o que não depende dessa coincidência). Chamar
-      // nteCongelarPlano(p) congelava o objeto errado: a guarda `!plan.days`
-      // devolvia cedo, e o item que o Coach acabara de adicionar nunca ganhava
-      // .snapshot. Confirmado ao vivo antes desta correção — ver o teste.
-      if (kind === 'nutrition' && wke04CurrentAthlete) nteCongelarPlano(ntePlanCache[wke04CurrentAthlete.id]);
-      const now = new Date();
-      const dd = String(now.getDate()).padStart(2,'0') + '/' + String(now.getMonth()+1).padStart(2,'0') + '/' + now.getFullYear();
-      const hh = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-      p.status = 'publicado';
-      p.publishedAt = dd + ' ' + hh;
-      p.hasUnpublishedChanges = false;
-      renderPubHeader(kind);
-      notifyAthletePublish(wke04CurrentAthlete ? wke04CurrentAthlete.id : null, kind);
-      wkeToast(label + ' publicado para o atleta.', { type: 'success' });
+      // AC-25 do Adendo 07. O congelamento nutricional SAIU DAQUI e passou para
+      // o servidor: `publicar-plano-direto.ts` grava `congeladoEm` pelo relógio
+      // do Firestore, no lugar do `_congeladoNoCliente` que o núcleo produzia
+      // por não haver, até aqui, persistência que desse ao valor um carimbo
+      // confiável. O núcleo mantém a função por compatibilidade com o preview
+      // "Ver como o atleta recebe", que não é publicação.
+      const a = wke04CurrentAthlete;
+      if (!a || !a.id) return;
+      const conteudo = kind === 'training' ? wkePlanCache[a.id] : ntePlanCache[a.id];
+      if (!conteudo) return;
+
+      const pfx = kind === 'training' ? 'tr' : 'nu';
+      const btn = document.getElementById(pfx + '-pubbtn');
+      if (btn) btn.disabled = true;
+      try {
+        const resultado = await m2Escrever('publicar-plano-direto', {
+          athleteUid: a.id,
+          planType: kind,
+          content: conteudo,
+        });
+        // O estado local só muda DEPOIS da confirmação do servidor. Antes da
+        // AC-25 este bloco rodava incondicionalmente — era exatamente o que
+        // fazia o botão confirmar uma publicação que não tinha acontecido
+        // (F-25): a interface não tinha como saber, porque não perguntava a
+        // ninguém.
+        const now = new Date();
+        const dd = String(now.getDate()).padStart(2,'0') + '/' + String(now.getMonth()+1).padStart(2,'0') + '/' + now.getFullYear();
+        const hh = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+        p.status = 'publicado';
+        p.publishedAt = dd + ' ' + hh;
+        p.hasUnpublishedChanges = false;
+        renderPubHeader(kind);
+        notifyAthletePublish(a.id, kind);
+        wkeToast(label + ' publicado para o atleta.', { type: 'success' });
+      } catch (e) {
+        // Sem alterar `p`: se o servidor recusou, o cabeçalho continua
+        // mostrando o estado anterior, que é o estado real.
+        wkeToast('Não foi possível publicar agora. Tente novamente.', { type: 'error' });
+        console.error('[doPublish]', kind, e);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
     }
-    function wkePublish() { doPublish('training', 'Plano de treino'); }
-    function ntePublish() { doPublish('nutrition', 'Plano nutricional'); }
+    async function wkePublish() { await doPublish('training', 'Plano de treino'); }
+    async function ntePublish() { await doPublish('nutrition', 'Plano nutricional'); }
     function notifyAthletePublish(athleteId, kind) {
       // mock: substituir por POST à Netlify Function (Resend) — não tocar na lógica do editor
       console.log('[notifyAthletePublish]', { athleteId: athleteId, kind: kind });

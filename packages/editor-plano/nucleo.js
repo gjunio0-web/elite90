@@ -168,6 +168,12 @@ function wkeDayName(d) {
   return l.split('—')[0].trim();
 }
 
+// AC-25 do Adendo 07: esta função DEIXOU DE TER CHAMADOR depois que o
+// congelamento migrou para o servidor em `publicar-plano-direto.ts`. Não foi
+// removida — apagar função por conta de uma entrega que não pediu limpeza é
+// decisão que ninguém tomou. Fica para quem revisar decidir se remove ou se
+// reencontra uso (a pré-visualização "Ver como o atleta recebe" não a chama:
+// ela lê o plano ao vivo, sem congelar).
 function nteCongelarItem(f) {
   const b = f.base || {};
   return {
