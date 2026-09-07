@@ -110,10 +110,11 @@ export const ACOES = [
   // janela.encerrada —, no mesmo padrão da reserva do M2 acima: dependem do
   // papel de Substituto, declarado fora do escopo desta fase.
   //
-  // Todas as doze já têm conteúdo especificado nas seções 7.3 e 7.4 daquele
+  // Todas as treze já têm conteúdo especificado nas seções 7.3 e 7.4 daquele
   // adendo: ator, alvo, origem e o que pode ir em `detalhe`. Nomear a ação sem
   // dizer o que ela grava é convite a gravar valor de campo, que a regra de
-  // `detalhe` proíbe por conformidade.
+  // `detalhe` proíbe por conformidade. A décima terceira é 'titular.definido',
+  // no fim desta lista.
   "profissional.cadastrado",
   "profissional.editado",
   "profissional.desativado",
@@ -146,6 +147,27 @@ export const ACOES = [
   // publicado. A Fase 5 reusa esta MESMA ação para a publicação direta do
   // Coach, sem sugestão de por meio.
   "plano.publicado",
+  // M2 — Fase 4-D (Adendo 09, AT-09; Adendo 02, AD-10). Décima terceira ação da
+  // delegação, e a ÚNICA cujo alvo é um documento de configuração:
+  // `{ colecao: "config", id: "delegationDefaults" }`. Ator `admin` — não existe
+  // autodesignação de titular. Origem no nome do arquivo da função, como as
+  // demais. `detalhe: { specialty }`, vocabulário fechado, e nada além: quem
+  // passou a ser titular está no documento de configuração, e os vínculos
+  // resultantes estão em `assignments`.
+  //
+  // UM ÚNICO EVENTO POR ATO, ainda que o ato gere dezenas de
+  // 'carteira.atribuida' — a decisão foi uma só. Os 'carteira.atribuida'
+  // registram o EFEITO; nenhum deles registra a DECISÃO: quem definiu o titular,
+  // quando, e para qual especialidade. Sem ação própria, a pergunta só teria
+  // resposta por inferência sobre um lote de eventos simultâneos, e a inferência
+  // quebra na segunda troca de titular. É o mesmo argumento que fez de
+  // 'profissional.desativado' ação própria em vez de "editado".
+  //
+  // A TROCA E A REMOÇÃO DE TITULAR USAM ESTA MESMA AÇÃO (AT-09, AT-10). Não há
+  // "titular trocado" nem "titular removido": o alvo é sempre o mesmo documento,
+  // e o histórico de quem foi titular quando se lê pela sequência de eventos
+  // sobre ele.
+  "titular.definido",
 ] as const;
 
 export type Acao = (typeof ACOES)[number];
