@@ -16,7 +16,7 @@
 // exclusão de evento, e nenhuma outra parte do código deve escrever na coleção
 // direto. Um registro editável não é registro. A única remoção admitida é o
 // expurgo por prazo de retenção (24 meses, DR-07), feito pela função agendada
-// expurgar-rastreabilidade.ts — Fase 5, ainda não implementada.
+// expurgar-rastreabilidade.ts, que roda diariamente.
 //
 // BEST-EFFORT, COM UMA RESSALVA (DR-06)
 // Segue o padrão de _publicacao.ts: falha aqui NÃO derruba a operação que
