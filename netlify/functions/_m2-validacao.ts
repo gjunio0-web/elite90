@@ -204,6 +204,33 @@ export const ASSIGNMENT_ENDED_REASONS = [
 ] as const;
 export type AssignmentEndedReason = (typeof ASSIGNMENT_ENDED_REASONS)[number];
 
+/**
+ * Origem do vínculo de carteira. Fechado (Adendo 09, AT-03).
+ *
+ * `default` — nasceu da regra de titularidade, por definição de titular ou pela
+ * promoção de um atleta. `explicit` — nasceu de atribuição individual, ato do
+ * Coach sobre aquele atleta.
+ *
+ * POR QUE O CAMPO EXISTE. A troca de titular (AT-05) migra automaticamente os
+ * vínculos `default` do titular anterior e PERGUNTA caso a caso sobre os
+ * `explicit`. Sem o campo, a distinção seria inferida comparando o
+ * `professionalId` do vínculo com o titular vigente — e a inferência quebra na
+ * segunda troca, quando o titular vigente já não é aquele de quem o vínculo
+ * nasceu.
+ *
+ * IMUTÁVEL DEPOIS DE GRAVADO (AT-03, critério CT-12). Um vínculo `default` que
+ * se queira tornar permanente NÃO é editado: encerra-se, e nasce outro,
+ * `explicit`. Editar apagaria a origem do vínculo que está sendo substituído,
+ * que é justamente o que a troca de titular precisa ler.
+ *
+ * E NUNCA `null`: vínculo sem origem obriga cada leitor a decidir o que fazer
+ * com o caso, e duas decisões diferentes sobre o mesmo vazio divergem em
+ * silêncio. Os vínculos anteriores a este campo recebem `explicit` por rotina
+ * única — foram todos atos individuais do Coach, porque não havia titularidade.
+ */
+export const ASSIGNMENT_ORIGINS = ["default", "explicit"] as const;
+export type AssignmentOrigin = (typeof ASSIGNMENT_ORIGINS)[number];
+
 /** Tetos de tamanho dos campos de texto do cadastro. */
 export const PROFESSIONAL_NAME_MAX_CHARS = 120;
 export const PROFESSIONAL_EMAIL_MAX_CHARS = 254;
@@ -356,6 +383,25 @@ export function validarMotivoEncerramento(valor: unknown): ResultadoValidacao {
     return {
       ok: false,
       erro: `endedReason inválido. Esperado um de: ${ASSIGNMENT_ENDED_REASONS.join(", ")}.`,
+    };
+  }
+  return { ok: true };
+}
+
+/**
+ * Origem do vínculo de carteira.
+ *
+ * Hoje nenhuma função recebe `origin` do chamador — cada uma grava o valor que
+ * corresponde ao seu próprio ato. O validador existe para a rotina única de
+ * preenchimento e para as funções de titularidade, e para que o vocabulário
+ * tenha um só ponto de conferência quando alguém precisar checar um valor vindo
+ * de fora.
+ */
+export function validarOrigin(valor: unknown): ResultadoValidacao {
+  if (!ASSIGNMENT_ORIGINS.includes(valor as AssignmentOrigin)) {
+    return {
+      ok: false,
+      erro: `origin inválido. Esperado um de: ${ASSIGNMENT_ORIGINS.join(", ")}.`,
     };
   }
   return { ok: true };

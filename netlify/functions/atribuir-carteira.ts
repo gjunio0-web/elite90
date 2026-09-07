@@ -31,12 +31,29 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
-import { validarUid, validarIdDocumento, validarSpecialty } from "./_m2-validacao";
+import {
+  validarUid,
+  validarIdDocumento,
+  validarSpecialty,
+  type AssignmentOrigin,
+} from "./_m2-validacao";
 import { conferirProfissionalAtivo } from "./_profissional-ativo";
 
 const COLECAO = "assignments";
 const COLECAO_ATLETAS = "athletes";
 const COLECAO_PROFISSIONAIS = "professionals";
+
+/**
+ * A origem dos vínculos que ESTA função cria (Adendo 09, AT-03).
+ *
+ * Sempre `explicit`, e nunca vem do chamador: esta função é o ato individual do
+ * Coach sobre um atleta. Os vínculos `default` nascem da titularidade — da
+ * função de definir titular e da promoção —, e nenhum deles passa por aqui.
+ *
+ * Tipada contra o vocabulário fechado para que uma mudança lá alcance este
+ * ponto na compilação, e não em produção.
+ */
+const ORIGEM_DESTA_FUNCAO: AssignmentOrigin = "explicit";
 
 function json(statusCode: number, body: unknown) {
   return {
@@ -153,6 +170,7 @@ export const handler = async (event: any) => {
         athleteUid,
         professionalId,
         specialty,
+        origin: ORIGEM_DESTA_FUNCAO,
         startedAt: FieldValue.serverTimestamp(),
         endedAt: null,
         endedReason: null,
@@ -195,7 +213,11 @@ export const handler = async (event: any) => {
     ator,
     origem: "atribuir-carteira",
     alvo: { colecao: COLECAO, id: novaRef.id } as Alvo,
-    detalhe: { specialty },
+    // `origin` no `detalhe` (Adendo 09, seção 5.2): sem ele, os eventos de uma
+    // definição de titular — dezenas de uma vez — seriam indistinguíveis de
+    // atribuições individuais na auditoria. Ambos os campos são vocabulário
+    // fechado, e nenhum carrega dado pessoal (DR-04).
+    detalhe: { specialty, origin: ORIGEM_DESTA_FUNCAO },
     _test: emHomologacao,
   });
 

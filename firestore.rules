@@ -121,10 +121,11 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // `assignments`: nenhuma função existe ainda (Fase 4-B ainda não chegou à
-    // carteira). A regra entra desde já — proteger a coleção não depende de a
-    // função existir, e omitir o bloco a deixaria correta só por acidente, na
-    // negação genérica do fim.
+    // `assignments`: as funções de carteira existem e gravam — atribuir e
+    // encerrar, ambas pelo Admin SDK, que não passa por estas regras. A regra
+    // fecha a coleção ao cliente: nenhuma leitura nem escrita de vínculo pelo
+    // navegador, nem do Coach nem do profissional. Ver
+    // listar-atletas-do-profissional.ts, que existe por causa desta linha.
     match /assignments/{assignmentId} {
       allow read, write: if false;
     }
