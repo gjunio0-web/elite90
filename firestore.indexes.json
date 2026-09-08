@@ -29,6 +29,14 @@
       "collectionGroup": "assignments",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "specialty", "order": "ASCENDING" },
+        { "fieldPath": "endedAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assignments",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "athleteUid", "order": "ASCENDING" },
         { "fieldPath": "specialty", "order": "ASCENDING" },
         { "fieldPath": "startedAt", "order": "DESCENDING" }

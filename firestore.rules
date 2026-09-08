@@ -130,6 +130,23 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ── CONFIGURAÇÃO (`config/…`) — nenhum acesso direto do navegador, NEM
+    // PARA admin. `config/delegationDefaults` registra quem é o titular de cada
+    // especialidade (Adendo 09, AT-01); a tela administrativa o lê e o grava por
+    // função de servidor, porque a tela não decide nada — ela chama (AT-07).
+    //
+    // Abrir leitura direta a admin aqui reintroduziria no navegador a superfície
+    // que o resto da arquitetura vem removendo, pelo mesmo argumento registrado
+    // no bloco de rastreabilidade abaixo.
+    //
+    // BLOCO PRÓPRIO, E NÃO A NEGAÇÃO GENÉRICA DO FIM (AT-11): é o precedente do
+    // bloco de `assignments`, escrito antes de existir função que gravasse.
+    // `config/` é prefixo, não coleção de um documento só — `config/nutritionFormula`
+    // chega na Fase 5, e herda o padrão que este bloco estabelece.
+    match /config/delegationDefaults {
+      allow read, write: if false;
+    }
+
     // `suggestions`: reservada no esquema (versão 3, seção 4), sem função de
     // escrita — depende de ator profissional autenticado, que é o M4.
     match /suggestions/{suggestionId} {
