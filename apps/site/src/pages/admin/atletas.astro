@@ -3275,7 +3275,16 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
       } catch (e) {
         // Sem alterar `p`: se o servidor recusou, o cabeçalho continua
         // mostrando o estado anterior, que é o estado real.
-        wkeToast('Não foi possível publicar agora. Tente novamente.', { type: 'error' });
+        //
+        // F-27: a mensagem do toast MOSTRA e.message quando existe, em vez de
+        // um texto fixo. Antes desta correção, qualquer causa — 502 de exceção
+        // não tratada, 500 estruturado, erro de rede — produzia exatamente o
+        // mesmo aviso na tela, e diagnosticar exigia abrir o console a cada
+        // vez. `m2Escrever` já lança com '[status] mensagem do servidor'
+        // (função declarada acima, nesta mesma seção); esse texto é o que
+        // deveria orientar quem vê o erro.
+        const detalhe = (e && e.message) ? e.message : 'Tente novamente.';
+        wkeToast('Não foi possível publicar agora. ' + detalhe, { type: 'error' });
         console.error('[doPublish]', kind, e);
       } finally {
         if (btn) btn.disabled = false;
