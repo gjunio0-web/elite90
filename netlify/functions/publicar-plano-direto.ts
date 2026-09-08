@@ -37,6 +37,18 @@
 // — `congeladoEm` pelo relógio do SERVIDOR — é produzido aqui, e é este que entra
 // em `versions/{vNNN}.content`. O campo do cliente nunca alcança o banco.
 
+// POR QUE `sanearUndefined` EXISTE (INCIDENTE F-27)
+//
+// `content` chega direto do estado em memória do cliente — `wkePlanCache` ou
+// `ntePlanCache` —, sem ter passado por validação de forma. O Firestore recusa
+// em tempo de execução qualquer campo com valor `undefined`, e um objeto de
+// edição construído incrementalmente no navegador é candidato natural a ter
+// algum. A primeira versão desta função não saneava e não protegia a
+// transação com try/catch: a exceção subia sem tratamento, o runtime do
+// Netlify devolvia 502 com corpo genérico, e o cliente via "falha ao gravar"
+// sem nenhum diagnóstico. Corrigido nesta revisão — ver também `aprovar-
+// sugestao.ts`, que tinha a mesma lacuna parcial.
+
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
@@ -104,6 +116,31 @@ function congelarPlanoNutricional(plano: any): Record<string, unknown> {
   return { ...plano, days: dias };
 }
 
+/**
+ * Remove recursivamente qualquer chave cujo valor seja `undefined`, de mapas
+ * e de arrays. O Firestore lança em tempo de execução ao encontrar
+ * `undefined` em qualquer profundidade — não há como pedir para ele ignorar.
+ *
+ * Não usa `JSON.parse(JSON.stringify(...))` porque isso destruiria os
+ * `FieldValue` que o próprio código insere depois (`serverTimestamp()`, que
+ * não é dado plano e não sobrevive a uma volta por JSON). Percorre a
+ * estrutura à mão, preservando qualquer objeto que não seja mapa nem array.
+ */
+function sanearUndefined<T>(valor: T): T {
+  if (Array.isArray(valor)) {
+    return valor.map((v) => sanearUndefined(v)) as unknown as T;
+  }
+  if (valor !== null && typeof valor === "object" && valor.constructor === Object) {
+    const saida: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(valor as Record<string, unknown>)) {
+      if (v === undefined) continue;
+      saida[k] = sanearUndefined(v);
+    }
+    return saida as T;
+  }
+  return valor;
+}
+
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -158,14 +195,22 @@ export const handler = async (event: any) => {
     return json(400, { erro: "content precisa ser um mapa." });
   }
 
-  const athleteSnap = await getFirestore(app).collection(COLECAO_ATLETAS).doc(athleteUid).get();
+  let athleteSnap;
+  try {
+    athleteSnap = await getFirestore(app).collection(COLECAO_ATLETAS).doc(athleteUid).get();
+  } catch (e) {
+    console.error("[publicar-plano-direto] falha ao ler atleta:", e);
+    return json(500, { erro: "Não foi possível verificar o atleta agora." });
+  }
   if (!athleteSnap.exists) return json(404, { erro: "Atleta não encontrado." });
 
   // O congelamento acontece ANTES da transação: é cálculo puro sobre o corpo da
   // requisição, sem leitura de banco, e não precisa competir pela janela da
-  // transação com a numeração da versão.
-  const conteudoCongelado =
-    planType === "nutrition" ? congelarPlanoNutricional(corpo.content) : corpo.content;
+  // transação com a numeração da versão. `sanearUndefined` roda por último —
+  // ver o cabeçalho do arquivo, F-27.
+  const conteudoCongelado = sanearUndefined(
+    planType === "nutrition" ? congelarPlanoNutricional(corpo.content) : corpo.content,
+  );
 
   const db = getFirestore(app);
   const refPlano = db
@@ -174,26 +219,37 @@ export const handler = async (event: any) => {
 
   let versaoCriada = 0;
 
-  await db.runTransaction(async (tx) => {
-    // Mesma técnica da AC-06: número lido e escrito no mesmo passo, pela ordem
-    // lexical dos identificadores de três dígitos.
-    const ultima = await tx.get(
-      refPlano.collection("versions").orderBy("__name__", "desc").limit(1),
-    );
-    const anterior = ultima.empty ? 0 : Number(String(ultima.docs[0].id).replace(/^v/, "")) || 0;
-    versaoCriada = anterior + 1;
+  // PROTEGIDA (F-27). Antes desta correção, esta chamada não tinha try/catch
+  // nenhum: uma exceção do Firestore subia sem tratamento até o runtime do
+  // Netlify, que devolvia 502 com corpo genérico, sem o `erro` estruturado que
+  // todo o resto desta função produz. O padrão abaixo é o mesmo de
+  // `desativar-profissional.ts` e `atribuir-carteira.ts`: qualquer exceção não
+  // prevista vira log e uma resposta 500 com corpo que o cliente sabe ler.
+  try {
+    await db.runTransaction(async (tx) => {
+      // Mesma técnica da AC-06: número lido e escrito no mesmo passo, pela ordem
+      // lexical dos identificadores de três dígitos.
+      const ultima = await tx.get(
+        refPlano.collection("versions").orderBy("__name__", "desc").limit(1),
+      );
+      const anterior = ultima.empty ? 0 : Number(String(ultima.docs[0].id).replace(/^v/, "")) || 0;
+      versaoCriada = anterior + 1;
 
-    const refVersao = refPlano.collection("versions").doc(idDaVersao(versaoCriada));
+      const refVersao = refPlano.collection("versions").doc(idDaVersao(versaoCriada));
 
-    tx.set(refVersao, {
-      content: conteudoCongelado,
-      // Nulo: não há profissional autor. A seção 5.2 do Adendo 02 prevê este
-      // valor para plano produzido pelo próprio Coach.
-      originatedBy: null,
-      publishedBy,
-      publishedAt: FieldValue.serverTimestamp(),
+      tx.set(refVersao, {
+        content: conteudoCongelado,
+        // Nulo: não há profissional autor. A seção 5.2 do Adendo 02 prevê este
+        // valor para plano produzido pelo próprio Coach.
+        originatedBy: null,
+        publishedBy,
+        publishedAt: FieldValue.serverTimestamp(),
+      });
     });
-  });
+  } catch (e) {
+    console.error("[publicar-plano-direto] falha ao gravar versão:", e);
+    return json(500, { erro: "Não foi possível publicar agora. Tente novamente." });
+  }
 
   // Evento fora da transação, como em `aprovar-sugestao.ts`: falhar no registro
   // de auditoria não pode desfazer uma publicação que já aconteceu.

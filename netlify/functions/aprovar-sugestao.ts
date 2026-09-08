@@ -59,6 +59,32 @@ const json = (statusCode: number, corpo: unknown) => ({
 class NaoEncontrada extends Error {}
 class EstadoInvalido extends Error {}
 
+/**
+ * Remove recursivamente qualquer chave cujo valor seja `undefined`, de mapas
+ * e de arrays. O Firestore lança em tempo de execução ao encontrar
+ * `undefined` em qualquer profundidade. Aqui `content` vem de
+ * `atual.get("content")` — já passou pelo Firestore uma vez, ao ser gravado
+ * por `rascunhar-sugestao.ts` ou `submeter-sugestao.ts` —, então o risco é
+ * menor que em `publicar-plano-direto.ts`. Mesmo assim, saneia: defesa em
+ * profundidade custa pouco e a F-27 mostrou que a suposição "já passou pelo
+ * Firestore, então está limpo" não é garantia — o dado pode ter sido
+ * modificado por caminho que não passou pela mesma validação.
+ */
+function sanearUndefined<T>(valor: T): T {
+  if (Array.isArray(valor)) {
+    return valor.map((v) => sanearUndefined(v)) as unknown as T;
+  }
+  if (valor !== null && typeof valor === "object" && valor.constructor === Object) {
+    const saida: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(valor as Record<string, unknown>)) {
+      if (v === undefined) continue;
+      saida[k] = sanearUndefined(v);
+    }
+    return saida as T;
+  }
+  return valor;
+}
+
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -186,7 +212,7 @@ export const handler = async (event: any) => {
       // A versão. Deliberadamente mínima — a Fase 5 acrescenta `coachNotes` e
       // `formulaSnapshot`, e generaliza sem recriar.
       tx.set(refVersao, {
-        content: atual.get("content") ?? null,
+        content: sanearUndefined(atual.get("content") ?? null),
         originatedBy,
         publishedBy,
         publishedAt: FieldValue.serverTimestamp(),
@@ -209,7 +235,13 @@ export const handler = async (event: any) => {
         reason: "estado-invalido",
       });
     }
-    throw e;
+    // F-27: antes desta correção, qualquer exceção que não fosse uma das duas
+    // acima subia sem log e sem resposta estruturada — `throw e;` relançava
+    // para o runtime do Netlify, que devolvia 502 com corpo genérico. Agora
+    // vira log e uma resposta 500 que o cliente sabe ler, no mesmo padrão de
+    // `desativar-profissional.ts` e `atribuir-carteira.ts`.
+    console.error("[aprovar-sugestao] falha ao gravar versão:", e);
+    return json(500, { erro: "Não foi possível aprovar agora. Tente novamente." });
   }
 
   // Depois da transação, e não dentro dela: escrita de auditoria não participa da
