@@ -37,11 +37,18 @@
 //   node scripts/preencher-origin-carteira.mjs             # ensaio: mostra o que faria
 //   node scripts/preencher-origin-carteira.mjs --commit    # grava
 //
-// EXECUÇÃO ÚNICA, NÃO RECORRENTE. Depois de rodar com --commit nos projetos que
-// tiverem vínculos sem origem, este arquivo pode ser removido — atribuir-carteira
-// já grava `origin` daqui em diante, e a definição de titular nascerá gravando.
-// Rodar de novo não causa dano (não sobrescreve), apenas não encontra o que fazer,
-// que é também como se confere a CT-13.
+// EXECUÇÃO ÚNICA POR AMBIENTE, E SÓ DEPOIS DO DEPLOY. A rotina roda em cada
+// ambiente DEPOIS que o código de carteira estiver implantado nele. Antes disso
+// ela é inútil e enganosa: um vínculo criado naquele ambiente nasceria sem
+// `origin` — a função que o grava não está lá —, e a rotina teria de rodar de
+// novo. Em 08/09/2026 a produção (branch `main`) não tem sequer
+// `netlify/functions/atribuir-carteira.ts`.
+//
+// Rodada num ambiente já implantado, e uma vez preenchidos os vínculos que
+// existirem, este arquivo pode ser removido — atribuir-carteira já grava
+// `origin` daqui em diante, e a definição de titular nascerá gravando. Rodar de
+// novo não causa dano (não sobrescreve), apenas não encontra o que fazer, que é
+// também como se confere a CT-13.
 // -----------------------------------------------------------------------------
 
 import { conectar } from './_firestore-cli.mjs';
