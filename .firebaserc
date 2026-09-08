@@ -1,7 +1,7 @@
 {
   "projects": {
-    "default": "PROJETO_HOMOLOGACAO_A_PREENCHER",
-    "homologacao": "PROJETO_HOMOLOGACAO_A_PREENCHER",
+    "default": "elt90-quality-env",
+    "homologacao": "elt90-quality-env",
     "producao": "elite90-c716b"
   }
 }
