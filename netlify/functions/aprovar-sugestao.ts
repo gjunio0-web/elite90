@@ -241,7 +241,10 @@ export const handler = async (event: any) => {
     // vira log e uma resposta 500 que o cliente sabe ler, no mesmo padrão de
     // `desativar-profissional.ts` e `atribuir-carteira.ts`.
     console.error("[aprovar-sugestao] falha ao gravar versão:", e);
-    return json(500, { erro: "Não foi possível aprovar agora. Tente novamente." });
+    // F-28: `m2Escrever` só lê o campo `erro` — concatenado, mesma correção
+    // de publicar-plano-direto.ts.
+    const msg = e instanceof Error ? e.message : String(e);
+    return json(500, { erro: "Não foi possível aprovar agora — " + msg });
   }
 
   // Depois da transação, e não dentro dela: escrita de auditoria não participa da

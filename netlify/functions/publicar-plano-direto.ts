@@ -200,7 +200,14 @@ export const handler = async (event: any) => {
     athleteSnap = await getFirestore(app).collection(COLECAO_ATLETAS).doc(athleteUid).get();
   } catch (e) {
     console.error("[publicar-plano-direto] falha ao ler atleta:", e);
-    return json(500, { erro: "Não foi possível verificar o atleta agora." });
+    // F-28: `m2Escrever`, do lado do cliente, só lê o campo `erro` do corpo —
+    // não um campo separado. O texto técnico entra concatenado dentro do
+    // próprio `erro`, para chegar à tela sem exigir mudança na função
+    // compartilhada. Este é ferramenta interna do Coach, não superfície
+    // pública — o texto da exceção vale mais aqui do que qualquer risco de
+    // exposição.
+    const msg = e instanceof Error ? e.message : String(e);
+    return json(500, { erro: "Não foi possível verificar o atleta agora — " + msg });
   }
   if (!athleteSnap.exists) return json(404, { erro: "Atleta não encontrado." });
 
@@ -248,7 +255,10 @@ export const handler = async (event: any) => {
     });
   } catch (e) {
     console.error("[publicar-plano-direto] falha ao gravar versão:", e);
-    return json(500, { erro: "Não foi possível publicar agora. Tente novamente." });
+    // F-28: este é o catch que produziu a mensagem genérica vista na tela em
+    // 08/09/2026. Mesma correção do bloco acima.
+    const msg = e instanceof Error ? e.message : String(e);
+    return json(500, { erro: "Não foi possível publicar agora — " + msg });
   }
 
   // Evento fora da transação, como em `aprovar-sugestao.ts`: falhar no registro
