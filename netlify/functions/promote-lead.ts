@@ -28,6 +28,8 @@ import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header"
 // @ts-ignore — módulo CommonJS compartilhado com scripts/emulate-fn08.js
 import athleteContract from "./_athlete-from-lead.js";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
+import { SPECIALTIES, type AssignmentOrigin } from "./_m2-validacao";
+import { conferirProfissionalAtivo } from "./_profissional-ativo";
 // @ts-ignore — módulo CommonJS compartilhado com scripts/emulate-fn08.js
 import externalLabelModule from "./_external-label.js";
 const { athleteFromLead } = athleteContract as any;
@@ -48,6 +50,194 @@ const GENEROS_VALIDOS = ["masculino", "feminino", "outro"];
 // carteira de dezenas de atletas, uma colisão já é rara; dez seguidas
 // indicariam defeito (alfabeto errado, banco inesperado), não azar.
 const EXTERNAL_LABEL_MAX_TENTATIVAS = 10;
+
+// -- Carteira do atleta recém-promovido (Adendo 09, AT-04) --------------------
+//
+// O atleta promovido entra JÁ NAS CARTEIRAS dos titulares vigentes. Sem isto,
+// ficaria fora de toda carteira até alguém reparar — e ninguém repara, porque
+// nada reprova: nenhuma tela mostra "atleta sem profissional" por si só, e o
+// atleta simplesmente não apareceria para ninguém.
+//
+// NÃO É ATÔMICO COM A PROMOÇÃO, e não poderia ser: a promoção não é uma
+// transação. A conta no Auth já existe antes de o Firestore ser tocado, e
+// nenhum rollback de Firestore a desfaz. O vínculo é criado depois de a
+// promoção estar consumada, em transação própria por especialidade.
+//
+// FALHA AQUI NÃO DESFAZ A PROMOÇÃO, MAS APARECE. Segue o padrão do e-mail de
+// boas-vindas: o resultado por especialidade volta na resposta, para o painel
+// mostrar. Registrar só em log seria reproduzir o problema que a AT-04 nomeia.
+//
+// SEM TITULAR E TITULAR INATIVO NÃO SÃO ERRO. São estados válidos, e o motivo
+// volta na resposta — é o que alimenta a contagem de atletas sem profissional
+// que a tela administrativa deve exibir (AT-08).
+
+const COLECAO_ASSIGNMENTS = "assignments";
+const COLECAO_PROFISSIONAIS = "professionals";
+const COLECAO_CONFIG = "config";
+const DOC_DELEGACAO = "delegationDefaults";
+
+/**
+ * Origem dos vínculos criados por esta rotina (AT-03).
+ *
+ * `default`: nasceram da regra de titularidade, não de escolha atleta a atleta.
+ * É esta marca que permite à troca de titular migrar estes automaticamente e
+ * perguntar sobre os `explicit`. Tipada contra o vocabulário fechado para que
+ * uma mudança lá alcance este ponto na compilação, e não em produção.
+ */
+const ORIGEM_DESTA_ROTINA: AssignmentOrigin = "default";
+
+type ResultadoCarteira = {
+  specialty: string;
+  vinculado: boolean;
+  /** Presente quando `vinculado` é falso. Vocabulário fechado. */
+  motivo?: "sem-titular" | "titular-inativo" | "ja-tem-vinculo" | "falha";
+  professionalId?: string;
+  detalhe?: string;
+};
+
+/**
+ * Cria, para cada especialidade com titular vigente, o vínculo do atleta recém
+ * promovido. Uma transação por especialidade: o que impede uma de gravar não
+ * tem por que impedir a outra, e o atleta pode legitimamente ter titular de
+ * treino e não de nutrição.
+ *
+ * Nunca lança. O resultado por especialidade é o valor de retorno, e quem chama
+ * decide o que fazer com ele — aqui, reportar sem desfazer a promoção.
+ */
+async function materializarCarteiras(
+  db: FirebaseFirestore.Firestore,
+  athleteUid: string,
+  ator: Extract<Ator, { tipo: "humano" }>,
+  emHomologacao: boolean,
+): Promise<ResultadoCarteira[]> {
+  const resultados: ResultadoCarteira[] = [];
+
+  for (const specialty of SPECIALTIES) {
+    let assignmentId: string | null = null;
+    let professionalIdUsado: string | null = null;
+
+    try {
+      const parcial = await db.runTransaction(async (tx): Promise<ResultadoCarteira> => {
+        // -- LEITURAS ANTES DAS ESCRITAS --
+
+        const configSnap = await tx.get(
+          db.collection(COLECAO_CONFIG).doc(DOC_DELEGACAO),
+        );
+        const titular = configSnap.exists
+          ? (configSnap.data() ?? {})[specialty]
+          : undefined;
+        const professionalId = titular?.professionalId
+          ? String(titular.professionalId)
+          : null;
+        if (!professionalId) {
+          return { specialty, vinculado: false, motivo: "sem-titular" };
+        }
+        professionalIdUsado = professionalId;
+
+        // O ESTADO DO PROFISSIONAL É LIDO AGORA, NÃO CONFIADO À CONFIGURAÇÃO
+        // (AC-13). A configuração registra a DECISÃO de quem é titular, não o
+        // estado atual daquele profissional: um titular desativado depois de
+        // definido continuaria gravado ali, e a promoção criaria vínculo com
+        // profissional inativo.
+        const profSnap = await tx.get(
+          db.collection(COLECAO_PROFISSIONAIS).doc(professionalId),
+        );
+        const verdicto = conferirProfissionalAtivo(profSnap);
+        if (!verdicto.ok) {
+          return {
+            specialty,
+            vinculado: false,
+            motivo: "titular-inativo",
+            professionalId,
+            detalhe: verdicto.erro,
+          };
+        }
+        const prof = verdicto.dados;
+        if (!Array.isArray(prof.specialties) || !prof.specialties.includes(specialty)) {
+          return {
+            specialty,
+            vinculado: false,
+            motivo: "titular-inativo",
+            professionalId,
+            detalhe: "Titular não tem mais a especialidade no cadastro.",
+          };
+        }
+
+        // A invariante RN-10: no máximo um vínculo ativo por par
+        // athleteUid+specialty. Um atleta recém-promovido não deveria ter
+        // nenhum, mas a guarda é a mesma de atribuir-carteira.ts — a promoção
+        // pode reaproveitar conta que já existia.
+        const ativoSnap = await tx.get(
+          db
+            .collection(COLECAO_ASSIGNMENTS)
+            .where("athleteUid", "==", athleteUid)
+            .where("specialty", "==", specialty)
+            .where("endedAt", "==", null)
+            .limit(1),
+        );
+        if (!ativoSnap.empty) {
+          return {
+            specialty,
+            vinculado: false,
+            motivo: "ja-tem-vinculo",
+            professionalId,
+          };
+        }
+
+        // -- ESCRITA --
+        const novaRef = db.collection(COLECAO_ASSIGNMENTS).doc();
+        tx.create(novaRef, {
+          athleteUid,
+          professionalId,
+          specialty,
+          origin: ORIGEM_DESTA_ROTINA,
+          startedAt: FieldValue.serverTimestamp(),
+          endedAt: null,
+          endedReason: null,
+          startedBy: { uid: ator.uid, email: ator.email },
+          endedBy: null,
+          _test: emHomologacao,
+        });
+        assignmentId = novaRef.id;
+
+        return { specialty, vinculado: true, professionalId };
+      });
+
+      // Evento fora da transação, como em toda a base (DR-06): descreve fato
+      // consumado. `origin` no `detalhe` distingue este vínculo, nascido da
+      // titularidade, de uma atribuição individual (Adendo 09, seção 5.2).
+      if (parcial.vinculado && assignmentId) {
+        await registrar({
+          acao: "carteira.atribuida",
+          ator,
+          origem: "promote-lead",
+          alvo: { colecao: COLECAO_ASSIGNMENTS, id: assignmentId } as Alvo,
+          detalhe: { specialty, origin: ORIGEM_DESTA_ROTINA },
+          _test: emHomologacao,
+        });
+      }
+
+      resultados.push(parcial);
+    } catch (e: any) {
+      // NÃO-FATAL, MAS VISÍVEL. A promoção já está consumada e não é desfeita;
+      // o painel recebe qual especialidade falhou e por quê.
+      const detalhe = e?.message ?? "Falha ao criar o vínculo.";
+      console.error(
+        `[promote-lead] Carteira não criada (${specialty}, não-fatal):`,
+        detalhe,
+      );
+      resultados.push({
+        specialty,
+        vinculado: false,
+        motivo: "falha",
+        professionalId: professionalIdUsado ?? undefined,
+        detalhe,
+      });
+    }
+  }
+
+  return resultados;
+}
 
 /**
  * Sorteia um rótulo externo que nenhum atleta possui (Adendo 02, seção 5.1:
@@ -355,6 +545,13 @@ export const handler = async (event: any) => {
       convertedByEmail:    caller.email ?? null,
     });
 
+    // -- Carteira do titular (AT-04) --
+    // Aqui, e não antes: o vínculo aponta para um atleta que precisa existir, e
+    // atribuir-carteira.ts recusa exatamente o caso contrário. E não depois do
+    // evento da promoção: a carteira faz parte do que a promoção produz, e a
+    // resposta ao painel a reporta junto.
+    const carteiras = await materializarCarteiras(db, uid, ator, lead._test === true);
+
     // A promoção está consumada aqui: a conta existe, o documento do atleta foi
     // gravado e o elo na ficha foi fechado. O e-mail de boas-vindas vem depois e
     // é não-fatal por decisão do próprio fluxo, então não faz parte deste ato.
@@ -402,7 +599,7 @@ export const handler = async (event: any) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true, athleteUid: uid, startDate, phase, externalLabel, welcomeSent, welcomeError }),
+      body: JSON.stringify({ success: true, athleteUid: uid, startDate, phase, externalLabel, welcomeSent, welcomeError, carteiras }),
     };
 
   } catch (err: any) {
