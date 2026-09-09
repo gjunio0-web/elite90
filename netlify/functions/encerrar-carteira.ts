@@ -9,14 +9,26 @@
 // campo."
 //
 // POR QUE ESTA FUNÇÃO NÃO ACEITA `endedReason: "replaced"`
-// "replaced" descreve um vínculo encerrado PORQUE outro foi aberto no lugar,
-// na mesma transação — é o que atribuir-carteira.ts faz internamente ao
-// detectar substituição (UC-DEL-02, A2). Aceitar "replaced" aqui permitiria
-// encerrar um vínculo alegando substituição sem que substituição alguma
-// tenha ocorrido, quebrando a garantia que o motivo existe para dar: que
-// todo "replaced" tem, em algum lugar da rastreabilidade, um
-// `carteira.atribuida` correspondente, criado na mesma operação atômica
-// (AD-14). Esta função aceita apenas `professional_exit` e `cycle_closed`.
+// "replaced" é reservado a operações que encerram um vínculo e criam o
+// substituto na mesma transação, para o mesmo `athleteUid` e `specialty` — é
+// o que preserva a garantia que o motivo existe para dar: que todo "replaced"
+// tem, em algum lugar da rastreabilidade, um `carteira.atribuida`
+// correspondente, criado na mesma operação atômica (AD-14). Esta função
+// aceita apenas `professional_exit` e `cycle_closed`.
+//
+// A RESERVA É DE CONDIÇÃO, NÃO DE FUNÇÃO NOMEADA (Adendo 09, AT-15). Duas
+// funções a satisfazem hoje — atribuir-carteira.ts, ao detectar substituição
+// (UC-DEL-02, A2), e a metade automática de trocar-titular.ts —, e qualquer
+// função futura que encerre e crie no mesmo ato, sob o mesmo par, também a
+// satisfaz. Nomear as funções em vez da condição obrigaria a reabrir este
+// comentário a cada terceira função legítima; foi o que a AT-12 já corrigiu
+// uma vez, no comentário de `assignments` em firestore.rules.
+//
+// AS DUAS CLÁUSULAS SÃO NECESSÁRIAS. "Mesma transação" sozinho não bastaria:
+// uma operação poderia encerrar um vínculo e criar outro não relacionado no
+// mesmo ato e satisfazer a frase sem satisfazer a garantia. A correlação pelo
+// par `athleteUid`+`specialty` é o que faz de "replaced" a descrição correta
+// do que aconteceu, e não apenas de quando.
 //
 // O QUE ESTA FUNÇÃO NÃO FAZ
 // Não desativa o cadastro do profissional. São atos independentes: a saída
@@ -34,7 +46,7 @@ import { validarIdDocumento, validarMotivoEncerramento } from "./_m2-validacao";
 
 const COLECAO = "assignments";
 
-/** Motivos aceitos por ESTA função. "replaced" é reservado a atribuir-carteira.ts. */
+/** Motivos aceitos por ESTA função. "replaced" tem reserva própria — ver cabeçalho. */
 const MOTIVOS_ACEITOS = ["professional_exit", "cycle_closed"] as const;
 
 function json(statusCode: number, body: unknown) {
@@ -91,8 +103,9 @@ export const handler = async (event: any) => {
   if (!(MOTIVOS_ACEITOS as readonly string[]).includes(endedReason)) {
     return json(400, {
       erro:
-        "endedReason 'replaced' só é gravado por atribuir-carteira.ts, " +
-        "como parte de uma substituição. Use professional_exit ou cycle_closed.",
+        "endedReason 'replaced' é reservado a operações que encerram e criam o " +
+        "substituto na mesma transação, para o mesmo atleta e especialidade. " +
+        "Use professional_exit ou cycle_closed.",
     });
   }
 
