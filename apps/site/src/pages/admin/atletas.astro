@@ -2872,13 +2872,62 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
       initNutrition(athlete).catch(function (e) { console.error('initNutrition:', e); });
 
       // WKE-04: cabeçalhos de publicação.
-      // Leem planStatus do documento do atleta, não do rascunho — por isso não
-      // aguardam as duas chamadas acima.
+      // Primeiro desenho: otimista, com o que já estiver em `athlete.trainingPlan`
+      // / `nutritionPlan` — hoje, sempre o padrão 'rascunho', porque a AC-25
+      // nunca escreve ali (DV-4). Não aguarda as duas chamadas acima.
       renderPubHeader('training');
       renderPubHeader('nutrition');
 
+      // AC-27 (F-29): busca a versão publicada DE VERDADE, em `versions/`, e
+      // corrige o cabeçalho quando a resposta chegar. Sem aguardar — a gaveta
+      // não trava esperando rede, no mesmo padrão de initWorkout/initNutrition
+      // acima. Antes desta correção, o cabeçalho nunca saía do estado
+      // otimista: fechar e reabrir mostrava sempre "Rascunho", mesmo depois de
+      // publicar com sucesso.
+      wkeAtualizarCabecalhoPublicacao(athlete);
+
       // UC2b: aba Evolução
       evoInit();
+    }
+
+    /**
+     * AC-27. Busca a última versão publicada de cada tipo de plano e, se
+     * existir, corrige `athlete.trainingPlan`/`nutritionPlan` — os mesmos
+     * campos que `getPlanRef` lê — antes de redesenhar o cabeçalho.
+     *
+     * Só ATUALIZA quando existe versão; nunca REGRIDE um estado otimista
+     * 'publicado' para 'rascunho' por falha de rede — se a busca falhar, o
+     * cabeçalho fica como estava, e o erro vai só ao console.
+     */
+    async function wkeAtualizarCabecalhoPublicacao(athlete) {
+      for (const kind of ['training', 'nutrition']) {
+        try {
+          const idToken = await window.__getFreshToken();
+          const resp = await fetch('/.netlify/functions/buscar-versao-publicada', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+            body: JSON.stringify({ athleteUid: athlete.id, planType: kind }),
+          });
+          if (!resp.ok) continue;
+          const dados = await resp.json();
+          if (!dados.existe) continue;
+
+          // Só atualiza se a gaveta deste MESMO atleta ainda estiver aberta —
+          // o Coach pode ter trocado de atleta enquanto a rede respondia.
+          if (wke04CurrentAthlete !== athlete) continue;
+
+          const key = kind === 'training' ? 'trainingPlan' : 'nutritionPlan';
+          const dt = dados.versao.publishedAt ? new Date(dados.versao.publishedAt) : null;
+          const carimbo = dt
+            ? String(dt.getDate()).padStart(2,'0') + '/' + String(dt.getMonth()+1).padStart(2,'0') + '/' + dt.getFullYear()
+              + ' ' + String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0')
+            : '';
+          athlete[key] = { status: 'publicado', publishedAt: carimbo, hasUnpublishedChanges: false };
+          renderPubHeader(kind);
+        } catch (e) {
+          console.error('[wkeAtualizarCabecalhoPublicacao]', kind, e);
+        }
+      }
     }
 
     function closeAthleteDrawer() {

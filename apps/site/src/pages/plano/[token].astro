@@ -37,6 +37,10 @@ import '@fontsource/montserrat/700.css';
 import '../../styles/tokens.css';
 import '../../styles/global.css';
 import { renderPlanDocument, DOC_CSS, type TrainingPlan, type NutritionPlan } from '../../lib/plano-documento';
+// AC-27 do Adendo 07: consulta única para a versão publicada, compartilhada
+// com o cabeçalho da gaveta do Coach. Import direto — SSR, mesmo processo,
+// sem HTTP interno. Ver o cabeçalho de _buscar-versao-publicada.ts.
+import { buscarVersaoPublicada } from '../../lib/versao-publicada';
 
 function getDb() {
   if (!getApps().length) {
@@ -48,16 +52,19 @@ function getDb() {
 
 const CAMPO_TOKEN = { training: "trainingPlanToken", nutrition: "nutritionPlanToken" } as const;
 const CAMPO_EXPIRA = { training: "trainingPlanTokenExpiresAt", nutrition: "nutritionPlanTokenExpiresAt" } as const;
-const CAMPO_PLANO = { training: "trainingPlan", nutrition: "nutritionPlan" } as const;
 const ROTULO = { training: "Plano de Treino", nutrition: "Plano Nutricional" } as const;
 
 const { token } = Astro.params;
 
 let athlete: Record<string, any> | null = null;
+let athleteUid: string | null = null;
 let kind: "training" | "nutrition" | null = null;
 let notFound = false;
 let isExpired = false;
 let semPlano = false;
+// AC-27 (F-29), CA-65: a fonte deixa de ser athlete.trainingPlan/nutritionPlan
+// (DV-4 — campo não mais escrito) e passa a ser a subcoleção de versões.
+let versaoPublicada: TrainingPlan | NutritionPlan | null = null;
 
 try {
   const db = getDb();
@@ -66,12 +73,13 @@ try {
     const snap = await db.collection("athletes").where(CAMPO_TOKEN[candidato], "==", token).limit(1).get();
     if (!snap.empty) {
       athlete = snap.docs[0].data();
+      athleteUid = snap.docs[0].id;
       kind = candidato;
       break;
     }
   }
 
-  if (!athlete || !kind) {
+  if (!athlete || !kind || !athleteUid) {
     notFound = true;
   } else {
     const expiraEm = athlete[CAMPO_EXPIRA[kind]];
@@ -80,8 +88,12 @@ try {
       if (exp < new Date()) isExpired = true;
     }
     if (!isExpired) {
-      const plano = athlete[CAMPO_PLANO[kind]];
-      if (!plano || plano.status !== "publicado") semPlano = true;
+      const resultado = await buscarVersaoPublicada(db, athleteUid, kind);
+      if (resultado.existe) {
+        versaoPublicada = resultado.versao.content as TrainingPlan | NutritionPlan;
+      } else {
+        semPlano = true;
+      }
     }
   }
 } catch (e) {
@@ -89,12 +101,8 @@ try {
 }
 
 const documentoHtml =
-  athlete && kind && !notFound && !isExpired && !semPlano
-    ? renderPlanDocument(
-        kind,
-        athlete.name ?? null,
-        athlete[CAMPO_PLANO[kind]] as TrainingPlan | NutritionPlan,
-      )
+  athlete && kind && !notFound && !isExpired && !semPlano && versaoPublicada
+    ? renderPlanDocument(kind, athlete.name ?? null, versaoPublicada)
     : null;
 
 const tituloAba = notFound
