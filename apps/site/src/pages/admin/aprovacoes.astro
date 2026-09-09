@@ -1,0 +1,276 @@
+---
+export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../../styles/tokens.css';
+import '../../styles/global.css';
+import AdminHeader from '../../components/AdminHeader.astro';
+---
+{/*
+  ELITE90 PRO · tela de aprovação de sugestões — AC-05 do Adendo 07.
+
+  SEM CARD NO HUB (AC-29). Alcançável por endereço direto e pelo indicador de
+  contagem em atletas.astro. Ver o Adendo 07, seção 5.1, para a razão — ação de
+  gestão sobre fluxo já em curso, categoria que o Hub ainda não tem.
+
+  O CONTEÚDO É RENDERIZADO NO SERVIDOR, PELA FUNÇÃO. `listar-sugestoes-
+  pendentes.ts` importa `renderPlanDocument` — a MESMA função que
+  `plano/[token].astro` usa para o atleta — e devolve o HTML de cada sugestão
+  já pronto. Não os componentes de prévia do editor
+  (`PreviaTreino`/`PreviaNutricional`): aqueles dependem de um único estado
+  global (`wkeState`/`nteState`), um plano ativo por vez — inadequados para
+  uma LISTA de N sugestões simultâneas na mesma tela. E não renderização no
+  cliente: não há precedente neste projeto de importar `apps/site/src/lib`
+  dentro de um `<script type="module">` de navegador — só no frontmatter SSR
+  e em Netlify Functions, ambos em Node.
+
+  TRÊS AÇÕES, TRÊS FUNÇÕES, NENHUMA CRIA VERSÃO ALÉM DE APROVAR. Aprovar já
+  existe (`aprovar-sugestao.ts`, entregue com a AC-06). Devolver e recusar são
+  novas nesta entrega — a diferença entre elas está no estado resultante:
+  `returned` reabre edição para o profissional; `rejected` encerra o ciclo.
+*/}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELITE90 PRO — Aprovações</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+  <meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+  <meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+  <meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
+  <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
+  <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
+
+  <style>
+    .apr-main { max-width: 900px; margin: 0 auto; padding: 32px 24px 64px; }
+    .apr-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
+                 letter-spacing: .04em; margin: 0 0 8px; }
+    .apr-sub { font-family: Montserrat, sans-serif; font-size: .9rem;
+               opacity: .75; margin: 0 0 32px; }
+    .apr-msg { font-family: Montserrat, sans-serif; padding: 24px;
+               border: 1px solid rgba(255,255,255,.12); border-radius: 8px; }
+    .apr-card { border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
+                margin-bottom: 24px; background: #1A1A1A; overflow: hidden; }
+    .apr-card__topo { padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,.08);
+                       display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+    .apr-card__atleta { font-family: Raleway, sans-serif; font-weight: 700;
+                         font-size: 1.05rem; }
+    .apr-card__meta { font-family: Montserrat, sans-serif; font-size: .78rem;
+                       opacity: .65; }
+    .apr-card__tipo { font-family: Raleway, sans-serif; font-size: .68rem;
+                       text-transform: uppercase; letter-spacing: .06em;
+                       padding: 3px 8px; border-radius: 4px;
+                       border: 1px solid var(--lima, #A6C300); color: var(--lima, #A6C300); }
+    .apr-card__doc { padding: 4px 20px 20px; max-height: 420px; overflow-y: auto; }
+    .apr-card__acoes { display: flex; gap: 10px; padding: 16px 20px;
+                        border-top: 1px solid rgba(255,255,255,.08); flex-wrap: wrap; }
+    .apr-btn { font-family: Raleway, sans-serif; font-weight: 700; font-size: .78rem;
+               text-transform: uppercase; letter-spacing: .05em; padding: 9px 16px;
+               border-radius: 4px; cursor: pointer; border: none; }
+    .apr-btn--aprovar { background: var(--lima, #A6C300); color: #0D0D0D; }
+    .apr-btn--devolver { background: none; border: 1px solid #E67E22; color: #E67E22; }
+    .apr-btn--recusar { background: none; border: 1px solid #C0392B; color: #C0392B; }
+    .apr-btn[disabled] { opacity: .35; cursor: not-allowed; }
+    .apr-nota { width: 100%; margin-top: 10px; }
+    .apr-nota textarea { width: 100%; min-height: 60px; background: #0D0D0D;
+                          border: 1px solid rgba(255,255,255,.15); border-radius: 4px;
+                          color: #EEE; font-family: Montserrat, sans-serif;
+                          font-size: .85rem; padding: 8px; resize: vertical; }
+    .apr-nota__botoes { display: flex; gap: 8px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <AdminHeader badge="Aprovações" backHref="/admin/atletas" />
+
+  <main class="apr-main">
+    <h1 class="apr-title">Sugestões pendentes</h1>
+    <p class="apr-sub" id="apr-sub">Carregando…</p>
+
+    <div id="apr-msg" class="apr-msg" hidden></div>
+    <div id="apr-lista"></div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const cfg = {
+      apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
+      authDomain:        document.querySelector('meta[name="fb-auth"]')?.content,
+      projectId:         document.querySelector('meta[name="fb-proj"]')?.content,
+      storageBucket:     document.querySelector('meta[name="fb-bucket"]')?.content,
+      messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
+      appId:             document.querySelector('meta[name="fb-appid"]')?.content,
+    };
+    const auth = getAuth(initializeApp(cfg));
+
+    const sub = document.getElementById("apr-sub");
+    const msg = document.getElementById("apr-msg");
+    const lista = document.getElementById("apr-lista");
+
+    const ROTULO_TIPO = { training: "Treino", nutrition: "Nutricional" };
+    let token = null;
+
+    function mostrarMensagem(texto) {
+      sub.textContent = ""; lista.innerHTML = "";
+      msg.textContent = texto; msg.hidden = false;
+    }
+
+    async function chamar(fn, corpo) {
+      return fetch("/.netlify/functions/" + fn, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(corpo ?? {}),
+      });
+    }
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) { window.location.href = "/admin/login"; return; }
+      try {
+        token = await user.getIdToken(true);
+        const resp = await chamar("listar-sugestoes-pendentes");
+        if (resp.status === 403) {
+          await signOut(auth);
+          mostrarMensagem("Acesso não autorizado para esta conta.");
+          return;
+        }
+        if (!resp.ok) throw new Error(String(resp.status));
+        const dados = await resp.json();
+        render(dados.sugestoes ?? []);
+      } catch {
+        mostrarMensagem("Não foi possível carregar as sugestões agora. Tente novamente em instantes.");
+      }
+    });
+
+    function render(sugestoes) {
+      msg.hidden = true;
+      if (sugestoes.length === 0) {
+        sub.textContent = "";
+        mostrarMensagem("Nenhuma sugestão aguardando revisão no momento.");
+        return;
+      }
+      sub.textContent = sugestoes.length === 1
+        ? "1 sugestão aguardando revisão."
+        : `${sugestoes.length} sugestões aguardando revisão.`;
+
+      lista.innerHTML = "";
+      for (const s of sugestoes) {
+        lista.appendChild(montarCard(s));
+      }
+    }
+
+    function montarCard(s) {
+      const card = document.createElement("div");
+      card.className = "apr-card";
+      card.dataset.id = s.id;
+
+      const topo = document.createElement("div");
+      topo.className = "apr-card__topo";
+      topo.innerHTML = `
+        <span class="apr-card__atleta">${escapeHtml(s.athleteName)}</span>
+        <span class="apr-card__tipo">${ROTULO_TIPO[s.planType] ?? s.planType}</span>
+        <span class="apr-card__meta">Enviado por ${escapeHtml(s.professionalName)}</span>
+      `;
+
+      const doc = document.createElement("div");
+      doc.className = "apr-card__doc";
+      // O MESMO documento que o atleta veria se isto fosse aprovado — montado
+      // no SERVIDOR por listar-sugestoes-pendentes.ts, não recalculado aqui.
+      doc.innerHTML = s.documentoHtml;
+
+      const acoes = document.createElement("div");
+      acoes.className = "apr-card__acoes";
+      acoes.innerHTML = `
+        <button class="apr-btn apr-btn--aprovar" data-acao="aprovar">Aprovar</button>
+        <button class="apr-btn apr-btn--devolver" data-acao="devolver">Devolver</button>
+        <button class="apr-btn apr-btn--recusar" data-acao="recusar">Recusar</button>
+      `;
+
+      card.append(topo, doc, acoes);
+      ligarAcoes(card, s.id, acoes);
+      return card;
+    }
+
+    function ligarAcoes(card, suggestionId, acoes) {
+      acoes.addEventListener("click", async (ev) => {
+        const btn = ev.target.closest("button[data-acao]");
+        if (!btn) return;
+        const tipo = btn.dataset.acao;
+
+        // Devolver e recusar pedem nota antes de agir; aprovar age direto.
+        if ((tipo === "devolver" || tipo === "recusar") && !acoes.querySelector(".apr-nota")) {
+          abrirNota(acoes, tipo, suggestionId, card);
+          return;
+        }
+        if (tipo === "aprovar") {
+          await executarAcao(card, acoes, "aprovar-sugestao", { suggestionId });
+        }
+      });
+    }
+
+    function abrirNota(acoes, tipo, suggestionId, card) {
+      const obrigatoria = tipo === "devolver";
+      const bloco = document.createElement("div");
+      bloco.className = "apr-nota";
+      bloco.innerHTML = `
+        <textarea placeholder="${obrigatoria ? 'O que precisa ajustar? (obrigatório)' : 'Motivo (opcional)'}"></textarea>
+        <div class="apr-nota__botoes">
+          <button class="apr-btn ${tipo === 'devolver' ? 'apr-btn--devolver' : 'apr-btn--recusar'}" data-confirmar="1">
+            Confirmar ${tipo === 'devolver' ? 'devolução' : 'recusa'}
+          </button>
+        </div>
+      `;
+      acoes.appendChild(bloco);
+      const textarea = bloco.querySelector("textarea");
+      textarea.focus();
+      bloco.querySelector("[data-confirmar]").addEventListener("click", async () => {
+        const reviewNote = textarea.value.trim();
+        if (obrigatoria && !reviewNote) { textarea.focus(); return; }
+        const fn = tipo === "devolver" ? "devolver-sugestao" : "recusar-sugestao";
+        await executarAcao(card, acoes, fn, { suggestionId, reviewNote: reviewNote || undefined });
+      });
+    }
+
+    async function executarAcao(card, acoes, fn, corpo) {
+      for (const b of acoes.querySelectorAll("button")) b.disabled = true;
+      try {
+        const resp = await chamar(fn, corpo);
+        if (!resp.ok) {
+          let texto = "";
+          try { texto = (await resp.json()).erro || ""; } catch (_) {}
+          throw new Error(texto || String(resp.status));
+        }
+        // Resolvida: sai da lista. Sem re-buscar tudo — a ação já diz o que
+        // aconteceu, e recarregar a lista inteira por uma sugestão é
+        // desperdício simétrico ao que a contagem separada evita do lado do
+        // indicador.
+        card.remove();
+        if (!lista.children.length) {
+          sub.textContent = "";
+          mostrarMensagem("Nenhuma sugestão aguardando revisão no momento.");
+        } else {
+          sub.textContent = lista.children.length === 1
+            ? "1 sugestão aguardando revisão."
+            : `${lista.children.length} sugestões aguardando revisão.`;
+        }
+      } catch (e) {
+        for (const b of acoes.querySelectorAll("button")) b.disabled = false;
+        alert("Não foi possível concluir agora: " + (e?.message || "tente novamente."));
+      }
+    }
+
+    function escapeHtml(s) {
+      const d = document.createElement("div");
+      d.textContent = s ?? "";
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>

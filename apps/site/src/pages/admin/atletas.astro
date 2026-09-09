@@ -64,6 +64,12 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     .action-btns { display: flex; gap: var(--space-3); flex-wrap: wrap; position: absolute; top: var(--space-4); right: var(--space-5); margin-top: 0; }
     .btn-action-outline { padding: 10px 20px; border: 1.5px solid var(--c-lime); background: transparent; color: var(--c-lime); border-radius: var(--radius-card); font-family: var(--font-label); font-size: var(--fs-label); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 150ms ease; }
     .btn-action-outline:hover { background: rgba(166, 195, 0, 0.12); }
+    /* .btn-action-outline já fixa display: inline-flex — sem esta regra o
+       atributo `hidden` de #apr-indicador (AC-29) não teria efeito algum,
+       porque a declaração do autor sempre vence a regra [hidden] do
+       user-agent quando ambas são "normais" (mesmo princípio já aplicado a
+       .wke-search-overlay[hidden] e às demais overlays desta página). */
+    #apr-indicador[hidden] { display: none; }
     .btn-action-outline [data-lucide] { width: 14px; height: 14px; }
     .btn-action-filled { padding: 10px 20px; border: 1.5px solid var(--c-lime); background: var(--c-lime); color: #0D0D0D; border-radius: var(--radius-card); font-family: var(--font-label); font-size: var(--fs-label); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: opacity 150ms ease; }
     .btn-action-filled:hover { opacity: 0.88; }
@@ -1187,6 +1193,11 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     <div class="eyebrow">Módulo 2 — Acompanhamento do Atleta</div>
     <h1 class="page-title">Gestão &amp; <b>Atletas</b></h1>
     <div class="action-btns">
+      <!-- AC-29: sem card no Hub. Este é o único ponto de entrada até a rota
+           de aprovação — oculto por padrão (CA-72: presença sem contagem real
+           reprova o critério tanto quanto ausência). aparece só quando a
+           contagem chega e é maior que zero. -->
+      <a id="apr-indicador" class="btn-action-outline" href="/admin/aprovacoes" hidden></a>
       <button class="btn-action-outline" onclick="atualizarLista()"><span data-lucide="refresh-cw"></span> Atualizar</button>
       <button class="btn-action-filled" onclick="exportarCSV()"><span data-lucide="download"></span> Exportar CSV</button>
     </div>
@@ -4580,6 +4591,31 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
       } catch (err) {
         console.error("Erro ao carregar atletas:", err);
         window.__setAthletesError();
+      }
+
+      // AC-29, CA-72: o indicador só aparece quando a contagem chega e é
+      // maior que zero. Falha de rede aqui não pode deixar o indicador
+      // visível e mudo — o padrão seguro é continuar oculto, o mesmo que o
+      // estado inicial, e não um número que pode estar errado.
+      try {
+        const idToken = await user.getIdToken();
+        const resp = await fetch('/.netlify/functions/contar-sugestoes-pendentes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+          body: '{}',
+        });
+        if (resp.ok) {
+          const { total } = await resp.json();
+          const el = document.getElementById('apr-indicador');
+          if (el && total > 0) {
+            el.textContent = total === 1
+              ? '1 sugestão pendente'
+              : total + ' sugestões pendentes';
+            el.hidden = false;
+          }
+        }
+      } catch (e) {
+        console.error('[indicador-aprovacoes]', e);
       }
     });
 </script>
