@@ -590,12 +590,26 @@ import AdminHeader from '../../components/AdminHeader.astro';
     }
 
     function abrirEdicao(linha, p) {
-      if (linha.querySelector(".prf-campos")) { linha.querySelector(".prf-campos").remove(); return; }
+      // O ALVO DO TOGGLE É O ENVOLTÓRIO INTEIRO (.prf-edicao), NÃO O GRID DE
+      // CAMPOS SOZINHO. `montarCampos()` devolve um `<div>` sem classe, com o
+      // grid (.prf-campos) dentro; os botões Salvar/Cancelar são irmãos desse
+      // grid, dentro do MESMO envoltório. Checar e remover só `.prf-campos`
+      // apagava o grid e deixava o envoltório — e os botões — órfãos na tela;
+      // o próximo clique em Editar não encontrava mais `.prf-campos` e montava
+      // tudo de novo, empilhando um segundo par de botões ao lado do órfão.
+      const existente = linha.querySelector(".prf-edicao");
+      if (existente) { existente.remove(); return; }
+
       const bloco = montarCampos(p);
+      bloco.classList.add("prf-edicao");
       const acoes = document.createElement("div");
       acoes.className = "prf-linha__acoes";
-      acoes.innerHTML = `<button class="prf-btn prf-btn--principal" data-salvar="1">Salvar alterações</button>`;
+      acoes.innerHTML = `
+        <button class="prf-btn prf-btn--principal" data-salvar="1">Salvar alterações</button>
+        <button class="prf-btn prf-btn--secundario" data-cancelar="1">Cancelar</button>
+      `;
       bloco.appendChild(acoes);
+      acoes.querySelector("[data-cancelar]").addEventListener("click", () => bloco.remove());
       acoes.querySelector("[data-salvar]").addEventListener("click", async () => {
         // Só os campos ALTERADOS vão no corpo. A função responde
         // `alterado: false` quando nada mudou, e mandar tudo faria toda edição
@@ -606,7 +620,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
           const novo = chave === "specialties" ? valor.join(",") : (valor ?? "");
           if (String(atual) !== String(novo)) carga[chave] = valor;
         }
-        if (Object.keys(carga).length === 1) { linha.querySelector(".prf-campos").remove(); return; }
+        if (Object.keys(carga).length === 1) { bloco.remove(); return; }
         await agir(acoes, "atualizar-profissional", carga);
       });
       linha.appendChild(bloco);
