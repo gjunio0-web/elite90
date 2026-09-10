@@ -121,8 +121,17 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-pend__item { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
                       padding: 8px 0; border-top: 1px solid rgba(255,255,255,.06); }
     .prf-pend__nome { font-family: Raleway, sans-serif; font-size: .9rem; flex: 1; min-width: 180px; }
-    .prf-erro { font-family: Montserrat, sans-serif; font-size: .8rem; color: #E67E22;
-                width: 100%; margin-top: 8px; }
+    /* Recado de ação — mesmo padrão semântico de exercicios.astro (#exc-recado):
+       uma cor para sucesso, outra para erro, nunca silêncio. Generaliza o que
+       antes só existia para erro (.prf-erro) — o sucesso não tinha feedback
+       algum, e "a lista recarregou" não é confirmação: o Coach não sabe se foi
+       a ação dele que mudou a lista ou uma atualização de outra pessoa. */
+    .prf-recado { font-family: Montserrat, sans-serif; font-size: .8rem;
+                  width: 100%; margin-top: 8px; padding: 7px 10px; border-radius: 4px; }
+    .prf-recado--ok { color: var(--c-lime, #A6C300); background: rgba(166,195,0,.08);
+                      border: 1px solid rgba(166,195,0,.3); }
+    .prf-recado--erro { color: var(--c-pending, #E67E22); background: rgba(230,126,34,.08);
+                        border: 1px solid rgba(230,126,34,.35); }
     /* Janela de confirmação — mesmo padrão de fichas.astro e exercicios.astro
        (classes .confirm-overlay/.confirm-box/.confirm-actions), com prefixo
        próprio porque esta tela ainda não compartilha um arquivo de estilo
@@ -408,7 +417,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
             "Remover o titular desta especialidade? Os vínculos atuais continuam ativos; apenas as próximas promoções deixam de gerar carteira.",
           );
           if (!ok1) return;
-          await executar(card, acoes, "remover-titular", { specialty: e.specialty });
+          await executarAcao(acoes, "remover-titular", { specialty: e.specialty }, "Titular removido.", card);
           return;
         }
         if (!card.querySelector(".prf-form")) abrirEscolha(card, acoes, e, tipo);
@@ -439,16 +448,24 @@ import AdminHeader from '../../components/AdminHeader.astro';
       confirmar.addEventListener("click", async () => {
         const professionalId = bloco.querySelector("select").value;
         const fn = tipo === "trocar" ? "trocar-titular" : "definir-titular";
-        await executar(card, acoes, fn, { professionalId, specialty: e.specialty });
+        const mensagem = tipo === "trocar" ? "Titular trocado." : "Titular definido.";
+        await executarAcao(acoes, fn, { professionalId, specialty: e.specialty }, mensagem, card);
       });
     }
 
-    async function executar(card, acoes, fn, corpo) {
+    // ── UMA SÓ FUNÇÃO PARA AS DUAS ÁREAS ────────────────────────────────────
+    // `executar` (titularidade) e `agir` (equipe) faziam exatamente a mesma
+    // coisa — chamar, desabilitar botões, recarregar — e tinham exatamente o
+    // mesmo defeito: nenhuma delas confirmava sucesso. Consertar as duas em
+    // separado repetiria o erro; unificadas, o conserto vale para as sete
+    // ações que passam por aqui de uma vez.
+    async function executarAcao(acoes, fn, corpo, mensagemOk, card) {
       for (const b of acoes.querySelectorAll("button")) b.disabled = true;
+      acoes.querySelector(".prf-recado")?.remove();
       try {
         const resp = await chamar(fn, corpo);
         if (!resp.ok) throw new Error(await erroDe(resp));
-        const dados = await resp.json();
+        const dados = await resp.json().catch(() => ({}));
         // A troca pode voltar com vínculos explícitos a decidir. Enquanto
         // houver pendência, a tela NÃO recarrega: recarregar apagaria a lista
         // que o Coach está respondendo.
@@ -456,14 +473,28 @@ import AdminHeader from '../../components/AdminHeader.astro';
           abrirPendencias(card, dados);
           return;
         }
+        if (mensagemOk) {
+          mostrarRecado(acoes, mensagemOk, "ok");
+          // A confirmação fica visível um instante antes de a lista recarregar
+          // — recarregar() reconstrói o card/linha inteiro, e o recado some
+          // junto com ele. Sem a pausa, o Coach nunca veria a mensagem: ela
+          // nasceria e morreria no mesmo quadro.
+          await new Promise((r) => setTimeout(r, 900));
+        }
+        formNovo.innerHTML = "";
         await recarregar();
       } catch (e) {
         for (const b of acoes.querySelectorAll("button")) b.disabled = false;
-        const aviso = document.createElement("p");
-        aviso.className = "prf-erro";
-        aviso.textContent = e?.message || "Não foi possível concluir agora.";
-        acoes.appendChild(aviso);
+        mostrarRecado(acoes, e?.message || "Não foi possível concluir agora.", "erro");
       }
+    }
+
+    function mostrarRecado(container, texto, tipo) {
+      container.querySelector(".prf-recado")?.remove();
+      const aviso = document.createElement("p");
+      aviso.className = `prf-recado prf-recado--${tipo}`;
+      aviso.textContent = texto;
+      container.appendChild(aviso);
     }
 
     // A METADE INTERATIVA DA TROCA (AT-16, AT-21).
@@ -508,8 +539,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
             concluir(item, bloco, card);
           } catch (e) {
             for (const b of item.querySelectorAll("button")) b.disabled = false;
+            // O item desaparecer da lista JÁ É a confirmação de sucesso aqui —
+            // não precisa de recado de "ok" além disso. O de erro, sim.
             const aviso = document.createElement("span");
-            aviso.className = "prf-erro";
+            aviso.className = "prf-recado prf-recado--erro";
             aviso.textContent = e?.message || "Não foi possível migrar agora.";
             item.appendChild(aviso);
           }
@@ -576,7 +609,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         // porque ela dispara e-mail e cria conta — efeito fora do banco.
         const ok2 = await confirmarAcao("Conceder acesso", `Conceder acesso ao portal para ${p.name}?`);
         if (!ok2) return;
-        await agir(acoes, "criar-conta-profissional", { professionalId: p.id });
+        await executarAcao(acoes, "criar-conta-profissional", { professionalId: p.id }, "Acesso concedido.");
       });
       linha.querySelector("[data-desativar]")?.addEventListener("click", async () => {
         const ok3 = await confirmarAcao(
@@ -584,7 +617,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
           `Desativar ${p.name}? As carteiras dele permanecem como estão — desativar não encerra vínculo.`,
         );
         if (!ok3) return;
-        await agir(acoes, "desativar-profissional", { professionalId: p.id });
+        await executarAcao(acoes, "desativar-profissional", { professionalId: p.id }, "Profissional desativado.");
       });
       return linha;
     }
@@ -620,8 +653,31 @@ import AdminHeader from '../../components/AdminHeader.astro';
           const novo = chave === "specialties" ? valor.join(",") : (valor ?? "");
           if (String(atual) !== String(novo)) carga[chave] = valor;
         }
-        if (Object.keys(carga).length === 1) { bloco.remove(); return; }
-        await agir(acoes, "atualizar-profissional", carga);
+        if (Object.keys(carga).length === 1) {
+          // Nada mudou. Fechar em silêncio aqui não é o mesmo problema do
+          // sucesso sem feedback: não houve ação nenhuma a confirmar, e um
+          // recado de "nada para salvar" seria ruído para quem só queria
+          // olhar os campos e fechar.
+          bloco.remove();
+          return;
+        }
+        // Mesma proteção do cadastro: campo obrigatório que o Coach deixou em
+        // branco vira `null` em silêncio (lerCampos) e só falharia no
+        // servidor, sem apontar qual campo foi. Verifica só os que estão de
+        // fato no corpo desta edição — os que não mudaram nem entram em jogo.
+        const faltando = [
+          ["name", "o nome"],
+          ["email", "o e-mail"],
+          ["councilNumber", "o número do conselho"],
+        ].filter(([k]) => k in carga && !carga[k]).map(([, r]) => r);
+        if ("specialties" in carga && !carga.specialties.length) {
+          faltando.push("ao menos uma especialidade");
+        }
+        if (faltando.length) {
+          mostrarRecado(acoes, `Falta preencher ${faltando.join(", ")}.`, "erro");
+          return;
+        }
+        await executarAcao(acoes, "atualizar-profissional", carga, "Alterações salvas.");
       });
       linha.appendChild(bloco);
     }
@@ -673,40 +729,27 @@ import AdminHeader from '../../components/AdminHeader.astro';
       acoes.querySelector("[data-cancelar]").addEventListener("click", () => { formNovo.innerHTML = ""; });
       acoes.querySelector("[data-criar]").addEventListener("click", async () => {
         const carga = lerCampos(bloco);
-        // Validação de forma fica na função — ela tem o vocabulário fechado e
-        // as mensagens. Aqui só se impede o envio obviamente vazio, para não
-        // gastar ida e volta com o que o campo já sabe.
-        if (!carga.name || !carga.email) {
-          mostrarErro(acoes, "Nome e e-mail são obrigatórios.");
+        // Validação de tela é conveniência; a garantia é do servidor
+        // (validarProfissional, em _m2-validacao.ts). Ela existe aqui só para
+        // não gastar uma ida à rede num cadastro obviamente incompleto — e
+        // para apontar QUAL campo falta, o que o erro do servidor não faz
+        // sozinho. Mesmo padrão de exercicios.astro (criarExercicio).
+        const faltando = [
+          ["name", "o nome"],
+          ["email", "o e-mail"],
+          ["councilNumber", "o número do conselho"],
+        ].filter(([k]) => !carga[k]).map(([, r]) => r);
+        if (!carga.specialties.length) faltando.push("ao menos uma especialidade");
+        if (faltando.length) {
+          mostrarRecado(acoes, `Falta preencher ${faltando.join(", ")}.`, "erro");
           return;
         }
-        await agir(acoes, "cadastrar-profissional", carga);
+        await executarAcao(acoes, "cadastrar-profissional", carga, "Profissional cadastrado.");
       });
       formNovo.appendChild(bloco);
     }
 
     document.getElementById("prf-novo").addEventListener("click", abrirCadastro);
-
-    async function agir(acoes, fn, corpo) {
-      for (const b of acoes.querySelectorAll("button")) b.disabled = true;
-      try {
-        const resp = await chamar(fn, corpo);
-        if (!resp.ok) throw new Error(await erroDe(resp));
-        formNovo.innerHTML = "";
-        await recarregar();
-      } catch (e) {
-        for (const b of acoes.querySelectorAll("button")) b.disabled = false;
-        mostrarErro(acoes, e?.message || "Não foi possível concluir agora.");
-      }
-    }
-
-    function mostrarErro(acoes, texto) {
-      acoes.querySelector(".prf-erro")?.remove();
-      const aviso = document.createElement("p");
-      aviso.className = "prf-erro";
-      aviso.textContent = texto;
-      acoes.appendChild(aviso);
-    }
 
     function escapeHtml(s) {
       const d = document.createElement("div");
