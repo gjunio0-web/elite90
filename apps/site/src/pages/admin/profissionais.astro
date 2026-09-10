@@ -1,0 +1,414 @@
+---
+export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../../styles/tokens.css';
+import '../../styles/global.css';
+import AdminHeader from '../../components/AdminHeader.astro';
+---
+{/*
+  ELITE90 PRO · tela de profissionais — ADM-13 reduzida, Adendo 09 (AT-07, AT-20).
+
+  DUAS ÁREAS, UMA TELA (AT-20). Titularidade por especialidade no topo, porque é
+  o ATO PRIMÁRIO: o Coach define titulares, e todos os atletas passam a estar nas
+  carteiras deles — não atribui carteira atleta a atleta. A lista de
+  profissionais, com cadastro e atos de carteira por linha, vem abaixo, em
+  entrega própria.
+
+  ESTA ENTREGA É A PRIMEIRA DAS DUAS. Traz a área de titularidade completa,
+  incluindo a metade interativa da troca. A segunda traz a lista de profissionais
+  e os atos de cadastro.
+
+  A TELA NÃO DECIDE NADA (AT-07). Toda regra vive nas funções: quem pode ser
+  titular, o que migra, o que se pergunta, o que se recusa. Aqui há chamada e
+  exibição — e é por isso que uma recusa da função deve chegar ao Coach com o
+  texto que a função mandou, não traduzida por esta página.
+
+  OS TRÊS ESTADOS DA AT-08 (CT-31). Especialidade sem titular; titular
+  desativado; contagem de atletas sem profissional. Os três vêm de
+  listar-titulares.ts, e nenhum deles é inferido aqui.
+
+  A CONTAGEM É POR ESPECIALIDADE, E NÃO SE SOMA. Um atleta sem profissional em
+  treino E em nutrição aparece nas duas contagens: seis atletas podem produzir
+  "1" e "6". Um total agregado diria sete, e não corresponderia a gente nenhuma.
+  Por isso não há total — cada linha mostra a sua.
+
+  DADOS EM JSON, MONTAGEM AQUI (AT-22). Diferente de aprovacoes.astro, que
+  recebe HTML pronto porque há um DOCUMENTO a renderizar — o plano do atleta,
+  pela mesma função que o atleta vê. Aqui não há documento, só listas.
+*/}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELITE90 PRO — Profissionais</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+  <meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+  <meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+  <meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
+  <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
+  <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
+
+  <style>
+    .prf-main { max-width: 900px; margin: 0 auto; padding: 32px 24px 64px; }
+    .prf-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
+                 letter-spacing: .04em; margin: 0 0 8px; }
+    .prf-sub { font-family: Montserrat, sans-serif; font-size: .9rem;
+               opacity: .75; margin: 0 0 32px; }
+    .prf-msg { font-family: Montserrat, sans-serif; padding: 24px;
+               border: 1px solid rgba(255,255,255,.12); border-radius: 4px; }
+    .prf-card { border: 1px solid rgba(255,255,255,.12); border-radius: 4px;
+                margin-bottom: 20px; background: #1A1A1A; overflow: hidden; }
+    .prf-card__topo { padding: 18px 20px; display: flex; flex-wrap: wrap;
+                      align-items: baseline; gap: 8px 16px; }
+    .prf-card__esp { font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem;
+                     letter-spacing: .04em; }
+    .prf-card__titular { font-family: Raleway, sans-serif; font-weight: 700;
+                         font-size: 1rem; }
+    .prf-card__vazio { font-family: Montserrat, sans-serif; font-size: .85rem;
+                       opacity: .7; }
+    .prf-selo { font-family: Raleway, sans-serif; font-size: .68rem;
+                text-transform: uppercase; letter-spacing: .06em;
+                padding: 3px 8px; border-radius: 4px; border: 1px solid currentColor; }
+    .prf-selo--ativo { color: var(--c-lime, #A6C300); }
+    .prf-selo--inativo { color: #E67E22; }
+    .prf-selo--ausente { color: #C0392B; }
+    .prf-selo--sem { color: #999; }
+    .prf-card__contagem { font-family: Montserrat, sans-serif; font-size: .8rem;
+                          opacity: .8; width: 100%; }
+    .prf-card__contagem button { background: none; border: none; padding: 0;
+                                 color: var(--c-lime, #A6C300); cursor: pointer;
+                                 font: inherit; text-decoration: underline; }
+    .prf-amostra { margin: 8px 0 0; padding: 0 0 0 18px; font-family: Montserrat, sans-serif;
+                   font-size: .8rem; opacity: .75; }
+    .prf-card__acoes { display: flex; gap: 10px; padding: 14px 20px; flex-wrap: wrap;
+                       border-top: 1px solid rgba(255,255,255,.08); }
+    .prf-btn { font-family: Raleway, sans-serif; font-weight: 700; font-size: .75rem;
+               text-transform: uppercase; letter-spacing: .05em; padding: 8px 14px;
+               border-radius: 4px; cursor: pointer; border: none; }
+    .prf-btn--principal { background: var(--c-lime, #A6C300); color: #0D0D0D; }
+    .prf-btn--secundario { background: none; border: 1px solid rgba(255,255,255,.3); color: #EEE; }
+    .prf-btn--perigo { background: none; border: 1px solid #C0392B; color: #C0392B; }
+    .prf-btn[disabled] { opacity: .35; cursor: not-allowed; }
+    .prf-form { width: 100%; margin-top: 10px; }
+    .prf-form select { background: #0D0D0D; border: 1px solid rgba(255,255,255,.15);
+                       color: #EEE; font-family: Montserrat, sans-serif;
+                       font-size: .85rem; padding: 8px; border-radius: 4px; min-width: 260px; }
+    .prf-pend { border-top: 1px solid rgba(255,255,255,.08); padding: 14px 20px; }
+    .prf-pend__aviso { font-family: Montserrat, sans-serif; font-size: .8rem;
+                       opacity: .75; margin: 0 0 12px; }
+    .prf-pend__item { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+                      padding: 8px 0; border-top: 1px solid rgba(255,255,255,.06); }
+    .prf-pend__nome { font-family: Raleway, sans-serif; font-size: .9rem; flex: 1; min-width: 180px; }
+    .prf-erro { font-family: Montserrat, sans-serif; font-size: .8rem; color: #E67E22;
+                width: 100%; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <AdminHeader badge="Profissionais" backHref="/admin" />
+
+  <main class="prf-main">
+    <h1 class="prf-title">Titularidade</h1>
+    <p class="prf-sub" id="prf-sub">Carregando…</p>
+
+    <div id="prf-msg" class="prf-msg" hidden></div>
+    <div id="prf-lista"></div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const cfg = {
+      apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
+      authDomain:        document.querySelector('meta[name="fb-auth"]')?.content,
+      projectId:         document.querySelector('meta[name="fb-proj"]')?.content,
+      storageBucket:     document.querySelector('meta[name="fb-bucket"]')?.content,
+      messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
+      appId:             document.querySelector('meta[name="fb-appid"]')?.content,
+    };
+    const auth = getAuth(initializeApp(cfg));
+
+    const sub = document.getElementById("prf-sub");
+    const msg = document.getElementById("prf-msg");
+    const lista = document.getElementById("prf-lista");
+
+    const ROTULO_ESP = { training: "Treino", nutrition: "Nutrição" };
+    let token = null;
+    let profissionais = [];
+
+    function mostrarMensagem(texto) {
+      sub.textContent = ""; lista.innerHTML = "";
+      msg.textContent = texto; msg.hidden = false;
+    }
+
+    async function chamar(fn, corpo) {
+      return fetch("/.netlify/functions/" + fn, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(corpo ?? {}),
+      });
+    }
+
+    // A recusa da função chega ao Coach COM O TEXTO DELA. A tela não traduz nem
+    // resume: as mensagens de recusa carregam a regra — por que replaced é
+    // reservado, por que trocar não é definir —, e reescrevê-las aqui as faria
+    // divergir da função no dia em que uma das duas mudasse.
+    async function erroDe(resp) {
+      try { return (await resp.json()).erro || `Falha (${resp.status}).`; }
+      catch { return `Falha (${resp.status}).`; }
+    }
+
+    async function carregar() {
+      const [rTit, rProf] = await Promise.all([
+        chamar("listar-titulares"),
+        chamar("listar-profissionais", { active: true }),
+      ]);
+      if (rTit.status === 403 || rProf.status === 403) {
+        await signOut(auth);
+        mostrarMensagem("Acesso não autorizado para esta conta.");
+        return;
+      }
+      if (!rTit.ok || !rProf.ok) throw new Error("leitura");
+      const dados = await rTit.json();
+      profissionais = (await rProf.json()).itens ?? [];
+      render(dados.especialidades ?? []);
+    }
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) { window.location.href = "/admin/login"; return; }
+      try {
+        token = await user.getIdToken(true);
+        await carregar();
+      } catch {
+        mostrarMensagem("Não foi possível carregar a titularidade agora. Tente novamente em instantes.");
+      }
+    });
+
+    function render(especialidades) {
+      msg.hidden = true;
+      const semTitular = especialidades.filter(e => !e.titular).length;
+      sub.textContent = semTitular === 0
+        ? "Todas as especialidades têm titular."
+        : semTitular === 1
+          ? "1 especialidade sem titular."
+          : `${semTitular} especialidades sem titular.`;
+      lista.innerHTML = "";
+      for (const e of especialidades) lista.appendChild(montarCard(e));
+    }
+
+    function montarCard(e) {
+      const card = document.createElement("div");
+      card.className = "prf-card";
+      card.dataset.specialty = e.specialty;
+
+      const topo = document.createElement("div");
+      topo.className = "prf-card__topo";
+      topo.innerHTML = `
+        <span class="prf-card__esp">${ROTULO_ESP[e.specialty] ?? escapeHtml(e.specialty)}</span>
+        ${montarTitular(e.titular)}
+        ${montarContagem(e)}
+      `;
+
+      const acoes = document.createElement("div");
+      acoes.className = "prf-card__acoes";
+      acoes.innerHTML = e.titular
+        ? `<button class="prf-btn prf-btn--secundario" data-acao="trocar">Trocar titular</button>
+           <button class="prf-btn prf-btn--perigo" data-acao="remover">Remover titular</button>`
+        : `<button class="prf-btn prf-btn--principal" data-acao="definir">Definir titular</button>`;
+
+      card.append(topo, acoes);
+      ligarAcoes(card, e, acoes);
+      ligarAmostra(card, e);
+      return card;
+    }
+
+    function montarTitular(t) {
+      // Sem titular NÃO é falta: é estado válido (AT-08), e por isso tem selo
+      // próprio em vez de espaço vazio.
+      if (!t) {
+        return `<span class="prf-card__vazio">Sem titular definido</span>
+                <span class="prf-selo prf-selo--sem">Sem titular</span>`;
+      }
+      // "Ausente" e "inativo" são estados DIFERENTES, e listar-titulares.ts os
+      // separa de propósito: um profissional desativado ainda está cadastrado;
+      // um ausente teve o documento removido. A tela não os funde.
+      const selo = t.ausente
+        ? `<span class="prf-selo prf-selo--ausente">Cadastro ausente</span>`
+        : t.active
+          ? `<span class="prf-selo prf-selo--ativo">Ativo</span>`
+          : `<span class="prf-selo prf-selo--inativo">Titular desativado</span>`;
+      return `<span class="prf-card__titular">${escapeHtml(t.name ?? t.professionalId)}</span>${selo}`;
+    }
+
+    function montarContagem(e) {
+      const n = e.atletasSemProfissional.total;
+      if (n === 0) return `<span class="prf-card__contagem">Nenhum atleta sem profissional nesta especialidade.</span>`;
+      const rotulo = n === 1 ? "1 atleta sem profissional" : `${n} atletas sem profissional`;
+      return `<span class="prf-card__contagem">${rotulo} — <button data-amostra="1">ver quem</button></span>`;
+    }
+
+    function ligarAmostra(card, e) {
+      const botao = card.querySelector("[data-amostra]");
+      if (!botao) return;
+      botao.addEventListener("click", () => {
+        if (card.querySelector(".prf-amostra")) {
+          card.querySelector(".prf-amostra").remove();
+          botao.textContent = "ver quem";
+          return;
+        }
+        const ul = document.createElement("ul");
+        ul.className = "prf-amostra";
+        const a = e.atletasSemProfissional;
+        ul.innerHTML = a.amostra.map(x => `<li>${escapeHtml(x.name ?? x.athleteUid)}</li>`).join("")
+          + (a.haMais ? `<li>e outros — a lista mostra os primeiros ${a.amostra.length}.</li>` : "");
+        botao.parentElement.appendChild(ul);
+        botao.textContent = "ocultar";
+      });
+    }
+
+    function ligarAcoes(card, e, acoes) {
+      acoes.addEventListener("click", async (ev) => {
+        const btn = ev.target.closest("button[data-acao]");
+        if (!btn) return;
+        const tipo = btn.dataset.acao;
+        if (tipo === "remover") {
+          if (!confirm("Remover o titular desta especialidade? Os vínculos atuais continuam ativos; apenas as próximas promoções deixam de gerar carteira.")) return;
+          await executar(card, acoes, "remover-titular", { specialty: e.specialty });
+          return;
+        }
+        if (!card.querySelector(".prf-form")) abrirEscolha(card, acoes, e, tipo);
+      });
+    }
+
+    function abrirEscolha(card, acoes, e, tipo) {
+      const atual = e.titular?.professionalId ?? null;
+      const opcoes = profissionais
+        .filter(p => (p.specialties ?? []).includes(e.specialty) && p.id !== atual)
+        .map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`)
+        .join("");
+
+      const bloco = document.createElement("div");
+      bloco.className = "prf-form";
+      bloco.innerHTML = opcoes
+        ? `<select>${opcoes}</select>
+           <button class="prf-btn prf-btn--principal" data-confirmar="1" style="margin-left:8px">
+             ${tipo === "trocar" ? "Confirmar troca" : "Confirmar titular"}
+           </button>`
+        : `<span class="prf-card__vazio">Nenhum profissional ativo com esta especialidade. Cadastre um antes.</span>`;
+      acoes.appendChild(bloco);
+
+      const confirmar = bloco.querySelector("[data-confirmar]");
+      if (!confirmar) return;
+      confirmar.addEventListener("click", async () => {
+        const professionalId = bloco.querySelector("select").value;
+        const fn = tipo === "trocar" ? "trocar-titular" : "definir-titular";
+        await executar(card, acoes, fn, { professionalId, specialty: e.specialty });
+      });
+    }
+
+    async function executar(card, acoes, fn, corpo) {
+      for (const b of acoes.querySelectorAll("button")) b.disabled = true;
+      try {
+        const resp = await chamar(fn, corpo);
+        if (!resp.ok) throw new Error(await erroDe(resp));
+        const dados = await resp.json();
+        // A troca pode voltar com vínculos explícitos a decidir. Enquanto
+        // houver pendência, a tela NÃO recarrega: recarregar apagaria a lista
+        // que o Coach está respondendo.
+        if (fn === "trocar-titular" && (dados.pendentesDeEscolha ?? []).length) {
+          abrirPendencias(card, dados);
+          return;
+        }
+        await recarregar();
+      } catch (e) {
+        for (const b of acoes.querySelectorAll("button")) b.disabled = false;
+        const aviso = document.createElement("p");
+        aviso.className = "prf-erro";
+        aviso.textContent = e?.message || "Não foi possível concluir agora.";
+        acoes.appendChild(aviso);
+      }
+    }
+
+    // A METADE INTERATIVA DA TROCA (AT-16, AT-21).
+    // A função migrou os vínculos `default` sozinha e devolveu os `explicit`
+    // para o Coach decidir um a um — eles estão ali porque ELE escolheu aquele
+    // profissional para aquele atleta, e migrá-los em massa desfaria a escolha.
+    //
+    // FECHAR A ABA AQUI É SEGURO. Os que sobrarem continuam com o titular
+    // anterior — vínculos ativos e corretos, estado válido, não inconsistência.
+    // Reabrir a troca sobre o mesmo par devolve os remanescentes (CT-34).
+    function abrirPendencias(card, dados) {
+      card.querySelector(".prf-form")?.remove();
+      const bloco = document.createElement("div");
+      bloco.className = "prf-pend";
+      bloco.innerHTML = `<p class="prf-pend__aviso">
+        ${dados.vinculosMigrados} vínculo(s) migrado(s) automaticamente.
+        ${dados.pendentesDeEscolha.length} atleta(s) foram atribuídos individualmente ao titular anterior —
+        decida um a um. Pode fechar a página: quem ficar sem resposta permanece com o profissional atual,
+        e a troca pode ser retomada depois.
+      </p>`;
+      for (const p of dados.pendentesDeEscolha) {
+        const item = document.createElement("div");
+        item.className = "prf-pend__item";
+        item.innerHTML = `
+          <span class="prf-pend__nome">${escapeHtml(p.athleteUid)}</span>
+          <button class="prf-btn prf-btn--principal" data-migrar="1">Migrar para o novo titular</button>
+          <button class="prf-btn prf-btn--secundario" data-manter="1">Manter como está</button>
+        `;
+        item.querySelector("[data-manter]").addEventListener("click", () => concluir(item, bloco, card));
+        item.querySelector("[data-migrar]").addEventListener("click", async (ev) => {
+          for (const b of item.querySelectorAll("button")) b.disabled = true;
+          try {
+            // Cada resposta vira uma chamada a atribuir-carteira.ts, que já faz
+            // substituição e já grava origin "explicit" (AT-16). Nenhuma função
+            // nova para esta metade.
+            const resp = await chamar("atribuir-carteira", {
+              athleteUid: p.athleteUid,
+              professionalId: dados.professionalId,
+              specialty: dados.specialty,
+            });
+            if (!resp.ok) throw new Error(await erroDe(resp));
+            concluir(item, bloco, card);
+          } catch (e) {
+            for (const b of item.querySelectorAll("button")) b.disabled = false;
+            const aviso = document.createElement("span");
+            aviso.className = "prf-erro";
+            aviso.textContent = e?.message || "Não foi possível migrar agora.";
+            item.appendChild(aviso);
+          }
+        });
+        bloco.appendChild(item);
+      }
+      card.appendChild(bloco);
+    }
+
+    function concluir(item, bloco, card) {
+      item.remove();
+      if (!bloco.querySelector(".prf-pend__item")) recarregar();
+    }
+
+    async function recarregar() {
+      try {
+        sub.textContent = "Atualizando…";
+        await carregar();
+      } catch {
+        mostrarMensagem("A ação foi concluída, mas não foi possível recarregar a tela. Atualize a página.");
+      }
+    }
+
+    function escapeHtml(s) {
+      const d = document.createElement("div");
+      d.textContent = s ?? "";
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>
