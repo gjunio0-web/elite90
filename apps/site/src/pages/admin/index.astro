@@ -77,9 +77,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
       flex-shrink: 0;
     }
     .mod-bar--blue  { background: linear-gradient(to right, #4A90D9, #2C5F8A); }
-    /* Âmbar: terceira cor de módulo, do M4. Não é token porque não se repete
-       em outro lugar do produto — se um dia repetir, vira token. */
-    .mod-bar--amber { background: linear-gradient(to right, #D88C2C, #8A5312); }
+    /* Âmbar: terceira cor de módulo, do M4 — ver tokens.css para o porquê de ser token. */
+    .mod-bar--amber { background: linear-gradient(to right, var(--c-modulo-m4), var(--c-modulo-m4-dark)); }
     .mod-bar--muted { background: rgba(255,255,255,0.06); }
 
     .mod-body {
@@ -99,7 +98,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       color: var(--c-lime);
     }
     .mod-eyebrow--blue  { color: var(--c-status-progress); }
-    .mod-eyebrow--amber { color: #D88C2C; }
+    .mod-eyebrow--amber { color: var(--c-modulo-m4); }
     .mod-eyebrow--muted { color: rgba(255,255,255,0.2); }
 
     .mod-title {
@@ -349,7 +348,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <p class="mod-desc">Defina quem responde por treino e por nutrição, e todos os atletas passam a estar na carteira desses profissionais. Cadastre a equipe, conceda acesso, atribua atletas individualmente quando precisar e acompanhe quem ainda está sem profissional.</p>
         </div>
         <div class="mod-footer">
-          <span class="mod-link" style="color:#D88C2C">Acessar profissionais <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+          <span class="mod-link" style="color:var(--c-modulo-m4)">Acessar profissionais <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
         </div>
       </a>
 

@@ -69,6 +69,17 @@
      o Coach ainda não revisou. */
   --c-pending: #E67E22;
 
+  /* CORES DE MÓDULO (Hub do Admin) — identidade de ÁREA, não de estado.
+     Categoria distinta dos status semânticos acima: aqui a cor diz "qual
+     módulo", e não "em que situação". O lima do M1 e o azul do M2 não têm
+     token próprio de módulo por acidente histórico — o eyebrow azul do cartão
+     reaproveita --c-status-progress, que é cor de ESTADO, e o segundo ponto do
+     gradiente da barra é literal. O âmbar do M4 nasce nomeado para não repetir
+     isso: três ocorrências do mesmo hex no mesmo arquivo é o que um token
+     evita. */
+  --c-modulo-m4:      #D88C2C;
+  --c-modulo-m4-dark: #8A5312; /* segundo ponto do gradiente da barra */
+
   /* SUPERFÍCIE ADICIONAL (Admin — M2 Atletas) */
   --c-surface-2:  #242424;
   --c-line-muted: #888888;
