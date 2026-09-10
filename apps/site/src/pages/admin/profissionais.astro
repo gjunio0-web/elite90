@@ -660,8 +660,18 @@ import AdminHeader from '../../components/AdminHeader.astro';
         // parecer alteração de nove campos na rastreabilidade.
         const carga = { professionalId: p.id };
         for (const [chave, valor] of Object.entries(lerCampos(bloco))) {
-          const atual = chave === "specialties" ? (p.specialties ?? []).join(",") : (p[chave] ?? "");
-          const novo = chave === "specialties" ? valor.join(",") : (valor ?? "");
+          let atual = chave === "specialties" ? (p.specialties ?? []).join(",") : (p[chave] ?? "");
+          let novo = chave === "specialties" ? valor.join(",") : (valor ?? "");
+          // Telefone é comparado por DÍGITOS, não pela string formatada. O
+          // campo entra na tela já com máscara (formatarTelefone), e o valor
+          // gravado em `p.phone` pode ser de antes desta máscara existir —
+          // sem esta normalização, abrir a edição e salvar SEM tocar no
+          // telefone ainda o marcaria como alterado, só por causa dos
+          // parênteses e do traço que a máscara acrescenta.
+          if (chave === "phone") {
+            atual = String(atual).replace(/\D/g, "");
+            novo = String(novo).replace(/\D/g, "");
+          }
           if (String(atual) !== String(novo)) carga[chave] = valor;
         }
         if (Object.keys(carga).length === 1) {
@@ -693,6 +703,40 @@ import AdminHeader from '../../components/AdminHeader.astro';
       linha.appendChild(bloco);
     }
 
+    /**
+     * Formata telefone brasileiro enquanto o Coach digita — (11) 91234-5678 ou
+     * (11) 1234-5678, conforme o total de dígitos. Não existe precedente de
+     * máscara no projeto (nenhuma outra tela formata telefone); esta é
+     * puramente JavaScript, sem biblioteca nova, no mesmo espírito do resto do
+     * arquivo.
+     *
+     * O VALOR GRAVADO É O FORMATADO, NÃO SÓ DÍGITOS. `phone` é
+     * `textoOpcional`, sem formato imposto pelo servidor (_m2-validacao.ts) —
+     * não há norma para a tela impor além dela mesma. Guardar "(11)
+     * 91234-5678" em vez de "11912345678" é mais legível para quem olhar o
+     * cadastro depois, e a tela não pode ficar mais rígida que o servidor: um
+     * número fora do padrão de 11 dígitos (DDI, ramal) ainda é aceito — só
+     * sai sem máscara completa.
+     */
+    function formatarTelefone(valor) {
+      const todos = valor.replace(/\D/g, "");
+      const d = todos.slice(0, 11);
+      // O que passa de 11 dígitos (DDI, ramal) é PRESERVADO, só sem entrar na
+      // máscara — descartá-lo aqui apagaria dígitos de um número existente
+      // que ninguém pediu para editar. Sem isto, abrir a edição de um
+      // profissional com telefone fora do padrão e salvar sem tocar no campo
+      // reescreveria o telefone truncado, por a exibição inicial já ter
+      // perdido os dígitos que o comparador de diff depois compara contra o
+      // valor original intacto.
+      const extra = todos.slice(11);
+      let base;
+      if (d.length <= 2) base = d.length ? `(${d}` : "";
+      else if (d.length <= 6) base = `(${d.slice(0, 2)}) ${d.slice(2)}`;
+      else if (d.length <= 10) base = `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+      else base = `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+      return base + extra;
+    }
+
     function montarCampos(p) {
       const bloco = document.createElement("div");
       const campos = document.createElement("div");
@@ -700,13 +744,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const v = (k) => escapeHtml(p?.[k] ?? "");
       campos.innerHTML = `
         <div class="prf-campo"><label>Nome</label><input data-c="name" value="${v("name")}" /></div>
-        <div class="prf-campo"><label>E-mail</label><input data-c="email" value="${v("email")}" /></div>
-        <div class="prf-campo"><label>Telefone</label><input data-c="phone" value="${v("phone")}" /></div>
+        <div class="prf-campo"><label>E-mail</label><input type="email" data-c="email" value="${v("email")}" /></div>
+        <div class="prf-campo"><label>Telefone</label><input type="tel" data-c="phone" value="${formatarTelefone(p?.phone ?? "")}" /></div>
         <div class="prf-campo"><label>Conselho</label><select data-c="council">
           ${CONSELHOS.map(c => `<option value="${c}"${p?.council === c ? " selected" : ""}>${c}</option>`).join("")}
         </select></div>
         <div class="prf-campo"><label>Número</label><input data-c="councilNumber" value="${v("councilNumber")}" /></div>
-        <div class="prf-campo"><label>UF</label><input data-c="councilState" value="${v("councilState")}" /></div>
+        <div class="prf-campo"><label>UF</label><input data-c="councilState" maxlength="2" value="${v("councilState")}" /></div>
         <div class="prf-campo"><label>Classificação</label><select data-c="classification">
           ${Object.entries(CLASSIFICACOES).map(([k, r]) => `<option value="${k}"${p?.classification === k ? " selected" : ""}>${r}</option>`).join("")}
         </select></div>
@@ -714,6 +758,35 @@ import AdminHeader from '../../components/AdminHeader.astro';
           ${Object.entries(ROTULO_ESP).map(([k, r]) => `<label style="text-transform:none;opacity:1"><input type="checkbox" data-esp="${k}"${(p?.specialties ?? []).includes(k) ? " checked" : ""} /> ${r}</label>`).join("")}
         </span></div>
       `;
+
+      // Telefone: reformata a cada tecla — a máscara acima. Cursor sempre vai
+      // para o fim; para um campo curto como telefone, isso não incomoda o
+      // suficiente para justificar a lógica de preservar posição do cursor.
+      campos.querySelector('[data-c="phone"]').addEventListener("input", (ev) => {
+        ev.target.value = formatarTelefone(ev.target.value);
+      });
+
+      // E-mail e UF: o SERVIDOR já normaliza os dois — email para minúsculas,
+      // councilState para maiúsculas (cadastrar-profissional.ts e
+      // atualizar-profissional.ts, nas duas direções). Sem espelhar isso aqui,
+      // reescrever o mesmo e-mail com caixa diferente numa edição passa no
+      // comparador de diff como "mudou", dispara uma chamada e grava um
+      // `profissional.editado` por uma alteração que não existe — o servidor
+      // ia normalizar para o valor idêntico de qualquer forma. Não é
+      // invenção: é a tela deixar de divergir do que o back-end já decide.
+      // SEM setSelectionRange: `input[type="email"]` recusa o método com
+      // InvalidStateError na maioria dos navegadores — mesma restrição de
+      // type="number". Descoberto testando em execução, não por leitura: o
+      // campo quebraria assim que alguém digitasse uma maiúscula. O cursor
+      // pula para o fim a cada tecla — aceitável num campo curto, mesmo
+      // trade-off já assumido na máscara de telefone acima.
+      campos.querySelector('[data-c="email"]').addEventListener("input", (ev) => {
+        ev.target.value = ev.target.value.toLowerCase();
+      });
+      campos.querySelector('[data-c="councilState"]').addEventListener("input", (ev) => {
+        ev.target.value = ev.target.value.toUpperCase();
+      });
+
       bloco.appendChild(campos);
       return bloco;
     }
