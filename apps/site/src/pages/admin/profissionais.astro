@@ -123,6 +123,29 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-pend__nome { font-family: Raleway, sans-serif; font-size: .9rem; flex: 1; min-width: 180px; }
     .prf-erro { font-family: Montserrat, sans-serif; font-size: .8rem; color: #E67E22;
                 width: 100%; margin-top: 8px; }
+    /* Janela de confirmação — mesmo padrão de fichas.astro e exercicios.astro
+       (classes .confirm-overlay/.confirm-box/.confirm-actions), com prefixo
+       próprio porque esta tela ainda não compartilha um arquivo de estilo
+       comum com aquelas. Reutilizada nas três ações que pedem confirmação:
+       remover titular, conceder acesso, desativar — o texto muda, a janela é
+       uma só. NÃO É window.confirm(): aquela caixa é do navegador, não pode
+       ser estilizada, e nenhuma outra tela deste painel a usa para ação
+       perigosa — usar aqui criaria um terceiro padrão onde já existem dois
+       (fichas.astro e exercicios.astro) e o comentário deste último já avisa
+       contra isso. */
+    .prf-confirm-overlay { position: fixed; inset: 0; z-index: 300; display: flex;
+                           align-items: center; justify-content: center;
+                           background: rgba(0,0,0,.7); padding: 16px; }
+    .prf-confirm-overlay[hidden] { display: none; }
+    .prf-confirm-box { background: #1A1A1A; border: 1px solid var(--c-lime, #A6C300);
+                       border-radius: 4px; max-width: 480px; width: 100%; padding: 24px; }
+    .prf-confirm-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem;
+                         color: #FFF; text-transform: uppercase; letter-spacing: .03em;
+                         margin: 0 0 12px; }
+    .prf-confirm-summary { font-family: Montserrat, sans-serif; font-size: .85rem;
+                           color: #CCC; line-height: 1.7; margin: 0 0 20px; }
+    .prf-confirm-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
     .prf-secao { margin-top: 44px; }
     .prf-secao__topo { display: flex; align-items: baseline; justify-content: space-between;
                        gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -156,6 +179,17 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     <div id="prf-msg" class="prf-msg" hidden></div>
     <div id="prf-lista"></div>
+
+    <div class="prf-confirm-overlay" id="prf-confirm-overlay" hidden>
+      <div class="prf-confirm-box">
+        <h3 class="prf-confirm-title" id="prf-confirm-title"></h3>
+        <p class="prf-confirm-summary" id="prf-confirm-summary"></p>
+        <div class="prf-confirm-actions">
+          <button class="prf-btn prf-btn--secundario" id="prf-confirm-cancelar">Cancelar</button>
+          <button class="prf-btn prf-btn--perigo" id="prf-confirm-ok">Confirmar</button>
+        </div>
+      </div>
+    </div>
 
     <section class="prf-secao" id="prf-equipe" hidden>
       <div class="prf-secao__topo">
@@ -200,6 +234,34 @@ import AdminHeader from '../../components/AdminHeader.astro';
     const ROTULO_ESP = { training: "Treino", nutrition: "Nutrição" };
     let token = null;
     let profissionais = [];
+
+    // ── JANELA DE CONFIRMAÇÃO (substitui window.confirm) ───────────────────
+    const cfOverlay = document.getElementById("prf-confirm-overlay");
+    const cfTitle = document.getElementById("prf-confirm-title");
+    const cfSummary = document.getElementById("prf-confirm-summary");
+    const cfOk = document.getElementById("prf-confirm-ok");
+    const cfCancelar = document.getElementById("prf-confirm-cancelar");
+
+    /** Devolve uma Promise<boolean>, no mesmo formato que confirm() devolvia
+     *  de forma síncrona — os chamadores não mudam de estrutura, só ganham
+     *  `await`. */
+    function confirmarAcao(titulo, resumo) {
+      cfTitle.textContent = titulo;
+      cfSummary.textContent = resumo;
+      cfOverlay.hidden = false;
+      cfOk.focus();
+      return new Promise((resolve) => {
+        const limpar = () => {
+          cfOverlay.hidden = true;
+          cfOk.removeEventListener("click", onOk);
+          cfCancelar.removeEventListener("click", onCancelar);
+        };
+        const onOk = () => { limpar(); resolve(true); };
+        const onCancelar = () => { limpar(); resolve(false); };
+        cfOk.addEventListener("click", onOk);
+        cfCancelar.addEventListener("click", onCancelar);
+      });
+    }
 
     function mostrarMensagem(texto) {
       sub.textContent = ""; lista.innerHTML = "";
@@ -341,7 +403,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
         if (!btn) return;
         const tipo = btn.dataset.acao;
         if (tipo === "remover") {
-          if (!confirm("Remover o titular desta especialidade? Os vínculos atuais continuam ativos; apenas as próximas promoções deixam de gerar carteira.")) return;
+          const ok1 = await confirmarAcao(
+            "Remover titular",
+            "Remover o titular desta especialidade? Os vínculos atuais continuam ativos; apenas as próximas promoções deixam de gerar carteira.",
+          );
+          if (!ok1) return;
           await executar(card, acoes, "remover-titular", { specialty: e.specialty });
           return;
         }
@@ -508,11 +574,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
       linha.querySelector("[data-acesso]")?.addEventListener("click", async () => {
         // A concessão é idempotente do lado da função; a confirmação existe
         // porque ela dispara e-mail e cria conta — efeito fora do banco.
-        if (!confirm(`Conceder acesso ao portal para ${p.name}?`)) return;
+        const ok2 = await confirmarAcao("Conceder acesso", `Conceder acesso ao portal para ${p.name}?`);
+        if (!ok2) return;
         await agir(acoes, "criar-conta-profissional", { professionalId: p.id });
       });
       linha.querySelector("[data-desativar]")?.addEventListener("click", async () => {
-        if (!confirm(`Desativar ${p.name}? As carteiras dele permanecem como estão — desativar não encerra vínculo.`)) return;
+        const ok3 = await confirmarAcao(
+          "Desativar profissional",
+          `Desativar ${p.name}? As carteiras dele permanecem como estão — desativar não encerra vínculo.`,
+        );
+        if (!ok3) return;
         await agir(acoes, "desativar-profissional", { professionalId: p.id });
       });
       return linha;
