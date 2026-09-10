@@ -18,9 +18,23 @@ import AdminHeader from '../../components/AdminHeader.astro';
   profissionais, com cadastro e atos de carteira por linha, vem abaixo, em
   entrega própria.
 
-  ESTA ENTREGA É A PRIMEIRA DAS DUAS. Traz a área de titularidade completa,
-  incluindo a metade interativa da troca. A segunda traz a lista de profissionais
-  e os atos de cadastro.
+  DUAS ÁREAS, ENTREGUES EM BLOCOS. A titularidade veio primeiro; a equipe veio
+  no bloco seguinte, com cadastro, edição, concessão de acesso e desativação.
+
+  DOIS ATOS DA AT-07 AINDA NÃO ESTÃO AQUI, E ISSO É DECLARADO, NÃO ESQUECIDO:
+  ENCERRAR CARTEIRA e ATRIBUIR A ATLETA QUE JÁ TEM PROFISSIONAL. Os dois exigem
+  um identificador que nenhuma função devolve ao administrador hoje —
+  `encerrar-carteira.ts` pede `assignmentId`, e a única leitura de carteira que
+  existe (`listar-atletas-do-profissional.ts`) recusa token sem o papel
+  `professional`, inclusive o do admin. A peça que falta é `listar-carteira.ts`,
+  especificada por inteiro na AT-23.
+
+  E ELA TEM PRAZO (§11 do adendo): entra na sequência imediatamente seguinte a
+  este bloco, na mesma leva de trabalho, antes de qualquer outra fase abrir. A
+  regra que a governança fixou é literal — "um bloco liberado como reduzido só é
+  dado por fechado quando o último bloco planejado estiver em homologação, não
+  quando o primeiro funcionar bem o suficiente para ninguém sentir falta do
+  resto".
 
   A TELA NÃO DECIDE NADA (AT-07). Toda regra vive nas funções: quem pode ser
   titular, o que migra, o que se pergunta, o que se recusa. Aqui há chamada e
@@ -109,6 +123,28 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-pend__nome { font-family: Raleway, sans-serif; font-size: .9rem; flex: 1; min-width: 180px; }
     .prf-erro { font-family: Montserrat, sans-serif; font-size: .8rem; color: #E67E22;
                 width: 100%; margin-top: 8px; }
+    .prf-secao { margin-top: 44px; }
+    .prf-secao__topo { display: flex; align-items: baseline; justify-content: space-between;
+                       gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .prf-linha { border: 1px solid rgba(255,255,255,.12); border-radius: 4px;
+                 background: #1A1A1A; margin-bottom: 12px; }
+    .prf-linha--inativo { opacity: .55; }
+    .prf-linha__topo { display: flex; align-items: baseline; gap: 8px 14px;
+                       flex-wrap: wrap; padding: 14px 18px; }
+    .prf-linha__nome { font-family: Raleway, sans-serif; font-weight: 700; font-size: .95rem; }
+    .prf-linha__meta { font-family: Montserrat, sans-serif; font-size: .78rem; opacity: .7; }
+    .prf-linha__acoes { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 18px 14px; }
+    .prf-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+                  gap: 10px; padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.08); }
+    .prf-campo { display: flex; flex-direction: column; gap: 4px; }
+    .prf-campo label { font-family: Raleway, sans-serif; font-size: .68rem;
+                       text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
+    .prf-campo input, .prf-campo select {
+      background: #0D0D0D; border: 1px solid rgba(255,255,255,.15); color: #EEE;
+      font-family: Montserrat, sans-serif; font-size: .85rem; padding: 7px; border-radius: 4px; }
+    .prf-campo--esp { display: flex; flex-direction: row; gap: 14px; align-items: center; }
+    .prf-nota { font-family: Montserrat, sans-serif; font-size: .78rem; opacity: .65;
+                border-top: 1px solid rgba(255,255,255,.08); margin-top: 28px; padding-top: 14px; }
   </style>
 </head>
 <body>
@@ -120,6 +156,20 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     <div id="prf-msg" class="prf-msg" hidden></div>
     <div id="prf-lista"></div>
+
+    <section class="prf-secao" id="prf-equipe" hidden>
+      <div class="prf-secao__topo">
+        <h2 class="prf-title" style="font-size:1.5rem; margin:0">Equipe</h2>
+        <button class="prf-btn prf-btn--principal" id="prf-novo">Cadastrar profissional</button>
+      </div>
+      <div id="prf-form-novo"></div>
+      <div id="prf-equipe-lista"></div>
+      <p class="prf-nota">
+        Encerrar uma carteira e atribuir um atleta que já tem profissional ainda não são
+        feitos por esta tela — dependem de uma leitura de vínculos que está especificada
+        e entra na sequência deste bloco.
+      </p>
+    </section>
   </main>
 
   <script type="module">
@@ -139,6 +189,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
     const sub = document.getElementById("prf-sub");
     const msg = document.getElementById("prf-msg");
     const lista = document.getElementById("prf-lista");
+    const equipe = document.getElementById("prf-equipe");
+    const equipeLista = document.getElementById("prf-equipe-lista");
+    const formNovo = document.getElementById("prf-form-novo");
+
+    const CONSELHOS = ["CRN", "CREF", "CRM"];
+    const CLASSIFICACOES = { internal: "Interno", external: "Externo" };
+    const CAMPOS_EDITAVEIS = ["name", "email", "phone", "council", "councilNumber", "councilState", "classification", "specialties"];
 
     const ROTULO_ESP = { training: "Treino", nutrition: "Nutrição" };
     let token = null;
@@ -169,7 +226,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
     async function carregar() {
       const [rTit, rProf] = await Promise.all([
         chamar("listar-titulares"),
-        chamar("listar-profissionais", { active: true }),
+        // Sem filtro de `active`: a área de equipe precisa mostrar também os
+        // inativos — desativar não apaga, e uma lista que esconde o inativo faz
+        // parecer que o cadastro sumiu. O seletor de titular filtra em memória.
+        chamar("listar-profissionais"),
       ]);
       if (rTit.status === 403 || rProf.status === 403) {
         await signOut(auth);
@@ -180,6 +240,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const dados = await rTit.json();
       profissionais = (await rProf.json()).itens ?? [];
       render(dados.especialidades ?? []);
+      renderEquipe();
     }
 
     onAuthStateChanged(auth, async user => {
@@ -291,7 +352,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
     function abrirEscolha(card, acoes, e, tipo) {
       const atual = e.titular?.professionalId ?? null;
       const opcoes = profissionais
-        .filter(p => (p.specialties ?? []).includes(e.specialty) && p.id !== atual)
+        // Titular precisa estar ativo: a função recusaria um inativo, e oferecer
+        // a opção seria convidar o Coach a um erro que só apareceria no envio.
+        .filter(p => p.active && (p.specialties ?? []).includes(e.specialty) && p.id !== atual)
         .map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`)
         .join("");
 
@@ -402,6 +465,162 @@ import AdminHeader from '../../components/AdminHeader.astro';
       } catch {
         mostrarMensagem("A ação foi concluída, mas não foi possível recarregar a tela. Atualize a página.");
       }
+    }
+
+    // ── ÁREA 2 · EQUIPE ──────────────────────────────────────────────────
+    // Quatro dos nove atos da AT-07: cadastrar, editar, conceder acesso e
+    // desativar. Atribuir carteira entra pela área de titularidade, a partir
+    // dos atletas sem profissional. Os dois que faltam estão declarados no
+    // cabeçalho e na nota ao pé da seção.
+
+    function renderEquipe() {
+      equipe.hidden = false;
+      equipeLista.innerHTML = "";
+      if (!profissionais.length) {
+        const vazio = document.createElement("p");
+        vazio.className = "prf-card__vazio";
+        vazio.textContent = "Nenhum profissional cadastrado ainda.";
+        equipeLista.appendChild(vazio);
+        return;
+      }
+      for (const p of profissionais) equipeLista.appendChild(montarLinha(p));
+    }
+
+    function montarLinha(p) {
+      const linha = document.createElement("div");
+      linha.className = p.active ? "prf-linha" : "prf-linha prf-linha--inativo";
+      const esp = (p.specialties ?? []).map(e => ROTULO_ESP[e] ?? e).join(" e ");
+      linha.innerHTML = `
+        <div class="prf-linha__topo">
+          <span class="prf-linha__nome">${escapeHtml(p.name)}</span>
+          <span class="prf-selo ${p.active ? "prf-selo--ativo" : "prf-selo--inativo"}">${p.active ? "Ativo" : "Inativo"}</span>
+          <span class="prf-linha__meta">${escapeHtml(p.council)} ${escapeHtml(p.councilNumber)}${p.councilState ? "/" + escapeHtml(p.councilState) : ""} · ${CLASSIFICACOES[p.classification] ?? escapeHtml(p.classification)} · ${escapeHtml(esp)}</span>
+          <span class="prf-linha__meta">${escapeHtml(p.email)}</span>
+        </div>
+        <div class="prf-linha__acoes">
+          <button class="prf-btn prf-btn--secundario" data-editar="1">Editar</button>
+          ${p.active ? `<button class="prf-btn prf-btn--secundario" data-acesso="1">Conceder acesso</button>
+                        <button class="prf-btn prf-btn--perigo" data-desativar="1">Desativar</button>` : ""}
+        </div>
+      `;
+      const acoes = linha.querySelector(".prf-linha__acoes");
+      linha.querySelector("[data-editar]").addEventListener("click", () => abrirEdicao(linha, p));
+      linha.querySelector("[data-acesso]")?.addEventListener("click", async () => {
+        // A concessão é idempotente do lado da função; a confirmação existe
+        // porque ela dispara e-mail e cria conta — efeito fora do banco.
+        if (!confirm(`Conceder acesso ao portal para ${p.name}?`)) return;
+        await agir(acoes, "criar-conta-profissional", { professionalId: p.id });
+      });
+      linha.querySelector("[data-desativar]")?.addEventListener("click", async () => {
+        if (!confirm(`Desativar ${p.name}? As carteiras dele permanecem como estão — desativar não encerra vínculo.`)) return;
+        await agir(acoes, "desativar-profissional", { professionalId: p.id });
+      });
+      return linha;
+    }
+
+    function abrirEdicao(linha, p) {
+      if (linha.querySelector(".prf-campos")) { linha.querySelector(".prf-campos").remove(); return; }
+      const bloco = montarCampos(p);
+      const acoes = document.createElement("div");
+      acoes.className = "prf-linha__acoes";
+      acoes.innerHTML = `<button class="prf-btn prf-btn--principal" data-salvar="1">Salvar alterações</button>`;
+      bloco.appendChild(acoes);
+      acoes.querySelector("[data-salvar]").addEventListener("click", async () => {
+        // Só os campos ALTERADOS vão no corpo. A função responde
+        // `alterado: false` quando nada mudou, e mandar tudo faria toda edição
+        // parecer alteração de nove campos na rastreabilidade.
+        const carga = { professionalId: p.id };
+        for (const [chave, valor] of Object.entries(lerCampos(bloco))) {
+          const atual = chave === "specialties" ? (p.specialties ?? []).join(",") : (p[chave] ?? "");
+          const novo = chave === "specialties" ? valor.join(",") : (valor ?? "");
+          if (String(atual) !== String(novo)) carga[chave] = valor;
+        }
+        if (Object.keys(carga).length === 1) { linha.querySelector(".prf-campos").remove(); return; }
+        await agir(acoes, "atualizar-profissional", carga);
+      });
+      linha.appendChild(bloco);
+    }
+
+    function montarCampos(p) {
+      const bloco = document.createElement("div");
+      const campos = document.createElement("div");
+      campos.className = "prf-campos";
+      const v = (k) => escapeHtml(p?.[k] ?? "");
+      campos.innerHTML = `
+        <div class="prf-campo"><label>Nome</label><input data-c="name" value="${v("name")}" /></div>
+        <div class="prf-campo"><label>E-mail</label><input data-c="email" value="${v("email")}" /></div>
+        <div class="prf-campo"><label>Telefone</label><input data-c="phone" value="${v("phone")}" /></div>
+        <div class="prf-campo"><label>Conselho</label><select data-c="council">
+          ${CONSELHOS.map(c => `<option value="${c}"${p?.council === c ? " selected" : ""}>${c}</option>`).join("")}
+        </select></div>
+        <div class="prf-campo"><label>Número</label><input data-c="councilNumber" value="${v("councilNumber")}" /></div>
+        <div class="prf-campo"><label>UF</label><input data-c="councilState" value="${v("councilState")}" /></div>
+        <div class="prf-campo"><label>Classificação</label><select data-c="classification">
+          ${Object.entries(CLASSIFICACOES).map(([k, r]) => `<option value="${k}"${p?.classification === k ? " selected" : ""}>${r}</option>`).join("")}
+        </select></div>
+        <div class="prf-campo"><label>Especialidades</label><span class="prf-campo--esp">
+          ${Object.entries(ROTULO_ESP).map(([k, r]) => `<label style="text-transform:none;opacity:1"><input type="checkbox" data-esp="${k}"${(p?.specialties ?? []).includes(k) ? " checked" : ""} /> ${r}</label>`).join("")}
+        </span></div>
+      `;
+      bloco.appendChild(campos);
+      return bloco;
+    }
+
+    function lerCampos(bloco) {
+      const dados = {};
+      for (const el of bloco.querySelectorAll("[data-c]")) {
+        const valor = el.value.trim();
+        dados[el.dataset.c] = valor === "" ? null : valor;
+      }
+      dados.specialties = [...bloco.querySelectorAll("[data-esp]")].filter(c => c.checked).map(c => c.dataset.esp);
+      return dados;
+    }
+
+    function abrirCadastro() {
+      if (formNovo.firstChild) { formNovo.innerHTML = ""; return; }
+      const bloco = montarCampos(null);
+      bloco.className = "prf-linha";
+      const acoes = document.createElement("div");
+      acoes.className = "prf-linha__acoes";
+      acoes.innerHTML = `<button class="prf-btn prf-btn--principal" data-criar="1">Cadastrar</button>
+                         <button class="prf-btn prf-btn--secundario" data-cancelar="1">Cancelar</button>`;
+      bloco.appendChild(acoes);
+      acoes.querySelector("[data-cancelar]").addEventListener("click", () => { formNovo.innerHTML = ""; });
+      acoes.querySelector("[data-criar]").addEventListener("click", async () => {
+        const carga = lerCampos(bloco);
+        // Validação de forma fica na função — ela tem o vocabulário fechado e
+        // as mensagens. Aqui só se impede o envio obviamente vazio, para não
+        // gastar ida e volta com o que o campo já sabe.
+        if (!carga.name || !carga.email) {
+          mostrarErro(acoes, "Nome e e-mail são obrigatórios.");
+          return;
+        }
+        await agir(acoes, "cadastrar-profissional", carga);
+      });
+      formNovo.appendChild(bloco);
+    }
+
+    document.getElementById("prf-novo").addEventListener("click", abrirCadastro);
+
+    async function agir(acoes, fn, corpo) {
+      for (const b of acoes.querySelectorAll("button")) b.disabled = true;
+      try {
+        const resp = await chamar(fn, corpo);
+        if (!resp.ok) throw new Error(await erroDe(resp));
+        formNovo.innerHTML = "";
+        await recarregar();
+      } catch (e) {
+        for (const b of acoes.querySelectorAll("button")) b.disabled = false;
+        mostrarErro(acoes, e?.message || "Não foi possível concluir agora.");
+      }
+    }
+
+    function mostrarErro(acoes, texto) {
+      acoes.querySelector(".prf-erro")?.remove();
+      const aviso = document.createElement("p");
+      aviso.className = "prf-erro";
+      aviso.textContent = texto;
+      acoes.appendChild(aviso);
     }
 
     function escapeHtml(s) {
