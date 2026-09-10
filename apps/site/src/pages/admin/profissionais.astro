@@ -229,6 +229,17 @@ import AdminHeader from '../../components/AdminHeader.astro';
     };
     const auth = getAuth(initializeApp(cfg));
 
+    // Liga o botão de logout do AdminHeader compartilhado — ele só renderiza o
+    // <button id="btn-logout">, sem comportamento algum, e cada página é quem
+    // liga o clique à SUA PRÓPRIA instância de auth. Mesma ligação de
+    // atletas.astro e fichas.astro. Sem isto, o botão existe visualmente e não
+    // faz nada — é o defeito que aprovacoes.astro, exercicios.astro e
+    // alimentos.astro também têm hoje; não copiar esse silêncio aqui.
+    document.getElementById("btn-logout")?.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "/admin/login";
+    });
+
     const sub = document.getElementById("prf-sub");
     const msg = document.getElementById("prf-msg");
     const lista = document.getElementById("prf-lista");
