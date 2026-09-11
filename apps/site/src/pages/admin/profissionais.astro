@@ -173,7 +173,26 @@ import AdminHeader from '../../components/AdminHeader.astro';
                        text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
     .prf-campo input, .prf-campo select {
       background: #0D0D0D; border: 1px solid rgba(255,255,255,.15); color: #EEE;
-      font-family: Montserrat, sans-serif; font-size: .85rem; padding: 7px; border-radius: 4px; }
+      font-family: Montserrat, sans-serif; font-size: .85rem; padding: 7px; border-radius: 4px;
+      transition: border-color 120ms ease, box-shadow 120ms ease; }
+    /* Mesmo padrão de EditorTreino.astro (M2, .wke-cell-input.invalid /
+       .wke-cell-error, packages/editor-plano/nucleo.js) — borda vermelha no
+       campo, mensagem pequena embaixo, com o mesmo token de cor
+       (--c-status-rejected). Nomeado prf-* para ficar dentro do vocabulário
+       desta tela, não porque o padrão em si seja diferente. */
+    .prf-campo input.invalid, .prf-campo select.invalid {
+      border-color: var(--c-status-rejected, #C0392B);
+      box-shadow: 0 0 0 2px rgba(231,76,60,0.15); }
+    /* min-height reserva o espaço da mensagem SEMPRE, mesmo vazia — sem isto,
+       o texto aparecendo ao sair do campo empurra o resto da coluna para
+       baixo, inclusive o botão "Salvar alterações" logo abaixo do grid. Um
+       clique em sequência (sair do campo em branco, clicar em Salvar) então
+       mira onde o botão estava ANTES do deslocamento, e erra o alvo — o
+       clique nasce no mesmo gesto que desloca o botão. Reservar o espaço de
+       antemão elimina o deslocamento, não só o sintoma num teste automatizado. */
+    .prf-campo-erro { display: block; font-family: Montserrat, sans-serif; font-size: 10px;
+                      line-height: 12px; height: 12px; overflow: hidden;
+                      color: var(--c-status-rejected, #C0392B); margin-top: 2px; }
     .prf-campo--esp { display: flex; flex-direction: row; gap: 14px; align-items: center; }
     .prf-nota { font-family: Montserrat, sans-serif; font-size: .78rem; opacity: .65;
                 border-top: 1px solid rgba(255,255,255,.08); margin-top: 28px; padding-top: 14px; }
@@ -758,13 +777,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
       campos.className = "prf-campos";
       const v = (k) => escapeHtml(p?.[k] ?? "");
       campos.innerHTML = `
-        <div class="prf-campo"><label>Nome</label><input data-c="name" value="${v("name")}" /></div>
-        <div class="prf-campo"><label>E-mail</label><input type="email" data-c="email" value="${v("email")}" /></div>
+        <div class="prf-campo"><label>Nome</label><input data-c="name" value="${v("name")}" />
+          <span class="prf-campo-erro" data-erro="name"></span></div>
+        <div class="prf-campo"><label>E-mail</label><input type="email" data-c="email" value="${v("email")}" />
+          <span class="prf-campo-erro" data-erro="email"></span></div>
         <div class="prf-campo"><label>Telefone</label><input type="tel" data-c="phone" value="${formatarTelefone(p?.phone ?? "")}" /></div>
         <div class="prf-campo"><label>Conselho</label><select data-c="council">
           ${CONSELHOS.map(c => `<option value="${c}"${p?.council === c ? " selected" : ""}>${c}</option>`).join("")}
         </select></div>
-        <div class="prf-campo"><label>Número</label><input data-c="councilNumber" value="${v("councilNumber")}" /></div>
+        <div class="prf-campo"><label>Número</label><input data-c="councilNumber" value="${v("councilNumber")}" />
+          <span class="prf-campo-erro" data-erro="councilNumber"></span></div>
         <div class="prf-campo"><label>UF</label><input data-c="councilState" maxlength="2" value="${v("councilState")}" /></div>
         <div class="prf-campo"><label>Classificação</label><select data-c="classification">
           ${Object.entries(CLASSIFICACOES).map(([k, r]) => `<option value="${k}"${p?.classification === k ? " selected" : ""}>${r}</option>`).join("")}
@@ -801,6 +823,51 @@ import AdminHeader from '../../components/AdminHeader.astro';
       campos.querySelector('[data-c="councilState"]').addEventListener("input", (ev) => {
         ev.target.value = ev.target.value.toUpperCase();
       });
+
+      // ── VALIDAÇÃO POR CAMPO, AO SAIR DO CAMPO ───────────────────────────
+      // Mesmo padrão visual de EditorTreino.astro (M2, aba Treino — o editor
+      // de séries da gaveta do atleta): borda vermelha no campo mais uma
+      // mensagem pequena logo abaixo, escrita e revelada quando o Coach sai
+      // do campo, não só no envio do formulário.
+      //
+      // UM DESVIO DELIBERADO DO ORIGINAL: lá o disparo é `onchange`, que só
+      // dispara quando o VALOR MUDOU — faz sentido numa tabela de séries já
+      // preenchida, onde o Coach está corrigindo um valor existente. Aqui o
+      // formulário nasce vazio (cadastro) ou parcialmente preenchido
+      // (edição), e um campo obrigatório em branco também precisa acusar ao
+      // ser abandonado, mesmo sem o Coach ter digitado nada nele. Por isso o
+      // gatilho é `blur` puro, que dispara sempre — é o que corresponde a
+      // "assim que o foco seja retirado do campo".
+      //
+      // SÓ NOME, E-MAIL E NÚMERO DO CONSELHO. Telefone e UF não têm formato a
+      // violar além do que a própria máscara/normalização já impede ao
+      // digitar (a seção acima). Conselho e Classificação são <select>, sempre
+      // preenchidos com um valor válido por padrão do navegador. Especialidades
+      // é grupo de checkbox, sem um único campo para o `blur` mirar — continua
+      // verificado só no envio, no recado de resumo já existente.
+      function validarCampo(chave, mensagemSeVazio) {
+        const input = campos.querySelector(`[data-c="${chave}"]`);
+        const erro = campos.querySelector(`[data-erro="${chave}"]`);
+        input.addEventListener("blur", () => {
+          const valor = input.value.trim();
+          let msg = null;
+          if (!valor) {
+            msg = mensagemSeVazio;
+          } else if (chave === "email" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(valor)) {
+            // Mesma expressão de _m2-validacao.ts (validarProfissional) — a
+            // tela não pode ser nem mais nem menos rígida que o servidor.
+            msg = "E-mail em formato inválido.";
+          }
+          input.classList.toggle("invalid", !!msg);
+          // Nunca `hidden`: o span fica sempre no layout (min-height reserva
+          // o espaço em CSS), só o texto muda — [hidden] removeria a caixa e
+          // devolveria o deslocamento que esta abordagem existe para evitar.
+          erro.textContent = msg ?? "";
+        });
+      }
+      validarCampo("name", "Nome é obrigatório.");
+      validarCampo("email", "E-mail é obrigatório.");
+      validarCampo("councilNumber", "Número do conselho é obrigatório.");
 
       bloco.appendChild(campos);
       return bloco;
