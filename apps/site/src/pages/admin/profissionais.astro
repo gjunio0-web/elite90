@@ -249,6 +249,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     const CONSELHOS = ["CRN", "CREF", "CRM"];
     const CLASSIFICACOES = { internal: "Interno", external: "Externo" };
+    // "active" fica FORA daqui de propósito: reativação é ação própria da tela
+    // (botão Reativar), e não um campo do formulário de edição. A função de
+    // servidor aceita `active: true` (Adendo 02, seção 7.2 — reativação É
+    // edição do campo), mas nunca `active: false`, que é desativar-profissional.
     const CAMPOS_EDITAVEIS = ["name", "email", "phone", "council", "councilNumber", "councilState", "classification", "specialties"];
 
     const ROTULO_ESP = { training: "Treino", nutrition: "Nutrição" };
@@ -609,8 +613,14 @@ import AdminHeader from '../../components/AdminHeader.astro';
         </div>
         <div class="prf-linha__acoes">
           <button class="prf-btn prf-btn--secundario" data-editar="1">Editar</button>
-          ${p.active ? `<button class="prf-btn prf-btn--secundario" data-acesso="1">Conceder acesso</button>
-                        <button class="prf-btn prf-btn--perigo" data-desativar="1">Desativar</button>` : ""}
+          ${p.active
+            ? `<button class="prf-btn prf-btn--secundario" data-acesso="1">Conceder acesso</button>
+               <button class="prf-btn prf-btn--perigo" data-desativar="1">Desativar</button>`
+            // Reativar chama atualizar-profissional com { active: true } — a
+            // mesma função de editar, não desativar-profissional ao contrário.
+            // É o que o Adendo 02 (seção 7.2) determina: reativação É edição
+            // do campo, não uma quarta ação de rastreabilidade própria.
+            : `<button class="prf-btn prf-btn--secundario" data-reativar="1">Reativar</button>`}
         </div>
       `;
       const acoes = linha.querySelector(".prf-linha__acoes");
@@ -621,6 +631,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
         const ok2 = await confirmarAcao("Conceder acesso", `Conceder acesso ao portal para ${p.name}?`);
         if (!ok2) return;
         await executarAcao(acoes, "criar-conta-profissional", { professionalId: p.id }, "Acesso concedido.");
+      });
+      linha.querySelector("[data-reativar]")?.addEventListener("click", async () => {
+        const ok4 = await confirmarAcao("Reativar profissional", `Reativar ${p.name}? Ele volta a poder receber carteira e conceder acesso.`);
+        if (!ok4) return;
+        await executarAcao(acoes, "atualizar-profissional", { professionalId: p.id, active: true }, "Profissional reativado.");
       });
       linha.querySelector("[data-desativar]")?.addEventListener("click", async () => {
         const ok3 = await confirmarAcao(
