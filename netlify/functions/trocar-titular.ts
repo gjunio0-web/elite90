@@ -40,6 +40,7 @@ import {
 import { conferirProfissionalAtivo } from "./_profissional-ativo";
 
 const COLECAO = "assignments";
+const COLECAO_ATLETAS = "athletes";
 const COLECAO_PROFISSIONAIS = "professionals";
 const COLECAO_CONFIG = "config";
 const DOC_DELEGACAO = "delegationDefaults";
@@ -91,11 +92,20 @@ class VolumeExcedido extends Error {
 }
 
 /** Vínculo `explicit` devolvido para a tela perguntar (AT-16). */
-type PendenteDeEscolha = {
+// A forma que a TRANSAÇÃO produz — sem nome, porque o getAll dos nomes
+// acontece DEPOIS dela, sobre o lote final de pendentes (não faz sentido
+// buscar nome de um atleta que a transação pode ainda descartar).
+type PendenteBruto = {
   assignmentId: string;
   athleteUid: string;
   professionalId: string;
 };
+
+// A forma que a RESPOSTA devolve — com nome, sempre presente (`null` é
+// resposta válida, ausência do campo não é). Achado em execução, 12/09/2026:
+// a tela mostrava o athleteUid literal na lista de pendências, porque esta
+// função nunca precisou do nome até a interface passar a listar por nome.
+type PendenteDeEscolha = PendenteBruto & { athleteName: string | null };
 
 export const handler = async (event: any) => {
   if (event.httpMethod !== "POST") {
@@ -145,7 +155,7 @@ export const handler = async (event: any) => {
 
   // Identificadores para os eventos posteriores à transação.
   const migrados: { anteriorId: string; novoId: string }[] = [];
-  let pendentes: PendenteDeEscolha[] = [];
+  let pendentes: PendenteBruto[] = [];
   let titularAnteriorId = "";
 
   try {
@@ -309,6 +319,24 @@ export const handler = async (event: any) => {
     });
   }
 
+  // Nomes dos atletas pendentes, restrito ao LOTE devolvido — nunca a
+  // coleção inteira. Mesmo padrão de listar-carteira.ts: um getAll pequeno é
+  // mais barato do que obrigar a tela a resolver identificador por conta
+  // própria, e a pendência já é curta por natureza (vínculos explícitos do
+  // titular que está saindo, tipicamente poucos).
+  const uidsPendentes = [...new Set(pendentes.map((x) => x.athleteUid))];
+  const nomesPorAtleta = new Map<string, string | null>();
+  if (uidsPendentes.length) {
+    const refs = uidsPendentes.map((uid) => db.collection(COLECAO_ATLETAS).doc(uid));
+    const docs = await db.getAll(...refs);
+    for (const s of docs) {
+      if (s.exists) {
+        const nome = (s.data() ?? {}).name;
+        nomesPorAtleta.set(s.id, typeof nome === "string" ? nome : null);
+      }
+    }
+  }
+
   return json(200, {
     ok: true,
     specialty,
@@ -318,6 +346,9 @@ export const handler = async (event: any) => {
     // A metade interativa começa aqui: a tela pergunta sobre cada um destes, e
     // cada resposta de migrar vira uma chamada a `atribuir-carteira.ts` (AT-16).
     // Lista vazia quer dizer que não há nada a perguntar, e a troca terminou.
-    pendentesDeEscolha: pendentes,
+    pendentesDeEscolha: pendentes.map((x) => ({
+      ...x,
+      athleteName: nomesPorAtleta.get(x.athleteUid) ?? null,
+    })),
   });
 };

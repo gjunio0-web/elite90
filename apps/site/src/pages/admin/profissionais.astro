@@ -612,17 +612,27 @@ import AdminHeader from '../../components/AdminHeader.astro';
       card.querySelector(".prf-form")?.remove();
       const bloco = document.createElement("div");
       bloco.className = "prf-pend";
+      const n = dados.pendentesDeEscolha.length;
+      // Versão própria para singular — "decida um a um" só faz sentido
+      // quando há mais de um item a percorrer; para um só, é "decida" sem o
+      // "um a um", e o verbo concorda no singular ("foi atribuído", não
+      // "foram atribuídos").
+      const fraseAtletas = n === 1
+        ? "1 atleta foi atribuído individualmente ao titular anterior — decida o que fazer com ele."
+        : `${n} atletas foram atribuídos individualmente ao titular anterior — decida um a um.`;
       bloco.innerHTML = `<p class="prf-pend__aviso">
         ${dados.vinculosMigrados} vínculo(s) migrado(s) automaticamente.
-        ${dados.pendentesDeEscolha.length} atleta(s) foram atribuídos individualmente ao titular anterior —
-        decida um a um. Pode fechar a página: quem ficar sem resposta permanece com o profissional atual,
+        ${fraseAtletas} Pode fechar a página: quem ficar sem resposta permanece com o profissional atual,
         e a troca pode ser retomada depois.
       </p>`;
       for (const p of dados.pendentesDeEscolha) {
         const item = document.createElement("div");
         item.className = "prf-pend__item";
+        // Nome do atleta, com o mesmo fallback honesto de listar-carteira.ts:
+        // se o cadastro não tiver nome gravado, mostra o identificador cru em
+        // vez de inventar um rótulo — mas isso deixou de ser o caso comum.
         item.innerHTML = `
-          <span class="prf-pend__nome">${escapeHtml(p.athleteUid)}</span>
+          <span class="prf-pend__nome">${escapeHtml(p.athleteName ?? p.athleteUid)}</span>
           <button class="prf-btn prf-btn--principal" data-migrar="1">Migrar para o novo titular</button>
           <button class="prf-btn prf-btn--secundario" data-manter="1">Manter como está</button>
         `;
