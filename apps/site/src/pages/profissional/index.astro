@@ -7,6 +7,7 @@ import '@fontsource/montserrat/400.css';
 import '@fontsource/montserrat/700.css';
 import '../../styles/tokens.css';
 import '../../styles/global.css';
+import '../../styles/editor-plano.css';
 import AdminHeader from '../../components/AdminHeader.astro';
 
 // CA-42 · Os MESMOS componentes que a gaveta do Coach importa. Não existe cópia:
@@ -54,7 +55,7 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
   <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
   <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
 
-  <style>
+  <style is:global>
     .prof-main { max-width: 1040px; margin: 0 auto; padding: 32px 24px 64px; }
     .prof-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
                   letter-spacing: .04em; margin: 0 0 8px; }
