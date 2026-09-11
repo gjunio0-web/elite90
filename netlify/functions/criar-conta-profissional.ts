@@ -232,12 +232,35 @@ export async function concederAcesso(
   let acessoEnviado = false;
   let acessoErro: string | null = null;
   try {
+    // URL FIXA POR AMBIENTE, NÃO DINÂMICA (Adendo 07, AC-30, v1.19). O link
+    // tem que apontar para o MESMO projeto Firebase que gerou o oobCode — um
+    // link de homologação abrindo o site de produção falha na validação,
+    // mesmo com o domínio autorizado (CA-87), porque tentaria verificar o
+    // código contra o Firebase errado.
+    //
+    // NÃO É `process.env.URL`: essa variável é a única disponível em runtime
+    // de função (confirmado contra a documentação oficial da Netlify —
+    // `DEPLOY_URL`, que varia por branch, só existe em build), mas descreve o
+    // ENDEREÇO PRINCIPAL DO SITE — a homologação é branch deploy do MESMO
+    // site que a produção, então essa variável resolveria sempre para
+    // coachruiz.com.br, não para o domínio da branch. Por isso dois valores
+    // FIXOS, escolhidos por `CONTEXT` — o mesmo mecanismo de `emHomologacao`,
+    // já usado em toda esta fase.
+    //
+    // MANUTENÇÃO: se o endereço de homologação mudar — troca de branch, nova
+    // configuração Netlify —, o valor abaixo precisa ser atualizado à mão.
+    // Nada aqui o atualiza sozinho.
+    const urlDefinirSenha =
+      process.env.CONTEXT === "production"
+        ? "https://coachruiz.com.br/definir-senha"
+        : "https://quality-env--elite90.netlify.app/definir-senha";
+
     const link = await auth.generatePasswordResetLink(email, {
       // `handleCodeInApp: true` NÃO É OPCIONAL — sem ele o Firebase intercepta
       // o código na própria página hospedada por ele, e /definir-senha nunca
       // recebe o `oobCode`. Erro real de uma versão anterior do Adendo 07,
       // corrigido antes de chegar à implementação.
-      url: "https://coachruiz.com.br/definir-senha",
+      url: urlDefinirSenha,
       handleCodeInApp: true,
     });
     if (!isMailerConfigured()) {
