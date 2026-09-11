@@ -173,7 +173,20 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-linha__nome { font-family: Raleway, sans-serif; font-weight: 700; font-size: .95rem; }
     .prf-linha__meta { font-family: Montserrat, sans-serif; font-size: .78rem; opacity: .7; }
     .prf-linha__acoes { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 18px 14px; }
-    .prf-carteira { border-top: 1px solid rgba(255,255,255,.08); padding: 14px 18px; }
+    /* Faixa lateral + cabeçalho, para diferenciar os dois painéis que podem
+       abrir na mesma linha — nada os distinguia antes além do formato dos
+       campos. Lima liga com o botão Salvar (é edição); âmbar liga com o
+       módulo M4 no hub (é carteira). A exclusividade mútua (abrirEdicao e
+       abrirCarteira fecham o painel irmão) é a defesa principal; isto é
+       reforço para quando só um está aberto. */
+    .prf-painel__titulo { font-family: Raleway, sans-serif; font-weight: 700; font-size: .78rem;
+                          text-transform: uppercase; letter-spacing: .05em; margin: 0 0 10px; }
+    .prf-edicao { border-left: 3px solid var(--c-lime, #A6C300); }
+    .prf-edicao .prf-painel__titulo { color: var(--c-lime, #A6C300); }
+    .prf-carteira { border-top: 1px solid rgba(255,255,255,.08); border-left: 3px solid var(--c-modulo-m4, #D88C2C);
+                    padding: 14px 18px 14px 15px; }
+    .prf-carteira .prf-carteira__titulo { color: var(--c-modulo-m4, #D88C2C); font-weight: 700; text-transform: uppercase;
+                                          letter-spacing: .05em; }
     .prf-carteira__titulo { font-family: Montserrat, sans-serif; font-size: .78rem;
                             opacity: .7; margin: 0 0 8px; }
     .prf-carteira__item { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -240,11 +253,6 @@ import AdminHeader from '../../components/AdminHeader.astro';
       </div>
       <div id="prf-form-novo"></div>
       <div id="prf-equipe-lista"></div>
-      <p class="prf-nota">
-        Encerrar uma carteira e atribuir um atleta que já tem profissional ainda não são
-        feitos por esta tela — dependem de uma leitura de vínculos que está especificada
-        e entra na sequência deste bloco.
-      </p>
     </section>
   </main>
 
@@ -744,6 +752,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
     async function abrirCarteira(linha, p) {
       const existente = linha.querySelector(".prf-carteira");
       if (existente) { existente.remove(); return; }
+      // Mesma exclusividade do lado de abrirEdicao — só um painel por vez.
+      linha.querySelector(".prf-edicao")?.remove();
 
       const bloco = document.createElement("div");
       bloco.className = "prf-carteira";
@@ -890,9 +900,17 @@ import AdminHeader from '../../components/AdminHeader.astro';
       // tudo de novo, empilhando um segundo par de botões ao lado do órfão.
       const existente = linha.querySelector(".prf-edicao");
       if (existente) { existente.remove(); return; }
+      // Exclusividade mútua: só um painel expandido por vez, nesta linha.
+      // Abrir Editar com a carteira aberta confundia os dois blocos, sem
+      // sinal algum de qual era qual.
+      linha.querySelector(".prf-carteira")?.remove();
 
       const bloco = montarCampos(p);
       bloco.classList.add("prf-edicao");
+      const titulo = document.createElement("p");
+      titulo.className = "prf-painel__titulo";
+      titulo.textContent = "Editar cadastro";
+      bloco.insertBefore(titulo, bloco.firstChild);
       const acoes = document.createElement("div");
       acoes.className = "prf-linha__acoes";
       acoes.innerHTML = `
