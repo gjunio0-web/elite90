@@ -211,7 +211,7 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const cfg = {
       apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
@@ -222,6 +222,15 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
       appId:             document.querySelector('meta[name="fb-appid"]')?.content,
     };
     const auth = getAuth(initializeApp(cfg));
+
+    // AdminHeader renderiza o botão de logout por padrão (showLogout=true),
+    // mas nada nesta página o ligava a signOut() — o mesmo defeito já
+    // catalogado em aprovacoes.astro, exercicios.astro e alimentos.astro:
+    // o botão existe e não faz nada. Mesmo padrão de atletas.astro.
+    document.getElementById("btn-logout")?.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "/admin/login";
+    });
 
     const $ = (id) => document.getElementById(id);
     const titulo = $("prof-title"), sub = $("prof-sub"), msg = $("prof-msg");
