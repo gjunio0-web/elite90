@@ -835,7 +835,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <span class="prf-campo-erro" data-erro="name"></span></div>
         <div class="prf-campo"><label>E-mail</label><input type="email" data-c="email" value="${v("email")}" />
           <span class="prf-campo-erro" data-erro="email"></span></div>
-        <div class="prf-campo"><label>Telefone</label><input type="tel" data-c="phone" value="${formatarTelefone(p?.phone ?? "")}" /></div>
+        <div class="prf-campo"><label>Telefone</label><input type="tel" data-c="phone" maxlength="15" value="${formatarTelefone(p?.phone ?? "")}" /></div>
         <div class="prf-campo"><label>Conselho</label><select data-c="council">
           ${CONSELHOS.map(c => `<option value="${c}"${p?.council === c ? " selected" : ""}>${c}</option>`).join("")}
         </select></div>
@@ -892,6 +892,14 @@ import AdminHeader from '../../components/AdminHeader.astro';
       // ser abandonado, mesmo sem o Coach ter digitado nada nele. Por isso o
       // gatilho é `blur` puro, que dispara sempre — é o que corresponde a
       // "assim que o foco seja retirado do campo".
+      //
+      // OUTRO DESVIO, ESTE DO FORMULÁRIO DE CAPTAÇÃO DE CANDIDATOS
+      // (TriageModal.astro, attachBlurValidation): lá o blur NÃO acusa campo
+      // vazio ainda não tocado. Aqui acusa — de propósito. O de captação é
+      // formulário longo, de rolagem única, onde o usuário tabula por campos
+      // que ainda vai preencher; acusar cedo demais seria ruído. Este
+      // formulário é curto e o Coach o preenche de cima para baixo; acusar o
+      // campo vazio ao sair dele é o retorno mais rápido possível.
       //
       // SÓ NOME, E-MAIL E NÚMERO DO CONSELHO. Telefone e UF não têm formato a
       // violar além do que a própria máscara/normalização já impede ao
