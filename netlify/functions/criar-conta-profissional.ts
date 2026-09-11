@@ -30,6 +30,23 @@
 // enviado por e-mail automático — mesma infraestrutura de promote-lead.ts
 // (`_mailer.ts`, `sendMail`, `isMailerConfigured`).
 //
+// A CHAMADA NÃO PASSA `ActionCodeSettings` (Adendo 07, v1.20 — correção sobre
+// as versões 1.18/1.19). `handleCodeInApp: true` era especificação anterior,
+// verificada contra a documentação oficial da Firebase só depois da primeira
+// execução real em homologação — e a verificação mostrou que a flag é
+// mecanismo de APP MÓVEL (Universal Link/Android App Link), exige `iOS`/
+// `android` no objeto para funcionar, e nunca foi o caminho certo para um
+// fluxo puramente web. O erro era do documento normativo, não da
+// implementação anterior, que seguiu a especificação corretamente.
+//
+// O DESTINO DO LINK É CONFIGURAÇÃO DE CONSOLE, NÃO PARÂMETRO DE CHAMADA —
+// Authentication → Templates → "customize action URL", em cada projeto
+// Firebase, apontando para /definir-senha. Feito uma vez por projeto, vale
+// para todos os modelos de e-mail dali em diante (CA-89, pré-requisito de
+// infraestrutura, não verificável por leitura de código). Sem essa
+// configuração, o link abre a página padrão hospedada pelo próprio Firebase,
+// não a nossa — mesmo com a chamada já simplificada.
+//
 // SEMPRE AUTOMÁTICO, SEM PARÂMETRO QUE DESATIVE. Diferente do e-mail de
 // boas-vindas do atleta, que é escolha do Coach por promoção — aqui conceder
 // acesso é ato administrativo, não momento de decisão caso a caso.
@@ -247,22 +264,10 @@ export async function concederAcesso(
     // FIXOS, escolhidos por `CONTEXT` — o mesmo mecanismo de `emHomologacao`,
     // já usado em toda esta fase.
     //
-    // MANUTENÇÃO: se o endereço de homologação mudar — troca de branch, nova
-    // configuração Netlify —, o valor abaixo precisa ser atualizado à mão.
-    // Nada aqui o atualiza sozinho.
-    const urlDefinirSenha =
-      process.env.CONTEXT === "production"
-        ? "https://coachruiz.com.br/definir-senha"
-        : "https://quality-env--elite90.netlify.app/definir-senha";
-
-    const link = await auth.generatePasswordResetLink(email, {
-      // `handleCodeInApp: true` NÃO É OPCIONAL — sem ele o Firebase intercepta
-      // o código na própria página hospedada por ele, e /definir-senha nunca
-      // recebe o `oobCode`. Erro real de uma versão anterior do Adendo 07,
-      // corrigido antes de chegar à implementação.
-      url: urlDefinirSenha,
-      handleCodeInApp: true,
-    });
+    // Sem segundo argumento, de propósito (v1.20). O destino é decidido pela
+    // configuração de console (CA-89), não por `ActionCodeSettings` — ver o
+    // cabeçalho deste arquivo para o raciocínio completo.
+    const link = await auth.generatePasswordResetLink(email);
     if (!isMailerConfigured()) {
       acessoErro = "Envio de e-mail não configurado no ambiente.";
     } else {
