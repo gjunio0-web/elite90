@@ -173,6 +173,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-linha__nome { font-family: Raleway, sans-serif; font-weight: 700; font-size: .95rem; }
     .prf-linha__meta { font-family: Montserrat, sans-serif; font-size: .78rem; opacity: .7; }
     .prf-linha__acoes { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 18px 14px; }
+    .prf-carteira { border-top: 1px solid rgba(255,255,255,.08); padding: 14px 18px; }
+    .prf-carteira__titulo { font-family: Montserrat, sans-serif; font-size: .78rem;
+                            opacity: .7; margin: 0 0 8px; }
+    .prf-carteira__item { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+                          padding: 8px 0; border-top: 1px solid rgba(255,255,255,.06); }
+    .prf-carteira__nome { font-family: Raleway, sans-serif; font-size: .85rem; flex: 1; min-width: 140px; }
+    .prf-carteira__origin { font-family: Montserrat, sans-serif; font-size: .7rem; opacity: .55; }
     .prf-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
                   gap: 10px; padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.08); }
     .prf-campo { display: flex; flex-direction: column; gap: 4px; }
@@ -686,6 +693,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         </div>
         <div class="prf-linha__acoes">
           <button class="prf-btn prf-btn--secundario" data-editar="1">Editar</button>
+          <button class="prf-btn prf-btn--secundario" data-carteira="1">Ver carteira</button>
           ${p.active
             ? `<button class="prf-btn prf-btn--secundario" data-acesso="1">Conceder acesso</button>
                <button class="prf-btn prf-btn--perigo" data-desativar="1">Desativar</button>`
@@ -698,6 +706,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
       `;
       const acoes = linha.querySelector(".prf-linha__acoes");
       linha.querySelector("[data-editar]").addEventListener("click", () => abrirEdicao(linha, p));
+      // "Ver carteira" independe de active: um profissional recém-desativado
+      // pode ter vínculos ativos ainda — desativar não encerra carteira
+      // (AT-10, mesmo precedente de remover-titular.ts). O Coach precisa
+      // conseguir ver e agir sobre eles mesmo com o cadastro inativo.
+      linha.querySelector("[data-carteira]").addEventListener("click", () => abrirCarteira(linha, p));
       linha.querySelector("[data-acesso]")?.addEventListener("click", async () => {
         // A concessão é idempotente do lado da função; a confirmação existe
         // porque ela dispara e-mail e cria conta — efeito fora do banco.
@@ -719,6 +732,152 @@ import AdminHeader from '../../components/AdminHeader.astro';
         await executarAcao(acoes, "desativar-profissional", { professionalId: p.id }, "Profissional desativado.");
       });
       return linha;
+    }
+
+    // ── CARTEIRA DO PROFISSIONAL (AT-23, bloco 2 completo) ──────────────────
+    // Opção A da decisão de layout: expande DENTRO da própria linha, mesmo
+    // padrão de abrirEdicao — reaproveita .prf-linha__acoes e o cuidado já
+    // resolvido contra empilhamento por toggle mal-alvado (.prf-edicao).
+    // Nasce aqui, e não numa janela separada, porque o Coach olha a carteira
+    // de UM profissional por vez, e a tela já tem o hábito de expandir
+    // conteúdo na linha — não o de empilhar camadas flutuantes.
+    async function abrirCarteira(linha, p) {
+      const existente = linha.querySelector(".prf-carteira");
+      if (existente) { existente.remove(); return; }
+
+      const bloco = document.createElement("div");
+      bloco.className = "prf-carteira";
+      bloco.innerHTML = `<p class="prf-card__vazio">Carregando…</p>`;
+      linha.appendChild(bloco);
+
+      let dados;
+      try {
+        const resp = await chamar("listar-carteira", { professionalId: p.id });
+        if (!resp.ok) throw new Error(await erroDe(resp));
+        dados = await resp.json();
+      } catch (e) {
+        bloco.innerHTML = "";
+        mostrarRecado(bloco, e?.message || "Não foi possível ler a carteira agora.", "erro");
+        return;
+      }
+
+      renderCarteira(bloco, p, dados.vinculos ?? []);
+    }
+
+    function renderCarteira(bloco, p, vinculos) {
+      bloco.innerHTML = "";
+      const titulo = document.createElement("p");
+      titulo.className = "prf-carteira__titulo";
+      titulo.textContent = vinculos.length
+        ? (vinculos.length === 1 ? "1 vínculo ativo" : `${vinculos.length} vínculos ativos`)
+        : "Nenhum vínculo ativo.";
+      bloco.appendChild(titulo);
+
+      for (const v of vinculos) bloco.appendChild(montarVinculo(bloco, p, v));
+    }
+
+    function montarVinculo(bloco, p, v) {
+      const item = document.createElement("div");
+      item.className = "prf-carteira__item";
+      item.innerHTML = `
+        <span class="prf-carteira__nome">${escapeHtml(v.athleteName ?? v.athleteUid)}</span>
+        <span class="prf-linha__meta">${ROTULO_ESP[v.specialty] ?? escapeHtml(v.specialty)}</span>
+        <span class="prf-carteira__origin">${v.origin === "default" ? "titularidade" : v.origin === "explicit" ? "manual" : "origem desconhecida"}</span>
+        <button class="prf-btn prf-btn--secundario" data-trocar="1">Trocar</button>
+        <button class="prf-btn prf-btn--perigo" data-encerrar="1">Encerrar</button>
+      `;
+
+      item.querySelector("[data-trocar]").addEventListener("click", () => abrirTroca(item, bloco, p, v));
+      item.querySelector("[data-encerrar]").addEventListener("click", () => abrirEncerramento(item, bloco, p, v));
+      return item;
+    }
+
+    // ATRIBUIR A QUEM JÁ TEM PROFISSIONAL (CT-40). atribuir-carteira.ts já
+    // detecta e faz a substituição sozinha — a tela só precisa oferecer o
+    // seletor. Nenhuma função nova além de listar-carteira.ts.
+    function abrirTroca(item, bloco, p, v) {
+      if (item.querySelector(".prf-form")) { item.querySelector(".prf-form").remove(); return; }
+      const elegiveis = profissionais.filter(
+        x => x.active && (x.specialties ?? []).includes(v.specialty) && x.id !== v.professionalId,
+      );
+      const form = document.createElement("div");
+      form.className = "prf-form";
+      form.innerHTML = elegiveis.length
+        ? `<select>${elegiveis.map(x => `<option value="${x.id}">${escapeHtml(x.name)}</option>`).join("")}</select>
+           <button class="prf-btn prf-btn--principal" data-confirmar-troca="1" style="margin-left:8px">Confirmar troca</button>`
+        : `<span class="prf-card__vazio">Nenhum outro profissional ativo com esta especialidade.</span>`;
+      item.appendChild(form);
+
+      const confirmar = form.querySelector("[data-confirmar-troca]");
+      if (!confirmar) return;
+      confirmar.addEventListener("click", async () => {
+        const professionalId = form.querySelector("select").value;
+        confirmar.disabled = true;
+        try {
+          const resp = await chamar("atribuir-carteira", {
+            athleteUid: v.athleteUid, professionalId, specialty: v.specialty,
+          });
+          if (!resp.ok) throw new Error(await erroDe(resp));
+          // Recarrega só esta carteira — não a lista de profissionais
+          // inteira, que perderia o estado de outras linhas abertas.
+          await recarregarCarteira(bloco, p);
+        } catch (e) {
+          confirmar.disabled = false;
+          mostrarRecado(form, e?.message || "Não foi possível trocar agora.", "erro");
+        }
+      });
+    }
+
+    // ENCERRAR CARTEIRA (CT-39). O vocabulário de motivo é fechado —
+    // professional_exit ou cycle_closed; "replaced" é reservado a operações
+    // que substituem no mesmo ato (AT-15), e esta função não é uma delas.
+    function abrirEncerramento(item, bloco, p, v) {
+      if (item.querySelector(".prf-form")) { item.querySelector(".prf-form").remove(); return; }
+      const form = document.createElement("div");
+      form.className = "prf-form";
+      form.innerHTML = `
+        <select>
+          <option value="professional_exit">Profissional saiu — sem substituto imediato</option>
+          <option value="cycle_closed">Ciclo do atleta encerrado</option>
+        </select>
+        <button class="prf-btn prf-btn--perigo" data-confirmar-fim="1" style="margin-left:8px">Confirmar encerramento</button>
+      `;
+      item.appendChild(form);
+
+      form.querySelector("[data-confirmar-fim]").addEventListener("click", async () => {
+        const endedReason = form.querySelector("select").value;
+        const ok = await confirmarAcao(
+          "Encerrar carteira",
+          `Encerrar o vínculo de ${escapeHtml(v.athleteName ?? v.athleteUid)}? O atleta fica sem profissional nesta especialidade até uma nova atribuição.`,
+        );
+        if (!ok) return;
+        const btn = form.querySelector("[data-confirmar-fim]");
+        btn.disabled = true;
+        try {
+          const resp = await chamar("encerrar-carteira", { assignmentId: v.assignmentId, endedReason });
+          if (!resp.ok) throw new Error(await erroDe(resp));
+          await recarregarCarteira(bloco, p);
+        } catch (e) {
+          btn.disabled = false;
+          mostrarRecado(form, e?.message || "Não foi possível encerrar agora.", "erro");
+        }
+      });
+    }
+
+    // Recarrega só o painel de carteira de UM profissional, sem tocar no
+    // resto da tela — trocar ou encerrar não deve fechar a carteira de outra
+    // linha que o Coach tenha aberto ao lado.
+    async function recarregarCarteira(bloco, p) {
+      bloco.innerHTML = `<p class="prf-card__vazio">Atualizando…</p>`;
+      try {
+        const resp = await chamar("listar-carteira", { professionalId: p.id });
+        if (!resp.ok) throw new Error(await erroDe(resp));
+        const dados = await resp.json();
+        renderCarteira(bloco, p, dados.vinculos ?? []);
+      } catch (e) {
+        bloco.innerHTML = "";
+        mostrarRecado(bloco, e?.message || "Não foi possível atualizar agora.", "erro");
+      }
     }
 
     function abrirEdicao(linha, p) {
