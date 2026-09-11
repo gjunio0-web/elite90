@@ -1,0 +1,212 @@
+---
+export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+import AdminHeader from '../components/AdminHeader.astro';
+---
+{/*
+  ELITE90 PRO · definir-senha — Adendo 07, AC-32.
+
+  ROTA NA RAIZ, NÃO SOB /admin/. O profissional não está autenticado ao
+  chegar — colocar sob /admin/ sugeriria pertencimento ao painel que ele
+  ainda não tem. Nenhum middleware exige sessão sob /admin/ hoje (cada
+  página se protege no próprio cliente), então esta rota fora dessa árvore
+  não depende de nada especial para funcionar.
+
+  SEM O GATE DE gateway_unlocked. Esse mecanismo existe só em
+  admin/login.astro, em sessionStorage, e não aparece em nenhuma outra
+  página do site — não é proteção de autenticação, é peça própria daquele
+  fluxo. Replicá-lo aqui bloquearia o profissional que chega direto de um
+  link de e-mail, sem ter passado pela página que define a flag.
+
+  SEM AdminHeader badge — é transição de estado, não tela de trabalho.
+
+  O QUE ESTA PÁGINA NÃO FAZ: não autentica depois da troca (login normal
+  exige a senha recém-definida); não mostra nada do painel antes de
+  confirmPasswordReset retornar com sucesso; não gera link novo se o
+  recebido estiver inválido ou expirado — reenviar é ato do Coach, pelo
+  botão "Conceder acesso" que já existe em /admin/profissionais.
+*/}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELITE90 PRO — Definir senha</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+  <meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+  <meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+  <meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
+  <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
+  <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
+
+  <style>
+    .ds-main { max-width: 440px; margin: 64px auto; padding: 0 24px; }
+    .ds-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem;
+                letter-spacing: .03em; margin: 0 0 8px; }
+    .ds-sub { font-family: Montserrat, sans-serif; font-size: .9rem; opacity: .75; margin: 0 0 28px; }
+    .ds-card { background: #1A1A1A; border: 1px solid rgba(255,255,255,.12);
+               border-radius: 4px; padding: 24px; }
+    .ds-msg { font-family: Montserrat, sans-serif; font-size: .85rem; line-height: 1.6; }
+    .ds-email { color: var(--c-lime, #A6C300); font-weight: 700; }
+    .ds-campo { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+    .ds-campo label { font-family: Raleway, sans-serif; font-size: .7rem;
+                      text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
+    .ds-campo input { background: #0D0D0D; border: 1px solid rgba(255,255,255,.15);
+                      color: #EEE; font-family: Montserrat, sans-serif; font-size: .9rem;
+                      padding: 10px; border-radius: 4px; }
+    .ds-erro { font-family: Montserrat, sans-serif; font-size: .78rem;
+              color: var(--c-status-rejected, #C0392B); margin: 4px 0 0; }
+    .ds-btn { font-family: Raleway, sans-serif; font-weight: 700; font-size: .8rem;
+              text-transform: uppercase; letter-spacing: .05em; padding: 12px 20px;
+              border-radius: 4px; cursor: pointer; border: none;
+              background: var(--c-lime, #A6C300); color: #0D0D0D; width: 100%; }
+    .ds-btn[disabled] { opacity: .4; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <AdminHeader badge="" showLogout={false} showGuide={false} />
+
+  <main class="ds-main">
+    <h1 class="ds-title">Definir senha</h1>
+    <p class="ds-sub" id="ds-sub">Verificando o link…</p>
+    <div class="ds-card" id="ds-card">
+      <p class="ds-msg">Aguarde.</p>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, verifyPasswordResetCode, confirmPasswordReset }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const cfg = {
+      apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
+      authDomain:        document.querySelector('meta[name="fb-auth"]')?.content,
+      projectId:         document.querySelector('meta[name="fb-proj"]')?.content,
+      storageBucket:     document.querySelector('meta[name="fb-bucket"]')?.content,
+      messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
+      appId:             document.querySelector('meta[name="fb-appid"]')?.content,
+    };
+    const auth = getAuth(initializeApp(cfg));
+
+    const sub = document.getElementById("ds-sub");
+    const card = document.getElementById("ds-card");
+
+    function escapeHtml(s) {
+      const d = document.createElement("div");
+      d.textContent = s ?? "";
+      return d.innerHTML;
+    }
+
+    function mostrarErro(texto) {
+      sub.textContent = "";
+      card.innerHTML = `<p class="ds-msg">${escapeHtml(texto)}</p>`;
+    }
+
+    // Leitura do oobCode/mode: SEM PRECEDENTE em outra tela deste painel —
+    // login.astro e aprovacoes.astro não leem parâmetro de URL nenhum, e o
+    // único precedente do site (guia.astro) lê do lado do SERVIDOR
+    // (Astro.url.searchParams), o que não serve aqui: verifyPasswordResetCode
+    // é chamada do SDK CLIENTE, precisa da instância `auth` já montada no
+    // navegador. Código novo, não repetição de padrão existente.
+    const params = new URLSearchParams(window.location.search);
+    const oobCode = params.get("oobCode");
+    const mode = params.get("mode");
+
+    async function iniciar() {
+      if (!oobCode || mode !== "resetPassword") {
+        mostrarErro(
+          "Este link não é válido. Peça ao Coach para gerar um novo pelo botão " +
+          "\"Conceder acesso\", em Profissionais.",
+        );
+        return;
+      }
+
+      let email;
+      try {
+        email = await verifyPasswordResetCode(auth, oobCode);
+      } catch {
+        // Código inválido ou expirado: SEM REENVIO NESTA PÁGINA. Reenviar é
+        // ato do Coach — a página não gera link novo por conta própria.
+        mostrarErro(
+          "Este link expirou ou já foi usado. Peça ao Coach para gerar um novo " +
+          "pelo botão \"Conceder acesso\", em Profissionais.",
+        );
+        return;
+      }
+
+      sub.innerHTML = `Definindo a senha de <span class="ds-email">${escapeHtml(email)}</span>.`;
+      card.innerHTML = `
+        <div class="ds-campo">
+          <label for="ds-senha">Nova senha</label>
+          <input type="password" id="ds-senha" autocomplete="new-password" minlength="6" />
+        </div>
+        <div class="ds-campo">
+          <label for="ds-confirma">Confirmar senha</label>
+          <input type="password" id="ds-confirma" autocomplete="new-password" minlength="6" />
+        </div>
+        <p class="ds-erro" id="ds-erro" hidden></p>
+        <button class="ds-btn" id="ds-enviar" type="button">Definir senha</button>
+      `;
+
+      const campoSenha = document.getElementById("ds-senha");
+      const campoConfirma = document.getElementById("ds-confirma");
+      const erro = document.getElementById("ds-erro");
+      const botao = document.getElementById("ds-enviar");
+
+      function mostrarErroCampo(texto) {
+        erro.textContent = texto;
+        erro.hidden = false;
+      }
+
+      botao.addEventListener("click", async () => {
+        erro.hidden = true;
+        const senha = campoSenha.value;
+        const confirma = campoConfirma.value;
+
+        // Validação de formato: conveniência de tela, a garantia é do
+        // Firebase (rejeitaria senha curta demais de qualquer forma). Só
+        // evita uma ida à rede óbvia.
+        if (senha.length < 6) {
+          mostrarErroCampo("A senha precisa ter ao menos 6 caracteres.");
+          return;
+        }
+        if (senha !== confirma) {
+          mostrarErroCampo("As senhas não coincidem.");
+          return;
+        }
+
+        botao.disabled = true;
+        try {
+          await confirmPasswordReset(auth, oobCode, senha);
+          card.innerHTML = `<p class="ds-msg">Senha definida. Redirecionando para o login…</p>`;
+          // /admin/login tem gate próprio (Footer.astro): sem sessionStorage
+          // "gateway_unlocked", o script inline da própria página devolve o
+          // visitante para "/" antes de renderizar qualquer coisa — normalmente
+          // aquele gate só é aberto pelo gesto de 5 cliques no rodapé. Confirmar
+          // um oobCode do Firebase e definir senha nova é prova de legitimidade
+          // ao menos tão forte quanto esse gesto; sem abrir o gate aqui, o
+          // profissional que acabou de definir a senha seria devolvido à home
+          // em silêncio, sem nunca ver o formulário de login.
+          sessionStorage.setItem("gateway_unlocked", "true");
+          setTimeout(() => { window.location.href = "/admin/login"; }, 1500);
+        } catch (e) {
+          botao.disabled = false;
+          mostrarErroCampo(e?.message || "Não foi possível definir a senha agora. Tente novamente.");
+        }
+      });
+    }
+
+    iniciar();
+  </script>
+</body>
+</html>

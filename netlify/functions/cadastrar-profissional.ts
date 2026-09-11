@@ -26,6 +26,22 @@
 //
 // Não atribui carteira. Atribuir é a função seguinte da fase, e o Adendo 02 diz na
 // pós-condição do UC-DEL-01 que o profissional nasce sem atleta nenhum.
+//
+// CONCEDE ACESSO NO MESMO ATO (Adendo 07, AC-31). Depois de gravar o
+// documento com sucesso, chama `concederAcesso` — a MESMA função que
+// criar-conta-profissional.ts expõe pelo botão manual —, no mesmo processo,
+// sem chamada HTTP a si mesma. SEQUENCIAL, NÃO ATÔMICO: Firestore e Firebase
+// Auth são dois sistemas diferentes, sem transação que cubra os dois.
+//
+// SE A CONCESSÃO FALHAR, O CADASTRO PERMANECE. Não é caso novo a tratar na
+// tela: é o MESMO ESTADO — "cadastrado, sem acesso" — que "Conceder acesso"
+// já precisa cobrir para os casos de espera deliberada (início futuro,
+// documentação pendente). O botão que já existe é a recuperação, sem rótulo
+// novo, sem lógica nova.
+//
+// DOIS EVENTOS NA MESMA JANELA, E ISSO JÁ É CORRETO. `profissional.cadastrado`
+// seguido de `profissional.acesso-concedido` — cada ação continua emitida por
+// quem sempre a emitiu, sem mudança de forma na rastreabilidade.
 
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
@@ -35,6 +51,7 @@ import {
   validarProfissional,
   type CargaProfissional,
 } from "./_m2-validacao";
+import { concederAcesso } from "./criar-conta-profissional";
 
 const COLECAO = "professionals";
 
@@ -155,5 +172,23 @@ export const handler = async (event: any) => {
     _test: emHomologacao,
   });
 
-  return json(200, { ok: true, professionalId: ref.id });
+  // -- Concessão de acesso no mesmo ato (AC-31) --
+  // Mesmo `ator` do cadastro: quem cadastrou é quem concede, e o Coach não
+  // fez um segundo clique para isso — é a MESMA operação, sequencialmente.
+  const resultadoAcesso = await concederAcesso(app, ref.id, ator);
+
+  // NÃO-FATAL, EM QUALQUER DESFECHO. O cadastro já está gravado quando
+  // chegamos aqui; nenhum resultado de concederAcesso desfaz o documento.
+  // `contaCriada` aqui significa "o acesso foi concedido com sucesso" — não
+  // confundir com o `contaCriada` interno de concederAcesso, que distingue
+  // conta NOVA de conta REAPROVEITADA; essa distinção não importa para quem
+  // consome esta resposta, só importa "tem acesso ou não tem ainda".
+  return json(200, {
+    ok: true,
+    professionalId: ref.id,
+    contaCriada: resultadoAcesso.ok,
+    erro: resultadoAcesso.ok
+      ? resultadoAcesso.acessoErro
+      : resultadoAcesso.erro,
+  });
 };
