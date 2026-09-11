@@ -100,8 +100,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-card__contagem button { background: none; border: none; padding: 0;
                                  color: var(--c-lime, #A6C300); cursor: pointer;
                                  font: inherit; text-decoration: underline; }
-    .prf-amostra { margin: 8px 0 0; padding: 0 0 0 18px; font-family: Montserrat, sans-serif;
-                   font-size: .8rem; opacity: .75; }
+    .prf-amostra { margin: 8px 0 0; padding: 0; list-style: none; font-family: Montserrat, sans-serif;
+                   font-size: .8rem; opacity: .95; }
+    .prf-amostra__item { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+                         padding: 6px 0; border-top: 1px solid rgba(255,255,255,.06); }
+    .prf-amostra__item span:first-child { flex: 1; min-width: 140px; }
+    .prf-amostra__item select { background: #0D0D0D; border: 1px solid rgba(255,255,255,.15);
+                                color: #EEE; font-family: Montserrat, sans-serif; font-size: .78rem;
+                                padding: 4px; border-radius: 4px; }
+    .prf-amostra__vazio { font-size: .75rem; opacity: .6; }
     .prf-card__acoes { display: flex; gap: 10px; padding: 14px 20px; flex-wrap: wrap;
                        border-top: 1px solid rgba(255,255,255,.08); }
     .prf-btn { font-family: Raleway, sans-serif; font-weight: 700; font-size: .75rem;
@@ -433,10 +440,57 @@ import AdminHeader from '../../components/AdminHeader.astro';
         const ul = document.createElement("ul");
         ul.className = "prf-amostra";
         const a = e.atletasSemProfissional;
-        ul.innerHTML = a.amostra.map(x => `<li>${escapeHtml(x.name ?? x.athleteUid)}</li>`).join("")
+        // Profissionais ATIVOS desta especialidade — mesmo filtro de
+        // abrirEscolha(). Sem isso, o seletor ofereceria um profissional que
+        // a própria atribuir-carteira.ts recusaria, e o erro só apareceria
+        // depois do clique.
+        const elegiveis = profissionais.filter(
+          p => p.active && (p.specialties ?? []).includes(e.specialty),
+        );
+        ul.innerHTML = a.amostra.map(x => `
+          <li class="prf-amostra__item" data-atleta="${x.athleteUid}">
+            <span>${escapeHtml(x.name ?? x.athleteUid)}</span>
+            ${elegiveis.length
+              ? `<select>${elegiveis.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("")}</select>
+                 <button class="prf-btn prf-btn--secundario" data-atribuir="1">Atribuir</button>`
+              : `<span class="prf-amostra__vazio">Nenhum profissional ativo com esta especialidade.</span>`}
+          </li>`).join("")
           + (a.haMais ? `<li>e outros — a lista mostra os primeiros ${a.amostra.length}.</li>` : "");
         botao.parentElement.appendChild(ul);
         botao.textContent = "ocultar";
+
+        // Um listener por item, não delegado no <ul> — cada linha precisa do
+        // PRÓPRIO <select>, e delegar exigiria navegar de volta ao ancestral
+        // a cada clique. O volume aqui é no máximo LIMITE_AMOSTRA (20).
+        for (const li of ul.querySelectorAll("[data-atleta]")) {
+          const btn = li.querySelector("[data-atribuir]");
+          if (!btn) continue;
+          btn.addEventListener("click", async () => {
+            const athleteUid = li.dataset.atleta;
+            const professionalId = li.querySelector("select").value;
+            btn.disabled = true;
+            li.querySelector(".prf-recado")?.remove();
+            try {
+              const resp = await chamar("atribuir-carteira", { athleteUid, professionalId, specialty: e.specialty });
+              if (!resp.ok) throw new Error(await erroDe(resp));
+              // O item some da lista — é a própria confirmação visual, mesmo
+              // padrão da migração individual em abrirPendencias(). Um recado
+              // de texto aqui seria redundante com o item desaparecendo.
+              li.remove();
+              if (!ul.querySelector("[data-atleta]")) {
+                // Lista esvaziada: a contagem do card ficou desatualizada até
+                // recarregar — que também busca listar-titulares de novo.
+                await recarregar();
+              }
+            } catch (err) {
+              btn.disabled = false;
+              const aviso = document.createElement("p");
+              aviso.className = "prf-recado prf-recado--erro";
+              aviso.textContent = err?.message || "Não foi possível atribuir agora.";
+              li.appendChild(aviso);
+            }
+          });
+        }
       });
     }
 
