@@ -179,8 +179,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
        módulo M4 no hub (é carteira). A exclusividade mútua (abrirEdicao e
        abrirCarteira fecham o painel irmão) é a defesa principal; isto é
        reforço para quando só um está aberto. */
+    /* padding-left casa com o padding horizontal de .prf-campos (18px) — sem
+       isto, o título encosta na faixa lateral colorida, porque nasce como
+       irmão de .prf-campos, fora do padding que só o grid de campos tem. */
     .prf-painel__titulo { font-family: Raleway, sans-serif; font-weight: 700; font-size: .78rem;
-                          text-transform: uppercase; letter-spacing: .05em; margin: 0 0 10px; }
+                          text-transform: uppercase; letter-spacing: .05em; margin: 0 0 10px;
+                          padding: 12px 18px 0; }
     .prf-edicao { border-left: 3px solid var(--c-lime, #A6C300); }
     .prf-edicao .prf-painel__titulo { color: var(--c-lime, #A6C300); }
     .prf-carteira { border-top: 1px solid rgba(255,255,255,.08); border-left: 3px solid var(--c-modulo-m4, #D88C2C);
