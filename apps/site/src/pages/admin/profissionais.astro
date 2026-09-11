@@ -580,6 +580,28 @@ import AdminHeader from '../../components/AdminHeader.astro';
           abrirPendencias(card, dados);
           return;
         }
+        // AÇÃO PRINCIPAL BEM-SUCEDIDA (ok: true), MAS COM AVISO EMBUTIDO.
+        // cadastrar-profissional.ts e criar-conta-profissional.ts continuam
+        // ok:true quando o cadastro/a concessão em si deram certo mas o
+        // e-mail de acesso falhou — não-fatal de propósito (AC-30/AC-31). Até
+        // aqui a tela lia `dados` só para pendentesDeEscolha e IGNORAVA os
+        // campos `erro`/`acessoErro` que a MESMA resposta carrega nesse
+        // caso — mostrando "sucesso" mesmo quando o profissional ficava sem
+        // o e-mail. Achado em execução real, não em leitura: as duas funções
+        // já foram testadas nos extremos (recusa completa, sucesso completo);
+        // faltava testar o meio-termo, que é o caso real que aconteceu.
+        const avisoEmbutido = dados.acessoErro || dados.erro || null;
+        if (avisoEmbutido) {
+          mostrarRecado(
+            acoes,
+            `${mensagemOk ?? "Ação concluída."} Porém: ${avisoEmbutido}`,
+            "erro",
+          );
+          await new Promise((r) => setTimeout(r, 1400));
+          formNovo.innerHTML = "";
+          await recarregar();
+          return;
+        }
         if (mensagemOk) {
           mostrarRecado(acoes, mensagemOk, "ok");
           // A confirmação fica visível um instante antes de a lista recarregar
