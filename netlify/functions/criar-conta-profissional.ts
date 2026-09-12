@@ -349,15 +349,18 @@ function buildAcessoEmail(nome: string, link: string): string {
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="color-scheme" content="dark"/>
+<meta name="supported-color-schemes" content="dark"/>
 <title>ELITE 90 PRO — Defina sua senha</title>
 <style>
 ${EMAIL_BASE_CSS}
   h1{font-size:22px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:.04em;margin:0 0 16px;}
   p{font-size:15px;line-height:1.7;margin:0 0 16px;}
   .highlight{color:#A6C300;font-weight:700;}
-  .btn{display:inline-block;background:#A6C300;color:#0D0D0D;font-weight:700;text-decoration:none;
+  .btn{display:inline-block;background:#A6C300;color:#0D0D0D !important;font-weight:700;text-decoration:none;
        padding:14px 28px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;font-size:14px;margin:8px 0 24px;}
   .fallback{font-size:12px;color:#888;word-break:break-all;margin-top:8px;}
+  .fallback a{color:#888 !important;text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -369,7 +372,7 @@ ${emailHeader("Acesso ao Portal do Profissional")}
     Para acessar o portal, defina sua senha pelo botão abaixo.
   </p>
   <p><a class="btn" href="${link}">Definir minha senha</a></p>
-  <p class="fallback">Se o botão não funcionar, copie e cole este endereço no navegador:<br/>${link}</p>
+  <p class="fallback">Se o botão não funcionar, copie e cole este endereço no navegador:<br/><a href="${link}" style="color:#888 !important;">${link}</a></p>
   <p>Este link expira em algumas horas. Se expirar, peça ao Coach para gerar um novo.</p>
 </div>
 </body>

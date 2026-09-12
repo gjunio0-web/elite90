@@ -86,6 +86,8 @@ function buildEmail(nome: string, objetivo: string, idioma: string): string {
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="color-scheme" content="dark"/>
+<meta name="supported-color-schemes" content="dark"/>
 <title>${t.title}</title>
 <style>
 ${EMAIL_BASE_CSS}
@@ -165,6 +167,8 @@ function buildCoachNotification(
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="color-scheme" content="dark"/>
+<meta name="supported-color-schemes" content="dark"/>
 <title>ELITE90 PRO - Ficha nova</title>
 <style>
 ${EMAIL_BASE_CSS}
@@ -175,7 +179,7 @@ ${EMAIL_BASE_CSS}
   .card p:last-child{margin:0;}
   .k{color:#666;text-transform:uppercase;letter-spacing:.1em;font-size:11px;}
   .v{color:#FFFFFF;font-weight:700;}
-  .cta{display:inline-block;background:#A6C300;color:#0D0D0D;text-decoration:none;font-weight:700;
+  .cta{display:inline-block;background:#A6C300;color:#0D0D0D !important;text-decoration:none;font-weight:700;
        text-transform:uppercase;letter-spacing:.08em;font-size:13px;padding:14px 28px;border-radius:6px;margin-top:8px;}
   .nota{font-size:12px;color:#666;margin-top:32px;line-height:1.6;}
 </style>

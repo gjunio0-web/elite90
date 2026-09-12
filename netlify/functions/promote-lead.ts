@@ -309,6 +309,8 @@ function buildWelcomeEmail(nome: string, startDate: string, idioma: string): str
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="color-scheme" content="dark"/>
+<meta name="supported-color-schemes" content="dark"/>
 <title>${txt.title}</title>
 <style>
 ${EMAIL_BASE_CSS}

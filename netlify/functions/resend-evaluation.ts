@@ -45,6 +45,8 @@ function buildResendEmail(nome: string, token: string, siteUrl: string, idioma: 
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="color-scheme" content="dark"/>
+<meta name="supported-color-schemes" content="dark"/>
 <title>${t.title}</title>
 <style>
 ${EMAIL_BASE_CSS}
@@ -52,7 +54,7 @@ ${EMAIL_BASE_CSS}
   p{font-size:15px;line-height:1.7;margin:0 0 16px;}
   .highlight{color:#A6C300;font-weight:700;}
   .cta-wrap{text-align:center;margin:32px 0;}
-  .cta{display:inline-block;background:#A6C300;color:#000;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:16px 40px;border-radius:50px;text-decoration:none;font-size:14px;}
+  .cta{display:inline-block;background:#A6C300;color:#000 !important;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:16px 40px;border-radius:50px;text-decoration:none;font-size:14px;}
   .notice{background:#121212;border-left:3px solid #444;padding:14px 18px;border-radius:0 6px 6px 0;margin:20px 0;font-size:13px;line-height:1.6;color:#888;}
   .sig{margin-top:40px;padding-top:24px;border-top:1px solid #1a1a1a;}
   .sig-name{font-size:16px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;}
@@ -79,7 +81,7 @@ ${emailHeader(t.tagline)}
   </div>
 
   <p style="font-size:13px;color:#666;text-align:center;">
-    ${t.direct} <a href="${pageUrl}" style="color:#A6C300;">${pageUrl}</a>
+    ${t.direct} <a href="${pageUrl}" style="color:#A6C300 !important;">${pageUrl}</a>
   </p>
 
   <div class="sig">
