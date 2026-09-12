@@ -48,7 +48,7 @@ import AdminHeader from '../components/AdminHeader.astro';
   <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
   <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
 
-  <style>
+  <style is:global>
     .ds-main { max-width: 440px; margin: 64px auto; padding: 0 24px; }
     .ds-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem;
                 letter-spacing: .03em; margin: 0 0 8px; }
