@@ -51,7 +51,7 @@ function buildResendEmail(nome: string, token: string, siteUrl: string, idioma: 
 <style>
 ${EMAIL_BASE_CSS}
   h1{font-size:22px;font-weight:700;color:#fff;text-transform:uppercase;margin:0 0 16px;}
-  p{font-size:15px;line-height:1.7;margin:0 0 16px;}
+  p{font-size:15px;line-height:1.7;margin:0 0 16px;color:#CCCCCC !important;}
   .highlight{color:#A6C300;font-weight:700;}
   .cta-wrap{text-align:center;margin:32px 0;}
   .cta{display:inline-block;background:#A6C300;color:#000 !important;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:16px 40px;border-radius:50px;text-decoration:none;font-size:14px;}

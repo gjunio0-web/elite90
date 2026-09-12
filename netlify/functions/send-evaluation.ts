@@ -59,11 +59,11 @@ function buildEvaluationEmail(
 <style>
 ${EMAIL_BASE_CSS}
   h1{font-size:22px;font-weight:700;color:#fff;text-transform:uppercase;margin:0 0 16px;}
-  p{font-size:15px;line-height:1.7;margin:0 0 16px;}
+  p{font-size:15px;line-height:1.7;margin:0 0 16px;color:#CCCCCC !important;}
   .highlight{color:#A6C300;font-weight:700;}
   .cta-wrap{text-align:center;margin:32px 0;}
   .cta{display:inline-block;background:#A6C300;color:#000 !important;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:16px 40px;border-radius:50px;text-decoration:none;font-size:14px;}
-  .section-preview{background:#121212;border-left:3px solid #A6C300;padding:16px 20px;border-radius:0 6px 6px 0;margin:20px 0;font-size:13px;line-height:1.6;}
+  .section-preview{background:#121212;border-left:3px solid #A6C300;padding:16px 20px;border-radius:0 6px 6px 0;margin:20px 0;font-size:13px;line-height:1.6;color:#CCCCCC !important;}
   .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#A6C300;margin-bottom:8px;}
   .sig{margin-top:40px;padding-top:24px;border-top:1px solid #1a1a1a;}
   .sig-name{font-size:16px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;}

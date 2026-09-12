@@ -355,7 +355,7 @@ function buildAcessoEmail(nome: string, link: string): string {
 <style>
 ${EMAIL_BASE_CSS}
   h1{font-size:22px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:.04em;margin:0 0 16px;}
-  p{font-size:15px;line-height:1.7;margin:0 0 16px;}
+  p{font-size:15px;line-height:1.7;margin:0 0 16px;color:#CCCCCC !important;}
   .highlight{color:#A6C300;font-weight:700;}
   .btn{display:inline-block;background:#A6C300;color:#0D0D0D !important;font-weight:700;text-decoration:none;
        padding:14px 28px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;font-size:14px;margin:8px 0 24px;}

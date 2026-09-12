@@ -315,7 +315,7 @@ function buildWelcomeEmail(nome: string, startDate: string, idioma: string): str
 <style>
 ${EMAIL_BASE_CSS}
   h1{font-size:22px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:.04em;margin:0 0 16px;}
-  p{font-size:15px;line-height:1.7;margin:0 0 16px;}
+  p{font-size:15px;line-height:1.7;margin:0 0 16px;color:#CCCCCC !important;}
   .highlight{color:#A6C300;font-weight:700;}
   .steps{background:#121212;border-left:3px solid #A6C300;padding:20px 24px;border-radius:0 6px 6px 0;margin:24px 0;}
   .steps p{margin:0 0 8px;font-size:14px;}
