@@ -3,7 +3,9 @@
 // Importado por: /admin/index.astro, /admin/fichas.astro, /admin/login.astro
 //
 // Props:
-//   badge   — rótulo do contexto atual (ex: "Admin", "Fichas"). Obrigatório.
+//   badge   — rótulo do contexto atual (ex: "Admin", "Fichas"). Vazia/omitida,
+//     nenhum badge é renderizado (usado por definir-senha.astro, que não é
+//     tela de trabalho do painel).
 //   backHref — se fornecido, exibe botão de voltar apontando para este href.
 //   showLogout — exibe botão de logout (padrão: true).
 //   showGuide — exibe o atalho para o Guia de Referência Rápida (padrão: true).
@@ -48,7 +50,7 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
 <header class="adm-header">
   <div class="adm-header__left">
     <a href="/admin" class="adm-logo">ELITE90 PRO</a>
-    <span class="adm-badge">{badge}</span>
+    {badge && <span class="adm-badge">{badge}</span>}
   </div>
   <div class="adm-header__right">
     <button class="adm-menu-toggle" id="adm-menu-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="adm-actions" aria-label="Mais ações">
