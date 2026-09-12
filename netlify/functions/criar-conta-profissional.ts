@@ -344,6 +344,25 @@ export const handler = async (event: any) => {
 function buildAcessoEmail(nome: string, link: string): string {
   const firstName = String(nome || "").split(" ")[0] || "";
   const saudacao = firstName ? `${firstName}, bem-vindo` : "Bem-vindo";
+
+  // ENDEREÇO DE LOGIN, POR AMBIENTE. Sem isto o profissional define a senha e
+  // fica sem caminho de volta: como a chamada a `generatePasswordResetLink`
+  // não passa mais `ActionCodeSettings` (v1.20), o link não carrega
+  // `continueUrl`, e a página do Google não tem para onde mandá-lo depois de
+  // salvar. Até a CA-90 fechar, quem diz o caminho é este e-mail.
+  //
+  // POR QUE ESTE `CONTEXT` É LEGÍTIMO, E O ANTERIOR NÃO ERA: aqui é TEXTO
+  // INFORMATIVO para uma pessoa ler, não parâmetro que o Firebase interprete.
+  // A URL que foi removida na v1.20 tentava decidir o destino do link — coisa
+  // que só a configuração de console decide. Esta apenas informa onde entrar.
+  const urlLogin =
+    process.env.CONTEXT === "production"
+      ? "https://coachruiz.com.br/admin/login"
+      : "https://quality-env--elite90.netlify.app/admin/login";
+  // Sem o esquema no TEXTO, com o esquema no href: `href` sem `https://`
+  // vira caminho relativo e quebra dentro do cliente de e-mail.
+  const urlLoginTexto = urlLogin.replace(/^https:\/\//, "");
+
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -373,6 +392,12 @@ ${emailHeader("Acesso ao Portal do Profissional")}
   </p>
   <p><a class="btn" href="${link}">Definir minha senha</a></p>
   <p class="fallback">Se o botão não funcionar, copie e cole este endereço no navegador:<br/><a href="${link}" style="color:#888 !important;">${link}</a></p>
+  <p>
+    A página de definição de senha é hospedada pelo Google e aparece em inglês — é esperado, e não
+    é motivo para desconfiar do link. Depois de definir a senha, acesse
+    <a href="${urlLogin}" class="highlight" style="color:#A6C300 !important;">${urlLoginTexto}</a>
+    para entrar no portal.
+  </p>
   <p>Este link expira em algumas horas. Se expirar, peça ao Coach para gerar um novo.</p>
 </div>
 </body>
