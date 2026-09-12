@@ -20,12 +20,18 @@
           <div id="wke-exercises"></div>
           <button class="wke-add-ex" id="wke-add-ex-btn" onclick="openExerciseSearch()"><span data-lucide="plus"></span> Adicionar exercício</button>
 
-          <!-- Observações do Coach — orientação DIRIGIDA AO ATLETA: sai também
-               no documento de "Ver como o atleta recebe" (wkeOpenPreview). O
-               conteúdo vive em wkeState.plan.coachNotes, portanto é por atleta;
+          <!-- Orientações gerais ao atleta — orientação DIRIGIDA AO ATLETA: sai
+               também no documento de "Ver como o atleta recebe" (wkeOpenPreview).
+               O conteúdo vive em wkeState.plan.coachNotes, portanto é por atleta;
                o campo nasce vazio de propósito. Espelho exato do bloco da aba
-               Nutricional. -->
+               Nutricional.
+
+               O rótulo diz A QUEM O TEXTO SE DIRIGE, não quem o escreveu — e é
+               por isso que deixou de citar o Coach: o mesmo componente serve à
+               gaveta dele e à rota restrita do profissional (CA-42), onde quem
+               escreve não é o Coach. A chave de dados segue `coachNotes`: mudá-la
+               invalidaria planos já gravados, e o nome dela não aparece na tela. -->
           <div class="drawer-section" id="wke-coach-notes-section" style="margin-top: var(--space-7); padding-top: var(--space-6); border-top: 1px solid rgba(255, 255, 255, 0.08);">
-            <div class="drawer-section-title">Observações do Coach</div>
+            <div class="drawer-section-title">Orientações gerais ao atleta</div>
             <textarea class="note-textarea" id="wke-coach-notes" rows="3" placeholder="Orientações para o atleta sobre este treino…" oninput="wkeSetCoachNotes(this.value)"></textarea>
           </div>

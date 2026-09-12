@@ -12,6 +12,10 @@
 //     Fica em todas as telas do painel de propósito: a dúvida sobre o que um
 //     aviso significa nasce com a ficha aberta, não no Hub. Desligar apenas na
 //     própria página do guia, onde o atalho apontaria para ela mesma.
+//   guideHref — destino do atalho do guia (padrão: o guia do Coach). Existe
+//     porque o cabeçalho é um só e os guias não são: a rota restrita do
+//     profissional tem guia próprio, e sem esta prop o pontinho de ajuda dela
+//     abriria o guia do Coach. Quem não passa a prop não muda de comportamento.
 //
 // Slot "primeiro" — entra ANTES do atalho do guia, dentro do mesmo contêiner.
 //   Existe porque a especificação do catálogo (seção 6.3) pede um item próprio
@@ -36,15 +40,22 @@ interface Props {
   backHref?: string;
   showLogout?: boolean;
   showGuide?: boolean;
+  guideHref?: string;
 }
 
-const { badge, backHref, showLogout = true, showGuide = true } = Astro.props;
+const { badge, backHref, showLogout = true, showGuide = true, guideHref } = Astro.props;
 
 // O atalho do guia carrega a página atual em "from" para que, se o guia por
 // sua vez for aberto com o link "voltar" apontando para /admin/guia (ver
 // guia.astro), ele saiba devolver o Coach à tela de onde partiu — em vez de
 // sempre cair no Hub, que era o comportamento anterior.
-const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`;
+//
+// Quando `guideHref` vem preenchido, ele vence e vai inteiro, sem "from": quem
+// aponta para outro guia é uma tela fora da árvore do Coach, e o guia dela sabe
+// sozinho para onde devolver. Sem a prop, o destino é o de sempre — é o que
+// mantém as nove telas do painel inalteradas por esta mudança.
+const destinoDoGuia =
+  guideHref ?? `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`;
 ---
 
 <header class="adm-header">
@@ -66,7 +77,7 @@ const guideHref = `/admin/guia?from=${encodeURIComponent(Astro.url.pathname + As
       {showGuide && (
         <a
           class="adm-btn-icon adm-btn-icon--guide"
-          href={guideHref}
+          href={destinoDoGuia}
           aria-label="Abrir o guia de referência rápida"
           title="Como o painel funciona"
         >

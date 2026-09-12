@@ -1,0 +1,936 @@
+---
+export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../../styles/tokens.css';
+import '../../styles/global.css';
+import AdminHeader from '../../components/AdminHeader.astro';
+
+// Gêmeo de /admin/guia para a rota restrita. MESMO design system, MESMA
+// estrutura de índice e MESMAS classes — o que muda é para quem o texto fala.
+//
+// Sem parâmetro "from": a área do profissional tem uma tela só, e o retorno é
+// sempre /profissional. Não há tela de origem a preservar, e um parâmetro de
+// caminho aqui abriria superfície de redirecionamento sem servir a nada.
+const backHref = '/profissional';
+
+// Índice do guia — fonte única dos destinos, consumida duas vezes: pela coluna
+// lateral e pelo bloco que vai ao menu "⋮" do cabeçalho. Mesma razão de
+// /admin/guia: duplicar a lista no HTML seria garantir que uma envelhecesse.
+const indice = [
+  { id: 'inicio',      titulo: 'Início',                   chave: '',     etapa: false },
+  { id: 'papeis',      titulo: 'Três papéis',              chave: '',     etapa: false },
+  { id: 'acesso',      titulo: 'Seu primeiro acesso',      chave: '01',   etapa: true  },
+  { id: 'carteira',    titulo: 'Sua carteira',             chave: '02',   etapa: true  },
+  { id: 'montar',      titulo: 'Montar o plano',           chave: '03',   etapa: true  },
+  { id: 'enviar',      titulo: 'Enviar ao Coach',          chave: '04',   etapa: true  },
+  { id: 'resposta',    titulo: 'A resposta do Coach',      chave: '05',   etapa: true  },
+  { id: 'exercicios',  titulo: 'O catálogo de exercícios', chave: 'Base', etapa: false },
+  { id: 'alimentos',   titulo: 'A base de alimentos',      chave: 'Base', etapa: false },
+  { id: 'privacidade', titulo: 'O que você vê do atleta',  chave: '',     etapa: false },
+  { id: 'regras',      titulo: 'Quatro regras',            chave: '',     etapa: false },
+];
+const antesDaJornada = indice.filter((s) => !s.etapa && ['inicio', 'papeis'].includes(s.id));
+const etapasDaJornada = indice.filter((s) => s.etapa);
+const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].includes(s.id));
+---
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELITE90 PRO — Guia do Profissional</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+  <style is:global>
+
+  :root{
+    /* Codigo de autoria — quem age em cada etapa do guia */
+    --ator-sistema:#4A90D9; --ator-voce:#A6C300; --ator-coach:#27AE60;
+    --line: 1px solid rgba(255,255,255,0.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+
+  :focus-visible{outline:2px solid var(--c-lime); outline-offset:3px}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 var(--space-4)}
+
+  /* ── Cabeçalho ───────────────────────────────── */
+  .top{
+    border-bottom:4px solid var(--c-lime);
+    background:linear-gradient(180deg,#0D0D0D 0%,#141414 100%);
+    padding:var(--space-7) 0 var(--space-6);
+  }
+  .eyebrow{
+    font-family:var(--font-label); font-size:.7rem; font-weight:700;
+    letter-spacing:var(--tracking-label); text-transform:uppercase; color:var(--c-lime);
+  }
+  h1{
+    font-family:var(--font-display); font-weight:400;
+    font-size:clamp(2.6rem,8vw,5.2rem); line-height:.95; letter-spacing:var(--tracking-display);
+    text-transform:uppercase; color:var(--c-white); margin:var(--space-3) 0 var(--space-3);
+  }
+  h1 em{font-style:normal; color:var(--c-lime)}
+  .top p{max-width:62ch; color:var(--c-textsub); margin:0}
+  .top .stamp{
+    margin-top:var(--space-5); padding-top:var(--space-3); border-top:var(--line);
+    font-family:var(--font-label); font-size:.7rem; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--c-textsub);
+  }
+
+  /* ── Blocos ──────────────────────────────────── */
+  section{padding:var(--space-7) 0}
+  section + section{border-top:var(--line)}
+  h2{
+    font-family:var(--font-display); font-weight:400;
+    font-size:clamp(1.7rem,4vw,2.6rem); line-height:1.1; letter-spacing:var(--tracking-display);
+    text-transform:uppercase; color:var(--c-white); margin:var(--space-2) 0 var(--space-4);
+  }
+  h3{
+    font-family:var(--font-label); font-size:.72rem; font-weight:700;
+    letter-spacing:var(--tracking-label); text-transform:uppercase;
+    color:var(--c-textsub); margin:0 0 var(--space-3);
+  }
+  p{margin:0 0 var(--space-3)}
+  .lead{font-size:1.05rem; color:var(--c-textbody); max-width:64ch}
+  strong{color:var(--c-white); font-weight:600}
+
+  /* ── Código de autoria ───────────────────────── */
+  .atores{display:grid; gap:var(--space-3); grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .ator{
+    background:var(--c-darkbg); border:var(--line); border-left:4px solid var(--cor);
+    border-radius:var(--radius-card); padding:var(--space-4);
+  }
+  .ator .n{
+    font-family:var(--font-label); font-size:.72rem; font-weight:700;
+    letter-spacing:var(--tracking-label); text-transform:uppercase; color:var(--cor);
+    display:flex; align-items:center; gap:var(--space-2);
+  }
+  .ator .n::before{content:""; width:10px; height:10px; border-radius:50%; background:var(--cor); flex:none}
+  .ator .verbo{
+    font-family:var(--font-display); font-size:1.9rem; line-height:1;
+    letter-spacing:var(--tracking-display); text-transform:uppercase;
+    color:var(--c-white); margin:var(--space-2) 0 var(--space-2);
+  }
+  .ator p{font-size:.875rem; color:var(--c-textsub); margin:0}
+
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--font-label); font-size:.62rem; font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase;
+    padding:4px 10px; border-radius:var(--radius-pill);
+    border:1px solid var(--cor); color:var(--cor); background:rgba(255,255,255,.02);
+    white-space:nowrap;
+  }
+  .chip::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--cor)}
+  .c-sis{--cor:var(--ator-sistema)} .c-voce{--cor:var(--ator-voce)} .c-coach{--cor:var(--ator-coach)}
+
+  /* ── Esteira de etapas ───────────────────────── */
+  .etapa{position:relative; padding-left:calc(var(--space-6) + var(--space-2)); margin-bottom:var(--space-6)}
+  .etapa::before{
+    content:""; position:absolute; left:22px; top:56px; bottom:-var(--space-6);
+    width:1px; background:linear-gradient(180deg,rgba(166,195,0,.5),rgba(166,195,0,.05));
+  }
+  .etapa:last-child::before{display:none}
+  .etapa .num{
+    position:absolute; left:0; top:0; width:46px; height:46px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--c-lime); border-radius:50%; background:var(--c-black);
+    font-family:var(--font-display); font-size:1.4rem; color:var(--c-lime); letter-spacing:.02em;
+  }
+  .etapa-hd{display:flex; align-items:center; gap:var(--space-3); flex-wrap:wrap; min-height:46px}
+  .etapa-hd h2{margin:0}
+  .etapa-body{margin-top:var(--space-4)}
+
+  .card{
+    background:var(--c-darkbg); border:var(--line); border-radius:var(--radius-card);
+    padding:var(--space-4); transition:border-color var(--transition-base);
+  }
+  .card:hover{border-color:rgba(166,195,0,.3)}
+  .grid-2{display:grid; gap:var(--space-3); grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .grid-3{display:grid; gap:var(--space-3); grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+
+  ul.clean{list-style:none; margin:0; padding:0}
+  ul.clean li{position:relative; padding-left:var(--space-4); margin-bottom:var(--space-2); font-size:.925rem}
+  ul.clean li::before{
+    content:""; position:absolute; left:0; top:.62em;
+    width:8px; height:2px; background:var(--c-lime);
+  }
+  ul.clean li:last-child{margin-bottom:0}
+
+  /* ── A RÉGUA (elemento assinatura) ───────────── */
+  .regua{
+    background:var(--c-surface-2); border:var(--line); border-radius:var(--radius-card);
+    padding:var(--space-5) var(--space-4) var(--space-4); margin-top:var(--space-3);
+  }
+  .regua-titulo{
+    font-family:var(--font-display); font-size:1.5rem; letter-spacing:var(--tracking-display);
+    text-transform:uppercase; color:var(--c-white); margin-bottom:var(--space-1);
+  }
+  .regua-sub{font-size:.85rem; color:var(--c-textsub); margin-bottom:var(--space-5)}
+
+  /* Trilho de estados — mesma família visual da escala de /admin/guia, aqui
+     com quatro paradas nomeadas em vez de uma barra proporcional. */
+  .trilho{display:grid; gap:2px; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); margin-bottom:var(--space-5)}
+  .parada{background:var(--c-black); border-top:3px solid var(--cor); padding:var(--space-3)}
+  .parada .p{font-family:var(--font-display); font-size:1.35rem; color:var(--cor); line-height:1}
+  .parada .r{font-family:var(--font-label); font-size:.65rem; font-weight:700; letter-spacing:.1em;
+             text-transform:uppercase; color:var(--c-textsub); margin-top:4px}
+  .parada .d{font-size:.82rem; color:var(--c-textsub); margin-top:var(--space-2)}
+
+  .faixas{display:grid; gap:2px; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); margin-top:var(--space-4)}
+  .faixa{background:var(--c-black); border-top:3px solid var(--cor); padding:var(--space-3)}
+  .faixa .p{font-family:var(--font-display); font-size:1.6rem; color:var(--cor); line-height:1}
+  .faixa .r{font-family:var(--font-label); font-size:.65rem; font-weight:700; letter-spacing:.1em;
+            text-transform:uppercase; color:var(--c-textsub); margin-top:4px}
+
+  /* ── Entra / Sai ─────────────────────────────── */
+  .fluxo{display:grid; gap:var(--space-3); grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .fluxo .col{background:var(--c-darkbg); border:var(--line); border-radius:var(--radius-card); padding:var(--space-4)}
+  .fluxo .col.destaque{border-color:rgba(166,195,0,.4); box-shadow:var(--shadow-cta)}
+  .fluxo .col h3{color:var(--c-lime)}
+
+  /* ── Avisos e garantias ──────────────────────── */
+  .aviso{
+    border-left:3px solid var(--cor); background:rgba(255,255,255,.02);
+    padding:var(--space-3) var(--space-4); border-radius:0 var(--radius-card) var(--radius-card) 0;
+    margin-bottom:var(--space-3);
+  }
+  .aviso .t{
+    font-family:var(--font-label); font-size:.68rem; font-weight:700; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--cor); margin-bottom:6px;
+  }
+  .aviso p{margin:0; font-size:.9rem}
+  .a-laranja{--cor:var(--c-status-alert)} .a-lime{--cor:var(--c-lime)} .a-azul{--cor:var(--c-status-progress)}
+
+  .garantias{display:grid; gap:2px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); background:rgba(255,255,255,.09)}
+  .g{background:var(--c-black); padding:var(--space-5) var(--space-4)}
+  .g .k{
+    font-family:var(--font-display); font-size:2.4rem; line-height:1; color:var(--c-lime);
+    letter-spacing:var(--tracking-display); margin-bottom:var(--space-2);
+  }
+  .g p{font-size:.9rem; margin:0; color:var(--c-textsub)}
+  .g p b{color:var(--c-white); font-weight:600}
+
+  /* ── Rodapé ──────────────────────────────────── */
+  footer{border-top:4px solid var(--c-lime); padding:var(--space-6) 0 var(--space-7); background:#141414}
+  footer .marca{
+    font-family:var(--font-display); font-size:2rem; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--c-white);
+  }
+  footer .marca span{color:var(--c-lime)}
+  footer p{font-size:.8rem; color:var(--c-textsub); max-width:60ch; margin-top:var(--space-2)}
+
+  /* ── Índice ──────────────────────────────────
+     Compensação de rolagem: o cabeçalho é fixo e tem 64px em qualquer
+     largura. Sem isto, TODO salto de âncora deposita o alvo atrás dele. */
+  [id]{scroll-margin-top:80px}
+
+  .idx-g{
+    font-family:var(--font-label); font-size:.62rem; font-weight:700;
+    letter-spacing:var(--tracking-label); text-transform:uppercase;
+    color:var(--c-textsub);
+  }
+  .idx-a{
+    display:flex; gap:10px; align-items:baseline; text-decoration:none;
+    color:var(--c-textbody); font-size:.8rem; line-height:1.3;
+    transition:color var(--transition-base), background var(--transition-base);
+  }
+  .idx-a:hover{color:var(--c-white); background:rgba(255,255,255,.03)}
+  .idx-k{
+    font-family:var(--font-label); font-size:.58rem; font-weight:700;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--c-textsub);
+    min-width:30px;
+  }
+  .idx-a[aria-current="true"]{color:var(--c-lime); background:rgba(166,195,0,.08)}
+  .idx-a[aria-current="true"] .idx-k{color:var(--c-lime)}
+
+  /* Coluna lateral — aparece onde o gatilho "⋮" NÃO aparece. As duas faixas
+     são complementares por construção: ver o @media no fim deste bloco. */
+  .idx--coluna{
+    position:fixed; left:0; top:64px; bottom:0; width:264px; z-index:90;
+    overflow-y:auto; background:var(--c-black);
+    border-right:var(--line); padding:var(--space-5) var(--space-3) var(--space-6);
+  }
+  .idx--coluna .idx-g{margin:0 0 var(--space-3) 10px}
+  .idx--coluna .idx-g--jornada{margin-top:var(--space-4); margin-bottom:var(--space-2)}
+  .idx--coluna .idx-a{
+    padding:7px 10px; border-left:2px solid transparent; border-radius:0 3px 3px 0;
+  }
+  .idx--coluna .idx-a[aria-current="true"]{border-left-color:var(--c-lime)}
+  .idx-sub{border-left:1px solid rgba(166,195,0,.18); margin-left:16px}
+  .idx-sub .idx-a{padding-left:12px}
+  .doc{padding-left:264px}
+
+  /* Bloco do menu "⋮" — herda a moldura do painel do cabeçalho, que já traz
+     fundo, borda e raio; aqui só as linhas. */
+  .idx--menu .idx-g{
+    padding:12px var(--space-4) 6px; background:rgba(255,255,255,.02);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .idx--menu .idx-a{
+    padding:11px var(--space-4);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .idx--menu .idx-a--sub{padding-left:calc(var(--space-4) + 12px)}
+  .idx--menu .idx-a[aria-current="true"]{box-shadow:inset 2px 0 0 var(--c-lime)}
+
+  /* A regra de faixas, num lugar só: onde o gatilho "⋮" existe, o índice mora
+     no menu e a coluna some. Fora daí, o inverso. A condição é copiada de
+     AdminHeader.astro de propósito — se lá mudar, muda aqui junto. */
+  @media (max-width:760px) and (orientation:portrait){
+    .idx--coluna{display:none}
+    .doc{padding-left:0}
+  }
+
+  @media (max-width:640px){
+    .etapa{padding-left:0}
+    .etapa::before{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important; scroll-behavior:auto !important}}
+
+  </style>
+</head>
+<body>
+  <AdminHeader badge="Guia" backHref={backHref} showGuide={false}>
+    <nav slot="navegacao" class="idx idx--menu" aria-label="Índice do guia">
+      <div class="idx-g">Neste guia</div>
+      {antesDaJornada.map((s) => (
+        <a class="idx-a" href={`#${s.id}`} data-idx={s.id}>
+          <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+        </a>
+      ))}
+      <div class="idx-g">Do convite ao plano publicado</div>
+      {etapasDaJornada.map((s) => (
+        <a class="idx-a idx-a--sub" href={`#${s.id}`} data-idx={s.id}>
+          <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+        </a>
+      ))}
+      {depoisDaJornada.map((s) => (
+        <a class="idx-a" href={`#${s.id}`} data-idx={s.id}>
+          <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+        </a>
+      ))}
+    </nav>
+  </AdminHeader>
+
+  <nav class="idx idx--coluna" aria-label="Índice do guia">
+    <div class="idx-g">Neste guia</div>
+    {antesDaJornada.map((s) => (
+      <a class="idx-a" href={`#${s.id}`} data-idx={s.id}>
+        <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+      </a>
+    ))}
+    <div class="idx-g idx-g--jornada">Do convite ao plano publicado</div>
+    <div class="idx-sub">
+      {etapasDaJornada.map((s) => (
+        <a class="idx-a idx-a--sub" href={`#${s.id}`} data-idx={s.id}>
+          <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+        </a>
+      ))}
+    </div>
+    {depoisDaJornada.map((s) => (
+      <a class="idx-a" href={`#${s.id}`} data-idx={s.id}>
+        <span class="idx-k">{s.chave}</span><span>{s.titulo}</span>
+      </a>
+    ))}
+  </nav>
+
+  <div class="doc">
+
+
+<header class="top" id="inicio">
+  <div class="wrap">
+    <div class="eyebrow">Coach Ruiz · Elite 90 Pro</div>
+    <h1>Guia de<br><em>Referência Rápida</em></h1>
+    <p class="lead">Do convite que chega por e-mail ao plano que o Coach publica para o atleta:
+      o que é seu, o que é do Coach, e o que o sistema faz sozinho enquanto você trabalha.</p>
+    <div class="stamp">Área do profissional · Planos de treino e nutricional</div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h3>Comece por aqui</h3>
+    <h2 id="papeis">Três papéis, sem sobreposição</h2>
+    <p class="lead" style="margin-bottom:var(--space-5)">Este código de cores acompanha o guia
+      inteiro. Em cada etapa, a etiqueta indica quem age — e a separação não é uma promessa de
+      conduta, é a forma como o sistema foi construído.</p>
+
+    <div class="atores">
+      <div class="ator" style="--cor:var(--ator-voce)">
+        <div class="n">Você</div>
+        <div class="verbo">Monta e envia</div>
+        <p>Constrói o plano de treino ou nutricional de cada atleta da sua carteira e o envia ao
+          Coach. É trabalho técnico seu, com seu nome — mas nada do que você escreve chega ao
+          atleta pela sua mão.</p>
+      </div>
+      <div class="ator" style="--cor:var(--ator-coach)">
+        <div class="n">O Coach</div>
+        <div class="verbo">Revisa e publica</div>
+        <p>Lê o que você enviou e decide entre três desfechos: publicar, devolver para ajuste ou
+          recusar. É o único que publica, e é ele quem define quem está na sua carteira.</p>
+      </div>
+      <div class="ator" style="--cor:var(--ator-sistema)">
+        <div class="n">O sistema</div>
+        <div class="verbo">Guarda e protege</div>
+        <p>Salva seu rascunho enquanto você digita, mostra do atleta só o que você precisa para
+          trabalhar, e registra cada ato que muda alguma coisa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h3>A jornada, passo a passo</h3>
+    <h2>Do convite ao plano publicado</h2>
+
+    <!-- 1 -->
+    <div class="etapa" id="acesso">
+      <div class="num">01</div>
+      <div class="etapa-hd">
+        <h2 style="font-size:clamp(1.4rem,3vw,2rem)">Seu primeiro acesso</h2>
+        <span class="chip c-coach">Cadastro pelo Coach</span>
+        <span class="chip c-sis">Automático</span>
+      </div>
+      <div class="etapa-body">
+        <p class="lead">Você não se cadastra sozinho, e não existe tela pública de inscrição. O
+          Coach cadastra você e concede o acesso; o resto chega por e-mail.</p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>O que chega até você</h3>
+            <ul class="clean">
+              <li>Um e-mail com um link para <strong>definir sua senha</strong>. Ele sai
+                automaticamente quando o Coach concede o acesso — não é opcional, nem depende de
+                alguém lembrar de avisar.</li>
+              <li>A página pede a senha e a confirmação. São necessários <strong>ao menos seis
+                caracteres</strong>, e as duas precisam coincidir.</li>
+              <li>Definida a senha, você é levado à tela de entrada. Entre com o mesmo e-mail e o
+                sistema abre direto a sua área.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Onde você trabalha</h3>
+            <ul class="clean">
+              <li>O endereço da sua área é <strong>/profissional</strong>. Guarde-o nos
+                favoritos: enquanto a sessão durar, ele abre direto, sem passar por login.</li>
+              <li>É a única tela do sistema destinada a você. O painel completo do Coach é outro
+                endereço, e sua conta não entra nele.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="aviso a-laranja" style="margin-top:var(--space-3)">
+          <div class="t">Guarde o endereço de entrada que veio no e-mail</div>
+          <p>O mesmo e-mail que trouxe o link da senha traz também, logo abaixo, o endereço da
+            tela de entrada — <strong>guarde-o nos favoritos</strong>. Ele não está publicado no
+            site, não aparece em buscador e não tem link em página nenhuma: o e-mail é o único
+            lugar em que ele chega até você. Se perder os dois, peça ao Coach que envie de novo.</p>
+        </div>
+
+        <div class="aviso a-azul">
+          <div class="t">Se o link de senha expirar ou não funcionar</div>
+          <p>A página não gera outro link por conta própria. Reemitir é ato do Coach, pelo botão
+            de conceder acesso que ele já tem na tela de profissionais — e vale também quando a
+            conta já existia.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="etapa" id="carteira">
+      <div class="num">02</div>
+      <div class="etapa-hd">
+        <h2 style="font-size:clamp(1.4rem,3vw,2rem)">Sua carteira</h2>
+        <span class="chip c-sis">Automático</span>
+      </div>
+      <div class="etapa-body">
+        <p class="lead">Ao entrar, a primeira tela é a sua carteira: um cartão por atleta que o
+          Coach atribuiu a você. Não há busca, nem lista geral de atletas — o que não é seu não
+          aparece.</p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>O que cada cartão traz</h3>
+            <ul class="clean">
+              <li>A identificação do atleta — que pode ser o nome ou um rótulo, conforme a sua
+                classificação de cadastro. A seção final deste guia explica a diferença.</li>
+              <li>A fase em que ele está no ciclo, ou o aviso de que ela ainda não foi definida.</li>
+              <li>Um botão por especialidade: <strong>Treino</strong>, <strong>Nutricional</strong>,
+                ou os dois.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Os botões são por atleta, não por cadastro</h3>
+            <p style="font-size:.9rem; margin:0 0 var(--space-2)">Se você é cadastrado nas duas
+              especialidades, ainda assim cada cartão mostra somente aquelas para as quais existe
+              atribuição ativa <strong>naquele atleta</strong>.</p>
+            <p style="font-size:.9rem; margin:0">Um atleta pode ser seu só para treino, e outro
+              para os dois. A tela reflete isso cartão a cartão.</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-5)">Duas mensagens que você pode ver no lugar da lista</h3>
+        <div class="grid-2">
+          <div class="card">
+            <p style="font-size:.9rem; margin:0"><strong>"Nenhum atleta atribuído a você no
+              momento."</strong> — Seu acesso está funcionando; o Coach ainda não atribuiu
+              ninguém, ou encerrou as atribuições que existiam. Nada a fazer do seu lado.</p>
+          </div>
+          <div class="card">
+            <p style="font-size:.9rem; margin:0"><strong>"Esta conta não tem acesso à área do
+              profissional."</strong> — Coisa diferente: o cadastro está inativo ou o acesso foi
+              revogado. Aqui é caso de procurar o Coach.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="etapa" id="montar">
+      <div class="num">03</div>
+      <div class="etapa-hd">
+        <h2 style="font-size:clamp(1.4rem,3vw,2rem)">Montar o plano</h2>
+        <span class="chip c-voce">Trabalho seu</span>
+        <span class="chip c-sis">Salvamento automático</span>
+      </div>
+      <div class="etapa-body">
+        <p class="lead">Clicar na especialidade abre um painel sobre a tela, com até três abas: a
+          Visão Geral do atleta e as suas especialidades naquele atleta. A tela de edição é a
+          mesma que o Coach usa — mesmo componente, sem cópia —, com as ações dele removidas.</p>
+
+        <div class="fluxo">
+          <div class="col">
+            <h3>Visão Geral — o contexto</h3>
+            <ul class="clean">
+              <li>Início do programa, fase, idade, gênero, altura.</li>
+              <li>Tempo de atividade, frequência semanal, tempo médio de treino por dia e o
+                objetivo declarado.</li>
+              <li>A progressão do ciclo: semana atual de treze, e o quanto dos noventa dias já
+                correu.</li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>O editor — o trabalho</h3>
+            <ul class="clean">
+              <li>Treino: dias, exercícios e séries, com busca de exercício.</li>
+              <li>Nutricional: dias, refeições e alimentos, com os macros recalculados enquanto
+                você monta.</li>
+              <li><strong>Ver como o atleta recebe</strong> abre a prévia do documento como ele
+                será lido — use antes de enviar.</li>
+              <li>Ao fim do editor, <strong>Orientações gerais ao atleta</strong> é o texto que
+                acompanha o plano e que o atleta lê junto com ele. Ele também sai na prévia, e vai
+                para a revisão do Coach como o resto do que você montou.</li>
+            </ul>
+          </div>
+          <div class="col destaque">
+            <h3>O que não existe nesta tela</h3>
+            <ul class="clean">
+              <li>Publicar. Compartilhar com o atleta. Configurar a fórmula de macros. Excluir
+                atleta.</li>
+              <li>Esses botões não estão desligados por permissão: eles <strong>não
+                existem</strong> nesta tela. Não há como aparecerem por engano, nem como alguém
+                habilitá-los para você sem querer.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="aviso a-lime" style="margin-top:var(--space-5)">
+          <div class="t">Seu rascunho é salvo enquanto você digita</div>
+          <p>Não existe botão de salvar, e não é esquecimento: a cada pausa na digitação o texto é
+            gravado em área própria sua. Ele <strong>nunca</strong> entra no plano do atleta —
+            só a publicação pelo Coach leva conteúdo para lá.</p>
+        </div>
+
+        <div class="aviso a-laranja">
+          <div class="t">O rascunho é oportunista; o envio é o ato que conta</div>
+          <p>Se a rede oscilar, a gravação do rascunho falha em silêncio, de propósito, para não
+            interromper sua digitação. Quem informa sucesso ou falha é o botão de enviar. Em
+            trabalho longo, envie ao Coach em vez de confiar que o rascunho sozinho guardou tudo.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="etapa" id="enviar">
+      <div class="num">04</div>
+      <div class="etapa-hd">
+        <h2 style="font-size:clamp(1.4rem,3vw,2rem)">Enviar ao Coach</h2>
+        <span class="chip c-voce">Decisão sua</span>
+      </div>
+      <div class="etapa-body">
+        <p class="lead">O botão fica no alto de cada aba de plano. Enviar não publica nada: põe o
+          seu trabalho na fila de revisão do Coach.</p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>O que muda no mesmo instante</h3>
+            <ul class="clean">
+              <li>A tela declara que a sugestão está em revisão.</li>
+              <li>O conteúdo passa a <strong>somente leitura</strong>, sem precisar recarregar.</li>
+              <li>Enquanto estiver em revisão, nada do que você fizer na tela é gravado — a
+                gravação nem chega a ser tentada.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Por que ela trava</h3>
+            <p style="font-size:.9rem; margin:0 0 var(--space-2)">O Coach está lendo exatamente
+              aquele documento. Se o texto continuasse mudando sob os olhos dele, ele revisaria uma
+              coisa e aprovaria outra.</p>
+            <p style="font-size:.9rem; margin:0">A saída existe e está escrita na própria tela:
+              para voltar a editar, peça ao Coach que devolva a sugestão.</p>
+          </div>
+        </div>
+
+        <div class="aviso a-azul" style="margin-top:var(--space-3)">
+          <div class="t">Se o envio falhar</div>
+          <p>A tela avisa e o botão volta a ficar disponível. Nada foi enviado pela metade: ou o
+            envio se completa, ou nada muda.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="etapa" id="resposta">
+      <div class="num">05</div>
+      <div class="etapa-hd">
+        <h2 style="font-size:clamp(1.4rem,3vw,2rem)">A resposta do Coach</h2>
+        <span class="chip c-coach">Decisão do Coach</span>
+      </div>
+      <div class="etapa-body">
+        <p class="lead">Sua sugestão tem um estado a qualquer momento, e é ele que determina o que
+          a tela permite. São quatro, e a tela sempre diz em qual você está.</p>
+
+        <div class="regua">
+          <div class="regua-titulo">Os quatro estados</div>
+          <div class="regua-sub">A tela declara o estado ao abrir o plano</div>
+
+          <div class="trilho">
+            <div class="parada" style="--cor:var(--c-textsub)">
+              <div class="p">Rascunho</div><div class="r">Editável</div>
+              <div class="d">Ainda não enviado. Só você vê.</div>
+            </div>
+            <div class="parada" style="--cor:var(--c-status-alert)">
+              <div class="p">Em revisão</div><div class="r">Somente leitura</div>
+              <div class="d">Com o Coach. Espere o retorno.</div>
+            </div>
+            <div class="parada" style="--cor:var(--c-lime)">
+              <div class="p">Devolvida</div><div class="r">Editável de novo</div>
+              <div class="d">Com a observação do Coach na tela.</div>
+            </div>
+            <div class="parada" style="--cor:var(--c-status-progress)">
+              <div class="p">Publicada</div><div class="r">Virou versão</div>
+              <div class="d">Chegou ao atleta pela mão do Coach.</div>
+            </div>
+          </div>
+
+          <h3>Devolver não é recusar</h3>
+          <div class="grid-2">
+            <div class="card">
+              <h3 style="color:var(--c-lime)">Devolvida</h3>
+              <p style="font-size:.9rem; margin:0">Volta para você <strong>com o motivo por
+                escrito</strong>, exibido na própria tela ao reabrir o plano. Ao devolver, o Coach
+                preenche um campo que a tela dele abre ali mesmo, e sem esse texto a devolução não
+                é concluída — ou ele diz o que ajustar, ou não devolve. Você ajusta e envia de
+                novo, quantas vezes forem necessárias.</p>
+            </div>
+            <div class="card">
+              <h3 style="color:var(--c-textsub)">Recusada</h3>
+              <p style="font-size:.9rem; margin:0">Encerra o ciclo daquela sugestão. Ela não
+                reabre para edição e não volta como pendência sua. Pode vir com observação, mas
+                aqui ela é opcional — não há próximo passo seu que dependa dela.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-5)">Quando o Coach publica</h3>
+        <div class="grid-3">
+          <div class="card">
+            <p style="font-size:.9rem; margin:0"><strong>Nasce uma versão numerada.</strong>
+              Publicar não sobrescreve o que existia: cada publicação vira uma versão nova e
+              permanente, em sequência.</p>
+          </div>
+          <div class="card">
+            <p style="font-size:.9rem; margin:0"><strong>Sua autoria vai junto, copiada.</strong>
+              Quem produziu o conteúdo e sob qual registro profissional fica gravado no instante
+              da publicação — e nunca mais muda.</p>
+          </div>
+          <div class="card">
+            <p style="font-size:.9rem; margin:0"><strong>Atualizar seu cadastro não reescreve o
+              passado.</strong> Se o seu número de conselho mudar, as versões já publicadas
+              continuam mostrando o que valia quando foram publicadas.</p>
+          </div>
+        </div>
+
+        <div class="aviso a-lime" style="margin-top:var(--space-4)">
+          <div class="t">Uma sugestão em curso por vez, em cada plano</div>
+          <p>Para o mesmo atleta e o mesmo tipo de plano existe uma sugestão sua em andamento. Ao
+            reabrir, a tela dá preferência à que você pode editar — se houver uma devolvida e uma
+            em revisão, ela abre a devolvida, para não travar seu trabalho por causa de um
+            documento já superado.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h3 id="exercicios">Base de domínio</h3>
+    <h2>O catálogo de exercícios</h2>
+    <p class="lead" style="margin-bottom:var(--space-4)">A busca de exercício dentro do editor não
+      consulta a internet nem uma base sua: ela lê o catálogo do programa, e mostra
+      <strong>somente o que o Coach já revisou</strong>. É por isso que o resultado é curto e
+      confiável — cada item ali passou pelos olhos dele antes de ficar disponível.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Escolher, e propor o que falta</h3>
+        <p style="font-size:.9rem; margin:0 0 var(--space-2)">Você busca pelo nome, seleciona e
+          monta as séries. O nome que aparece no seu plano é o mesmo que o atleta vai ler.</p>
+        <p style="font-size:.9rem; margin:0">Se o exercício que você quer não está no catálogo,
+          <strong>você mesmo propõe</strong> — com a classificação que a sua formação já domina:
+          padrão de movimento, grupamento muscular, o que for o caso. Não é um pedido em texto
+          livre; é o item pronto.</p>
+      </div>
+      <div class="card">
+        <h3>Quem decide se ele entra</h3>
+        <p style="font-size:.9rem; margin:0 0 var(--space-2)">O Coach. A proposta fica numa fila
+          para ele aprovar ou recusar, e só então o exercício passa a existir para todo mundo.</p>
+        <p style="font-size:.9rem; margin:0">O catálogo é <strong>comum a todos os
+          profissionais</strong>: um item errado aqui não afeta um atleta, afeta qualquer plano
+          que venha a usá-lo. É por isso que a aprovação existe, e não por desconfiança do seu
+          trabalho técnico — tanto que é a sua ficha que entra, não uma refeita por ele.</p>
+      </div>
+    </div>
+
+    <div class="aviso a-azul" style="margin-top:var(--space-4)">
+      <div class="t">Item novo pode demorar a aparecer para você</div>
+      <p>Aprovado o item — um que o Coach cadastrou ou um que você propôs —, a gravação é
+        imediata, mas a chegada à busca que você usa depende da próxima publicação do site. Não é
+        erro se algo recém-aprovado ainda não estiver na sua lista.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h3 id="alimentos">Base de domínio</h3>
+    <h2>A base de alimentos</h2>
+    <p class="lead" style="margin-bottom:var(--space-4)">A base vem da TACO, a tabela de
+      composição de alimentos da Unicamp — a mesma referência que nutricionista usa, com
+      procedência que se pode citar. Os valores são por cem gramas, e o cálculo do plano parte
+      deles.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Medida caseira, quando existe</h3>
+        <p style="font-size:.9rem; margin:0 0 var(--space-2)">A TACO informa o valor por cem
+          gramas e para por aí. A medida caseira — "seis colheres de sopa", "uma concha média" —
+          é trabalho de curadoria do Coach, feito aos poucos.</p>
+        <p style="font-size:.9rem; margin:0">Alimento sem ela funciona normalmente: o atleta lê a
+          quantidade em gramas. Com ela, o plano fica mais fácil de cumprir.</p>
+      </div>
+      <div class="card">
+        <h3>Alguns alimentos nunca aparecem</h3>
+        <p style="font-size:.9rem; margin:0">Um punhado de itens da TACO não tem os quatro valores
+          nutricionais completos. Eles ficam fora da busca de propósito, revisados ou não: com
+          macro faltando, o cálculo do seu plano sairia errado. Se você procura algo e não
+          encontra, pode ser este o motivo.</p>
+      </div>
+    </div>
+
+    <div class="aviso a-lime" style="margin-top:var(--space-4)">
+      <div class="t">A mesma regra do catálogo vale aqui</div>
+      <p>Faltando um item — um suplemento, uma barra de proteína, um iogurte de marca —, você
+        mesmo propõe, com a ficha nutricional lida do rótulo, e o Coach decide se ele entra no
+        acervo comum. Enquanto a proposta não é aprovada, o alimento ainda não aparece na busca:
+        se precisar fechar o plano antes disso e usar um substituto aproximado,
+        <strong>deixe isso escrito</strong> em vez de trocar em silêncio — o Coach revisa o plano
+        depois, e precisa saber que aquele item é provisório.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h3 id="privacidade">Quem consegue ver os dados</h3>
+    <h2>O que você vê do atleta</h2>
+    <p class="lead" style="margin-bottom:var(--space-4)">Os dados do atleta incluem informação de
+      saúde. Seu navegador não os lê diretamente em nenhum momento: toda leitura passa pelo
+      servidor, que devolve apenas os campos do seu nível de acesso.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <h3>Nome ou rótulo</h3>
+        <p style="font-size:.9rem; margin:0">O cadastro classifica cada profissional. Na
+          classificação externa, você recebe um <strong>rótulo</strong> no lugar do nome, e nada
+          de contato — o plano não fica associado a uma pessoa identificável. Na interna, o nome e
+          os dados de contato aparecem.</p>
+      </div>
+      <div class="card">
+        <h3>O que nunca sai</h3>
+        <p style="font-size:.9rem; margin:0">Dados de pagamento, a origem da candidatura, os
+          endereços de acesso a documentos e quem promoveu o atleta não vão para profissional
+          nenhum, em nível nenhum. Não é filtro de tela: esses campos não saem do servidor.</p>
+      </div>
+      <div class="card">
+        <h3>Lista de permitidos</h3>
+        <p style="font-size:.9rem; margin:0">O que você vê é uma lista fechada de campos. Um dado
+          novo no cadastro do atleta <strong>não</strong> passa a aparecer para você por inércia —
+          precisa de decisão explícita. O silêncio fecha, não abre.</p>
+      </div>
+    </div>
+
+    <div class="aviso a-azul" style="margin-top:var(--space-4)">
+      <div class="t">Seu acesso é conferido a cada requisição</div>
+      <p>Não basta estar autenticado. A cada ação, o sistema confere no cadastro se você está
+        ativo e se aquele atleta é seu naquela especialidade. Quando o Coach encerra uma
+        atribuição, o efeito é imediato — a tela avisa que o atleta não está mais na sua carteira.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h3>Para levar na memória</h3>
+    <h2 id="regras">Quatro regras que não mudam</h2>
+    <div class="garantias">
+      <div class="g">
+        <div class="k">01</div>
+        <p><b>Você nunca publica.</b> O plano chega ao atleta pela mão do Coach, sempre. Sua tela
+          não tem esse botão porque esse ato não é seu.</p>
+      </div>
+      <div class="g">
+        <div class="k">02</div>
+        <p><b>Seu trabalho vive em lugar próprio.</b> Rascunho e sugestão ficam em área sua e
+          nunca dentro do plano do atleta — só a publicação leva conteúdo para lá.</p>
+      </div>
+      <div class="g">
+        <div class="k">03</div>
+        <p><b>Em revisão, a tela é de leitura.</b> Para voltar a editar, o Coach devolve a
+          sugestão — e devolver exige que ele diga o que ajustar.</p>
+      </div>
+      <div class="g">
+        <div class="k">04</div>
+        <p><b>Você vê só o necessário.</b> Somente os atletas da sua carteira, somente os campos
+          do seu nível, conferidos a cada requisição.</p>
+      </div>
+    </div>
+  </div>
+</section>
+  </div>
+
+
+<script>
+  // Destaque da seção corrente. Progressivo de propósito: se o navegador não
+  // tiver IntersectionObserver, ou se algum alvo sumir do documento, os onze
+  // itens seguem funcionando como links comuns. O índice não depende disto
+  // para servir — o destaque é orientação, não navegação.
+  //
+  // Fica FORA do script que importa o Firebase de propósito: orientação dentro
+  // do documento não deve depender de autenticação.
+  if ("IntersectionObserver" in window) {
+    const marcas = document.querySelectorAll<HTMLElement>("[data-idx]");
+    const ids = [...new Set([...marcas].map((m) => m.dataset.idx))]
+      .filter((id): id is string => !!id);
+
+    // Observa-se o BLOCO que contém a âncora, não a âncora: títulos de altura
+    // mínima entram e saem da faixa de observação num piscar, e o último do
+    // documento nunca chega a entrar, porque a rolagem acaba antes.
+    const alvos: HTMLElement[] = [];
+    for (const id of ids) {
+      const ancora = document.getElementById(id);
+      if (!ancora) continue;
+      const bloco = (ancora.closest("section, .etapa") as HTMLElement | null) ?? ancora;
+      bloco.dataset.secao = id;
+      alvos.push(bloco);
+    }
+
+    const visiveis = new Set<string>();
+    const pintar = () => {
+      // Entre as seções visíveis, vence a que está mais acima na página —
+      // é a que o leitor acabou de alcançar ao rolar para baixo.
+      let corrente: string | null = null;
+      for (const alvo of alvos) {
+        const secao = alvo.dataset.secao;
+        if (secao && visiveis.has(secao)) { corrente = secao; break; }
+      }
+      // No fim do documento a regra acima não alcança a última seção: a
+      // rolagem termina antes de ela subir ao topo. Chegando ao fim, a última
+      // vence.
+      const noFim = window.innerHeight + window.scrollY
+        >= document.documentElement.scrollHeight - 2;
+      if (noFim && alvos.length) {
+        corrente = alvos[alvos.length - 1].dataset.secao ?? corrente;
+      }
+      marcas.forEach((m) => {
+        if (m.dataset.idx === corrente) m.setAttribute("aria-current", "true");
+        else m.removeAttribute("aria-current");
+      });
+    };
+
+    const observador = new IntersectionObserver((entradas) => {
+      entradas.forEach((e) => {
+        const secao = (e.target as HTMLElement).dataset.secao;
+        if (!secao) return;
+        if (e.isIntersecting) visiveis.add(secao);
+        else visiveis.delete(secao);
+      });
+      pintar();
+    }, { rootMargin: "-80px 0px -55% 0px" });
+
+    alvos.forEach((alvo) => observador.observe(alvo));
+
+    // A regra de fim de documento depende da posição de rolagem, que o
+    // observador não reporta sozinho: chegar ao fim pode não cruzar nenhuma
+    // fronteira de seção.
+    window.addEventListener("scroll", pintar, { passive: true });
+  }
+</script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const cfg = {
+      apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
+      authDomain:        document.querySelector('meta[name="fb-auth"]')?.content,
+      projectId:         document.querySelector('meta[name="fb-proj"]')?.content,
+      storageBucket:     document.querySelector('meta[name="fb-bucket"]')?.content,
+      messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
+      appId:             document.querySelector('meta[name="fb-appid"]')?.content,
+    };
+    const app  = initializeApp(cfg);
+    const auth = getAuth(app);
+
+    // Mesmo guarda das demais telas: o guia descreve o funcionamento interno e
+    // não fica acessível fora da área autenticada.
+    //
+    // O destino é /acesso-equipe, NÃO /admin/login — mesmo de profissional/
+    // index.astro. /admin/login tem o portão de `gateway_unlocked` (AC-35) e
+    // devolveria o profissional à raiz em silêncio.
+    onAuthStateChanged(auth, user => {
+      if (!user) { window.location.href = "/acesso-equipe"; return; }
+    });
+
+    document.getElementById("btn-logout")?.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "/acesso-equipe";
+    });
+  </script>
+
+  <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+  <meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+  <meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+  <meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
+  <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
+  <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
+</body>
+</html>
