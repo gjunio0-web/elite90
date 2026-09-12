@@ -124,6 +124,16 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
         <div class="drawer-header">
           <span class="drawer-title">Atleta <span id="prof-drawer-nome"></span></span>
           <button class="drawer-close" id="prof-drawer-close" aria-label="Fechar gaveta" type="button">✕</button>
+          <!-- Hambúrguer (mobile). No celular a media query esconde
+               .drawer-sidenav e mostra este botão em seu lugar — sem ele, não
+               há navegação de aba nenhuma no aparelho. -->
+          <div class="drawer-hamburger-wrap" id="prof-hamburger-wrap">
+            <button class="drawer-hamburger-btn" id="prof-hamburger-btn" type="button" aria-label="Menu de navegação">
+              <!-- Caractere direto em vez de <i data-lucide>: esta página não
+                   chama renderIcons(), então um data-lucide ficaria vazio. -->
+              ☰
+            </button>
+          </div>
         </div>
         <div class="drawer-body">
           <nav class="drawer-sidenav" id="prof-drawer-sidenav">
@@ -210,6 +220,17 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
       </div>
     </div>
   </main>
+
+  <!-- Menu suspenso que substitui a barra lateral no mobile. Fora de
+       #prof-drawer de propósito, como em /admin/atletas: é overlay de tela
+       cheia, e ficar dentro do painel o prenderia ao transform de arrasto. -->
+  <div class="drawer-tab-backdrop" id="prof-tab-backdrop"></div>
+  <div class="drawer-tab-dropdown" id="prof-tab-dropdown">
+    <button class="drawer-tab-close-btn" id="prof-tab-dropdown-close" type="button">✕</button>
+    <button class="drawer-tab-opt active" data-tab="overview" type="button">Visão Geral</button>
+    <button class="drawer-tab-opt" data-tab="training" type="button" id="prof-opt-training" hidden>Treino</button>
+    <button class="drawer-tab-opt" data-tab="nutrition" type="button" id="prof-opt-nutrition" hidden>Nutricional</button>
+  </div>
 
   <SobreposicoesTreino />
   <SobreposicoesNutricional />
@@ -449,10 +470,15 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
 
       drawerNome.textContent = identidade;
 
-      // Sidenav: Visão Geral sempre; Treino/Nutricional só se esta atribuição
-      // os autoriza (CA-44) — nunca os dois por padrão, nunca por suposição.
-      $("prof-sidenav-training").hidden = !specialties.includes("training");
-      $("prof-sidenav-nutrition").hidden = !specialties.includes("nutrition");
+      // Sidenav (desktop) E menu suspenso (mobile): as duas superfícies de
+      // navegação mostram as mesmas abas, e as duas precisam ser atualizadas
+      // — a media query decide qual está visível, não o JavaScript.
+      const temTreino = specialties.includes("training");
+      const temNutricao = specialties.includes("nutrition");
+      $("prof-sidenav-training").hidden = !temTreino;
+      $("prof-sidenav-nutrition").hidden = !temNutricao;
+      $("prof-opt-training").hidden = !temTreino;
+      $("prof-opt-nutrition").hidden = !temNutricao;
 
       // A gaveta fica visível ANTES de popularVisaoGeral (que inicializa os
       // gráficos) — mesma ordem de /admin/atletas. Gráfico é o Chart.js vindo
@@ -470,6 +496,9 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     function fecharGaveta() {
       if (!drawer || !drawer.classList.contains("open")) return;
       drawer.classList.remove("open");
+      // O menu suspenso vive FORA do painel (overlay de tela cheia): fechar a
+      // gaveta sem fechá-lo deixaria um menu órfão sobre a carteira.
+      alternarMenuAbas(false);
       drawerCloseTimer = setTimeout(() => {
         drawer.style.display = "none";
         drawerCloseTimer = null;
@@ -546,6 +575,8 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
 
       document.querySelectorAll("#athlete-drawer .tab-content").forEach(c => c.classList.remove("active"));
       document.querySelectorAll("#athlete-drawer .sidenav-item").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+      // O menu suspenso do mobile marca a aba corrente igual à barra lateral.
+      document.querySelectorAll("#prof-tab-dropdown .drawer-tab-opt").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
       const conteudo = $(`prof-tab-${tab}`);
       if (conteudo) conteudo.classList.add("active");
 
@@ -673,6 +704,29 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
       const btn = e.target.closest(".sidenav-item");
       if (!btn || btn.hidden) return;
       selecionarAbaGaveta(btn.dataset.tab);
+    });
+
+    // ── HAMBÚRGUER (mobile) ───────────────────────────────────────────────
+    // No celular a barra lateral é display:none pela media query; este menu é
+    // a ÚNICA navegação de aba disponível ali.
+    function alternarMenuAbas(forcar) {
+      const dropdown = $("prof-tab-dropdown");
+      const backdrop = $("prof-tab-backdrop");
+      const aberto = forcar != null ? forcar : !dropdown.classList.contains("open");
+      dropdown.classList.toggle("open", aberto);
+      backdrop.classList.toggle("open", aberto);
+      backdrop.style.display = aberto ? "block" : "none";
+    }
+
+    $("prof-hamburger-btn").addEventListener("click", () => alternarMenuAbas());
+    $("prof-tab-dropdown-close").addEventListener("click", () => alternarMenuAbas(false));
+    $("prof-tab-backdrop").addEventListener("click", () => alternarMenuAbas(false));
+
+    $("prof-tab-dropdown").addEventListener("click", (e) => {
+      const opt = e.target.closest(".drawer-tab-opt");
+      if (!opt || opt.hidden) return;
+      selecionarAbaGaveta(opt.dataset.tab);
+      alternarMenuAbas(false);
     });
 
     // ── DRAG TO DISMISS (mobile bottom sheet) — mesmo mecanismo de

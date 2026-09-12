@@ -398,3 +398,48 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
   .drawer-content-wrap { overflow-y: auto; padding: var(--space-4); }
 }
 
+
+
+/* ── TERCEIRA RODADA (12/09/2026) — menu suspenso do hambúrguer ─────────────
+ * ACHADO EM TESTE VISUAL, não em leitura: no mobile, a media query acima
+ * faz `.drawer-sidenav { display: none }` e mostra `.drawer-hamburger-wrap`
+ * em seu lugar. A gaveta do Coach tem o menu suspenso que substitui a barra
+ * lateral; a primeira versão da gaveta do profissional copiou a barra e o
+ * CSS que a esconde, mas NÃO o menu — resultado: no celular não havia
+ * navegação de aba nenhuma, e quem abrisse em Treino ficava presa ali, sem
+ * acesso à Visão Geral.
+ *
+ * O teste automatizado não pegou: jsdom não aplica CSS nem tem viewport, e
+ * o elemento estava lá, com hidden=false. Só apareceu no aparelho real. */
+
+.drawer-tab-dropdown {
+      display: block;
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 82%;
+      max-width: 380px;
+      background: #242424;
+      z-index: 600;
+      overflow-y: auto;
+      padding: var(--space-5) var(--space-6) var(--space-8);
+      transform: translateX(110%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: -8px 0 40px rgba(0,0,0,0.6);
+    }
+.drawer-tab-dropdown.open { transform: translateX(0); }
+.drawer-tab-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 599; }
+.drawer-tab-backdrop.open { display: block; }
+.drawer-tab-close-btn { display: block; background: none; border: none; color: var(--c-white); font-size: 1rem; cursor: pointer; margin-left: auto; margin-bottom: var(--space-8); padding: 0; line-height: 1; }
+.drawer-tab-close-btn:hover { color: var(--c-lime); }
+.drawer-tab-opt { display: block; width: 100%; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.08); padding: var(--space-5) 0; color: var(--c-white); font-family: var(--font-label); font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; text-align: left; transition: color var(--dur-fast) var(--ease-std); }
+/* .drawer-tab-opt fixa display:block — sem esta regra o atributo `hidden` que
+   profissional/index.astro usa para ocultar Treino/Nutricional por
+   especialidade (CA-44) não teria efeito no menu suspenso do mobile, mesmo
+   já valendo na barra lateral (.sidenav-item[hidden], corrigida antes). Nunca
+   foi preciso em /admin/atletas: lá todas as seis opções são sempre
+   mostradas, sem exclusão por especialidade. */
+.drawer-tab-opt[hidden] { display: none; }
+.drawer-tab-opt:first-of-type { border-top: 1px solid rgba(255,255,255,0.08); }
+.drawer-tab-opt:last-child { border-bottom: none; }
+.drawer-tab-opt:hover { color: var(--c-lime); }
+.drawer-tab-opt.active { color: var(--c-lime); }
