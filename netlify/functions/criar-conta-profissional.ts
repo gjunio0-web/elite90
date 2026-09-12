@@ -393,8 +393,8 @@ ${emailHeader("Acesso ao Portal do Profissional")}
   <p><a class="btn" href="${link}">Definir minha senha</a></p>
   <p class="fallback">Se o botão não funcionar, copie e cole este endereço no navegador:<br/><a href="${link}" style="color:#888 !important;">${link}</a></p>
   <p>
-    A página de definição de senha é hospedada pelo Google e aparece em inglês — é esperado, e não
-    é motivo para desconfiar do link. Depois de definir a senha, acesse
+    A página de definição de senha é hospedada pelo Google e aparece em inglês e em um layout
+    distinto. Depois de definir a senha, acesse
     <a href="${urlLogin}" class="highlight" style="color:#A6C300 !important;">${urlLoginTexto}</a>
     para entrar no portal.
   </p>
