@@ -42,7 +42,7 @@ export { emblemaAttachment };
 /** Regras de estilo comuns aos cinco modelos: corpo, moldura e cabeçalho. */
 export const EMAIL_BASE_CSS = [
   "  body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;color:#CCCCCC;-webkit-text-size-adjust:100%;text-size-adjust:100%;}",
-  "  .wrap{max-width:600px;margin:0 auto;padding:40px 24px;}",
+  "  .wrap{max-width:600px;margin:0 auto;padding:40px 24px;background:#080808;}",
   "  .logo{font-size:28px;font-weight:900;letter-spacing:.08em;color:#A6C300;text-transform:uppercase;}",
   "  .tagline{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#666;}",
 ].join("\n");
