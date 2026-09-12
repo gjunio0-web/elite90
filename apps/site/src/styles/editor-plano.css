@@ -396,6 +396,13 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
   .drawer-sidenav { display: none; }
   .drawer-body { flex-direction: column; }
   .drawer-content-wrap { overflow-y: auto; padding: var(--space-4); }
+  /* Só em /profissional: o "x" do cabeçalho some no mobile — a opção "Sair"
+     dentro do próprio menu do hambúrguer o substitui ali, porque o "x" fica
+     coberto pelo menu suspenso quando ele está aberto (mesma largura de tela
+     em que ambos concorrem pelo canto superior direito). Seletor por ID,
+     não por classe: .drawer-close também nomeia botões de fechar overlay em
+     /admin/atletas que não devem ser afetados. */
+  #prof-drawer-close { display: none; }
 }
 
 
@@ -443,3 +450,8 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 .drawer-tab-opt:last-child { border-bottom: none; }
 .drawer-tab-opt:hover { color: var(--c-lime); }
 .drawer-tab-opt.active { color: var(--c-lime); }
+/* "Sair" (só /profissional) fecha a gaveta — não é troca de aba, então não
+   compartilha a cor de destaque (lime) das opções de navegação, e ganha uma
+   margem para se separar visualmente do grupo acima. */
+.drawer-tab-opt--sair { margin-top: var(--space-3); color: var(--c-textsub); }
+.drawer-tab-opt--sair:hover { color: var(--c-white); }

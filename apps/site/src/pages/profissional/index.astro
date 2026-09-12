@@ -230,6 +230,11 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     <button class="drawer-tab-opt active" data-tab="overview" type="button">Visão Geral</button>
     <button class="drawer-tab-opt" data-tab="training" type="button" id="prof-opt-training" hidden>Treino</button>
     <button class="drawer-tab-opt" data-tab="nutrition" type="button" id="prof-opt-nutrition" hidden>Nutricional</button>
+    <!-- "Sair" fecha a GAVETA (não é troca de aba) — substitui o "x" do
+         cabeçalho no mobile, onde ele fica coberto por este próprio menu
+         quando aberto. Classe própria (não .drawer-tab-opt) para não entrar
+         na sincronização de "active" que selecionarAbaGaveta() faz. -->
+    <button class="drawer-tab-opt drawer-tab-opt--sair" data-acao="sair" type="button" id="prof-opt-sair">Sair</button>
   </div>
 
   <SobreposicoesTreino />
@@ -725,6 +730,9 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     $("prof-tab-dropdown").addEventListener("click", (e) => {
       const opt = e.target.closest(".drawer-tab-opt");
       if (!opt || opt.hidden) return;
+      // "Sair" fecha a gaveta inteira — fecharGaveta() já chama
+      // alternarMenuAbas(false) por conta própria, então não repete aqui.
+      if (opt.dataset.acao === "sair") { fecharGaveta(); return; }
       selecionarAbaGaveta(opt.dataset.tab);
       alternarMenuAbas(false);
     });
