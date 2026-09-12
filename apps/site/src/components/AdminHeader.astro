@@ -16,6 +16,10 @@
 //     porque o cabeçalho é um só e os guias não são: a rota restrita do
 //     profissional tem guia próprio, e sem esta prop o pontinho de ajuda dela
 //     abriria o guia do Coach. Quem não passa a prop não muda de comportamento.
+//   logoHref — destino do clique no logo "ELITE90 PRO" (padrão: /admin). Mesma
+//     razão de guideHref: a rota do profissional não pertence à árvore do
+//     Coach, e o logo sem esta prop mandava o profissional para o painel dele
+//     ao clicar. Quem não passa a prop não muda de comportamento.
 //
 // Slot "primeiro" — entra ANTES do atalho do guia, dentro do mesmo contêiner.
 //   Existe porque a especificação do catálogo (seção 6.3) pede um item próprio
@@ -41,9 +45,10 @@ interface Props {
   showLogout?: boolean;
   showGuide?: boolean;
   guideHref?: string;
+  logoHref?: string;
 }
 
-const { badge, backHref, showLogout = true, showGuide = true, guideHref } = Astro.props;
+const { badge, backHref, showLogout = true, showGuide = true, guideHref, logoHref = "/admin" } = Astro.props;
 
 // O atalho do guia carrega a página atual em "from" para que, se o guia por
 // sua vez for aberto com o link "voltar" apontando para /admin/guia (ver
@@ -60,7 +65,7 @@ const destinoDoGuia =
 
 <header class="adm-header">
   <div class="adm-header__left">
-    <a href="/admin" class="adm-logo">ELITE90 PRO</a>
+    <a href={logoHref} class="adm-logo">ELITE90 PRO</a>
     {badge && <span class="adm-badge">{badge}</span>}
   </div>
   <div class="adm-header__right">
