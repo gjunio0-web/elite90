@@ -455,3 +455,42 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
    margem para se separar visualmente do grupo acima. */
 .drawer-tab-opt--sair { margin-top: var(--space-3); color: var(--c-textsub); }
 .drawer-tab-opt--sair:hover { color: var(--c-white); }
+
+/* ── QUARTA RODADA (12/09/2026) — lacuna real na primeira extração ──────────
+ * ACHADO A PARTIR DE UM BUG RELATADO: o menu de ações do dia ("...") abria
+ * longe do botão em /profissional. Causa: .wke-daymenu nunca saiu de
+ * atletas.astro — só as regras de .wke-daymenu-item (o conteúdo) foram
+ * levadas na primeira rodada; o CONTÊINER (position:fixed, entre outras
+ * propriedades) ficou para trás. Sem position:fixed, o menu.style.top/left
+ * calculados em JS (viewport-relative) não tinham efeito nenhum: o elemento
+ * renderizava em fluxo normal do documento, na posição em que o
+ * appendChild(document.body) o deixou cair.
+ *
+ * Auditoria re-executada por script (não por leitura) contra as 171 classes
+ * candidatas referenciadas por nucleo.js (editor-plano e editor-comuns) e
+ * pelos seis componentes que os hospedam — achou mais 4 lacunas da mesma
+ * natureza (contêineres de elementos anexados a <body>, cujo conteúdo
+ * interno já tinha sido migrado, mas não o invólucro): o ghost e o
+ * placeholder do arrasto de exercícios, o overlay de confirmação, e o
+ * sistema de toast inteiro (a `.wke-err-row` que a auditoria original já
+ * documentava como ausência pré-existente, e `.wke-drag-active`, que não
+ * tem estilo próprio — só marca elemento para :not() em querySelectorAll —,
+ * seguem sem entrada aqui, de propósito). */
+
+body.wke-dragging, body.wke-dragging * { user-select: none !important; }
+.wke-drag-ghost { position: fixed; z-index: 420; pointer-events: none; background: var(--c-surface-2); border: 1px solid var(--c-lime); border-radius: var(--radius-pill); padding: 7px 14px 7px 10px; box-shadow: var(--shadow-lg); font-family: var(--font-label); font-size: 11px; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.04em; color: var(--c-white); display: flex; align-items: center; gap: 8px; white-space: nowrap; opacity: 0.95; }
+.wke-drag-placeholder { height: 2px; background: var(--c-lime); border-radius: 2px; margin: 2px var(--space-3); box-shadow: 0 0 6px rgba(166,195,0,0.5); }
+.wke-daymenu { position: fixed; min-width: 168px; background: var(--c-surface-2); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); padding: var(--space-1) 0; z-index: 150; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55); }
+.wke-confirm-overlay { position: fixed; inset: 0; z-index: 360; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; padding: var(--space-5); }
+.wke-confirm-overlay[hidden] { display: none !important; }
+.wke-toast-wrap { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 340; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+.wke-toast { display: flex; align-items: center; gap: 8px; background: var(--c-surface-2); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-pill); padding: 9px 18px; font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-white); box-shadow: var(--shadow-md); animation: wke-toast-in 200ms var(--ease-out) both; }
+.wke-toast.pr { border-color: var(--c-lime); }
+.wke-toast [data-lucide] { width: 14px; height: 14px; color: var(--c-lime); }
+.wke-toast-warning { border-color: var(--c-status-warning); }
+.wke-toast-warning [data-lucide] { color: var(--c-status-warning); }
+.wke-toast-error { border-color: var(--c-status-rejected); }
+.wke-toast-error [data-lucide] { color: var(--c-status-rejected); }
+.wke-toast-info { border-color: rgba(255, 255, 255, 0.14); }
+.wke-toast-info [data-lucide] { color: var(--c-textsub); }
+@keyframes wke-toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }

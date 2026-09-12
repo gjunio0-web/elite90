@@ -236,12 +236,6 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .exercise-item:last-child { border-bottom: none; }
 .exercise-name { font-weight: var(--fw-body-bold); color: var(--c-white); }
 .exercise-meta { font-size: 11px; color: var(--c-textsub); margin-top: var(--space-1); }
-body.wke-dragging, body.wke-dragging * { user-select: none !important; }
-.wke-drag-ghost { position: fixed; z-index: 420; pointer-events: none; background: var(--c-surface-2); border: 1px solid var(--c-lime); border-radius: var(--radius-pill); padding: 7px 14px 7px 10px; box-shadow: var(--shadow-lg); font-family: var(--font-label); font-size: 11px; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.04em; color: var(--c-white); display: flex; align-items: center; gap: 8px; white-space: nowrap; opacity: 0.95; }
-.wke-drag-placeholder { height: 2px; background: var(--c-lime); border-radius: 2px; margin: 2px var(--space-3); box-shadow: 0 0 6px rgba(166,195,0,0.5); }
-.wke-daymenu { position: fixed; min-width: 168px; background: var(--c-surface-2); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); padding: var(--space-1) 0; z-index: 150; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55); }
-.wke-confirm-overlay { position: fixed; inset: 0; z-index: 360; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; padding: var(--space-5); }
-.wke-confirm-overlay[hidden] { display: none !important; }
 .pub-header { display: flex; align-items: center; gap: 12px; padding: 12px 0 14px; margin-bottom: var(--space-5); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
 .pub-titlewrap { min-width: 0; }
 .pub-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: var(--radius-pill); font-family: var(--font-label); font-size: 0.55rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
@@ -421,16 +415,6 @@ body.wke-dragging, body.wke-dragging * { user-select: none !important; }
 .shr-opt-chev { flex-shrink: 0; display: inline-flex; color: #5a5a5a; }
 .shr-opt-chev [data-lucide] { width: 15px; height: 15px; }
 .wke-search-result--pendente { box-shadow: inset 3px 0 0 var(--c-pending); }
-.wke-toast-wrap { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 340; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
-.wke-toast { display: flex; align-items: center; gap: 8px; background: var(--c-surface-2); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-pill); padding: 9px 18px; font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-white); box-shadow: var(--shadow-md); animation: wke-toast-in 200ms var(--ease-out) both; }
-.wke-toast.pr { border-color: var(--c-lime); }
-.wke-toast [data-lucide] { width: 14px; height: 14px; color: var(--c-lime); }
-.wke-toast-warning { border-color: var(--c-status-warning); }
-.wke-toast-warning [data-lucide] { color: var(--c-status-warning); }
-.wke-toast-error { border-color: var(--c-status-rejected); }
-.wke-toast-error [data-lucide] { color: var(--c-status-rejected); }
-.wke-toast-info { border-color: rgba(255, 255, 255, 0.14); }
-.wke-toast-info [data-lucide] { color: var(--c-textsub); }
 .nte-formula-gear-btn { background: transparent; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); color: var(--c-textsub); width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: color 150ms ease, border-color 150ms ease; }
 .nte-formula-gear-btn:hover { color: var(--c-lime); border-color: rgba(166, 195, 0, 0.50); }
 .nte-formula-gear-btn [data-lucide] { width: 14px; height: 14px; }
@@ -602,7 +586,6 @@ tbody { display: block; width: 100%; }
 @keyframes evo-spin { to { transform: rotate(360deg); } }
 @keyframes evo-curpulse { 0% { box-shadow: 0 0 0 0 rgba(166,195,0,0.55); } 70% { box-shadow: 0 0 0 5px rgba(166,195,0,0); } 100% { box-shadow: 0 0 0 0 rgba(166,195,0,0); } }
 @keyframes evo-curpulse-dark { 0% { box-shadow: 0 0 0 0 rgba(13,13,13,0.5); } 70% { box-shadow: 0 0 0 5px rgba(13,13,13,0); } 100% { box-shadow: 0 0 0 0 rgba(13,13,13,0); } }
-@keyframes wke-toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
