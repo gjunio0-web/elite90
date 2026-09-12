@@ -189,16 +189,12 @@ import AdminHeader from '../components/AdminHeader.astro';
         try {
           await confirmPasswordReset(auth, oobCode, senha);
           card.innerHTML = `<p class="ds-msg">Senha definida. Redirecionando para o login…</p>`;
-          // /admin/login tem gate próprio (Footer.astro): sem sessionStorage
-          // "gateway_unlocked", o script inline da própria página devolve o
-          // visitante para "/" antes de renderizar qualquer coisa — normalmente
-          // aquele gate só é aberto pelo gesto de 5 cliques no rodapé. Confirmar
-          // um oobCode do Firebase e definir senha nova é prova de legitimidade
-          // ao menos tão forte quanto esse gesto; sem abrir o gate aqui, o
-          // profissional que acabou de definir a senha seria devolvido à home
-          // em silêncio, sem nunca ver o formulário de login.
-          sessionStorage.setItem("gateway_unlocked", "true");
-          setTimeout(() => { window.location.href = "/admin/login"; }, 1500);
+          // Vai para /acesso-equipe, não /admin/login (AC-35). Antes era
+          // preciso abrir o portão à mão aqui — gravar `gateway_unlocked` —
+          // porque /admin/login devolveria o profissional à raiz. A rota nova
+          // não tem portão, então o contorno saiu: quem define a senha agora
+          // chega a uma porta que simplesmente abre.
+          setTimeout(() => { window.location.href = "/acesso-equipe"; }, 1500);
         } catch (e) {
           botao.disabled = false;
           mostrarErroCampo(e?.message || "Não foi possível definir a senha agora. Tente novamente.");

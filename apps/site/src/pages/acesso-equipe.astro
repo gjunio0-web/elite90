@@ -1,0 +1,313 @@
+---
+export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+---
+{/*
+  ELITE90 PRO · /acesso-equipe — Adendo 07, AC-35 (v1.24).
+
+  POR QUE ESTA ROTA EXISTE
+  /admin/login tem um portão (Footer.astro, gesto de 5 cliques, chave
+  `gateway_unlocked` em sessionStorage) que devolve à raiz quem chega direto.
+  A premissa do portão — todo mundo que precisa do painel conhece o gesto —
+  valia quando o único usuário era o Coach, e quebrou quando passaram a
+  existir profissionais, sobretudo externos, que não são equipe. Sem esta
+  rota, um profissional que faz logout NÃO CONSEGUE ENTRAR DE NOVO (CA-100).
+
+  CA-95 · NÃO TEM O SCRIPT DO PORTÃO, de propósito. É a razão de existir.
+
+  CA-96 · RECUSA TOKEN COM `admin: true`. Sem esta guarda, perderíamos a
+  obscuridade do portão de um lado sem substituí-la por proteção nenhuma do
+  outro: a rota viraria segunda porta ao mesmo Firebase, e quem a
+  descobrisse poderia tentar logar como Coach por aqui. Com a guarda, o
+  máximo que se consegue é tentar autenticar como profissional.
+
+  CONSEQUÊNCIA DELIBERADA: o Coach está cadastrado também como profissional
+  (ver comentário em admin/login.astro). Ele é RECUSADO aqui e entra pelo
+  painel, como sempre — a CA-96 não abre exceção por conveniência.
+
+  CA-97 · /admin/login não é tocado. O portão do Coach segue intacto.
+
+  CA-98 · Fora do sitemap (filtro em astro.config.mjs) e sem link em página
+  pública. O endereço chega ao profissional pelo e-mail de acesso, e por
+  nenhum outro caminho.
+
+  SÓ E-MAIL/SENHA, SEM GOOGLE. Contas de profissional nascem por
+  `createUser` com senha, em criar-conta-profissional.ts; oferecer entrada
+  pelo Google criaria conta paralela ou vínculo inesperado, para ganho
+  nenhum.
+*/}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELITE90 PRO — Acesso da Equipe</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+  <meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+  <meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+  <meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
+  <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
+  <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
+
+  <style is:global>
+    /* ── LAYOUT ──────────────────────────────────────────────────────── */
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-5) var(--space-3);
+    }
+
+    .login-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* ── LOGO ────────────────────────────────────────────────────────── */
+    .login-logo {
+      text-align: center;
+      margin-bottom: var(--space-5);
+    }
+    .login-logo img {
+      height: 110px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      margin: 0 auto;
+      display: block;
+    }
+
+    /* ── CARD ────────────────────────────────────────────────────────── */
+    .login-card {
+      background: var(--c-darkbg);
+      border: 1px solid rgba(166,195,0,0.2);
+      border-top: 3px solid var(--c-lime);
+      border-radius: var(--radius-card);
+      padding: var(--space-6) var(--space-5);
+    }
+
+    .login-eyebrow {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--c-lime);
+      text-align: center;
+      margin-bottom: var(--space-2);
+    }
+    .login-title {
+      font-family: var(--font-display);
+      font-size: var(--fs-display-md);
+      font-weight: 400;
+      color: var(--c-white);
+      text-transform: uppercase;
+      text-align: center;
+      letter-spacing: 0.05em;
+      line-height: 1;
+      margin-bottom: var(--space-6);
+    }
+
+    /* ── FIELDS ──────────────────────────────────────────────────────── */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+    .field label {
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--c-textsub);
+    }
+    .field input {
+      background: var(--c-black);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-card);
+      color: var(--c-white);
+      font-family: var(--font-body);
+      font-size: var(--fs-body-md);
+      padding: 14px var(--space-4);
+      transition: border-color var(--transition-base);
+      outline: none;
+    }
+    .field input:focus { border-color: var(--c-lime); }
+    .field input::placeholder { color: rgba(255,255,255,0.2); }
+
+    /* ── BUTTONS ─────────────────────────────────────────────────────── */
+    .btn-login {
+      width: 100%;
+      background: var(--c-lime);
+      color: #000;
+      font-family: var(--font-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 16px;
+      border: none;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: var(--space-2);
+      transition: box-shadow var(--transition-base);
+    }
+    .btn-login:hover { box-shadow: var(--shadow-cta); }
+    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── FEEDBACK ────────────────────────────────────────────────────── */
+    .error-msg {
+      font-family: var(--font-body);
+      font-size: var(--fs-body-sm);
+      color: #E74C3C;
+      text-align: center;
+      margin-top: var(--space-3);
+      min-height: 1.2em;
+    }
+
+    /* ── BACK LINK ───────────────────────────────────────────────────── */
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: var(--space-4);
+      font-family: var(--font-label);
+      font-size: var(--fs-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--c-textsub);
+      text-decoration: none;
+      transition: color var(--transition-base);
+    }
+    .back-link:hover { color: var(--c-lime); }
+
+    /* ── AUTOFILL (WEBKIT) ───────────────────────────────────────────── */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0px 1000px var(--c-black) inset !important;
+      -webkit-text-fill-color: var(--c-white) !important;
+      transition: background-color 5000s ease-in-out 0s;
+      caret-color: var(--c-lime);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <img src="/images/brand/logo-hero.webp" alt="Coach Ruiz ELITE90 PRO" />
+      </div>
+      <p class="login-eyebrow">Área do Profissional</p>
+      <h1 class="login-title">Acesso da Equipe</h1>
+
+      <form id="ae-form" novalidate>
+        <div class="field">
+          <label for="ae-email">E-mail</label>
+          <input type="email" id="ae-email" name="email" required
+            placeholder="seu@email.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="ae-password">Senha</label>
+          <input type="password" id="ae-password" name="password" required
+            placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <button class="btn-login" type="submit" id="ae-btn">Entrar</button>
+        <p class="error-msg" id="ae-error" aria-live="polite"></p>
+      </form>
+    </div>
+
+    <a class="back-link" href="/">← Voltar ao site</a>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signOut, signInWithEmailAndPassword }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const cfg = {
+      apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
+      authDomain:        document.querySelector('meta[name="fb-auth"]')?.content,
+      projectId:         document.querySelector('meta[name="fb-proj"]')?.content,
+      storageBucket:     document.querySelector('meta[name="fb-bucket"]')?.content,
+      messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
+      appId:             document.querySelector('meta[name="fb-appid"]')?.content,
+    };
+    const auth = getAuth(initializeApp(cfg));
+
+    const ROTA_PROFISSIONAL = "/profissional";
+    const form = document.getElementById("ae-form");
+    const btn = document.getElementById("ae-btn");
+    const erro = document.getElementById("ae-error");
+
+    /**
+     * CA-96 · A guarda. Recusa `admin: true` ANTES de qualquer redirecionamento,
+     * e encerra a sessão — não basta não redirecionar: deixar a sessão de
+     * administrador aberta por esta rota é exatamente o que a guarda existe
+     * para impedir.
+     *
+     * Devolve o destino quando autorizado, ou `null` quando recusou (já tendo
+     * feito signOut e escrito o recado).
+     */
+    async function destinoAutorizado(user) {
+      const tokenResult = await user.getIdTokenResult(true).catch(() => null);
+      const claims = tokenResult?.claims ?? null;
+
+      if (claims?.admin) {
+        await signOut(auth);
+        erro.textContent =
+          "Esta conta é de administrador. O acesso ao painel é feito pelo site, não por aqui.";
+        return null;
+      }
+      if (claims?.professional) return ROTA_PROFISSIONAL;
+
+      await signOut(auth);
+      erro.textContent = "Acesso não autorizado para esta conta.";
+      return null;
+    }
+
+    // Já autenticado ao chegar: o mesmo crivo se aplica. Uma sessão de
+    // administrador aberta noutra aba não pode entrar por esta porta.
+    auth.onAuthStateChanged(async user => {
+      if (!user) return;
+      const destino = await destinoAutorizado(user);
+      if (destino) window.location.href = destino;
+    });
+
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      btn.disabled = true;
+      erro.textContent = "";
+      try {
+        const cred = await signInWithEmailAndPassword(
+          auth,
+          document.getElementById("ae-email").value.trim(),
+          document.getElementById("ae-password").value,
+        );
+        const destino = await destinoAutorizado(cred.user);
+        if (destino) window.location.href = destino;
+        else btn.disabled = false;
+      } catch {
+        // Mensagem única para credencial errada, conta inexistente e conta
+        // desativada: distinguir diria a um estranho quais e-mails existem.
+        erro.textContent = "E-mail ou senha incorretos.";
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -39,13 +39,14 @@
 // fluxo puramente web. O erro era do documento normativo, não da
 // implementação anterior, que seguiu a especificação corretamente.
 //
-// O DESTINO DO LINK É CONFIGURAÇÃO DE CONSOLE, NÃO PARÂMETRO DE CHAMADA —
-// Authentication → Templates → "customize action URL", em cada projeto
-// Firebase, apontando para /definir-senha. Feito uma vez por projeto, vale
-// para todos os modelos de e-mail dali em diante (CA-89, pré-requisito de
-// infraestrutura, não verificável por leitura de código). Sem essa
-// configuração, o link abre a página padrão hospedada pelo próprio Firebase,
-// não a nossa — mesmo com a chamada já simplificada.
+// O DESTINO DO LINK É DECIDIDO AQUI, POR REESCRITA (v1.25). Extraímos o
+// `oobCode` do link que o Firebase gera e montamos o endereço da nossa
+// própria página — ver o comentário longo em `concederAcesso`, sobre por que
+// isso é legítimo e por que a configuração de console nunca foi necessária.
+//
+// A CA-89 — "configurar customize action URL em cada projeto" — DEIXOU DE
+// EXISTIR. Não foi contornada nem adiada: descobriu-se que governava os
+// e-mails que o Firebase envia, e esta função sempre enviou os próprios.
 //
 // SEMPRE AUTOMÁTICO, SEM PARÂMETRO QUE DESATIVE. Diferente do e-mail de
 // boas-vindas do atleta, que é escolha do Coach por promoção — aqui conceder
@@ -249,32 +250,51 @@ export async function concederAcesso(
   let acessoEnviado = false;
   let acessoErro: string | null = null;
   try {
-    // URL FIXA POR AMBIENTE, NÃO DINÂMICA (Adendo 07, AC-30, v1.19). O link
-    // tem que apontar para o MESMO projeto Firebase que gerou o oobCode — um
-    // link de homologação abrindo o site de produção falha na validação,
-    // mesmo com o domínio autorizado (CA-87), porque tentaria verificar o
-    // código contra o Firebase errado.
+    // O QUE ESTA CHAMADA FAZ, E O QUE NÃO FAZ (v1.25). Ela GERA um link e o
+    // devolve como texto — NÃO dispara e-mail nenhum. Quem envia somos nós,
+    // logo abaixo, com `sendMail` e nosso próprio `buildAcessoEmail`.
     //
-    // NÃO É `process.env.URL`: essa variável é a única disponível em runtime
-    // de função (confirmado contra a documentação oficial da Netlify —
-    // `DEPLOY_URL`, que varia por branch, só existe em build), mas descreve o
-    // ENDEREÇO PRINCIPAL DO SITE — a homologação é branch deploy do MESMO
-    // site que a produção, então essa variável resolveria sempre para
-    // coachruiz.com.br, não para o domínio da branch. Por isso dois valores
-    // FIXOS, escolhidos por `CONTEXT` — o mesmo mecanismo de `emHomologacao`,
-    // já usado em toda esta fase.
-    //
-    // Sem segundo argumento, de propósito (v1.20). O destino é decidido pela
-    // configuração de console (CA-89), não por `ActionCodeSettings` — ver o
-    // cabeçalho deste arquivo para o raciocínio completo.
+    // É por isso que a configuração de console "customize action URL" nunca
+    // foi necessária: ela governa o link dos e-mails que o FIREBASE manda, e
+    // o Firebase nunca mandou e-mail aqui. O bloqueio
+    // `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`, que travou a homologação na v1.21,
+    // barrava um caminho que não precisávamos percorrer. A CA-89 deixou de
+    // existir por isso, e não por ter sido contornada.
     const link = await auth.generatePasswordResetLink(email);
+
+    // Do link gerado interessa só o `oobCode` — o código de uso único. O
+    // domínio que o carrega é irrelevante para a validação:
+    // `verifyPasswordResetCode(auth, oobCode)` recebe SÓ o código, e quem o
+    // valida é o projeto Firebase que o emitiu, nunca o endereço da página.
+    // Então reescrevemos o endereço para a NOSSA página (CA-101), mantendo o
+    // código intacto (CA-102).
+    const parametros = new URL(link).searchParams;
+    const oobCode = parametros.get("oobCode");
+    const mode = parametros.get("mode") ?? "resetPassword";
+
+    // Sem `oobCode` não há link válido a enviar. Melhor falhar aqui, com o
+    // motivo dito, do que despachar um e-mail cujo botão leva a uma página de
+    // "link inválido" — o Coach veria "acesso concedido" e o profissional
+    // receberia algo quebrado, sem ninguém saber por quê.
+    if (!oobCode) {
+      throw new Error("Link de redefinição sem oobCode — formato inesperado do Firebase.");
+    }
+
+    const urlDefinirSenha =
+      process.env.CONTEXT === "production"
+        ? "https://coachruiz.com.br/definir-senha"
+        : "https://quality-env--elite90.netlify.app/definir-senha";
+
+    const linkProprio =
+      `${urlDefinirSenha}?mode=${encodeURIComponent(mode)}&oobCode=${encodeURIComponent(oobCode)}`;
+
     if (!isMailerConfigured()) {
       acessoErro = "Envio de e-mail não configurado no ambiente.";
     } else {
       await sendMail({
         to: email,
         subject: "Defina sua senha — ELITE 90 PRO",
-        html: buildAcessoEmail(String(prof.name ?? ""), link),
+        html: buildAcessoEmail(String(prof.name ?? ""), linkProprio),
         attachments: [emblemaAttachment()],
       });
       acessoEnviado = true;
@@ -345,11 +365,15 @@ function buildAcessoEmail(nome: string, link: string): string {
   const firstName = String(nome || "").split(" ")[0] || "";
   const saudacao = firstName ? `${firstName}, bem-vindo` : "Bem-vindo";
 
-  // ENDEREÇO DE LOGIN, POR AMBIENTE. Sem isto o profissional define a senha e
-  // fica sem caminho de volta: como a chamada a `generatePasswordResetLink`
-  // não passa mais `ActionCodeSettings` (v1.20), o link não carrega
-  // `continueUrl`, e a página do Google não tem para onde mandá-lo depois de
-  // salvar. Até a CA-90 fechar, quem diz o caminho é este e-mail.
+  // ENDEREÇO DE LOGIN, POR AMBIENTE. Reforço textual, não necessidade: desde
+  // a v1.25 o botão do e-mail leva direto a /definir-senha, que ao terminar
+  // redireciona sozinha para cá. Esta linha existe para quem fechar a aba no
+  // meio, ou voltar ao e-mail dias depois — casos em que o redirecionamento
+  // automático não acontece.
+  //
+  // É /acesso-equipe, NÃO /admin/login (AC-35, CA-99). /admin/login tem
+  // portão: devolveria o profissional à raiz, em silêncio, e o endereço no
+  // e-mail pareceria quebrado.
   //
   // POR QUE ESTE `CONTEXT` É LEGÍTIMO, E O ANTERIOR NÃO ERA: aqui é TEXTO
   // INFORMATIVO para uma pessoa ler, não parâmetro que o Firebase interprete.
@@ -357,8 +381,8 @@ function buildAcessoEmail(nome: string, link: string): string {
   // que só a configuração de console decide. Esta apenas informa onde entrar.
   const urlLogin =
     process.env.CONTEXT === "production"
-      ? "https://coachruiz.com.br/admin/login"
-      : "https://quality-env--elite90.netlify.app/admin/login";
+      ? "https://coachruiz.com.br/acesso-equipe"
+      : "https://quality-env--elite90.netlify.app/acesso-equipe";
   // Sem o esquema no TEXTO, com o esquema no href: `href` sem `https://`
   // vira caminho relativo e quebra dentro do cliente de e-mail.
   const urlLoginTexto = urlLogin.replace(/^https:\/\//, "");
@@ -393,8 +417,7 @@ ${emailHeader("Acesso ao Portal do Profissional")}
   <p><a class="btn" href="${link}">Definir minha senha</a></p>
   <p class="fallback">Se o botão não funcionar, copie e cole este endereço no navegador:<br/><a href="${link}" style="color:#888 !important;">${link}</a></p>
   <p>
-    A página de definição de senha é hospedada pelo Google e aparece em inglês e em um layout
-    distinto. Depois de definir a senha, acesse
+    Depois de definir a senha, acesse
     <a href="${urlLogin}" class="highlight" style="color:#A6C300 !important;">${urlLoginTexto}</a>
     para entrar no portal.
   </p>
