@@ -118,7 +118,7 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
          Visão Geral entra aqui porque sem contexto do atleta (idade,
          objetivo, frequência) o profissional não tem como montar plano
          nenhum com critério. -->
-    <div id="prof-drawer" style="display: none;">
+    <div id="athlete-drawer" style="display: none;">
       <div class="drawer-panel">
         <span class="drawer-handle"></span>
         <div class="drawer-header">
@@ -318,7 +318,13 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
 
     // A gaveta substitui a antiga <section id="prof-editor"> mostrada inline.
     // #prof-editor continua no HTML, sempre hidden — nada a mostrar nela.
-    const drawer = $("prof-drawer");
+    // O id do elemento é "athlete-drawer", NÃO "prof-drawer" — mesmo id de
+    // /admin/atletas, de propósito: editor-plano.css usa #athlete-drawer como
+    // seletor (position:fixed, inset:0, z-index etc.) para as duas páginas.
+    // Um id diferente aqui faria a gaveta renderizar em fluxo normal do
+    // documento, em vez de sobrepor a tela — bug real, encontrado em produção
+    // (Adendo 07, correção 12/09/2026).
+    const drawer = $("athlete-drawer");
     const drawerNome = $("prof-drawer-nome");
     const sidenav = $("prof-drawer-sidenav");
 
@@ -434,8 +440,8 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
 
     // ── ABERTURA DA GAVETA ──────────────────────────────────────────────────
     // Substitui o antigo abrir(): em vez de trocar #prof-grid por
-    // #prof-editor na mesma página, abre #prof-drawer — mesmo padrão visual
-    // de /admin/atletas, com CSS compartilhado (editor-plano.css).
+    // #prof-editor na mesma página, abre #athlete-drawer — mesmo padrão
+    // visual de /admin/atletas, com CSS compartilhado (editor-plano.css).
     function abrirGaveta(athleteUid, planTypeInicial) {
       const entrada = atletasPorUid.get(athleteUid);
       if (!entrada) return;
@@ -538,12 +544,12 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     function selecionarAbaGaveta(tab, athleteUidForcado) {
       const athleteUid = athleteUidForcado ?? window.E90.athleteUid;
 
-      document.querySelectorAll("#prof-drawer .tab-content").forEach(c => c.classList.remove("active"));
-      document.querySelectorAll("#prof-drawer .sidenav-item").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+      document.querySelectorAll("#athlete-drawer .tab-content").forEach(c => c.classList.remove("active"));
+      document.querySelectorAll("#athlete-drawer .sidenav-item").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
       const conteudo = $(`prof-tab-${tab}`);
       if (conteudo) conteudo.classList.add("active");
 
-      const wrap = document.querySelector("#prof-drawer .drawer-content-wrap");
+      const wrap = document.querySelector("#athlete-drawer .drawer-content-wrap");
       if (wrap) wrap.scrollTop = 0;
 
       if (tab === "training" || tab === "nutrition") {
@@ -670,13 +676,13 @@ import editorPlanoNucleo from '@elite90/editor-plano/nucleo.js?raw';
     });
 
     // ── DRAG TO DISMISS (mobile bottom sheet) — mesmo mecanismo de
-    //    /admin/atletas, adaptado para #prof-drawer. ──────────────────────
+    //    /admin/atletas, adaptado para #athlete-drawer. ────────────────────
     (function() {
       let startY = 0, currentY = 0, isDragging = false, startTime = 0;
       const DISMISS_THRESHOLD = 0.3;
       const VELOCITY_THRESHOLD = 0.4;
 
-      function getPanel() { return document.querySelector('#prof-drawer .drawer-panel'); }
+      function getPanel() { return document.querySelector('#athlete-drawer .drawer-panel'); }
 
       let origemConteudo = false;
 
