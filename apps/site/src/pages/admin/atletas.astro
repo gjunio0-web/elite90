@@ -170,39 +170,14 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .status-badge.acima-14-dias { background: rgba(192, 57, 43, 0.12); color: var(--c-status-rejected); border: 1px solid var(--c-status-rejected); }
 .td--status { width: 18%; text-align: left; }
 .td--progress { width: 20%; }
-.progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--c-lime); border-radius: 3px; }
 .td--actions { width: 18%; text-align: right; }
 .act { display: inline-flex; align-items: center; gap: var(--space-2); background: none; border: none; cursor: pointer; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-cta); text-transform: uppercase; color: var(--c-textsub); transition: color var(--dur-med) var(--ease-std); }
 .act:hover { color: var(--c-lime); }
 .act [data-lucide] { width: 14px; height: 14px; }
-#athlete-drawer { position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-start; justify-content: flex-end; background: rgba(0,0,0,0); transition: background var(--dur-med) var(--ease-std); }
-#athlete-drawer.open { background: rgba(0,0,0,0.6); }
-#athlete-drawer[hidden] { display: none !important; }
-.drawer-panel { background: var(--c-darkbg); width: min(800px, 96vw); height: 100%; overflow: hidden; border-left: 3px solid var(--c-lime); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-#athlete-drawer.open .drawer-panel { transform: translateX(0); }
-.drawer-body { display: flex; flex-direction: row; flex: 1; overflow: hidden; }
-.drawer-sidenav { width: 170px; flex-shrink: 0; background: rgba(0,0,0,0.25); border-right: 1px solid rgba(255, 255, 255, 0.08); display: flex; flex-direction: column; transition: width 0.28s cubic-bezier(0.16,1,0.3,1); overflow: hidden; }
-.drawer-sidenav.collapsed { width: 52px; }
-.sidenav-item { display: flex; align-items: center; gap: 12px; padding: 16px 0 16px 14px; background: none; border: none; border-left: 3px solid transparent; color: var(--c-textsub); font-family: var(--font-label); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; width: 100%; text-align: left; white-space: nowrap; transition: color 140ms, border-color 140ms; }
-.sidenav-item:hover { color: var(--c-textbody); }
-.sidenav-item.active { color: var(--c-lime); border-left-color: var(--c-lime); }
-.sidenav-abbr { font-family: var(--font-display); font-size: 1.1rem; flex-shrink: 0; width: 28px; text-align: center; }
-.sidenav-label { opacity: 1; transition: opacity 0.15s; }
-.drawer-sidenav.collapsed .sidenav-label { opacity: 0; }
-.drawer-content-wrap { flex: 1; overflow-y: auto; padding: var(--space-5) var(--space-6) var(--space-8); scrollbar-width: thin; scrollbar-color: rgba(166,195,0,0.5) transparent; position: relative; }
-.drawer-content-wrap::-webkit-scrollbar { width: 4px; }
-.drawer-content-wrap::-webkit-scrollbar-thumb { background: rgba(166,195,0,0.5); border-radius: 2px; }
-.drawer-external-label { font-family: var(--font-label); font-size: var(--fs-label); color: var(--c-textsub); letter-spacing: var(--tracking-label); margin-left: 8px; }
 .tabs-nav { display: flex; gap: var(--space-2); margin-bottom: var(--space-6); border-bottom: 1px solid rgba(255, 255, 255, 0.08); overflow-x: auto; }
 .tab-button { background: none; border: none; cursor: pointer; padding: var(--space-3) var(--space-3); font-family: var(--font-label); font-size: 0.7rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.06em; color: var(--c-textsub); border-bottom: 2px solid transparent; transition: color var(--dur-med) var(--ease-std), border-color var(--dur-med) var(--ease-std); white-space: nowrap; }
 .tab-button.active { color: var(--c-lime); border-bottom-color: var(--c-lime); }
 .tab-button:hover { color: var(--c-textbody); }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.drawer-row { display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.drawer-label { font-size: var(--fs-body-md); color: var(--c-textsub); }
-.drawer-value { font-size: var(--fs-body-md); color: var(--c-white); font-weight: var(--fw-body-bold); }
 .cycle-week-bar { margin-bottom: var(--space-6); }
 .cycle-week-label { font-family: var(--font-label); font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-textsub); margin-bottom: var(--space-2); }
 .cycle-week-track { position: relative; height: 4px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; }
@@ -529,9 +504,6 @@ body.wke-dragging, body.wke-dragging * { user-select: none !important; }
 .fab-option-btn:hover { background: rgba(166, 195, 0, 0.12); }
 .drawer-fab { display: none; }
 .drawer-fab.visible { display: flex; }
-.drawer-hamburger-wrap { display: none; position: relative; }
-.drawer-hamburger-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); color: var(--c-white); cursor: pointer; transition: border-color var(--dur-fast) var(--ease-std); padding: 0; }
-.drawer-hamburger-btn:hover { border-color: var(--c-lime); }
 .drawer-tab-dropdown {
       display: block;
       position: fixed;
@@ -618,37 +590,8 @@ tbody { display: block; width: 100%; }
 .td--status { order: 3; width: auto; }
 .status-badge { font-size: 0.6rem; padding: 3px 10px; white-space: nowrap; }
 .td--actions { order: 4; width: 100%; text-align: right; }
-#athlete-drawer { align-items: flex-end; justify-content: center; background: rgba(0,0,0,0); }
-#athlete-drawer.open { background: rgba(0,0,0,0.6); }
-.drawer-panel {
-        width: 100%;
-        /* svh = viewport PEQUENO, medido como se a barra do navegador estivesse
-           à mostra. Com vh, a conta é feita contra o viewport grande e não é
-           refeita quando a barra aparece: a folga de 8% no topo passava a ser
-           exatamente o que a barra ocupava, e a gaveta parecia cobrir a tela
-           inteira. Com svh a folga sobrevive aos dois estados — fica maior com
-           a barra recolhida, o que é preferível a sumir.
-           A linha vh acima fica de reserva para navegador sem suporte a svh. */
-        height: 92vh;
-        height: 92svh;
-        border-left: none;
-        border-top: none;
-        border-radius: 20px 20px 0 0;
-        padding: 0;
-        overflow: hidden;
-        position: relative;
-        transform: translateY(100%);
-        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-#athlete-drawer.open .drawer-panel { transform: translateY(0); }
-.drawer-handle { display: block; width: 48px; height: 20px; background: transparent; margin: 0 auto var(--space-3); display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; }
-.drawer-handle::after { content: ''; display: block; width: 40px; height: 4px; background: rgba(255, 255, 255, 0.14); border-radius: 2px; }
 #drawer-tabs-nav { display: none; }
-.drawer-hamburger-wrap { display: block; }
 #drawer-close { display: none; }
-.drawer-sidenav { display: none; }
-.drawer-body { flex-direction: column; }
-.drawer-content-wrap { overflow-y: auto; padding: var(--space-4); }
 .drawer-tab-indicator { display: flex !important; }
 .metric-grid[style*="1fr 1fr 1fr 1fr"] { grid-template-columns: 1fr 1fr !important; }
 .metric-grid[style*="1fr 1fr 1fr"] { grid-template-columns: 1fr 1fr !important; }
