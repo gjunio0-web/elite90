@@ -37,18 +37,20 @@ const isSafeDrawer = (v: string | null): v is 'detail' | 'eval' => v === 'detail
 // linhas fica vazio de propósito — a coluna segue reservada, para o alinhamento
 // não quebrar, mas não se inventa rótulo onde o título já diz tudo.
 //
-// "etapa" marca as cinco fases da jornada, que aparecem recuadas sob o grupo.
+// "etapa" marca as seis fases da jornada, que aparecem recuadas sob o grupo.
 const indice = [
   { id: 'inicio',    titulo: 'Início',                  chave: '',     etapa: false },
-  { id: 'papeis',    titulo: 'Três papéis',             chave: '',     etapa: false },
+  { id: 'papeis',    titulo: 'Quatro papéis',           chave: '',     etapa: false },
   { id: 'chegada',   titulo: 'Chega uma candidatura',   chave: '01',   etapa: true  },
   { id: 'triagem',   titulo: 'A triagem',               chave: '02',   etapa: true  },
   { id: 'avaliacao', titulo: 'A avaliação estratégica', chave: '03',   etapa: true  },
   { id: 'promocao',  titulo: 'Aceitar no programa',     chave: '04',   etapa: true  },
-  { id: 'retencao',  titulo: 'A rotina da madrugada',   chave: '05',   etapa: true  },
+  { id: 'delegacao', titulo: 'Delegar o plano',         chave: '05',   etapa: true  },
+  { id: 'retencao',  titulo: 'A rotina da madrugada',   chave: '06',   etapa: true  },
   { id: 'catalogo',  titulo: 'O catálogo de exercícios', chave: 'Base', etapa: false },
   { id: 'alimentos', titulo: 'A base de alimentos',     chave: 'Base', etapa: false },
   { id: 'seguranca', titulo: 'As fechaduras do painel', chave: '',     etapa: false },
+  { id: 'visaoprof', titulo: 'O que o profissional vê', chave: '',     etapa: false },
   { id: 'regras',    titulo: 'Quatro regras',           chave: '',     etapa: false },
 ];
 const antesDaJornada = indice.filter((s) => !s.etapa && ['inicio', 'papeis'].includes(s.id));
@@ -73,7 +75,7 @@ const backHref =
 
   :root{
     /* Codigo de autoria — quem age em cada etapa do guia */
-    --ator-sistema:#4A90D9; --ator-ia:#A0A820; --ator-coach:#27AE60;
+    --ator-sistema:#4A90D9; --ator-ia:#A0A820; --ator-coach:#27AE60; --ator-prof:#8E6FD8;
     --line: 1px solid rgba(255,255,255,0.08);
   }
   *{box-sizing:border-box}
@@ -151,6 +153,7 @@ const backHref =
   }
   .chip::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--cor)}
   .c-sis{--cor:var(--ator-sistema)} .c-ia{--cor:var(--ator-ia)} .c-coach{--cor:var(--ator-coach)}
+  .c-prof{--cor:var(--ator-prof)}
 
   /* ── Esteira de etapas ───────────────────────── */
   .etapa{position:relative; padding-left:calc(var(--space-6) + var(--space-2)); margin-bottom:var(--space-6)}
@@ -408,7 +411,7 @@ const backHref =
 <section>
   <div class="wrap">
     <h3>Comece por aqui</h3>
-    <h2 id="papeis">Três papéis, sem sobreposição</h2>
+    <h2 id="papeis">Quatro papéis, sem sobreposição</h2>
     <p class="lead" style="margin-bottom:var(--space-5)">Este código de cores acompanha o guia
       inteiro. Em cada etapa, a etiqueta indica quem age — e a separação não é uma promessa de
       conduta, é a forma como o sistema foi construído.</p>
@@ -431,6 +434,12 @@ const backHref =
         <div class="verbo">Decide</div>
         <p>Aprova ou recusa, revisa e corrige cada texto, aperta o botão de enviar e escolhe
           quem entra no programa.</p>
+      </div>
+      <div class="ator" style="--cor:var(--ator-prof)">
+        <div class="n">O profissional</div>
+        <div class="verbo">Propõe</div>
+        <p>Preparador ou nutricionista a quem o Coach delega um plano. Monta o conteúdo e o
+          submete. Não publica, não escolhe atleta e não mexe nas bases sozinho.</p>
       </div>
     </div>
   </div>
@@ -739,8 +748,74 @@ const backHref =
     </div>
 
     <!-- 5 -->
-    <div class="etapa" id="retencao">
+    <div class="etapa" id="delegacao">
       <div class="num">05</div>
+      <div class="etapa-hd">
+        <h2 style="font-size:clamp(1.4rem,3vw,2rem)">Delegar o plano</h2>
+        <span class="chip c-coach">Decisão do Coach</span>
+        <span class="chip c-prof">Trabalho do profissional</span>
+      </div>
+      <div class="etapa-body">
+        <p class="lead">Aceito no programa, o atleta precisa de um plano. O Coach pode montá-lo
+          ele mesmo, como sempre, ou <strong>atribuí-lo a um profissional</strong> — e a
+          atribuição é por especialidade: o mesmo atleta pode ter treino com um e nutricional com
+          outro.</p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>O que a atribuição faz</h3>
+            <ul class="clean">
+              <li>Põe o atleta na carteira daquele profissional, que passa a vê-lo numa tela
+                própria, fora do painel.</li>
+              <li>Abre para ele o mesmo editor de plano que o Coach usa — <strong>sem</strong>
+                publicar, compartilhar, configurar fórmula de macros ou excluir atleta.</li>
+              <li>Encerrar a atribuição tem efeito imediato: o atleta sai da carteira dele na
+                requisição seguinte.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>O que volta para o Coach</h3>
+            <ul class="clean">
+              <li>Uma sugestão, na fila de aprovações, com o plano montado por inteiro.</li>
+              <li>Enquanto ela está em revisão, a tela do profissional fica de leitura — ele não
+                muda o documento sob os olhos de quem o revisa.</li>
+              <li>Por atleta e tipo de plano existe <strong>uma</strong> sugestão em curso.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-top:var(--space-5)">Três desfechos, e só um deles chega ao atleta</h3>
+        <div class="grid-3">
+          <div class="card">
+            <p style="font-size:.9rem; margin:0"><strong>Devolver.</strong> Volta para ajuste, e
+              <strong>exige dizer o que ajustar</strong>: sem o texto, a devolução não se conclui.
+              O profissional lê a observação na própria tela dele.</p>
+          </div>
+          <div class="card">
+            <p style="font-size:.9rem; margin:0"><strong>Recusar.</strong> Encerra o ciclo daquela
+              sugestão, que não reabre. O motivo aqui é opcional — não há passo seguinte que
+              dependa dele.</p>
+          </div>
+          <div class="card">
+            <p style="font-size:.9rem; margin:0"><strong>Publicar.</strong> O único ato que leva
+              conteúdo ao plano do atleta. Nasce uma versão numerada e permanente, com a autoria do
+              profissional <strong>copiada no instante</strong> — atualizar o cadastro dele depois
+              não reescreve versão já publicada.</p>
+          </div>
+        </div>
+
+        <div class="aviso a-lime" style="margin-top:var(--space-4)">
+          <div class="t">A regra 04 não abriu exceção</div>
+          <p>Delegar transfere o <strong>trabalho técnico</strong>, não a revisão. Nenhum plano
+            montado por terceiro chega ao atleta sem passar pelos olhos e pelo dedo do Coach — é a
+            mesma regra que vale para o texto de uma avaliação, aplicada a um documento maior.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="etapa" id="retencao">
+      <div class="num">06</div>
       <div class="etapa-hd">
         <h2 style="font-size:clamp(1.4rem,3vw,2rem)">A rotina da madrugada</h2>
         <span class="chip c-sis">Automático</span>
@@ -798,6 +873,11 @@ const backHref =
         <p style="font-size:.9rem; margin:0 0 var(--space-2)"><strong>Salvar</strong> grava a
           correção sem aprovar nada. <strong>Salvar e marcar como revisado</strong> grava e carimba
           quem aprovou e quando.</p>
+        <p style="font-size:.9rem; margin:0 0 var(--space-2)">Um exercício <strong>proposto por um
+          profissional</strong> entra por aqui, aguardando revisão, com a ficha que ele preencheu.
+          O Coach aprova ou recusa; a escrita direta no catálogo continua só dele. O motivo de a
+          aprovação existir não é desconfiança técnica — o catálogo é comum, e um item errado
+          alcança qualquer plano que venha a usá-lo.</p>
         <p style="font-size:.9rem; margin:0">Corrigir uma vírgula não é atestar que o exercício
           está pronto para o atleta — por isso são dois botões, e não um só com uma caixa de
           marcar ao lado.</p>
@@ -922,6 +1002,10 @@ const backHref =
 
     <div class="aviso a-azul" style="margin-top:var(--space-3)">
       <div class="t">No celular, medida caseira ganha caminho próprio</div>
+      <p>Alimento <strong>proposto por um profissional</strong> — um suplemento, uma marca — cai
+        na mesma fila de revisão, com a ficha nutricional que ele leu do rótulo. É o caso em que a
+        proposta costuma vir mais completa do que o Coach a faria: quem tem a formação para ler um
+        rótulo é quem a submeteu.</p>
       <p>Aqui a regra difere de exercícios de propósito. Escrever "1 concha média" é digitação de
         segundos, e é no mercado ou na cozinha que a medida certa ocorre a alguém — então o
         aparelho traz um filtro de quem ainda está sem medida, e abre esse campo primeiro. Marcar
@@ -959,6 +1043,60 @@ const backHref =
           depósito: passam pelo sistema, que os recebe e grava.</p>
       </div>
     </div>
+
+    <div class="aviso a-azul" style="margin-top:var(--space-4)">
+      <div class="t">Há uma quarta porta, e ela não é do painel</div>
+      <p>O profissional não entra no painel: ele tem rota própria, com tela de entrada própria,
+        que <strong>recusa conta de administrador</strong> tanto quanto o painel recusa a dele.
+        Essa tela não é linkada em página pública nem indexada — o endereço chega ao profissional
+        pelo e-mail de concessão de acesso, e por mais nenhum caminho.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h3 id="visaoprof">Quem consegue ver os dados</h3>
+    <h2>O que o profissional vê</h2>
+    <p class="lead" style="margin-bottom:var(--space-4)">Ao cadastrar alguém, o Coach faz uma
+      escolha que decide o que o servidor devolve sobre cada atleta daquela carteira. É decisão
+      dele, tomada uma vez por profissional, e não há como afrouxá-la atleta a atleta depois.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Interno — vê o atleta</h3>
+        <p style="font-size:.9rem; margin:0">Nome, e-mail, telefone e as fotos de base. Para quem
+          trabalha dentro da operação e já conversa com o atleta.</p>
+      </div>
+      <div class="card">
+        <h3>Externo — vê um rótulo</h3>
+        <p style="font-size:.9rem; margin:0">O atleta aparece por um identificador, sem nome e sem
+          contato. O plano fica tecnicamente completo e deixa de estar ligado a uma pessoa
+          identificável.</p>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:var(--space-3)">
+      <div class="card">
+        <p style="font-size:.9rem; margin:0"><strong>Nada é lido pelo navegador dele.</strong>
+          Toda leitura passa pelo servidor, que monta a resposta com os campos do nível — o filtro
+          não está na tela, onde seria contornável.</p>
+      </div>
+      <div class="card">
+        <p style="font-size:.9rem; margin:0"><strong>Alguns campos não saem em nível nenhum.</strong>
+          Pagamento, origem da candidatura, endereços de acesso a documentos e quem promoveu o
+          atleta ficam no painel.</p>
+      </div>
+      <div class="card">
+        <p style="font-size:.9rem; margin:0"><strong>É lista de permitidos.</strong> Um campo novo
+          na ficha do atleta não passa a aparecer para o profissional por inércia: precisa de
+          decisão explícita. O silêncio fecha.</p>
+      </div>
+    </div>
+
+    <p style="font-size:.85rem; color:var(--c-textsub); margin-top:var(--space-4)">O profissional
+      tem um guia próprio, escrito para ele, que descreve esta mesma mecânica do lado de lá — o que
+      ele vê, o que não vê, e por quê.</p>
   </div>
 </section>
 
@@ -984,8 +1122,8 @@ const backHref =
       </div>
       <div class="g">
         <div class="k">04</div>
-        <p><b>Nada sai sem revisão.</b> Todo texto que chega a um candidato passou pelos olhos e
-          pelo dedo do Coach antes.</p>
+        <p><b>Nada sai sem revisão.</b> Todo texto que chega a um candidato ou atleta passou pelos
+          olhos e pelo dedo do Coach antes — inclusive o plano montado por um profissional.</p>
       </div>
     </div>
   </div>
@@ -995,7 +1133,7 @@ const backHref =
 
 <script>
   // Destaque da seção corrente. Progressivo de propósito: se o navegador não
-  // tiver IntersectionObserver, ou se algum alvo sumir do documento, os onze
+  // tiver IntersectionObserver, ou se algum alvo sumir do documento, os treze
   // itens seguem funcionando como links comuns. O índice não depende disto
   // para servir — o destaque é orientação, não navegação.
   //
@@ -1007,7 +1145,7 @@ const backHref =
     const ids = [...new Set([...marcas].map((m) => m.dataset.idx))]
       .filter((id): id is string => !!id);
 
-    // Observa-se o BLOCO que contém a âncora, não a âncora. Três das onze são
+    // Observa-se o BLOCO que contém a âncora, não a âncora. Três das treze são
     // títulos de altura mínima; sozinhas, elas entram e saem da faixa de
     // observação num piscar, e a última do documento nunca chega a entrar,
     // porque a rolagem acaba antes. O bloco tem altura de verdade.
@@ -1059,7 +1197,7 @@ const backHref =
     // A regra de fim de documento depende da posição de rolagem, que o
     // observador não reporta sozinho: chegar ao fim pode não cruzar nenhuma
     // fronteira de seção. Daí o ouvinte, passivo e sem trabalho por quadro
-    // além de repintar onze itens.
+    // além de repintar treze itens.
     window.addEventListener("scroll", pintar, { passive: true });
   }
 </script>
