@@ -90,6 +90,16 @@
   --c-status-pending:  #F1C40F; /* Aguardando check-in — cor nova; não confundir com --c-pending (selo público, cor diferente) */
   --c-status-warning:  #EAB308; /* Atenção (±5-10%) */
 
+  /* ESTADO DE SUGESTÃO DEVOLVIDA (rota do profissional e guias) —
+     Cor NOVA, e não um alias, por um motivo concreto: devolvida começou em
+     --c-lime e ficou invisível, porque lima já é a cor de marca e a aba de
+     especialidade nasce lima (profissional/index.astro). Estado não pode usar
+     a cor que a interface usa para tudo.
+     O violeta não é arbitrário: é o mesmo --ator-prof dos guias e dos dois
+     fluxogramas, onde significa "este ato é do profissional". Devolvida é
+     exatamente o estado em que o trabalho voltou às mãos dele. */
+  --c-status-returned: #8E6FD8;
+
   /* TIPOGRAFIA ADICIONAL (Admin — M2 Atletas) */
   --fw-body:      400;
   --fw-body-bold: 700;

@@ -93,7 +93,7 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
        consegue reabrir. Sem sugestão nenhuma, a aba fica neutra. */
     .prof-aba[data-estado="draft"]     { --estado: var(--c-textsub); }
     .prof-aba[data-estado="pending"]   { --estado: var(--c-status-alert); }
-    .prof-aba[data-estado="returned"]  { --estado: var(--c-lime); }
+    .prof-aba[data-estado="returned"]  { --estado: var(--c-status-returned); }
     .prof-aba[data-estado="published"] { --estado: var(--c-status-progress); }
     .prof-aba[data-estado="rejected"]  { --estado: var(--c-status-rejected); }
     .prof-aba[data-estado] { border-color: var(--estado); color: var(--estado); }
@@ -157,7 +157,7 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
     <div id="prof-legenda" class="prof-legenda" hidden>
       <span class="prof-legenda__i" style="--ponto:var(--c-textsub)">Rascunho</span>
       <span class="prof-legenda__i" style="--ponto:var(--c-status-alert)">Em revisão</span>
-      <span class="prof-legenda__i" style="--ponto:var(--c-lime)">Devolvida</span>
+      <span class="prof-legenda__i" style="--ponto:var(--c-status-returned)">Devolvida</span>
       <span class="prof-legenda__i" style="--ponto:var(--c-status-progress)">Publicada</span>
       <span class="prof-legenda__i" style="--ponto:var(--c-status-rejected)">Recusada</span>
       <a class="prof-legenda__link" href="/profissional/guia#resposta">O que significa cada estado</a>
