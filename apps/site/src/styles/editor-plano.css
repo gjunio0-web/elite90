@@ -325,6 +325,24 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 .pi-campo input, .pi-campo select, .pi-campo textarea { background: var(--c-black); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 9px 10px; }
 .pi-campo input:focus, .pi-campo select:focus, .pi-campo textarea:focus { outline: none; border-color: var(--c-lime); box-shadow: 0 0 0 2px rgba(166, 195, 0, 0.12); }
 .pi-campo textarea { min-height: 70px; resize: vertical; }
+/* select nativo, sem appearance:none, herda o cromo do sistema — no mobile
+   (iOS/Android) isso troca o triângulo do sistema por um branco/claro que não
+   respeita background/color do autor, quebrando o Design System exatamente
+   onde o app é mais usado. Mesmo remédio já usado em .status-sel
+   (admin/fichas.astro): apagar o cromo nativo e desenhar a seta própria. */
+.pi-campo select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23999999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+/* A lista de opções aberta é a segunda metade do mesmo problema: o cromo do
+   sistema ignora o CSS do <select> mas ainda lê o de <option> na maioria dos
+   navegadores móveis (exceção conhecida: Safari iOS, que não dá margem
+   nenhuma aqui — mesma limitação documentada em .status-sel). */
+.pi-campo select option { background: var(--c-darkbg); color: var(--c-textbody); }
 .pi-campo--largo { grid-column: 1 / -1; }
 .pi-kcal-calc { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); margin: 0; padding: 9px 0; }
 .pi-erro { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-status-rejected); margin: var(--space-3) 0 0; }
