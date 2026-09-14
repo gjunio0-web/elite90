@@ -443,7 +443,17 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
 
       atletasPorUid = new Map();
       grid.innerHTML = "";
-      for (const item of atletas) {
+      // Alfabético pela identidade EXIBIDA — nome ou rótulo externo, o que o
+      // servidor tiver projetado (D-14); a ordenação nunca decide entre os
+      // dois, só usa o mesmo valor que a linha de baixo mostra. Antes disto
+      // a ordem era acidental: a devolvida por uma consulta a assignments/
+      // sem orderBy (netlify/functions/listar-atletas-do-profissional.ts).
+      const atletasOrdenados = [...atletas].sort((x, y) => {
+        const nx = (x.atleta?.name ?? x.atleta?.externalLabel ?? "").toLowerCase();
+        const ny = (y.atleta?.name ?? y.atleta?.externalLabel ?? "").toLowerCase();
+        return nx.localeCompare(ny, "pt-BR");
+      });
+      for (const item of atletasOrdenados) {
         const a = item.atleta ?? {};
         // Nome OU rótulo, nunca os dois: o servidor projeta um só, conforme a
         // classificação do cadastro (D-14). A tela exibe o que veio, e o `??`
