@@ -27,6 +27,7 @@ import Fluxogramas from './Fluxogramas.astro';
 ---
 <div class="gvf" id="gvf" hidden role="dialog" aria-modal="true" aria-labelledby="gvf-titulo">
   <div class="gvf-panel">
+    <span class="gvf-handle" aria-hidden="true"></span>
     <div class="gvf-topo">
       <div>
         <div class="gvf-eyebrow">Coach Ruiz · Elite 90 Pro</div>
@@ -185,8 +186,19 @@ import Fluxogramas from './Fluxogramas.astro';
       width:100%; height:92vh; height:92svh;
       border-left:none; border-top:none; border-radius:20px 20px 0 0;
       transform:translateY(100%);
+      transition:transform .35s cubic-bezier(0.16,1,0.3,1);
     }
     .gvf.open .gvf-panel{transform:translateY(0)}
+
+    /* Puxador: mesmo .drawer-handle de #athlete-drawer. Existe só para ser
+       arrastado — sem o gesto de arrastar (ligado no script abaixo), seria
+       um desenho prometendo uma interação que não funciona. */
+    .gvf-handle{
+      display:flex; align-items:center; justify-content:center;
+      width:48px; height:20px; margin:8px auto 0; flex:none;
+      background:transparent; cursor:grab; touch-action:none;
+    }
+    .gvf-handle::after{content:''; display:block; width:40px; height:4px; background:rgba(255,255,255,.14); border-radius:2px}
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -288,5 +300,86 @@ import Fluxogramas from './Fluxogramas.astro';
     window.addEventListener('hashchange', () => {
       if (location.hash === '#fluxos') abrir(false); else fechar();
     });
+
+    // ── ARRASTAR PARA FECHAR (folha inferior no mobile) ──
+    // Mesmo mecanismo de #athlete-drawer/.drawer-panel em admin/atletas.astro.
+    // Só liga abaixo de 768px, onde o painel é a folha inferior (translateY) —
+    // acima disso ele desliza da lateral (translateX), e um arrasto vertical
+    // não corresponde a nada ali.
+    (() => {
+      const bp = window.matchMedia('(max-width:768px)');
+      let startY = 0, currentY = 0, arrastando = false, startTime = 0, origemConteudo = false;
+      const LIMIAR_DISTANCIA = 0.3;
+      const LIMIAR_VELOCIDADE = 0.4;
+
+      const painel = () => gaveta.querySelector<HTMLElement>('.gvf-panel');
+
+      const onTouchStart = (e: TouchEvent, doConteudo: boolean) => {
+        const p = painel();
+        if (!p) return;
+        startY = e.touches[0].clientY;
+        currentY = 0;
+        arrastando = true;
+        origemConteudo = doConteudo;
+        startTime = Date.now();
+        p.style.transition = 'none';
+      };
+
+      const cancelarArrasto = () => {
+        arrastando = false; origemConteudo = false; currentY = 0;
+        const p = painel();
+        if (p) { p.style.transition = ''; p.style.transform = ''; }
+      };
+
+      // Devolve true quando o gesto foi consumido como arrasto — só aí o
+      // chamador cancela o comportamento padrão (rolagem).
+      const onTouchMove = (e: TouchEvent): boolean => {
+        if (!arrastando) return false;
+        const p = painel();
+        if (!p) return false;
+        const dy = e.touches[0].clientY - startY;
+        if (dy < 0) { if (origemConteudo) cancelarArrasto(); return false; }
+        currentY = dy;
+        p.style.transform = `translateY(${dy}px)`;
+        return true;
+      };
+
+      const onTouchEnd = () => {
+        if (!arrastando) return;
+        arrastando = false;
+        const p = painel();
+        if (!p) return;
+        const decorrido = Date.now() - startTime;
+        const velocidade = currentY / Math.max(decorrido, 1);
+        const alturaPainel = p.offsetHeight;
+        const deveFechar = currentY > alturaPainel * LIMIAR_DISTANCIA || velocidade > LIMIAR_VELOCIDADE;
+        p.style.transition = 'transform .35s cubic-bezier(0.16,1,0.3,1)';
+        if (deveFechar) {
+          p.style.transform = 'translateY(100%)';
+          fechar();
+          setTimeout(() => { p.style.transform = ''; p.style.transition = ''; }, DURACAO_TRANSICAO);
+        } else {
+          p.style.transform = 'translateY(0)';
+        }
+        currentY = 0;
+      };
+
+      gaveta.addEventListener('touchstart', (e) => {
+        if (!bp.matches || !gaveta.classList.contains('open')) return;
+        const alvo = e.target as HTMLElement;
+        // Puxador e cabeçalho: arrasto sempre, não há o que rolar ali.
+        if (alvo.closest('.gvf-handle, .gvf-topo')) { onTouchStart(e, false); return; }
+        // Conteúdo: só quando já está no topo — fora do topo o gesto para
+        // baixo é rolagem, e roubá-lo seria pior que não ter arrasto nenhum.
+        const wrap = alvo.closest('.gvf-corpo');
+        if (wrap && (wrap as HTMLElement).scrollTop <= 0) onTouchStart(e, true);
+      }, { passive: true });
+
+      gaveta.addEventListener('touchmove', (e) => {
+        if (arrastando && onTouchMove(e)) e.preventDefault();
+      }, { passive: false });
+
+      gaveta.addEventListener('touchend', () => { if (arrastando) onTouchEnd(); });
+    })();
   })();
 </script>
