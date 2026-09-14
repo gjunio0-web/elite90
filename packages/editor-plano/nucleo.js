@@ -1555,6 +1555,150 @@ function nteAutoSave() {
   if (_nup && _nup.status === 'publicado' && !_nup.hasUnpublishedChanges) { _nup.hasUnpublishedChanges = true; EditorPlanoHost.renderPubHeader('nutrition'); }
 }
 
+// ---------- AC-34 · Propor item de catálogo, agora em modal ----------
+//
+// Era página própria (/profissional/propor-item); virou modal sobre o próprio
+// editor de plano, para não perder o plano em edição só para propor um item —
+// a mesma razão pela qual o link "Propor exercício/alimento" abria em aba nova
+// antes desta mudança.
+//
+// Fica no NÚCLEO compartilhado, não em cada hospedeira, porque a marcação do
+// modal mora dentro de SobreposicoesTreino.astro / SobreposicoesNutricional.astro
+// (CA-42, sem cópia entre a gaveta do Coach e a rota do profissional). Só é
+// ACIONADA no profissional: o link só chama abrirPropostaItem quando
+// `window.E90` existe — ver o script condicional nesses dois componentes.
+
+// Vocabulário fechado, repetido aqui como em toda tela desta fase: recusa em
+// vez de assumir lista desatualizada, nunca reimporta módulo do servidor no
+// cliente. Precisa ficar IDÊNTICO, caractere a caractere, a
+// _vocabulario-exercicios.ts / _vocabulario-alimentos.ts.
+var PI_GRUPOS = ['Peito', 'Costas', 'Ombros', 'Bíceps', 'Tríceps', 'Antebraço', 'Pernas', 'Abdômen'];
+var PI_EQUIPAMENTOS = ['Barra', 'Halteres', 'Polia', 'Máquina', 'Peso Corporal', 'Barra W', 'Kettlebell'];
+var PI_NIVEIS = ['iniciante', 'intermediario', 'avancado'];
+var PI_CATEGORIAS = [
+  'Alimentos preparados', 'Bebidas (alcoólicas e não alcoólicas)', 'Carnes e derivados',
+  'Cereais e derivados', 'Frutas e derivados', 'Gorduras e óleos', 'Leguminosas e derivados',
+  'Leite e derivados', 'Miscelâneas', 'Nozes e sementes', 'Outros alimentos industrializados',
+  'Ovos e derivados', 'Pescados e frutos do mar', 'Produtos açucarados',
+  'Verduras, hortaliças e derivados',
+];
+var piSelectsPreenchidos = false;
+
+function piPreencherSelect(select, opcoes, rotulos) {
+  select.innerHTML = opcoes.map(function(v) {
+    return '<option value="' + v + '">' + (rotulos ? (rotulos[v] || v) : v) + '</option>';
+  }).join('');
+}
+
+function piChamar(fn, corpo) {
+  return fetch('/.netlify/functions/' + fn, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.E90.token },
+    body: JSON.stringify(corpo || {}),
+  });
+}
+
+async function piErroDe(resp) {
+  try {
+    const d = await resp.json();
+    return d.detalhes ? (d.erro + ' (' + d.detalhes.join('; ') + ')') : (d.erro || ('Erro ' + resp.status));
+  } catch (err) { return 'Erro ' + resp.status; }
+}
+
+function piAtualizarKcal() {
+  const p = parseFloat(document.getElementById('pi-al-proteina').value) || 0;
+  const c = parseFloat(document.getElementById('pi-al-carboidrato').value) || 0;
+  const l = parseFloat(document.getElementById('pi-al-lipideos').value) || 0;
+  document.getElementById('pi-al-kcal-calc').textContent = Math.round(p * 4 + c * 4 + l * 9) + ' kcal / 100g';
+}
+
+async function piCarregarPropostas(tipo) {
+  const lista = document.getElementById('pi-lista-' + tipo);
+  if (!lista) return;
+  lista.innerHTML = '<p class="pi-vazio">Carregando…</p>';
+  try {
+    const resp = await piChamar('listar-minhas-propostas', { tipo: tipo });
+    if (!resp.ok) { lista.innerHTML = ''; return; }
+    const { propostas } = await resp.json();
+    if (!propostas.length) {
+      lista.innerHTML = '<p class="pi-vazio">Nenhuma proposta enviada ainda.</p>';
+      return;
+    }
+    lista.innerHTML = propostas.map(function(p) {
+      return '<div class="pi-lista__item"><span class="pi-lista__nome">' + (p.nome || '(sem nome)') + '</span>' +
+        '<span class="pi-estado pi-estado--' + p.status + '">' + (p.status === 'aprovado' ? 'Aprovado' : 'Pendente') + '</span></div>';
+    }).join('');
+  } catch (err) {
+    lista.innerHTML = '';
+  }
+}
+
+function abrirPropostaItem(tipo) {
+  if (tipo === 'exercicio') closeExerciseSearch(); else closeFoodSearch();
+  if (!piSelectsPreenchidos) {
+    piPreencherSelect(document.getElementById('pi-ex-grupo'), PI_GRUPOS);
+    piPreencherSelect(document.getElementById('pi-ex-equipamento'), PI_EQUIPAMENTOS);
+    piPreencherSelect(document.getElementById('pi-ex-nivel'), PI_NIVEIS, { iniciante: 'Iniciante', intermediario: 'Intermediário', avancado: 'Avançado' });
+    piPreencherSelect(document.getElementById('pi-al-categoria'), PI_CATEGORIAS);
+    piSelectsPreenchidos = true;
+  }
+  document.getElementById('pi-form-' + tipo).reset();
+  document.getElementById('pi-erro-' + tipo).hidden = true;
+  if (tipo === 'alimento') piAtualizarKcal();
+  document.getElementById('pi-modal-' + tipo).hidden = false;
+  piCarregarPropostas(tipo);
+}
+
+function fecharPropostaItem(tipo) {
+  document.getElementById('pi-modal-' + tipo).hidden = true;
+}
+
+async function piEnviarProposta(tipo) {
+  const erro = document.getElementById('pi-erro-' + tipo);
+  const enviar = document.getElementById('pi-enviar-' + tipo);
+  erro.hidden = true;
+  enviar.disabled = true;
+
+  let campos;
+  if (tipo === 'exercicio') {
+    campos = {
+      nome_pt: document.getElementById('pi-ex-nome').value.trim(),
+      instrucao_pt: document.getElementById('pi-ex-instrucao').value.trim(),
+      grupo: document.getElementById('pi-ex-grupo').value,
+      musculoPrimario: document.getElementById('pi-ex-musculo').value.trim(),
+      equipamento: document.getElementById('pi-ex-equipamento').value,
+      nivel: document.getElementById('pi-ex-nivel').value,
+    };
+  } else {
+    const p = parseFloat(document.getElementById('pi-al-proteina').value);
+    const c = parseFloat(document.getElementById('pi-al-carboidrato').value);
+    const l = parseFloat(document.getElementById('pi-al-lipideos').value);
+    campos = {
+      nomeExibicao: document.getElementById('pi-al-nome').value.trim(),
+      categoria: document.getElementById('pi-al-categoria').value,
+      // kcal calculado aqui, nunca digitado — conveniência de tela; o servidor
+      // segue sendo quem decide se está certo (validarMacros em
+      // _vocabulario-alimentos.ts).
+      macros: { proteinaG: p, carboidratoG: c, lipideosG: l, kcal: Math.round(p * 4 + c * 4 + l * 9) },
+    };
+  }
+
+  const fn = tipo === 'exercicio' ? 'atualizar-exercicio' : 'atualizar-alimento';
+  try {
+    const resp = await piChamar(fn, { operacao: 'criar', campos: campos });
+    if (!resp.ok) throw new Error(await piErroDe(resp));
+    document.getElementById('pi-form-' + tipo).reset();
+    if (tipo === 'alimento') piAtualizarKcal();
+    wkeToast('Proposta enviada para revisão do Coach');
+    await piCarregarPropostas(tipo);
+  } catch (err) {
+    erro.textContent = (err && err.message) || 'Não foi possível enviar agora.';
+    erro.hidden = false;
+  } finally {
+    enviar.disabled = false;
+  }
+}
+
 
 // ---------- corpo do editor movido pela AC-17 (correção da fronteira) ----------
 //

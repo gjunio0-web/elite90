@@ -19,23 +19,76 @@
           </div>
           <!-- Atalho para o catálogo. A especificação o chama de entrada de uso
                diário, e com razão: a vontade de corrigir um nome ou de procurar
-               um exercício que não existe nasce AQUI, com o plano aberto — não
-               no hub. Abre em ABA NOVA de propósito: o plano em edição vive só
-               na memória da página (wkePlanCache; o auto-salvamento ainda é um
-               comentário), e sair da página o perderia.
+               um exercício que não existe nasce AQUI, com o plano aberto.
 
                CA-42 · componente sem cópia entre a gaveta do Coach e a rota do
                profissional — o destino deste link, porém, PRECISA diferir: o
-               Coach vai para a gestão completa (/admin/exercicios); o
-               profissional não tem acesso lá (403), e vai para a tela de
-               propor item (AC-34). O texto e o `href` nascem para o Coach, e
-               o script logo abaixo os corrige se a página for a restrita —
-               nunca o contrário, para o caso comum (Coach) não depender de
-               JS extra rodando a tempo. -->
+               Coach vai para a gestão completa (/admin/exercicios, em aba
+               nova — o plano em edição vive só na memória da página, e sair
+               dela o perderia); o profissional não tem acesso lá (403), e em
+               vez disso abre o MODAL de propor item (AC-34), que fica sobre
+               o próprio editor — nem precisa de aba nova, porque não navega
+               para lugar nenhum. O texto e o `href` nascem para o Coach, e o
+               script logo abaixo os corrige (e troca a navegação por
+               abertura de modal) se a página for a restrita — nunca o
+               contrário, para o caso comum (Coach) não depender de JS extra
+               rodando a tempo. -->
           <a class="wke-search-catalogo" id="wke-search-catalogo" href="/admin/exercicios" target="_blank" rel="noopener">
             Gerenciar catálogo
             <span data-lucide="external-link"></span>
           </a>
+        </div>
+      </div>
+
+      <!-- Modal de propor exercício (AC-34). Marcação vive aqui — sem cópia,
+           mesma regra do resto do arquivo — mas só é ABERTA no profissional
+           (abrirPropostaItem/fecharPropostaItem, em nucleo.js, só são chamadas
+           pelo script logo abaixo, que só reescreve o link nessa rota). No
+           Coach, fica presente e sempre oculta. -->
+      <div class="pi-modal-overlay" id="pi-modal-exercicio" hidden onclick="if(event.target===this)fecharPropostaItem('exercicio')">
+        <div class="pi-modal-box">
+          <h2 class="pi-modal-title">Propor exercício</h2>
+          <p class="pi-modal-sub">Vai para a mesma fila de revisão que o Coach já usa. Aprovado, passa a existir para todo mundo.</p>
+          <form class="pi-modal-form" id="pi-form-exercicio" onsubmit="event.preventDefault(); piEnviarProposta('exercicio');">
+            <div class="pi-grid">
+              <div class="pi-campo pi-campo--largo">
+                <label for="pi-ex-nome">Nome</label>
+                <input type="text" id="pi-ex-nome" required />
+              </div>
+              <div class="pi-campo pi-campo--largo">
+                <label for="pi-ex-instrucao">Instrução de execução</label>
+                <textarea id="pi-ex-instrucao" required></textarea>
+              </div>
+              <div class="pi-campo">
+                <label for="pi-ex-grupo">Grupamento</label>
+                <select id="pi-ex-grupo" required></select>
+              </div>
+              <div class="pi-campo">
+                <label for="pi-ex-musculo">Músculo primário</label>
+                <input type="text" id="pi-ex-musculo" required />
+              </div>
+              <div class="pi-campo">
+                <label for="pi-ex-equipamento">Equipamento</label>
+                <select id="pi-ex-equipamento" required></select>
+              </div>
+              <div class="pi-campo">
+                <label for="pi-ex-nivel">Nível</label>
+                <select id="pi-ex-nivel" required></select>
+              </div>
+            </div>
+
+            <p class="pi-erro" id="pi-erro-exercicio" hidden></p>
+
+            <div class="pi-modal-actions">
+              <button type="button" class="pi-btn pi-btn--secundario" onclick="fecharPropostaItem('exercicio')">Cancelar</button>
+              <button type="submit" class="pi-btn" id="pi-enviar-exercicio">Enviar para aprovação</button>
+            </div>
+          </form>
+
+          <div class="pi-lista-wrap">
+            <h3 class="pi-lista-title">Suas propostas</h3>
+            <div id="pi-lista-exercicio"></div>
+          </div>
         </div>
       </div>
 
@@ -51,7 +104,13 @@
           if (typeof window.E90 === "undefined") return; // é o Coach — link já está certo
           var a = document.getElementById("wke-search-catalogo");
           if (!a) return;
-          a.href = "/profissional/propor-item?tipo=exercicio";
+          a.href = "#";
+          a.removeAttribute("target");
+          a.removeAttribute("rel");
           a.firstChild.textContent = "Propor exercício";
+          a.addEventListener("click", function (ev) {
+            ev.preventDefault();
+            abrirPropostaItem("exercicio");
+          });
         });
       </script>

@@ -308,7 +308,42 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 .nte-qty-cancel { background: transparent; border: 1px solid rgba(255, 255, 255, 0.14); color: var(--c-textsub); }
 .nte-qty-confirm { background: var(--c-lime); border: 1px solid var(--c-lime); color: #0D0D0D; }
 .nte-qty-confirm:hover, .nte-qty-cancel:hover { opacity: 0.85; }
+
+/* AC-34 · modal de propor item de catálogo (era página própria; ver o
+   comentário em SobreposicoesTreino.astro sobre a mudança). Mesma família
+   visual dos outros dois overlays acima — z-index maior que os dois porque
+   abre por cima da própria busca (abrirPropostaItem fecha a busca antes,
+   mas o valor mais alto cobre qualquer corrida de eventos). */
+.pi-modal-overlay { position: fixed; inset: 0; z-index: 340; background: rgba(0,0,0,0.7); display: flex; align-items: flex-start; justify-content: center; padding: 12vh var(--space-4) var(--space-6); overflow-y: auto; }
+.pi-modal-overlay[hidden] { display: none !important; }
+.pi-modal-box { width: 100%; max-width: 580px; background: var(--c-darkbg); border: 1px solid rgba(166, 195, 0, 0.50); border-radius: var(--radius-card); box-shadow: var(--shadow-lg); padding: var(--space-5); }
+.pi-modal-title { font-family: var(--font-display); font-size: 1.3rem; letter-spacing: 0.03em; color: var(--c-white); margin: 0 0 6px; }
+.pi-modal-sub { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); margin: 0 0 var(--space-4); }
+.pi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: var(--space-3); }
+.pi-campo { display: flex; flex-direction: column; gap: 4px; }
+.pi-campo label { font-family: var(--font-label); font-size: 10px; text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-textsub); }
+.pi-campo input, .pi-campo select, .pi-campo textarea { background: var(--c-black); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 9px 10px; }
+.pi-campo input:focus, .pi-campo select:focus, .pi-campo textarea:focus { outline: none; border-color: var(--c-lime); box-shadow: 0 0 0 2px rgba(166, 195, 0, 0.12); }
+.pi-campo textarea { min-height: 70px; resize: vertical; }
+.pi-campo--largo { grid-column: 1 / -1; }
+.pi-kcal-calc { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); margin: 0; padding: 9px 0; }
+.pi-erro { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-status-rejected); margin: var(--space-3) 0 0; }
+.pi-modal-actions { display: flex; gap: var(--space-2); margin-top: var(--space-4); }
+.pi-btn { flex: 1; padding: 11px; border-radius: var(--radius-card); font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); cursor: pointer; border: 1px solid var(--c-lime); background: var(--c-lime); color: #0D0D0D; transition: opacity 150ms ease; }
+.pi-btn:hover { opacity: 0.88; }
+.pi-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.pi-btn--secundario { background: transparent; border-color: rgba(255, 255, 255, 0.14); color: var(--c-textsub); }
+.pi-lista-wrap { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid rgba(255,255,255,0.08); }
+.pi-lista-title { font-family: var(--font-label); font-size: 0.7rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-textsub); margin: 0 0 var(--space-2); }
+.pi-lista__item { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: 9px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+.pi-lista__item:first-child { border-top: none; }
+.pi-lista__nome { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textbody); }
+.pi-estado { font-family: var(--font-label); font-size: 9.5px; text-transform: uppercase; letter-spacing: var(--tracking-label); padding: 3px 10px; border-radius: var(--radius-pill); white-space: nowrap; }
+.pi-estado--pendente { border: 1px solid rgba(255,255,255,0.25); color: var(--c-textsub); }
+.pi-estado--aprovado { border: 1px solid var(--c-lime); color: var(--c-lime); }
+.pi-vazio { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); padding: 6px 0; margin: 0; }
 @media (max-width: 768px) {
+  .pi-modal-overlay { padding-top: var(--space-5); }
   .nte-previewbtn { margin-left: 0; width: 100%; justify-content: center; }
   .wke-loadhist-full table { display: table; }
   .wke-loadhist-full thead { display: table-header-group; }
