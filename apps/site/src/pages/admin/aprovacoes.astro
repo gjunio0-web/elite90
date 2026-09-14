@@ -90,6 +90,8 @@ import { DOC_CSS } from '../../lib/plano-documento';
                           color: #EEE; font-family: Montserrat, sans-serif;
                           font-size: .85rem; padding: 8px; resize: vertical; }
     .apr-nota__botoes { display: flex; gap: 8px; margin-top: 8px; }
+    .apr-erro { width: 100%; font-family: Montserrat, sans-serif; font-size: .8rem;
+                color: var(--c-status-rejected); margin: 10px 0 0; }
   </style>
   <style set:html={DOC_CSS}></style>
 </head>
@@ -247,6 +249,7 @@ import { DOC_CSS } from '../../lib/plano-documento';
 
     async function executarAcao(card, acoes, fn, corpo) {
       for (const b of acoes.querySelectorAll("button")) b.disabled = true;
+      acoes.querySelector(".apr-erro")?.remove();
       try {
         const resp = await chamar(fn, corpo);
         if (!resp.ok) {
@@ -269,7 +272,13 @@ import { DOC_CSS } from '../../lib/plano-documento';
         }
       } catch (e) {
         for (const b of acoes.querySelectorAll("button")) b.disabled = false;
-        alert("Não foi possível concluir agora: " + (e?.message || "tente novamente."));
+        // Erro inline, na própria ação que falhou — não alert() nativo, que o
+        // navegador desenha com o próprio cromo (título do site, botão "OK"
+        // azul do sistema) e não respeita nenhuma regra deste arquivo.
+        const erro = document.createElement("p");
+        erro.className = "apr-erro";
+        erro.textContent = "Não foi possível concluir agora: " + (e?.message || "tente novamente.");
+        acoes.appendChild(erro);
       }
     }
 
