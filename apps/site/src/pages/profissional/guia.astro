@@ -8,6 +8,7 @@ import '@fontsource/montserrat/700.css';
 import '../../styles/tokens.css';
 import '../../styles/global.css';
 import AdminHeader from '../../components/AdminHeader.astro';
+import GavetaFluxos from '../../components/GavetaFluxos.astro';
 
 // Gêmeo de /admin/guia para a rota restrita. MESMO design system, MESMA
 // estrutura de índice e MESMAS classes — o que muda é para quem o texto fala.
@@ -189,7 +190,8 @@ const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].i
 
   /* ── Mapa reduzido, com link para os fluxos ─── */
   .mapa{
-    display:block; text-decoration:none; color:inherit;
+    display:block; width:100%; text-align:left; font:inherit; cursor:pointer;
+    text-decoration:none; color:inherit;
     background:var(--c-darkbg); border:var(--line); border-left:3px solid var(--c-lime);
     border-radius:0 var(--radius-card) var(--radius-card) 0;
     padding:var(--space-4); margin-bottom:var(--space-6);
@@ -429,8 +431,9 @@ const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].i
          aqui está em primeiro contato e provavelmente não sabe que existe um
          desenho a procurar — daí embutir. Mas embutir o fluxo completo faria o
          texto virar legenda do desenho: o mapa dá a forma do percurso em cinco
-         marcos, e o link leva a quem quiser a versão com raias. -->
-    <a href="/profissional/fluxos" class="mapa" aria-label="Ver os fluxos completos da delegação">
+         marcos, e o cartão inteiro é o gatilho da gaveta, para quem quiser a
+         versão com raias. -->
+    <button type="button" class="mapa" data-gvf-abrir aria-label="Ver os fluxos completos da delegação">
       <span class="mapa-r">O percurso, em cinco marcos</span>
       <span class="mapa-t">
         <span class="mapa-p"><b>01</b>Acesso</span>
@@ -444,7 +447,7 @@ const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].i
         <span class="mapa-p mapa-p--coach"><b>05</b>Resposta</span>
       </span>
       <span class="mapa-l">Ver o fluxo completo</span>
-    </a>
+    </button>
 
     <!-- 1 -->
     <div class="etapa" id="acesso">
@@ -911,6 +914,8 @@ const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].i
   </div>
 </section>
   </div>
+
+  <GavetaFluxos />
 
 
 <script>

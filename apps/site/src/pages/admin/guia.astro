@@ -8,6 +8,7 @@ import '@fontsource/montserrat/700.css';
 import '../../styles/tokens.css';
 import '../../styles/global.css';
 import AdminHeader from '../../components/AdminHeader.astro';
+import GavetaFluxos from '../../components/GavetaFluxos.astro';
 
 // "from" chega dos links de AdminHeader e das entradas contextuais em
 // fichas.astro (?from=/admin/fichas), para que "voltar" devolva o Coach à
@@ -346,6 +347,14 @@ const backHref =
     .etapa .num{position:static; margin-bottom:var(--space-3)}
     .escala{height:78px}
   }
+  /* Gatilho da gaveta em meio a texto corrido: é botão, não link, porque não
+     leva a lugar nenhum — mas se lê como o resto da frase. */
+  .gvf-gatilho{
+    background:none; border:none; padding:0; font:inherit; cursor:pointer;
+    color:var(--c-lime); text-decoration:underline; text-underline-offset:3px;
+  }
+  .gvf-gatilho:hover{color:var(--c-white)}
+
   @media (prefers-reduced-motion:reduce){*{transition:none !important; scroll-behavior:auto !important}}
 
   </style>
@@ -806,9 +815,9 @@ const backHref =
 
         <p style="font-size:.85rem; color:var(--c-textsub); margin-top:var(--space-4)">O desenho
           completo deste processo, com os dois fluxos que o compõem, está em
-          <a href="/admin/fluxos" style="color:var(--c-lime)">Fluxos da delegação</a> — inclusive o
-          ciclo de vida do profissional, que não é etapa desta jornada porque acontece em outra
-          escala de tempo.</p>
+          <button type="button" class="gvf-gatilho" data-gvf-abrir>Fluxos da delegação</button> —
+          inclusive o ciclo de vida do profissional, que não é etapa desta jornada porque acontece
+          em outra escala de tempo.</p>
 
         <div class="aviso a-lime" style="margin-top:var(--space-4)">
           <div class="t">A regra 04 não abriu exceção</div>
@@ -1175,6 +1184,8 @@ const backHref =
   </div>
 </section>
   </div>
+
+  <GavetaFluxos />
 
 
 <script>
