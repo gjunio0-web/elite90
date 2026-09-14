@@ -8,6 +8,12 @@ import '@fontsource/montserrat/700.css';
 import '../../styles/tokens.css';
 import '../../styles/global.css';
 import AdminHeader from '../../components/AdminHeader.astro';
+// documentoHtml (abaixo) já chega pronto do servidor (renderPlanDocument, em
+// listar-sugestoes-pendentes.ts) — falta só o CSS das classes .doc-* que ele
+// usa. DOC_CSS é o mesmo bloco que /plano/[token].astro injeta para o
+// atleta; sem ele, o documento aparece como texto corrido, sem cartão nem
+// tipografia — só a estrutura HTML, sem nenhuma regra para desenhá-la.
+import { DOC_CSS } from '../../lib/plano-documento';
 ---
 {/*
   ELITE90 PRO · tela de aprovação de sugestões — AC-05 do Adendo 07.
@@ -85,6 +91,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
                           font-size: .85rem; padding: 8px; resize: vertical; }
     .apr-nota__botoes { display: flex; gap: 8px; margin-top: 8px; }
   </style>
+  <style set:html={DOC_CSS}></style>
 </head>
 <body>
   <AdminHeader badge="Aprovações" backHref="/admin/atletas" />
