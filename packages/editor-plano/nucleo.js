@@ -1585,13 +1585,78 @@ var PI_CATEGORIAS = [
   'Ovos e derivados', 'Pescados e frutos do mar', 'Produtos açucarados',
   'Verduras, hortaliças e derivados',
 ];
-var piSelectsPreenchidos = false;
-
-function piPreencherSelect(select, opcoes, rotulos) {
-  select.innerHTML = opcoes.map(function(v) {
-    return '<option value="' + v + '">' + (rotulos ? (rotulos[v] || v) : v) + '</option>';
-  }).join('');
+function piItens(opcoes, rotulos) {
+  return opcoes.map(function(v) { return { value: v, label: rotulos ? (rotulos[v] || v) : v }; });
 }
+
+// Os cinco campos de vocabulário fechado deste modal (grupo, músculo,
+// equipamento, nível, categoria) usavam <select> nativo. Um <select> só
+// permite estilizar a CAIXA FECHADA — a lista aberta é desenhada pelo sistema
+// operacional e ignora fundo/cor do autor (visto em produção, no mobile: a
+// lista abria clara, fora do tema escuro do resto do formulário). Mesma
+// técnica já usada em admin/fichas.astro para o mesmo problema — lá em DOIS
+// lugares: .status-dropdown-menu (status do lead) e .promote-dropdown-trigger
+// (Fase inicial/Gênero do modal de promoção, o precedente mais parecido com
+// este por também viver dentro de um modal, não de uma linha de tabela): um
+// botão-gatilho com o valor escolhido, e um menu PRÓPRIO (<ul>) — nunca o
+// <select> do navegador.
+var piDropdownsAtivos = [];
+function piFecharDropdowns() { piDropdownsAtivos.forEach(function(m) { m.hidden = true; }); }
+
+function piPosicionarMenu(menu, trigger) {
+  const r = trigger.getBoundingClientRect();
+  menu.style.left = r.left + 'px';
+  menu.style.minWidth = r.width + 'px';
+  menu.style.top = '-9999px';
+  menu.hidden = false;
+  const alturaMenu = menu.offsetHeight;
+  menu.style.top = (window.innerHeight - r.bottom) > alturaMenu
+    ? (r.bottom + 4) + 'px'
+    : (r.top - alturaMenu - 4) + 'px';
+}
+
+var piDropdownsCriados = {};
+function piCriarDropdown(campoId, itens) {
+  const trigger = document.getElementById(campoId);
+  const menu = document.createElement('ul');
+  menu.className = 'pi-dd-menu';
+  menu.hidden = true;
+  menu.innerHTML = itens.map(function(it) {
+    return '<li><button type="button" data-value="' + it.value + '">' + it.label + '</button></li>';
+  }).join('');
+  document.body.appendChild(menu);
+  piDropdownsAtivos.push(menu);
+
+  function rotulo(v) {
+    const achado = itens.find(function(it) { return it.value === v; });
+    return achado ? achado.label : v;
+  }
+  function definir(v) {
+    trigger.dataset.value = v;
+    trigger.textContent = rotulo(v);
+  }
+
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const abrir = menu.hidden;
+    piFecharDropdowns();
+    if (abrir) piPosicionarMenu(menu, trigger);
+  });
+  menu.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const opt = e.target.closest('button[data-value]');
+    if (opt) definir(opt.dataset.value);
+    menu.hidden = true;
+  });
+
+  const alca = { definir: definir };
+  piDropdownsCriados[campoId] = alca;
+  return alca;
+}
+document.addEventListener('click', function() { piFecharDropdowns(); });
+window.addEventListener('scroll', piFecharDropdowns, true);
+
+var piSelectsPreenchidos = false;
 
 function piChamar(fn, corpo) {
   return fetch('/.netlify/functions/' + fn, {
@@ -1639,14 +1704,27 @@ async function piCarregarPropostas(tipo) {
 function abrirPropostaItem(tipo) {
   if (tipo === 'exercicio') closeExerciseSearch(); else closeFoodSearch();
   if (!piSelectsPreenchidos) {
-    piPreencherSelect(document.getElementById('pi-ex-grupo'), PI_GRUPOS);
-    piPreencherSelect(document.getElementById('pi-ex-musculo'), PI_MUSCULOS);
-    piPreencherSelect(document.getElementById('pi-ex-equipamento'), PI_EQUIPAMENTOS);
-    piPreencherSelect(document.getElementById('pi-ex-nivel'), PI_NIVEIS, { iniciante: 'Iniciante', intermediario: 'Intermediário', avancado: 'Avançado' });
-    piPreencherSelect(document.getElementById('pi-al-categoria'), PI_CATEGORIAS);
+    piCriarDropdown('pi-ex-grupo', piItens(PI_GRUPOS));
+    piCriarDropdown('pi-ex-musculo', piItens(PI_MUSCULOS));
+    piCriarDropdown('pi-ex-equipamento', piItens(PI_EQUIPAMENTOS));
+    piCriarDropdown('pi-ex-nivel', piItens(PI_NIVEIS, { iniciante: 'Iniciante', intermediario: 'Intermediário', avancado: 'Avançado' }));
+    piCriarDropdown('pi-al-categoria', piItens(PI_CATEGORIAS));
     piSelectsPreenchidos = true;
   }
   document.getElementById('pi-form-' + tipo).reset();
+  // form.reset() só alcança <input>/<select>/<textarea> de verdade — os
+  // gatilhos dos dropdowns são <button>, e ficariam com o valor da última
+  // abertura se não fossem devolvidos ao primeiro item aqui (mesmo cuidado
+  // que admin/fichas.astro tem ao reabrir o modal de promoção: __promoFase.
+  // reset('Bulking') / __promoGenero.reset('masculino')).
+  if (tipo === 'exercicio') {
+    piDropdownsCriados['pi-ex-grupo'].definir(PI_GRUPOS[0]);
+    piDropdownsCriados['pi-ex-musculo'].definir(PI_MUSCULOS[0]);
+    piDropdownsCriados['pi-ex-equipamento'].definir(PI_EQUIPAMENTOS[0]);
+    piDropdownsCriados['pi-ex-nivel'].definir(PI_NIVEIS[0]);
+  } else {
+    piDropdownsCriados['pi-al-categoria'].definir(PI_CATEGORIAS[0]);
+  }
   document.getElementById('pi-erro-' + tipo).hidden = true;
   if (tipo === 'alimento') piAtualizarKcal();
   document.getElementById('pi-modal-' + tipo).hidden = false;
@@ -1668,10 +1746,10 @@ async function piEnviarProposta(tipo) {
     campos = {
       nome_pt: document.getElementById('pi-ex-nome').value.trim(),
       instrucao_pt: document.getElementById('pi-ex-instrucao').value.trim(),
-      grupo: document.getElementById('pi-ex-grupo').value,
-      musculoPrimario: document.getElementById('pi-ex-musculo').value,
-      equipamento: document.getElementById('pi-ex-equipamento').value,
-      nivel: document.getElementById('pi-ex-nivel').value,
+      grupo: document.getElementById('pi-ex-grupo').dataset.value,
+      musculoPrimario: document.getElementById('pi-ex-musculo').dataset.value,
+      equipamento: document.getElementById('pi-ex-equipamento').dataset.value,
+      nivel: document.getElementById('pi-ex-nivel').dataset.value,
     };
   } else {
     const p = parseFloat(document.getElementById('pi-al-proteina').value);
@@ -1679,7 +1757,7 @@ async function piEnviarProposta(tipo) {
     const l = parseFloat(document.getElementById('pi-al-lipideos').value);
     campos = {
       nomeExibicao: document.getElementById('pi-al-nome').value.trim(),
-      categoria: document.getElementById('pi-al-categoria').value,
+      categoria: document.getElementById('pi-al-categoria').dataset.value,
       // kcal calculado aqui, nunca digitado — conveniência de tela; o servidor
       // segue sendo quem decide se está certo (validarMacros em
       // _vocabulario-alimentos.ts).

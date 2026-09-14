@@ -60,20 +60,25 @@
                 <textarea id="pi-ex-instrucao" required></textarea>
               </div>
               <div class="pi-campo">
-                <label for="pi-ex-grupo">Grupamento</label>
-                <select id="pi-ex-grupo" required></select>
+                <label id="pi-ex-grupo-label">Grupamento</label>
+                <!-- <select> nativo trocado por gatilho + menu próprio: a lista
+                     aberta de um <select> é desenhada pelo sistema operacional
+                     e ignora o tema escuro no mobile (achado em produção — ver
+                     o comentário em piCriarDropdown, em nucleo.js, para a
+                     técnica completa, a mesma já usada em admin/fichas.astro). -->
+                <button type="button" class="pi-dd-trigger" id="pi-ex-grupo" aria-labelledby="pi-ex-grupo-label"></button>
               </div>
               <div class="pi-campo">
-                <label for="pi-ex-musculo">Músculo primário</label>
-                <select id="pi-ex-musculo" required></select>
+                <label id="pi-ex-musculo-label">Músculo primário</label>
+                <button type="button" class="pi-dd-trigger" id="pi-ex-musculo" aria-labelledby="pi-ex-musculo-label"></button>
               </div>
               <div class="pi-campo">
-                <label for="pi-ex-equipamento">Equipamento</label>
-                <select id="pi-ex-equipamento" required></select>
+                <label id="pi-ex-equipamento-label">Equipamento</label>
+                <button type="button" class="pi-dd-trigger" id="pi-ex-equipamento" aria-labelledby="pi-ex-equipamento-label"></button>
               </div>
               <div class="pi-campo">
-                <label for="pi-ex-nivel">Nível</label>
-                <select id="pi-ex-nivel" required></select>
+                <label id="pi-ex-nivel-label">Nível</label>
+                <button type="button" class="pi-dd-trigger" id="pi-ex-nivel" aria-labelledby="pi-ex-nivel-label"></button>
               </div>
             </div>
 

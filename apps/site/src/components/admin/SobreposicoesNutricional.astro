@@ -47,8 +47,10 @@
                 <input type="text" id="pi-al-nome" required />
               </div>
               <div class="pi-campo pi-campo--largo">
-                <label for="pi-al-categoria">Categoria</label>
-                <select id="pi-al-categoria" required></select>
+                <label id="pi-al-categoria-label">Categoria</label>
+                <!-- Ver o comentário equivalente em SobreposicoesTreino.astro
+                     sobre por que isto é um gatilho, não um <select>. -->
+                <button type="button" class="pi-dd-trigger" id="pi-al-categoria" aria-labelledby="pi-al-categoria-label"></button>
               </div>
               <div class="pi-campo">
                 <label for="pi-al-proteina">Proteína (g / 100g)</label>

@@ -322,28 +322,40 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 .pi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: var(--space-3); }
 .pi-campo { display: flex; flex-direction: column; gap: 4px; }
 .pi-campo label { font-family: var(--font-label); font-size: 10px; text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-textsub); }
-.pi-campo input, .pi-campo select, .pi-campo textarea { background: var(--c-black); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 9px 10px; }
-.pi-campo input:focus, .pi-campo select:focus, .pi-campo textarea:focus { outline: none; border-color: var(--c-lime); box-shadow: 0 0 0 2px rgba(166, 195, 0, 0.12); }
+.pi-campo input, .pi-campo textarea { background: var(--c-black); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 9px 10px; }
+.pi-campo input:focus, .pi-campo textarea:focus { outline: none; border-color: var(--c-lime); box-shadow: 0 0 0 2px rgba(166, 195, 0, 0.12); }
 .pi-campo textarea { min-height: 70px; resize: vertical; }
-/* select nativo, sem appearance:none, herda o cromo do sistema — no mobile
-   (iOS/Android) isso troca o triângulo do sistema por um branco/claro que não
-   respeita background/color do autor, quebrando o Design System exatamente
-   onde o app é mais usado. Mesmo remédio já usado em .status-sel
-   (admin/fichas.astro): apagar o cromo nativo e desenhar a seta própria. */
-.pi-campo select {
-  appearance: none;
-  -webkit-appearance: none;
-  padding-right: 34px;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23999999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-}
-/* A lista de opções aberta é a segunda metade do mesmo problema: o cromo do
-   sistema ignora o CSS do <select> mas ainda lê o de <option> na maioria dos
-   navegadores móveis (exceção conhecida: Safari iOS, que não dá margem
-   nenhuma aqui — mesma limitação documentada em .status-sel). */
-.pi-campo select option { background: var(--c-darkbg); color: var(--c-textbody); }
 .pi-campo--largo { grid-column: 1 / -1; }
+/* Os campos de vocabulário fechado (grupo, músculo, equipamento, nível,
+   categoria) NÃO são <select> — são o mesmo par gatilho+menu que
+   admin/fichas.astro já usa (.status-dropdown-menu/.promote-dropdown-trigger)
+   para o problema que um <select> nativo não resolve: a lista aberta é
+   desenhada pelo sistema operacional, e no mobile ela ignorava o tema escuro
+   do resto do formulário (achado em produção, não hipotético). */
+.pi-campo button.pi-dd-trigger {
+  width: 100%; text-align: left; cursor: pointer;
+  background: var(--c-black); border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-card); color: var(--c-white);
+  font-family: var(--font-body); font-size: var(--fs-body-sm);
+  padding: 9px 34px 9px 10px;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23999999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+.pi-campo button.pi-dd-trigger:focus { outline: none; border-color: var(--c-lime); box-shadow: 0 0 0 2px rgba(166, 195, 0, 0.12); }
+.pi-dd-menu {
+  position: fixed; z-index: 500;
+  background: var(--c-darkbg); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-card); list-style: none; padding: 4px 0;
+  max-height: 260px; overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.85);
+}
+.pi-dd-menu[hidden] { display: none !important; }
+.pi-dd-menu li button {
+  width: 100%; padding: 10px 14px; text-align: left; background: transparent; border: none;
+  color: var(--c-textbody); font-family: var(--font-body); font-size: var(--fs-body-sm);
+  cursor: pointer; transition: background var(--transition-base);
+}
+.pi-dd-menu li button:hover { background: rgba(255,255,255,0.06); }
 .pi-kcal-calc { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); margin: 0; padding: 9px 0; }
 .pi-erro { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-status-rejected); margin: var(--space-3) 0 0; }
 .pi-modal-actions { display: flex; gap: var(--space-2); margin-top: var(--space-4); }
