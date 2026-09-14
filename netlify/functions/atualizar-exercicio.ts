@@ -54,8 +54,14 @@ import { getApp } from "./_firebase";
 import { CAMPOS_EDITAVEIS, validarCampos, validarNovo, dobraBusca, GRUPOS, EQUIPAMENTOS } from "./_vocabulario-exercicios";
 import { marcarPendente } from "./_publicacao";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
+import { conferirProfissionalAtivo } from "./_profissional-ativo";
 
 const COLECAO = "exercises";
+const COLECAO_PROFISSIONAIS = "professionals";
+// Qual especialidade pode PROPOR item nesta base (AC-34, amarra 2). Em
+// atualizar-alimento.ts o valor é "nutrition" — é a única diferença entre as
+// duas amarras de especialidade.
+const ESPECIALIDADE_DESTA_BASE = "training";
 const ORIGEM = "atualizar-exercicio";
 
 const json = (statusCode: number, corpo: unknown) => ({
@@ -180,8 +186,50 @@ async function revisarLote(corpo: Record<string, any>, ator: Ator & { tipo: "hum
  * comparação usa a mesma dobra da busca: acento e caixa não fazem exercício
  * diferente.
  */
-async function criar(corpo: Record<string, any>, ator: Ator & { tipo: "humano" }) {
+async function criar(
+  corpo: Record<string, any>,
+  ator: Ator & { tipo: "humano" },
+  professionalId: string | null,
+) {
   const uid = ator.uid;
+  const ehProposta = ator.papel === "professional";
+
+  // ── AS TRÊS AMARRAS DO CAMINHO DO PROFISSIONAL (AC-34) ────────────────────
+  // Valem só para ele: o Coach cria como sempre criou. Ficam ANTES de validar
+  // campos, porque quem não pode propor não deve receber uma crítica de
+  // formulário como resposta — isso confirmaria que o caminho existe.
+  if (ehProposta) {
+    if (!professionalId) {
+      return json(403, { erro: "Acesso não autorizado.", reason: "vinculo-ausente" });
+    }
+
+    const snapProf = await getFirestore().collection(COLECAO_PROFISSIONAIS).doc(professionalId).get();
+
+    // AMARRA 3 · profissional ativo, pela mesma checagem da AC-13 que as demais
+    // funções desta fase usam. Cadastro desativado não propõe item.
+    const verdicto = conferirProfissionalAtivo(snapProf);
+    if (!verdicto.ok) {
+      return json(verdicto.reason === "nao-encontrado" ? 404 : 403, {
+        erro: verdicto.reason === "inativo"
+          ? "Cadastro desativado. Procure o Coach."
+          : verdicto.erro,
+        reason: verdicto.reason,
+      });
+    }
+
+    // AMARRA 2 · a especialidade tem que casar com a base. Quem faz treino
+    // propõe exercício; quem faz nutrição, alimento. A especialidade vem do
+    // DOCUMENTO, nunca do corpo da requisição — o mesmo princípio que
+    // criar-conta-profissional.ts aplica à classificação.
+    const especialidades = Array.isArray(verdicto.dados.specialties) ? verdicto.dados.specialties : [];
+    if (!especialidades.includes(ESPECIALIDADE_DESTA_BASE)) {
+      return json(403, {
+        erro: "Sua especialidade não corresponde a esta base.",
+        reason: "especialidade-incompativel",
+      });
+    }
+  }
+
   const campos = corpo.campos;
   if (!campos || typeof campos !== "object" || Array.isArray(campos)) {
     return json(400, { erro: "campos obrigatório para 'criar'." });
@@ -203,7 +251,10 @@ async function criar(corpo: Record<string, any>, ator: Ator & { tipo: "humano" }
     });
   }
 
-  const revisar = corpo.revisar === true;
+  // AMARRA 1 · `revisar` é FORÇADO a false para proposta de profissional —
+  // nunca lido do corpo nesse caso. Ninguém aprova o próprio item, e a amarra
+  // fica no servidor: mandar `revisar: true` daqui não tem efeito algum.
+  const revisar = ehProposta ? false : corpo.revisar === true;
   const agora = FieldValue.serverTimestamp();
 
   const documento: Record<string, any> = {
@@ -225,7 +276,11 @@ async function criar(corpo: Record<string, any>, ator: Ator & { tipo: "humano" }
     revisarMusculo: false,
     publicado: true,
     ativo: true,
-    origem: { fonte: "curadoria-coach", idOrigem: null },
+    // Procedência: é o que permite ao Coach, na fila de revisão que já existe,
+    // distinguir "item que eu mesmo cadastrei e ainda não revisei" de "item que
+    // alguém me pediu para aprovar". Sem isso os dois se confundiriam, e a
+    // proposta perderia o sentido (AC-34).
+    origem: { fonte: ehProposta ? "proposta-profissional" : "curadoria-coach", idOrigem: null },
     revisadoPor: revisar ? uid : null,
     revisadoEm: revisar ? agora : null,
     criadoPor: uid,
@@ -262,18 +317,52 @@ export const handler = async (event: any) => {
 
   let uid: string;
   let ator: Ator & { tipo: "humano" };
+  // Guardado para a guarda geral, mais abaixo. Ver o bloco "REORDENAÇÃO DE
+  // GUARDA" logo depois do despacho por `operacao`.
+  let ehAdmin = false;
+  let professionalId: string | null = null;
   try {
     const decoded = await getAuth(app).verifyIdToken(idToken);
-    if (!decoded.admin) return { statusCode: 403, body: "Acesso não autorizado" };
+
+    // ┌── REORDENAÇÃO DE GUARDA (Adendo 07, AC-34 · v1.28) ────────────────────┐
+    // │ Até aqui havia `if (!decoded.admin) return 403` NESTE PONTO, cobrindo  │
+    // │ as sete operações de uma vez, antes de a função saber qual foi pedida. │
+    // │ A AC-34 abre UMA delas — `criar` — ao profissional, e isso não se faz  │
+    // │ com uma exceção antes da guarda: a guarda geral DESCE para depois do   │
+    // │ despacho, e `criar()` passa a decidir sozinha.                         │
+    // │                                                                        │
+    // │ O RISCO DESTA MUDANÇA É AFROUXAR ALGUMA DAS OUTRAS SEIS SEM QUERER.    │
+    // │ Por isso a guarda geral abaixo é posicionada ANTES de qualquer outro   │
+    // │ despacho, e a CA correspondente exige verificar as seis uma a uma, não │
+    // │ em bloco.                                                              │
+    // └────────────────────────────────────────────────────────────────────────┘
+    ehAdmin = decoded.admin === true;
+
     // O uid real é o ponto da tela existir. Até aqui, revisão era carimbada em
     // bloco por script, com o sentinela 'coach:aprovacao-lote-NN', porque não
     // havia sessão autenticada do Coach em nenhum ponto do fluxo.
     uid = decoded.uid;
+
+    // `papel` descreve o VÍNCULO de quem age, não o nível de permissão
+    // (_rastreabilidade.ts). Admin prevalece quando a conta tem os dois — é o
+    // caso do Coach cadastrado também como profissional, e a operação que ele
+    // executa aqui é de curadoria, não de proposta.
+    if (ehAdmin) {
+      ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "admin" };
+    } else if (decoded.professional === true && typeof decoded.professionalId === "string" && decoded.professionalId) {
+      professionalId = decoded.professionalId;
+      ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "professional" };
+    } else {
+      // Nem admin nem profissional com vínculo: recusa aqui mesmo, sem deixar
+      // o corpo ser analisado. Quem não tem papel nenhum não tem operação
+      // nenhuma a pedir, e responder igual para todas não revela quais existem.
+      return { statusCode: 403, body: "Acesso não autorizado" };
+    }
+
     // O e-mail é gravado NO MOMENTO do evento, e não resolvido na leitura
     // (DR-09): sem ele o histórico identificaria quem agiu por um uid opaco, e
     // ler exigiria consultar o console do Firebase item a item. Gravar agora
     // preserva a identificação ainda que a conta seja renomeada ou removida.
-    ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "admin" };
   } catch {
     return { statusCode: 401, body: "Invalid token" };
   }
@@ -287,10 +376,19 @@ export const handler = async (event: any) => {
 
   const { operacao, exerciseId, campos } = corpo;
 
+  // `criar` decide sozinha quem pode chamá-la: admin sem restrição, ou
+  // profissional sob as três amarras da AC-34. É a ÚNICA operação fora da
+  // guarda geral logo abaixo.
+  if (operacao === "criar") return criar(corpo, ator, professionalId);
+
+  // ── GUARDA GERAL — as seis operações restantes seguem exclusivas do Coach ──
+  // Estava no topo do handler, cobrindo as sete de uma vez; desceu para cá com
+  // a AC-34. Fica ANTES de qualquer outro despacho, para que nenhuma operação
+  // nova acrescentada abaixo escape dela por esquecimento.
+  if (!ehAdmin) return { statusCode: 403, body: "Acesso não autorizado" };
+
   // As que não trabalham sobre um documento existente saem antes da exigência
-  // de exerciseId: criar ainda não tem id, e as de lote resolvem o conjunto
-  // pelo filtro.
-  if (operacao === "criar") return criar(corpo, ator);
+  // de exerciseId: as de lote resolvem o conjunto pelo filtro.
   if (operacao === "revisar-lote") return revisarLote(corpo, ator, true);
   if (operacao === "desrevisar-lote") return revisarLote(corpo, ator, false);
 

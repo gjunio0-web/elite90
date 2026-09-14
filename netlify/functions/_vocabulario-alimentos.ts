@@ -77,6 +77,17 @@ export const FONTE_TACO = 'taco-4ed-2011';
  *  possa ser digitado errado. */
 export const FONTE_CURADORIA = 'curadoria';
 
+/** Procedência de item PROPOSTO POR PROFISSIONAL (Adendo 07, AC-34). Mora aqui
+ *  pelo mesmo motivo de FONTE_CURADORIA: um lugar só de onde a string pode ser
+ *  digitada errado.
+ *
+ *  COMPORTA-SE COMO 'curadoria' PARA EFEITO DE MACROS, e isso é intencional: a
+ *  trava de edição de macros pergunta `fonte === FONTE_TACO` (lista de
+ *  proibidos, não de permitidos), então qualquer fonte que não seja a TACO tem
+ *  macros editáveis. Item proposto por profissional nasce com macros que ele
+ *  declarou, e o Coach precisa poder corrigi-los antes de aprovar. */
+export const FONTE_PROPOSTA_PROFISSIONAL = 'proposta-profissional';
+
 /** Campos que a tela pode alterar. Fora daqui, de propósito: nome, nomeBusca
  *  (derivado de nomeExibicao, recalculado pelo servidor — ver
  *  normalizarNomeBusca), categoria, base, nutrientes, macrosTemTraco,

@@ -51,12 +51,17 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
 import {
   CAMPOS_EDITAVEIS, validarCampos, validarNovo, normalizarNomeBusca, dobraBusca,
-  categoriaValida, FONTE_CURADORIA,
+  categoriaValida, FONTE_CURADORIA, FONTE_PROPOSTA_PROFISSIONAL,
 } from "./_vocabulario-alimentos";
 import { marcarPendente } from "./_publicacao";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
+import { conferirProfissionalAtivo } from "./_profissional-ativo";
 
 const COLECAO = "foods";
+const COLECAO_PROFISSIONAIS = "professionals";
+// Qual especialidade pode PROPOR item nesta base (AC-34, amarra 2). Em
+// atualizar-exercicio.ts o valor é "training".
+const ESPECIALIDADE_DESTA_BASE = "nutrition";
 const ORIGEM = "atualizar-alimento";
 
 const json = (statusCode: number, corpo: unknown) => ({
@@ -155,8 +160,40 @@ async function revisarLote(corpo: Record<string, any>, ator: Ator & { tipo: "hum
  * existente na TACO (ou de outro item de curadoria), e o Coach escolheria um
  * dos dois ao acaso no construtor nutricional.
  */
-async function criar(corpo: Record<string, any>, ator: Ator & { tipo: "humano" }) {
+async function criar(
+  corpo: Record<string, any>,
+  ator: Ator & { tipo: "humano" },
+  professionalId: string | null,
+) {
   const uid = ator.uid;
+  const ehProposta = ator.papel === "professional";
+
+  // AS TRÊS AMARRAS (AC-34) — ver atualizar-exercicio.ts para o raciocínio.
+  // Ficam antes de validar campos: quem não pode propor não deve receber
+  // crítica de formulário, que confirmaria que o caminho existe.
+  if (ehProposta) {
+    if (!professionalId) {
+      return json(403, { erro: "Acesso não autorizado.", reason: "vinculo-ausente" });
+    }
+    const snapProf = await getFirestore().collection(COLECAO_PROFISSIONAIS).doc(professionalId).get();
+    const verdicto = conferirProfissionalAtivo(snapProf);
+    if (!verdicto.ok) {
+      return json(verdicto.reason === "nao-encontrado" ? 404 : 403, {
+        erro: verdicto.reason === "inativo"
+          ? "Cadastro desativado. Procure o Coach."
+          : verdicto.erro,
+        reason: verdicto.reason,
+      });
+    }
+    const especialidades = Array.isArray(verdicto.dados.specialties) ? verdicto.dados.specialties : [];
+    if (!especialidades.includes(ESPECIALIDADE_DESTA_BASE)) {
+      return json(403, {
+        erro: "Sua especialidade não corresponde a esta base.",
+        reason: "especialidade-incompativel",
+      });
+    }
+  }
+
   const campos = corpo.campos;
   if (!campos || typeof campos !== "object" || Array.isArray(campos)) {
     return json(400, { erro: "campos obrigatório para 'criar'." });
@@ -178,7 +215,9 @@ async function criar(corpo: Record<string, any>, ator: Ator & { tipo: "humano" }
     });
   }
 
-  const revisar = corpo.revisar === true;
+  // AMARRA 1 · forçado a false para proposta de profissional — mandar
+  // `revisar: true` daqui não tem efeito algum.
+  const revisar = ehProposta ? false : corpo.revisar === true;
   const agora = FieldValue.serverTimestamp();
   const nomeExibicao = String(campos.nomeExibicao).trim();
 
@@ -200,7 +239,9 @@ async function criar(corpo: Record<string, any>, ator: Ator & { tipo: "humano" }
     medidaCaseira: campos.medidaCaseira ?? null,
     publicado: true,
     ativo: true,
-    fonte: FONTE_CURADORIA,
+    // Procedência: permite ao Coach distinguir, na fila de revisão que já
+    // existe, "item que eu cadastrei" de "item que me pediram para aprovar".
+    fonte: ehProposta ? FONTE_PROPOSTA_PROFISSIONAL : FONTE_CURADORIA,
     revisadoPor: revisar ? uid : null,
     revisadoEm: revisar ? agora : null,
     criadoPor: uid,
@@ -236,13 +277,27 @@ export const handler = async (event: any) => {
 
   let uid: string;
   let ator: Ator & { tipo: "humano" };
+  let ehAdmin = false;
+  let professionalId: string | null = null;
   try {
     const decoded = await getAuth(app).verifyIdToken(idToken);
-    if (!decoded.admin) return { statusCode: 403, body: "Acesso não autorizado" };
+
+    // REORDENAÇÃO DE GUARDA (AC-34) — espelha atualizar-exercicio.ts, onde o
+    // raciocínio completo está escrito. A guarda geral desceu para depois do
+    // despacho; só `criar` fica fora dela.
+    ehAdmin = decoded.admin === true;
     uid = decoded.uid;
-    // Ver o comentário equivalente em atualizar-exercicio.ts sobre por que o
-    // e-mail é gravado no momento do evento (DR-09).
-    ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "admin" };
+
+    if (ehAdmin) {
+      // Ver o comentário equivalente em atualizar-exercicio.ts sobre por que o
+      // e-mail é gravado no momento do evento (DR-09).
+      ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "admin" };
+    } else if (decoded.professional === true && typeof decoded.professionalId === "string" && decoded.professionalId) {
+      professionalId = decoded.professionalId;
+      ator = { tipo: "humano", uid: decoded.uid, email: decoded.email ?? null, papel: "professional" };
+    } else {
+      return { statusCode: 403, body: "Acesso não autorizado" };
+    }
   } catch {
     return { statusCode: 401, body: "Invalid token" };
   }
@@ -256,9 +311,17 @@ export const handler = async (event: any) => {
 
   const { operacao, foodId, campos } = corpo;
 
+  // `criar` decide sozinha quem pode chamá-la (AC-34): admin sem restrição, ou
+  // profissional sob as três amarras. É a ÚNICA fora da guarda geral abaixo.
+  if (operacao === "criar") return criar(corpo, ator, professionalId);
+
+  // ── GUARDA GERAL — as seis restantes seguem exclusivas do Coach ──
+  // Antes da AC-34 ficava no topo do handler. Fica ANTES de qualquer outro
+  // despacho, para nenhuma operação nova escapar dela por esquecimento.
+  if (!ehAdmin) return { statusCode: 403, body: "Acesso não autorizado" };
+
   // As que não trabalham sobre um documento existente saem antes da exigência
   // de foodId — mesma ordem de atualizar-exercicio.ts.
-  if (operacao === "criar") return criar(corpo, ator);
   if (operacao === "revisar-lote") return revisarLote(corpo, ator, true);
   if (operacao === "desrevisar-lote") return revisarLote(corpo, ator, false);
 
