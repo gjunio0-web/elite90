@@ -4,13 +4,15 @@ import Fluxogramas from './Fluxogramas.astro';
 // GAVETA DOS FLUXOS — substitui as rotas /admin/fluxos e /profissional/fluxos,
 // que existiram entre o patch D e este.
 //
-// POR QUE GAVETA, E NÃO PÁGINA
+// POR QUE GAVETA DESLIZANTE, E NÃO PÁGINA
 // A coluna de leitura dos guias tem ~1080px, e o índice lateral come 264 — sobra
 // perto de 790 de área útil, contra 1200 de largura do fluxo II. Embutido no
 // corpo, o desenho renderizaria a dois terços, com rótulo abaixo de 11px. A
-// gaveta é o único formato que recupera a largura inteira SEM tirar o leitor do
-// parágrafo em que estava. O preço é a rolagem interna, que aqui não é defeito:
-// é o que .evo-overlay e .drawer-content-wrap (editor-plano.css) já fazem.
+// gaveta recupera a largura que o fluxo precisa SEM tirar o leitor do parágrafo
+// em que estava — mesmo #athlete-drawer/.drawer-panel de admin/atletas.astro
+// (fixed + flex justify-content:flex-end + transform:translateX), só que mais
+// larga, porque o conteúdo que ela guarda é mais largo. O preço é a rolagem
+// interna, que aqui não é defeito: é o que .drawer-content-wrap já faz lá.
 //
 // O QUE A GAVETA NÃO PODE PERDER EM RELAÇÃO À PÁGINA
 // Eram duas coisas, e as duas estão resolvidas aqui:
@@ -24,69 +26,90 @@ import Fluxogramas from './Fluxogramas.astro';
 // não precisa ser vizinho da gaveta nem conhecer o id dela.
 ---
 <div class="gvf" id="gvf" hidden role="dialog" aria-modal="true" aria-labelledby="gvf-titulo">
-  <div class="gvf-topo">
-    <div>
-      <div class="gvf-eyebrow">Coach Ruiz · Elite 90 Pro</div>
-      <h2 class="gvf-h1" id="gvf-titulo">Fluxos da delegação</h2>
-    </div>
-    <button type="button" class="gvf-fechar" data-gvf-fechar aria-label="Fechar os fluxos">Fechar</button>
-  </div>
-
-  <div class="gvf-corpo" tabindex="-1">
-    <div class="gvf-wrap">
-      <p class="gvf-lead">São dois, e não um. O primeiro acontece uma vez por profissional. O
-        segundo acontece muitas vezes, para cada atleta e cada plano, enquanto o vínculo durar.</p>
-
-      <div class="gvf-legenda">
-        <span class="gvf-lg"><svg width="44" height="22" aria-hidden="true"><rect x="1" y="3" width="42" height="16" rx="8" fill="#A6C300"/></svg>Início ou fim</span>
-        <span class="gvf-lg"><svg width="44" height="22" aria-hidden="true"><rect x="1" y="3" width="42" height="16" rx="2" fill="#1A1A1A" stroke="#8A8A82" stroke-width="1.5"/></svg>Processo</span>
-        <span class="gvf-lg"><svg width="44" height="22" aria-hidden="true"><polygon points="22,2 43,11 22,20 1,11" fill="#1A1A1A" stroke="#8A8A82" stroke-width="1.5"/></svg>Decisão</span>
-        <span class="gvf-lg"><svg width="44" height="22" aria-hidden="true"><circle cx="22" cy="11" r="9" fill="#0D0D0D" stroke="#A6C300" stroke-width="1.5"/></svg>Conector</span>
-        <span class="gvf-lg"><svg width="44" height="22" aria-hidden="true"><line x1="2" y1="11" x2="34" y2="11" stroke="#8A8A82" stroke-width="1.5"/><path d="M34 6L41 11L34 16" fill="none" stroke="#8A8A82" stroke-width="1.5"/></svg>Fluxo</span>
+  <div class="gvf-panel">
+    <div class="gvf-topo">
+      <div>
+        <div class="gvf-eyebrow">Coach Ruiz · Elite 90 Pro</div>
+        <h2 class="gvf-h1" id="gvf-titulo">Fluxos da delegação</h2>
       </div>
+      <button type="button" class="gvf-fechar" data-gvf-fechar aria-label="Fechar os fluxos">Fechar</button>
+    </div>
 
-      <section class="gvf-fl">
-        <div class="gvf-n">I</div>
-        <h3 class="gvf-h2">Ciclo de vida do profissional</h3>
-        <p>Acontece uma vez. Vai da decisão do Coach de trazer alguém para o programa até a saída
-          dessa pessoa. Entre uma ponta e outra existe um estado — profissional ativo — que dura o
-          tempo que durar, e é dentro dele que o fluxo II roda, quantas vezes for preciso.</p>
-        <Fluxogramas qual="i" />
-      </section>
+    <div class="gvf-corpo" tabindex="-1">
+      <div class="gvf-wrap">
+        <p class="gvf-lead">São dois, e não um. O primeiro acontece uma vez por profissional. O
+          segundo acontece muitas vezes, para cada atleta e cada plano, enquanto o vínculo durar.</p>
 
-      <section class="gvf-fl">
-        <div class="gvf-n">II</div>
-        <h3 class="gvf-h2">Ciclo de um plano</h3>
-        <p>Acontece muitas vezes: uma por atleta, por especialidade e por rodada de plano. Começa
-          quando o Coach atribui um atleta e termina quando o plano publicado chega às mãos dele.
-          Rodar de novo é voltar ao começo deste fluxo, não do primeiro.</p>
-        <Fluxogramas qual="ii" />
-      </section>
+        <div class="gvf-legenda">
+          <span class="gvf-lg"><svg width="44" height="22" aria-hidden="true"><rect x="1" y="3" width="42" height="16" rx="8" fill="#A6C300"/></svg>Início ou fim</span>
+          <span class="gvf-lg"><svg width="44" height="22" aria-hidden="true"><rect x="1" y="3" width="42" height="16" rx="2" fill="#1A1A1A" stroke="#8A8A82" stroke-width="1.5"/></svg>Processo</span>
+          <span class="gvf-lg"><svg width="44" height="22" aria-hidden="true"><polygon points="22,2 43,11 22,20 1,11" fill="#1A1A1A" stroke="#8A8A82" stroke-width="1.5"/></svg>Decisão</span>
+          <span class="gvf-lg"><svg width="44" height="22" aria-hidden="true"><circle cx="22" cy="11" r="9" fill="#0D0D0D" stroke="#A6C300" stroke-width="1.5"/></svg>Conector</span>
+          <span class="gvf-lg"><svg width="44" height="22" aria-hidden="true"><line x1="2" y1="11" x2="34" y2="11" stroke="#8A8A82" stroke-width="1.5"/><path d="M34 6L41 11L34 16" fill="none" stroke="#8A8A82" stroke-width="1.5"/></svg>Fluxo</span>
+        </div>
 
-      <section class="gvf-notas">
-        <h3 class="gvf-h3">Como ler</h3>
-        <p>A coluna em que um símbolo está diz de quem é o ato, e toda seta que muda de coluna é
-          uma passagem de responsabilidade. Em tela estreita, a mesma sequência aparece em coluna
-          única, com o nome do ator dentro de cada símbolo.</p>
-        <p>Os círculos são conectores. As <strong>letras</strong> marcam retorno a um ponto já
-          desenhado acima. Os <strong>números</strong> marcam salto adiante e só aparecem na versão
-          em coluna, onde um ramo não tem por onde contornar. Círculo tracejado é saída, contínuo
-          é entrada.</p>
-        <p>Duas coisas que o desenho deixa explícitas de propósito. A saída do profissional exige
-          <strong>dois atos separados</strong>: encerrar cada atribuição, uma a uma, e revogar o
-          acesso — um não implica o outro. E o cadastro nunca é apagado, porque a autoria das
-          versões publicadas aponta para ele.</p>
-      </section>
+        <section class="gvf-fl">
+          <div class="gvf-n">I</div>
+          <h3 class="gvf-h2">Ciclo de vida do profissional</h3>
+          <p>Acontece uma vez. Vai da decisão do Coach de trazer alguém para o programa até a saída
+            dessa pessoa. Entre uma ponta e outra existe um estado — profissional ativo — que dura o
+            tempo que durar, e é dentro dele que o fluxo II roda, quantas vezes for preciso.</p>
+          <Fluxogramas qual="i" />
+        </section>
+
+        <section class="gvf-fl">
+          <div class="gvf-n">II</div>
+          <h3 class="gvf-h2">Ciclo de um plano</h3>
+          <p>Acontece muitas vezes: uma por atleta, por especialidade e por rodada de plano. Começa
+            quando o Coach atribui um atleta e termina quando o plano publicado chega às mãos dele.
+            Rodar de novo é voltar ao começo deste fluxo, não do primeiro.</p>
+          <Fluxogramas qual="ii" />
+        </section>
+
+        <section class="gvf-notas">
+          <h3 class="gvf-h3">Como ler</h3>
+          <p>A coluna em que um símbolo está diz de quem é o ato, e toda seta que muda de coluna é
+            uma passagem de responsabilidade. Em tela estreita, a mesma sequência aparece em coluna
+            única, com o nome do ator dentro de cada símbolo.</p>
+          <p>Os círculos são conectores. As <strong>letras</strong> marcam retorno a um ponto já
+            desenhado acima. Os <strong>números</strong> marcam salto adiante e só aparecem na versão
+            em coluna, onde um ramo não tem por onde contornar. Círculo tracejado é saída, contínuo
+            é entrada.</p>
+          <p>Duas coisas que o desenho deixa explícitas de propósito. A saída do profissional exige
+            <strong>dois atos separados</strong>: encerrar cada atribuição, uma a uma, e revogar o
+            acesso — um não implica o outro. E o cadastro nunca é apagado, porque a autoria das
+            versões publicadas aponta para ele.</p>
+        </section>
+      </div>
     </div>
   </div>
 </div>
 
 <style is:global>
+  /* O invólucro é só o pano de fundo: fixo, cobre a tela inteira, mas começa
+     transparente e sem bloquear nada por trás até .open ligar. É ele que
+     recebe o clique fora do painel para fechar (mesmo papel de #athlete-drawer
+     em admin/atletas.astro). */
   .gvf{
-    position:fixed; inset:0; z-index:400; background:var(--c-black);
-    display:flex; flex-direction:column;
+    position:fixed; inset:0; z-index:400;
+    display:flex; align-items:stretch; justify-content:flex-end;
+    background:rgba(0,0,0,0); transition:background var(--dur-med) var(--ease-std);
   }
-  .gvf[hidden]{display:none}
+  .gvf[hidden]{display:none !important}
+  .gvf.open{background:rgba(0,0,0,.6)}
+
+  /* O painel é quem desliza. Começa fora da tela (translateX(100%)) e entra
+     quando .open liga, na mesma curva que .drawer-panel usa. É mais largo que
+     .drawer-panel (800px) porque o fluxo II tem 1200px — largura menor
+     reproduziria o problema que a gaveta existe para resolver. */
+  .gvf-panel{
+    width:min(1320px,94vw); height:100%; overflow:hidden;
+    background:var(--c-black); border-left:3px solid var(--c-lime); box-shadow:var(--shadow-lg);
+    display:flex; flex-direction:column;
+    transform:translateX(100%); transition:transform .4s cubic-bezier(0.16,1,0.3,1);
+  }
+  .gvf.open .gvf-panel{transform:translateX(0)}
+
   .gvf-topo{
     flex:none; display:flex; align-items:flex-end; justify-content:space-between; gap:var(--space-4);
     border-bottom:4px solid var(--c-lime); background:#141414;
@@ -149,11 +172,23 @@ import Fluxogramas from './Fluxogramas.astro';
 
   html.gvf-travado, html.gvf-travado body{overflow:hidden}
 
-  /* No papel, a gaveta é o documento: o guia atrás sai do caminho e o conteúdo
-     dela imprime inteiro, sem painel nem barra de rolagem. */
+  @media (max-width:640px){
+    .gvf-panel{width:100vw}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .gvf, .gvf-panel{transition:none}
+  }
+
+  /* No papel, a gaveta é o documento: o guia atrás sai do caminho e o painel
+     imprime inteiro, sem invólucro, sem borda e sem barra de rolagem. */
   @media print{
     html.gvf-travado body > *:not(.gvf){display:none !important}
-    .gvf{position:static; background:#fff}
+    .gvf{position:static; background:#fff !important; display:block}
+    .gvf-panel{
+      width:auto; height:auto; overflow:visible; transform:none;
+      border-left:none; box-shadow:none; background:#fff;
+    }
     .gvf-corpo{overflow:visible}
     .gvf-fechar{display:none}
   }
@@ -168,15 +203,25 @@ import Fluxogramas from './Fluxogramas.astro';
     const corpo = gaveta.querySelector<HTMLElement>('.gvf-corpo');
     const raiz = document.documentElement;
     let devolverFoco: HTMLElement | null = null;
+    let fecharTimer: ReturnType<typeof setTimeout> | null = null;
+
+    // Casa com a transição de .gvf-panel (transform .4s): só depois dela some
+    // de fato (hidden), senão o painel reapareceria sem deslizar da próxima vez.
+    const DURACAO_TRANSICAO = 400;
 
     const focaveis = () => Array.from(
       gaveta.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')
     ).filter((e) => e.offsetParent !== null);
 
     const abrir = (comHash = true) => {
-      if (!gaveta.hidden) return;
+      if (fecharTimer) { clearTimeout(fecharTimer); fecharTimer = null; }
+      if (gaveta.classList.contains('open')) return;
       devolverFoco = document.activeElement as HTMLElement | null;
       gaveta.hidden = false;
+      // Duas etapas: tirar o [hidden] e só then ligar .open, para o navegador
+      // ter um quadro com transform:translateX(100%) já aplicado e animar a
+      // entrada — ligar as duas coisas juntas pula direto para o estado final.
+      requestAnimationFrame(() => gaveta.classList.add('open'));
       raiz.classList.add('gvf-travado');
       // O hash é o que torna a gaveta endereçável: quem receber o link cai
       // direto nela. replaceState, e não pushState, para que "voltar" do
@@ -188,9 +233,10 @@ import Fluxogramas from './Fluxogramas.astro';
     };
 
     const fechar = () => {
-      if (gaveta.hidden) return;
-      gaveta.hidden = true;
+      if (!gaveta.classList.contains('open')) return;
+      gaveta.classList.remove('open');
       raiz.classList.remove('gvf-travado');
+      fecharTimer = setTimeout(() => { gaveta.hidden = true; fecharTimer = null; }, DURACAO_TRANSICAO);
       if (location.hash === '#fluxos') {
         history.replaceState(null, '', location.pathname + location.search);
       }
@@ -203,9 +249,12 @@ import Fluxogramas from './Fluxogramas.astro';
     gaveta.querySelectorAll('[data-gvf-fechar]').forEach((b) => {
       b.addEventListener('click', () => fechar());
     });
+    // Clicar no pano de fundo (fora do painel) fecha — só quando o alvo do
+    // clique é o próprio invólucro, nunca um descendente dentro do painel.
+    gaveta.addEventListener('click', (e) => { if (e.target === gaveta) fechar(); });
 
     document.addEventListener('keydown', (e) => {
-      if (gaveta.hidden) return;
+      if (gaveta.hidden || !gaveta.classList.contains('open')) return;
       if (e.key === 'Escape') { fechar(); return; }
       if (e.key !== 'Tab') return;
       // Prende o foco: sem isto, o Tab sairia da gaveta e passearia pelo guia
