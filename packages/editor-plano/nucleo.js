@@ -1573,6 +1573,9 @@ function nteAutoSave() {
 // cliente. Precisa ficar IDÊNTICO, caractere a caractere, a
 // _vocabulario-exercicios.ts / _vocabulario-alimentos.ts.
 var PI_GRUPOS = ['Peito', 'Costas', 'Ombros', 'Bíceps', 'Tríceps', 'Antebraço', 'Pernas', 'Abdômen'];
+var PI_MUSCULOS = ['Peitoral', 'Dorsal', 'Trapézio', 'Lombar', 'Deltoide', 'Bíceps', 'Tríceps',
+  'Antebraço', 'Quadríceps', 'Posterior de Coxa', 'Glúteo', 'Panturrilha', 'Adutor', 'Abdutor',
+  'Abdômen', 'Oblíquo'];
 var PI_EQUIPAMENTOS = ['Barra', 'Halteres', 'Polia', 'Máquina', 'Peso Corporal', 'Barra W', 'Kettlebell'];
 var PI_NIVEIS = ['iniciante', 'intermediario', 'avancado'];
 var PI_CATEGORIAS = [
@@ -1637,6 +1640,7 @@ function abrirPropostaItem(tipo) {
   if (tipo === 'exercicio') closeExerciseSearch(); else closeFoodSearch();
   if (!piSelectsPreenchidos) {
     piPreencherSelect(document.getElementById('pi-ex-grupo'), PI_GRUPOS);
+    piPreencherSelect(document.getElementById('pi-ex-musculo'), PI_MUSCULOS);
     piPreencherSelect(document.getElementById('pi-ex-equipamento'), PI_EQUIPAMENTOS);
     piPreencherSelect(document.getElementById('pi-ex-nivel'), PI_NIVEIS, { iniciante: 'Iniciante', intermediario: 'Intermediário', avancado: 'Avançado' });
     piPreencherSelect(document.getElementById('pi-al-categoria'), PI_CATEGORIAS);
@@ -1665,7 +1669,7 @@ async function piEnviarProposta(tipo) {
       nome_pt: document.getElementById('pi-ex-nome').value.trim(),
       instrucao_pt: document.getElementById('pi-ex-instrucao').value.trim(),
       grupo: document.getElementById('pi-ex-grupo').value,
-      musculoPrimario: document.getElementById('pi-ex-musculo').value.trim(),
+      musculoPrimario: document.getElementById('pi-ex-musculo').value,
       equipamento: document.getElementById('pi-ex-equipamento').value,
       nivel: document.getElementById('pi-ex-nivel').value,
     };
