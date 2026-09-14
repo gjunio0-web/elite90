@@ -58,6 +58,8 @@ export function buildDecisaoSugestaoEmail(
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="color-scheme" content="dark"/>
+<meta name="supported-color-schemes" content="dark"/>
 <title>ELITE 90 PRO — ${rotuloResultado}</title>
 <style>
 ${EMAIL_BASE_CSS}
@@ -65,7 +67,7 @@ ${EMAIL_BASE_CSS}
   p{font-size:15px;line-height:1.7;margin:0 0 16px;}
   .status{display:inline-block;color:${cor};font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:14px;
           border:1px solid ${cor};border-radius:4px;padding:4px 12px;margin:0 0 16px;}
-  .btn{display:inline-block;background:#A6C300;color:#0D0D0D;font-weight:700;text-decoration:none;
+  .btn{display:inline-block;background:#A6C300;color:#0D0D0D !important;font-weight:700;text-decoration:none;
        padding:14px 28px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;font-size:14px;margin:8px 0 8px;}
 </style>
 </head>
