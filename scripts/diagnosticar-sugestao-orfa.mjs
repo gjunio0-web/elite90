@@ -19,6 +19,9 @@
 // ou o cadastro foi removido por fora da aplicação (console do Firestore
 // direto). Este roteiro não distingue as duas — só aponta o documento.
 //
+// A CONSULTA E O CRITÉRIO DE ÓRFÃ vivem em _diagnostico-sugestoes.mjs,
+// compartilhado com limpar-sugestoes-orfas.mjs — mesma régua nos dois.
+//
 // Uso:
 //   node scripts/diagnosticar-sugestao-orfa.mjs            # só as pendentes (o que a tela de Aprovações mostra)
 //   node scripts/diagnosticar-sugestao-orfa.mjs --todas     # todos os status (pending/returned/rejected/published)
@@ -27,6 +30,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { listarSugestoesComDiagnostico } from './_diagnostico-sugestoes.mjs';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const TODAS = process.argv.slice(2).includes('--todas');
@@ -75,47 +79,25 @@ console.log(`Projeto: ${sa?.project_id ?? '(desconhecido)'}`);
 console.log(TODAS ? 'Escopo: todas as sugestões, qualquer status.' : 'Escopo: só as pendentes (o que a tela de Aprovações mostra hoje). Use --todas para o histórico inteiro.');
 console.log('');
 
-const COLECAO_SUGESTOES = 'suggestions';
-const COLECAO_ATLETAS = 'athletes';
-const COLECAO_PROFISSIONAIS = 'professionals';
+const sugestoes = await listarSugestoesComDiagnostico(db, { todas: TODAS });
 
-let query = db.collection(COLECAO_SUGESTOES);
-if (!TODAS) query = query.where('status', '==', 'pending');
-const snap = await query.get();
-
-if (snap.empty) {
+if (!sugestoes.length) {
   console.log('Nenhuma sugestão encontrada nesse escopo.');
   process.exit(0);
 }
 
-const athleteUids = [...new Set(snap.docs.map((d) => d.get('athleteUid')).filter(Boolean))];
-const professionalIds = [...new Set(snap.docs.map((d) => d.get('professionalId')).filter(Boolean))];
-
-const [athleteDocs, profDocs] = await Promise.all([
-  athleteUids.length ? db.getAll(...athleteUids.map((uid) => db.collection(COLECAO_ATLETAS).doc(uid))) : Promise.resolve([]),
-  professionalIds.length ? db.getAll(...professionalIds.map((id) => db.collection(COLECAO_PROFISSIONAIS).doc(id))) : Promise.resolve([]),
-]);
-const atletas = new Map(athleteDocs.map((d) => [d.id, d.exists ? d.data() : null]));
-const profissionais = new Map(profDocs.map((d) => [d.id, d.exists ? d.data() : null]));
-
 let orfas = 0;
-for (const doc of snap.docs) {
-  const d = doc.data();
-  const atleta = d.athleteUid ? atletas.get(d.athleteUid) : null;
-  const prof = d.professionalId ? profissionais.get(d.professionalId) : null;
-  const atletaOk = !!atleta;
-  const profOk = !!prof;
-  if (!atletaOk || !profOk) orfas++;
-
+for (const s of sugestoes) {
+  if (s.orfa) orfas++;
   const linha = (rotulo, ok, detalhe) => `    ${ok ? '✓' : '✗'} ${rotulo}: ${detalhe}`;
 
-  console.log(`[${doc.id}] status=${d.status ?? '(ausente)'} planType=${d.planType ?? '(ausente)'} submittedAt=${d.submittedAt?.toDate?.()?.toISOString() ?? '(ausente)'}`);
-  console.log(linha('athleteUid', atletaOk, `${d.athleteUid ?? '(ausente)'}${atletaOk ? ' — ' + (atleta.name ?? '(sem name)') : ' — NENHUM documento em athletes/ com este id'}`));
-  console.log(linha('professionalId', profOk, `${d.professionalId ?? '(ausente)'}${profOk ? ' — ' + (prof.name ?? '(sem name)') + (prof.active === false ? ' [INATIVO]' : '') : ' — NENHUM documento em professionals/ com este id'}`));
-  if (!atletaOk || !profOk) {
+  console.log(`[${s.id}] status=${s.status ?? '(ausente)'} planType=${s.planType ?? '(ausente)'} submittedAt=${s.submittedAt?.toISOString() ?? '(ausente)'}`);
+  console.log(linha('athleteUid', s.athleteOk, `${s.athleteUid ?? '(ausente)'}${s.athleteOk ? ' — ' + (s.athleteName ?? '(sem name)') : ' — NENHUM documento em athletes/ com este id'}`));
+  console.log(linha('professionalId', s.professionalOk, `${s.professionalId ?? '(ausente)'}${s.professionalOk ? ' — ' + (s.professionalName ?? '(sem name)') + (s.professionalActive === false ? ' [INATIVO]' : '') : ' — NENHUM documento em professionals/ com este id'}`));
+  if (s.orfa) {
     console.log('    ⚠ ÓRFÃ — é esta referência ausente que produz "Cadastro ... não encontrado" ao aprovar/devolver/recusar.');
   }
   console.log('');
 }
 
-console.log(`Total: ${snap.docs.length} sugestão(ões) no escopo, ${orfas} órfã(s).`);
+console.log(`Total: ${sugestoes.length} sugestão(ões) no escopo, ${orfas} órfã(s).`);
