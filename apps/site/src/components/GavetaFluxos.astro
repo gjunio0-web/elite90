@@ -33,7 +33,9 @@ import Fluxogramas from './Fluxogramas.astro';
         <div class="gvf-eyebrow">Coach Ruiz · Elite 90 Pro</div>
         <h2 class="gvf-h1" id="gvf-titulo">Fluxos da delegação</h2>
       </div>
-      <button type="button" class="gvf-fechar" data-gvf-fechar aria-label="Fechar os fluxos">✕</button>
+      <button type="button" class="gvf-fechar" data-gvf-fechar aria-label="Fechar os fluxos">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
 
     <div class="gvf-corpo" tabindex="-1">
@@ -125,14 +127,22 @@ import Fluxogramas from './Fluxogramas.astro';
     line-height:1; letter-spacing:var(--tracking-display); text-transform:uppercase;
     color:var(--c-white); margin:var(--space-2) 0 0;
   }
-  /* Mesmo .drawer-close de editor-plano.css (usado em #athlete-drawer): "✕"
-     nu, sem moldura de botão-pílula — não é a gaveta dos fluxos que deveria
-     inventar outra convenção de fechar. */
+  /* SVG, não o caractere "✕" (U+2715) que .drawer-close usa em editor-plano.css.
+     Motivo, verificado e não suposto: a fonte Montserrat autohospedada não tem
+     esse glifo (conferido no próprio arquivo .woff2 com fontTools — ausente),
+     então o navegador cai para a fonte do sistema SÓ nesse caractere. O peso e
+     a forma daí em diante variam por aparelho — o que rendia fino aqui podia
+     chegar grosso no Android do Coach. admin/fichas.astro já resolve isso do
+     jeito certo (.drawer-close svg, viewBox 24, stroke-width 2.5): um ícone
+     desenhado é idêntico em qualquer navegador, porque não depende de glifo de
+     fonte nenhuma. Copiado daqui, não reinventado. */
   .gvf-fechar{
     flex:none; background:none; border:none; color:var(--c-textsub);
-    font-size:20px; line-height:1; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:40px; height:40px; margin:-8px -8px 0 0; cursor:pointer;
     transition:color var(--dur-med) var(--ease-std);
   }
+  .gvf-fechar svg{width:22px; height:22px}
   .gvf-fechar:hover{color:var(--c-lime)}
 
   /* A rolagem é DESTE painel, e não da página: o corpo fica travado atrás
