@@ -42,6 +42,13 @@ const COLECAO = "exercises";
 const POR_PAGINA_PADRAO = 25;
 const POR_PAGINA_MAX = 200;
 
+// Mesma string gravada por atualizar-exercicio.ts em origem.fonte e já
+// redeclarada localmente em listar-minhas-propostas.ts — não há vocabulário
+// compartilhado para a origem de exercício (ao contrário de FONTE_TACO/
+// FONTE_PROPOSTA_PROFISSIONAL em _vocabulario-alimentos.ts), então segue o
+// mesmo precedente em vez de criar um agora.
+const ORIGEM_EXERCICIO_PROPOSTA = "proposta-profissional";
+
 const ESTADOS = ["aguardando", "revisados", "arquivados", "todos"] as const;
 type Estado = (typeof ESTADOS)[number];
 
@@ -58,7 +65,9 @@ const dobra = dobraBusca;
 /** Item do catálogo como esta função o devolve. */
 export type ItemCatalogo = {
   nome_pt: string; nome_en: string | null; grupo: string; equipamento: string;
-  ativo: boolean; revisado: boolean; [k: string]: unknown;
+  ativo: boolean; revisado: boolean;
+  origem?: { fonte?: string | null; idOrigem?: string | null } | null;
+  [k: string]: unknown;
 };
 
 /**
@@ -89,7 +98,15 @@ export function filtrarEPaginar<T extends ItemCatalogo>(
     itens = itens.filter((e) => dobra(e.nome_pt).includes(busca) || dobra(e.nome_en).includes(busca));
   }
 
-  itens = [...itens].sort((a, b) => String(a.nome_pt).localeCompare(String(b.nome_pt), "pt-BR"));
+  // Proposta do profissional primeiro, dentro de QUALQUER filtro — mesma
+  // regra e mesmo motivo de listar-alimentos.ts. Empate por origem é
+  // alfabético, como antes.
+  itens = [...itens].sort((a, b) => {
+    const propostaA = a.origem?.fonte === ORIGEM_EXERCICIO_PROPOSTA ? 0 : 1;
+    const propostaB = b.origem?.fonte === ORIGEM_EXERCICIO_PROPOSTA ? 0 : 1;
+    if (propostaA !== propostaB) return propostaA - propostaB;
+    return String(a.nome_pt).localeCompare(String(b.nome_pt), "pt-BR");
+  });
 
   const encontrados = itens.length;
   const paginas = Math.max(1, Math.ceil(encontrados / o.porPagina));

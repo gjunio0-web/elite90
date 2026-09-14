@@ -31,7 +31,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
-import { CATEGORIAS, categoriaValida, dobraBusca, termosBusca, casaTodosTermos, macrosFaltando } from "./_vocabulario-alimentos";
+import { CATEGORIAS, categoriaValida, dobraBusca, termosBusca, casaTodosTermos, macrosFaltando, FONTE_PROPOSTA_PROFISSIONAL } from "./_vocabulario-alimentos";
 
 const COLECAO = "foods";
 const POR_PAGINA_PADRAO = 25;
@@ -89,7 +89,15 @@ export function filtrarEPaginar<T extends ItemCatalogo>(
     );
   }
 
-  itens = [...itens].sort((a, b) => String(a.nomeExibicao).localeCompare(String(b.nomeExibicao), "pt-BR"));
+  // Proposta do profissional primeiro, dentro de QUALQUER filtro — é a
+  // gaveta menos visitada (revisados, arquivados) onde uma proposta esquecida
+  // mais some no meio do alfabeto. Empate por fonte é alfabético, como antes.
+  itens = [...itens].sort((a, b) => {
+    const propostaA = a.fonte === FONTE_PROPOSTA_PROFISSIONAL ? 0 : 1;
+    const propostaB = b.fonte === FONTE_PROPOSTA_PROFISSIONAL ? 0 : 1;
+    if (propostaA !== propostaB) return propostaA - propostaB;
+    return String(a.nomeExibicao).localeCompare(String(b.nomeExibicao), "pt-BR");
+  });
 
   const encontrados = itens.length;
   const paginas = Math.max(1, Math.ceil(encontrados / o.porPagina));

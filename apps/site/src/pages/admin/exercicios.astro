@@ -126,10 +126,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-linha:focus-visible { box-shadow: inset 0 0 0 1px var(--c-lime); }
   .exc-nome { font-size: var(--fs-body-sm); color: var(--c-white); }
   .exc-col { font-size: var(--fs-body-sm); color: var(--c-textsub); }
-  .exc-selo { display: inline-block; margin-top: 5px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: 0.625rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 9px; border-radius: var(--radius-pill); }
+  .exc-selo { display: inline-block; margin-top: 5px; margin-right: 6px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: 0.625rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 9px; border-radius: var(--radius-pill); }
   .exc-selo--pend { color: var(--c-pending); border: 1px solid rgba(230,126,34,0.45); background: rgba(230,126,34,0.12); }
   .exc-selo--ok { color: var(--c-lime); border: 1px solid rgba(166,195,0,0.4); background: rgba(166,195,0,0.12); }
   .exc-selo--arq { color: var(--c-textsub); border: 1px solid var(--c-line-muted); }
+  /* Mesmo violeta de --c-status-returned e --ator-prof — ver o comentário
+     equivalente em alimentos.astro. */
+  .exc-selo--proposta { color: var(--c-status-returned); border: 1px solid rgba(142,111,216,0.45); background: rgba(142,111,216,0.12); }
   /* Triângulo de músculo a conferir (spec 5.1). Marca herdada da base de origem;
      não é estado de revisão, e por isso não vira selo. */
   .exc-aviso-musculo { color: var(--c-pending); margin-left: 6px; font-size: var(--fs-label); }
@@ -493,6 +496,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   const EQUIPAMENTOS = ['Barra','Halteres','Polia','Máquina','Peso Corporal','Barra W','Kettlebell'];
   const MECANICAS = ['composto','isolado'];
   const NIVEIS = ['iniciante','intermediario','avancado'];
+  const ORIGEM_EXERCICIO_PROPOSTA = 'proposta-profissional';
 
   const ESTADOS = [
     { valor: 'aguardando', rotulo: 'Aguardando revisão' },
@@ -581,6 +585,8 @@ import AdminHeader from '../../components/AdminHeader.astro';
           : e.revisado
             ? '<span class="exc-selo exc-selo--ok">revisado</span>'
             : '<span class="exc-selo exc-selo--pend">aguardando</span>';
+        const proposta = e.origem?.fonte === ORIGEM_EXERCICIO_PROPOSTA
+          ? '<span class="exc-selo exc-selo--proposta">proposta do profissional</span>' : '';
         const aviso = e.revisarMusculo
           ? '<span class="exc-aviso-musculo" title="Classificação de músculo herdada da origem — conferir ao revisar">▲</span>'
           : '';
@@ -589,7 +595,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         // a única forma de alcançá-las no CSS seria por :nth-child, que quebra
         // silenciosamente na primeira vez que alguém reordenar as colunas.
         return `<button type="button" class="exc-linha" data-i="${i}">
-          <span class="exc-nome">${esc(e.nome_pt)}${aviso}<br>${selo}</span>
+          <span class="exc-nome">${esc(e.nome_pt)}${aviso}<br>${proposta}${selo}</span>
           <span class="exc-col exc-col--grupo">${esc(e.grupo)}</span>
           <span class="exc-col exc-col--equip">${esc(e.equipamento)}</span>
           <span class="exc-col exc-col--musculo">${esc(e.musculoPrimario)}</span>
@@ -725,11 +731,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
     emEdicao = e;
     secundarios = [...(e.musculosSecundarios || [])];
     $('exc-painel-nome').textContent = e.nome_pt;
-    $('exc-painel-selo').innerHTML = !e.ativo
+    const seloProposta = e.origem?.fonte === ORIGEM_EXERCICIO_PROPOSTA
+      ? '<span class="exc-selo exc-selo--proposta">proposta do profissional</span>' : '';
+    $('exc-painel-selo').innerHTML = seloProposta + (!e.ativo
       ? '<span class="exc-selo exc-selo--arq">arquivado</span>'
       : e.revisado
         ? `<span class="exc-selo exc-selo--ok">revisado${e.revisadoEm ? ' em ' + new Date(e.revisadoEm).toLocaleDateString('pt-BR') : ''}</span>`
-        : '<span class="exc-selo exc-selo--pend">aguardando validação do Coach</span>';
+        : '<span class="exc-selo exc-selo--pend">aguardando validação do Coach</span>');
     // O que abrirNovo esconde, abrir() devolve — os dois compartilham a mesma
     // gaveta e cada um deixa a marca do modo anterior se não desfizer.
     $('exc-proc').hidden = false;

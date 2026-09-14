@@ -139,10 +139,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .alm-linha:focus-visible { box-shadow: inset 0 0 0 1px var(--c-lime); }
   .alm-nome { font-size: var(--fs-body-sm); color: var(--c-white); }
   .alm-col { font-size: var(--fs-body-sm); color: var(--c-textsub); }
-  .alm-selo { display: inline-block; margin-top: 5px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: 0.625rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 9px; border-radius: var(--radius-pill); }
+  .alm-selo { display: inline-block; margin-top: 5px; margin-right: 6px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: 0.625rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 9px; border-radius: var(--radius-pill); }
   .alm-selo--pend { color: var(--c-pending); border: 1px solid rgba(230,126,34,0.45); background: rgba(230,126,34,0.12); }
   .alm-selo--ok { color: var(--c-lime); border: 1px solid rgba(166,195,0,0.4); background: rgba(166,195,0,0.12); }
   .alm-selo--arq { color: var(--c-textsub); border: 1px solid var(--c-line-muted); }
+  /* Mesmo violeta de --c-status-returned (profissional/index.astro) e de
+     --ator-prof nos guias/fluxogramas: em todo o app, violeta já significa
+     "este ato é do profissional" — a proposta de catálogo não inventa cor
+     nova, herda a que a interface já usa para esse mesmo significado. */
+  .alm-selo--proposta { color: var(--c-status-returned); border: 1px solid rgba(142,111,216,0.45); background: rgba(142,111,216,0.12); }
   /* Passo 8: qual macronutriente falta, na própria linha — não é selo, porque
      não é estado de revisão, e o texto varia por item. */
   .alm-aviso-macro { display: block; margin-top: 3px; font-size: 0.6875rem; color: var(--c-pending); }
@@ -469,6 +474,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     'Ovos e derivados', 'Pescados e frutos do mar', 'Produtos açucarados', 'Verduras, hortaliças e derivados'];
   const FONTE_TACO = 'taco-4ed-2011';
   const MACRO_CAMPOS = ['kcal', 'proteinaG', 'carboidratoG', 'lipideosG'];
+  const FONTE_PROPOSTA_PROFISSIONAL = 'proposta-profissional';
 
   const ESTADOS = [
     { valor: 'aguardando', rotulo: 'Aguardando revisão' },
@@ -569,10 +575,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
             : a.publicado
               ? '<span class="alm-selo alm-selo--pend">aguardando</span>'
               : '';
+        const proposta = a.fonte === FONTE_PROPOSTA_PROFISSIONAL
+          ? '<span class="alm-selo alm-selo--proposta">proposta do profissional</span>' : '';
         const faltando = a.macrosFaltando?.length
           ? `<span class="alm-aviso-macro">Falta: ${esc(a.macrosFaltando.join(', '))}</span>` : '';
         return `<button type="button" class="alm-linha" data-i="${i}">
-          <span class="alm-nome">${esc(a.nomeExibicao)}<br>${selo}${faltando}</span>
+          <span class="alm-nome">${esc(a.nomeExibicao)}<br>${proposta}${selo}${faltando}</span>
           <span class="alm-col alm-col--cat">${esc(a.categoria)}</span>
           <span class="alm-col alm-col--kcal">${numero(a.macros?.kcal)}</span>
           <span class="alm-col alm-col--macros">${macrosLinha(a.macros)}</span>
@@ -714,13 +722,15 @@ import AdminHeader from '../../components/AdminHeader.astro';
     emEdicao = a;
     macrosEditavelAtual = a.fonte !== FONTE_TACO;
     $('alm-painel-nome').textContent = a.nomeExibicao;
-    $('alm-painel-selo').innerHTML = !a.ativo
+    const seloProposta = a.fonte === FONTE_PROPOSTA_PROFISSIONAL
+      ? '<span class="alm-selo alm-selo--proposta">proposta do profissional</span>' : '';
+    $('alm-painel-selo').innerHTML = seloProposta + (!a.ativo
       ? '<span class="alm-selo alm-selo--arq">arquivado</span>'
       : a.revisado
         ? `<span class="alm-selo alm-selo--ok">revisado${a.revisadoEm ? ' em ' + new Date(a.revisadoEm).toLocaleDateString('pt-BR') : ''}</span>`
         : a.publicado
           ? '<span class="alm-selo alm-selo--pend">aguardando validação do Coach</span>'
-          : '<span class="alm-selo alm-selo--arq">sem macros completos — não revisável</span>';
+          : '<span class="alm-selo alm-selo--arq">sem macros completos — não revisável</span>');
     $('alm-f-nome').value = a.nomeExibicao ?? '';
     $('alm-f-medida').value = a.medidaCaseira ?? '';
 
