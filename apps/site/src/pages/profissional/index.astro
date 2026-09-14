@@ -528,6 +528,13 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
     }
 
     $("prof-drawer-close").addEventListener("click", fecharGaveta);
+    // Clicar fora do painel (no fundo da sobreposição) fecha a gaveta — mesmo
+    // comportamento que /admin/atletas já tem (closeAthleteDrawer, ligado ao
+    // próprio #athlete-drawer). Faltava aqui: só o "X" e o "Sair" do menu
+    // fechavam, e a área externa clicável parecia travada.
+    drawer.addEventListener("click", (e) => {
+      if (e.target.id === "athlete-drawer") fecharGaveta();
+    });
 
     // ── VISÃO GERAL ──────────────────────────────────────────────────────────
     // Todo campo aqui já vem de listar-atletas-do-profissional (CAMPOS_NIVEL_1
