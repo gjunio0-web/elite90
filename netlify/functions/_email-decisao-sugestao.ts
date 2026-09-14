@@ -48,8 +48,8 @@ export function buildDecisaoSugestaoEmail(
 
   const blocoNota = reviewNote
     ? `<div style="background:#161616;border-left:3px solid ${cor};padding:12px 16px;margin:8px 0 20px;">
-         <p style="margin:0;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:.04em;">Observação do Coach</p>
-         <p style="margin:6px 0 0;font-size:15px;line-height:1.6;">${reviewNote}</p>
+         <p style="margin:0;font-size:13px;color:#999 !important;text-transform:uppercase;letter-spacing:.04em;">Observação do Coach</p>
+         <p style="margin:6px 0 0;font-size:15px;line-height:1.6;color:#CCCCCC !important;">${reviewNote}</p>
        </div>`
     : "";
 
@@ -63,9 +63,9 @@ export function buildDecisaoSugestaoEmail(
 <title>ELITE 90 PRO — ${rotuloResultado}</title>
 <style>
 ${EMAIL_BASE_CSS}
-  h1{font-size:22px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:.04em;margin:0 0 16px;}
-  p{font-size:15px;line-height:1.7;margin:0 0 16px;}
-  .status{display:inline-block;color:${cor};font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:14px;
+  h1{font-size:22px;font-weight:700;color:#FFFFFF !important;text-transform:uppercase;letter-spacing:.04em;margin:0 0 16px;}
+  p{font-size:15px;line-height:1.7;margin:0 0 16px;color:#CCCCCC !important;}
+  .status{display:inline-block;color:${cor} !important;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:14px;
           border:1px solid ${cor};border-radius:4px;padding:4px 12px;margin:0 0 16px;}
   .btn{display:inline-block;background:#A6C300;color:#0D0D0D !important;font-weight:700;text-decoration:none;
        padding:14px 28px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;font-size:14px;margin:8px 0 8px;}
@@ -76,7 +76,7 @@ ${EMAIL_BASE_CSS}
 ${emailHeader("Sugestão de plano")}
   <h1>${saudacao} sua sugestão foi revisada.</h1>
   <span class="status">${rotuloResultado}</span>
-  <p>${rotuloPlano} de <span style="color:#A6C300;font-weight:700;">${nomeAtleta}</span>.</p>
+  <p>${rotuloPlano} de <span style="color:#A6C300 !important;font-weight:700;">${nomeAtleta}</span>.</p>
   ${blocoNota}
   <p><a class="btn" href="${urlPortal}">Ver na sua carteira</a></p>
 </div>

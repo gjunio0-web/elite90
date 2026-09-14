@@ -304,8 +304,8 @@ function buildSubmissaoEmail(
 <title>ELITE 90 PRO — Nova sugestão</title>
 <style>
 ${EMAIL_BASE_CSS}
-  h1{font-size:22px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:.04em;margin:0 0 16px;}
-  p{font-size:15px;line-height:1.7;margin:0 0 16px;}
+  h1{font-size:22px;font-weight:700;color:#FFFFFF !important;text-transform:uppercase;letter-spacing:.04em;margin:0 0 16px;}
+  p{font-size:15px;line-height:1.7;margin:0 0 16px;color:#CCCCCC !important;}
   .btn{display:inline-block;background:#A6C300;color:#0D0D0D !important;font-weight:700;text-decoration:none;
        padding:14px 28px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;font-size:14px;margin:8px 0 8px;}
 </style>
@@ -315,8 +315,8 @@ ${EMAIL_BASE_CSS}
 ${emailHeader("Nova sugestão de plano")}
   <h1>Uma sugestão chegou para revisão.</h1>
   <p>
-    <span style="color:#A6C300;font-weight:700;">${nomeProfissional}</span> enviou um
-    ${rotuloPlano.toLowerCase()} para <span style="color:#A6C300;font-weight:700;">${nomeAtleta}</span>.
+    <span style="color:#A6C300 !important;font-weight:700;">${nomeProfissional}</span> enviou um
+    ${rotuloPlano.toLowerCase()} para <span style="color:#A6C300 !important;font-weight:700;">${nomeAtleta}</span>.
   </p>
   <p><a class="btn" href="${urlAdmin}">Revisar agora</a></p>
 </div>
