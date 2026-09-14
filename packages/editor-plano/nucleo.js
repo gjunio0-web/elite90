@@ -1238,7 +1238,7 @@ function nteOpenPreview() {
   }).join('');
   inner += docNotesSection(nteState.plan.coachNotes, dayDefs.length + 1);
   document.getElementById('nte-preview-body').innerHTML =
-    docEnvelope('Plano Nutricional', 'Plano Nutricional', a && a.name, ' com base na sua fase e composição corporal', inner);
+    docEnvelope('Plano Nutricional', 'Plano Nutricional', a && a.name, ' com base na sua fase e composição corporal', inner, DOC_FONTE_NUTRICIONAL);
   document.getElementById('nte-preview').style.display = 'flex';
   renderIcons();
 }
@@ -1703,7 +1703,14 @@ function renderNutrition() {
   renderIcons();
 }
 
-function docEnvelope(badgeText, title, athleteName, summaryExtra, innerHtml) {
+// Nota de procedência do rodapé. Só o documento NUTRICIONAL a recebe: a
+// atribuição é devida à TACO, e o plano de treino não usa dado dela.
+// A segunda frase existe porque o plano mistura procedências — atribuir à TACO
+// um valor lido do rótulo de um industrializado seria pior que não atribuir.
+var DOC_FONTE_NUTRICIONAL =
+  'Valores nutricionais: NEPA-UNICAMP, Tabela Brasileira de Composição de Alimentos (TACO), 4ª ed., 2011. Itens de curadoria própria: valores conforme rótulo do produto.';
+
+function docEnvelope(badgeText, title, athleteName, summaryExtra, innerHtml, fonteNota) {
   return '<div class="doc-sheet">' +
     '<div class="doc-header">' +
       '<div class="doc-logo">' + DOC_LOGO_IMG +
@@ -1717,6 +1724,7 @@ function docEnvelope(badgeText, title, athleteName, summaryExtra, innerHtml) {
       innerHtml +
     '</div>' +
     '<div class="doc-footer"><div class="doc-footer-div"></div>' +
+      (fonteNota ? '<div class="doc-footer-fonte">' + wkeEsc(fonteNota) + '</div>' : '') +
       '<div class="doc-footer-copy">Coach Ruiz 2026 © Todos os direitos reservados</div>' +
       '<div class="doc-footer-credit">Criado por GM Digital Bunker ©, 2026</div>' +
     '</div>' +

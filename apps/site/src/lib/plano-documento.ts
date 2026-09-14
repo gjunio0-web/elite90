@@ -63,8 +63,15 @@ export type NutritionPlan = { days: { treino?: { meals?: Meal[] }; descanso?: { 
 const DOC_LOGO_IMG =
   '<img src="/images/brand/logo-emblema.webp" srcset="/images/brand/logo-emblema.webp 1x, /images/brand/logo-emblema@2x.webp 2x" alt="" width="51" height="56" decoding="async" aria-hidden="true"/>';
 
+// Nota de procedência do rodapé. Só o documento NUTRICIONAL a recebe: a
+// atribuição é devida à TACO, e o plano de treino não usa dado dela.
+// A segunda frase existe porque o plano mistura procedências — atribuir à TACO
+// um valor lido do rótulo de um industrializado seria pior que não atribuir.
+const DOC_FONTE_NUTRICIONAL =
+  'Valores nutricionais: NEPA-UNICAMP, Tabela Brasileira de Composição de Alimentos (TACO), 4ª ed., 2011. Itens de curadoria própria: valores conforme rótulo do produto.';
+
 /** Envelope de marca em volta do conteúdo — igual ao de atletas.astro. */
-function docEnvelope(badgeText: string, title: string, athleteName: string | null, summaryExtra: string, innerHtml: string): string {
+function docEnvelope(badgeText: string, title: string, athleteName: string | null, summaryExtra: string, innerHtml: string, fonteNota?: string): string {
   return (
     '<div class="doc-sheet">' +
       '<div class="doc-header">' +
@@ -79,6 +86,7 @@ function docEnvelope(badgeText: string, title: string, athleteName: string | nul
         innerHtml +
       '</div>' +
       '<div class="doc-footer"><div class="doc-footer-div"></div>' +
+        (fonteNota ? '<div class="doc-footer-fonte">' + esc(fonteNota) + '</div>' : '') +
         '<div class="doc-footer-copy">Coach Ruiz 2026 © Todos os direitos reservados</div>' +
         '<div class="doc-footer-credit">Criado por GM Digital Bunker ©, 2026</div>' +
       '</div>' +
@@ -193,7 +201,7 @@ export function renderNutricional(athleteName: string | null, plan: NutritionPla
     return sec + (i < defs.length - 1 ? '<div class="doc-divider"></div>' : '');
   }).join('');
 
-  return docEnvelope('Plano Nutricional', 'Plano Nutricional', athleteName, ' com base na sua fase e composição corporal', inner);
+  return docEnvelope('Plano Nutricional', 'Plano Nutricional', athleteName, ' com base na sua fase e composição corporal', inner, DOC_FONTE_NUTRICIONAL);
 }
 
 /**
@@ -254,6 +262,7 @@ export const DOC_CSS = `
   .doc-ex-sets { font-family: var(--font-body); font-size: 0.76rem; color: var(--c-textbody); }
   .doc-footer { text-align: center; padding: 24px 0 8px; margin-top: 28px; }
   .doc-footer-div { width: 100%; height: 1px; background: linear-gradient(to right, transparent, var(--c-lime) 20%, var(--c-lime) 80%, transparent); opacity: 0.25; margin-bottom: 18px; }
+  .doc-footer-fonte { font-size: 0.6rem; line-height: 1.45; color: rgba(153,153,153,0.75); margin-bottom: 10px; }
   .doc-footer-copy { font-family: var(--font-label); font-size: 0.55rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-textsub); }
   .doc-footer-credit { font-family: var(--font-label); font-size: 0.5rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; color: rgba(153,153,153,0.5); margin-top: 6px; }
 `;

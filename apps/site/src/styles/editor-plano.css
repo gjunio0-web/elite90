@@ -250,6 +250,7 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 .doc-ex-sets { font-family: var(--font-body); font-size: 0.76rem; color: var(--c-textbody); }
 .doc-footer { text-align: center; padding: 24px 0 8px; margin-top: 28px; }
 .doc-footer-div { width: 100%; height: 1px; background: linear-gradient(to right, transparent, var(--c-lime) 20%, var(--c-lime) 80%, transparent); opacity: 0.25; margin-bottom: 18px; }
+.doc-footer-fonte { font-size: 0.6rem; line-height: 1.45; color: rgba(153,153,153,0.75); margin-bottom: 10px; }
 .doc-footer-copy { font-family: var(--font-label); font-size: 0.55rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-textsub); }
 .doc-footer-credit { font-family: var(--font-label); font-size: 0.5rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; color: rgba(153,153,153,0.5); margin-top: 6px; }
 .nte-macro { background: var(--c-darkbg); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-card); padding: var(--space-3); }
