@@ -39,6 +39,14 @@ import { nivelPara, projetarAtleta, type AtletaProjetado } from "./_projecao-atl
 const COLECAO_PROFISSIONAIS = "professionals";
 const COLECAO_ATRIBUICOES = "assignments";
 const COLECAO_ATLETAS = "athletes";
+const COLECAO_SUGESTOES = "suggestions";
+
+// Teto da leitura de sugestões. A carteira tem dezenas de atletas, não
+// milhares, e o que interessa é o estado ATUAL de cada par atleta+plano — as
+// sugestões antigas do mesmo par já foram superadas. Ordenado por updatedAt
+// desc, o corte só alcançaria histórico velho de uma carteira muito grande, e
+// o efeito seria uma aba sem cor, não uma cor errada.
+const LIMITE_SUGESTOES = 500;
 
 const json = (statusCode: number, corpo: unknown) => ({
   statusCode,
@@ -57,6 +65,13 @@ const json = (statusCode: number, corpo: unknown) => ({
 type AtletaDaCarteira = {
   atleta: AtletaProjetado;
   specialties: string[];
+  /**
+   * Estado da sugestão em vigor para cada especialidade da lista acima. Chave
+   * sempre presente; valor `null` quando não existe sugestão nenhuma — "plano
+   * não começado" é estado, e a tela o distingue de rascunho, que já tem
+   * trabalho dentro.
+   */
+  planStatus: Record<string, string | null>;
 };
 
 export const handler = async (event: any) => {
@@ -125,6 +140,57 @@ export const handler = async (event: any) => {
     porAtleta.get(uid)!.add(specialty);
   }
 
+  // ── Estado do plano por atleta e especialidade ──────────────────────────
+  //
+  // POR QUE AQUI, E NÃO NA TELA
+  // Até esta mudança a carteira devolvia só o atleta e as especialidades, e as
+  // duas abas saíam idênticas: quem sabia o estado era abrir-plano-profissional,
+  // e só DEPOIS do clique. Pintar a aba na tela exige o dado na listagem.
+  //
+  // UMA CONSULTA PARA A CARTEIRA INTEIRA, e não uma por atleta: o índice
+  // (professionalId, updatedAt DESC) já está declarado em firestore.indexes.json
+  // e serve exatamente a isto. O agrupamento por atleta e tipo é em memória,
+  // como o de atribuições logo acima.
+  //
+  // QUAL ESTADO GANHA, quando há mais de uma sugestão para o mesmo par
+  // A MESMA PREFERÊNCIA de abrir-plano-profissional.ts (returned > draft >
+  // pending), porque a cor precisa anunciar a tela que o clique vai abrir. Se
+  // nenhuma estiver em aberto, vale a resolvida mais recente — `published` ou
+  // `rejected` — que é o que o profissional viu por último acontecer ali.
+  const NAO_RESOLVIDOS = ["draft", "returned", "pending"];
+  const PREFERENCIA = ["returned", "draft", "pending"];
+  const estadoPorChave = new Map<string, string>();
+
+  const sugestoes = await db
+    .collection(COLECAO_SUGESTOES)
+    .where("professionalId", "==", professionalId)
+    .orderBy("updatedAt", "desc")
+    .limit(LIMITE_SUGESTOES)
+    .get();
+
+  for (const doc of sugestoes.docs) {
+    const d = doc.data();
+    const uid = typeof d.athleteUid === "string" ? d.athleteUid : "";
+    const planType = typeof d.planType === "string" ? d.planType : "";
+    const status = typeof d.status === "string" ? d.status : "";
+    if (!uid || !planType || !status) continue;
+    const chave = `${uid}|${planType}`;
+    const atual = estadoPorChave.get(chave);
+
+    if (NAO_RESOLVIDOS.includes(status)) {
+      // Em aberto sempre vence resolvida, e entre duas em aberto vale a ordem
+      // de preferência — nunca a de chegada.
+      if (!atual || !NAO_RESOLVIDOS.includes(atual) ||
+          PREFERENCIA.indexOf(status) < PREFERENCIA.indexOf(atual)) {
+        estadoPorChave.set(chave, status);
+      }
+    } else if (!atual) {
+      // Resolvida só entra se nada ocupou a chave. Como a consulta vem por
+      // updatedAt desc, a primeira resolvida vista é a mais recente.
+      estadoPorChave.set(chave, status);
+    }
+  }
+
   const uids = [...porAtleta.keys()];
   const atletas: AtletaDaCarteira[] = [];
 
@@ -139,9 +205,15 @@ export const handler = async (event: any) => {
       // silêncio: a exclusão de atleta é matéria do Adendo 04, e devolver uma
       // linha vazia na tela seria pior que não devolvê-la.
       if (!doc.exists) continue;
+      const specialties = [...(porAtleta.get(doc.id) ?? [])].sort();
+      // Chave presente e valor nulo quando não há sugestão nenhuma: "plano não
+      // começado" é estado, e a tela precisa distingui-lo de "não sei".
+      const planStatus: Record<string, string | null> = {};
+      for (const s of specialties) planStatus[s] = estadoPorChave.get(`${doc.id}|${s}`) ?? null;
       atletas.push({
         atleta: projetarAtleta(doc.id, doc.data() ?? {}, nivel),
-        specialties: [...(porAtleta.get(doc.id) ?? [])].sort(),
+        specialties,
+        planStatus,
       });
     }
   }

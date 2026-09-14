@@ -81,6 +81,43 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
     .prof-card__meta { font-family: Montserrat, sans-serif; font-size: .8rem;
                        opacity: .7; margin: 0 0 14px; }
     .prof-abas { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* CÓDIGO DE CORES DO ESTADO DO PLANO
+       As quatro primeiras são as MESMAS do trilho de estados do guia do
+       profissional (secão "A resposta do Coach"), de propósito: quem leu o guia
+       reconhece a cor sem consultar legenda. A cor vai na PRÓPRIA ABA, e não
+       numa etiqueta ao lado — a informação entra sem acrescentar elemento à
+       tela, e o alvo de clique continua o mesmo.
+       "recusada" não está no trilho do guia, que trata recusa como fim de
+       ciclo; aqui precisa aparecer, ou o profissional não entende por que não
+       consegue reabrir. Sem sugestão nenhuma, a aba fica neutra. */
+    .prof-aba[data-estado="draft"]     { --estado: var(--c-textsub); }
+    .prof-aba[data-estado="pending"]   { --estado: var(--c-status-alert); }
+    .prof-aba[data-estado="returned"]  { --estado: var(--c-lime); }
+    .prof-aba[data-estado="published"] { --estado: var(--c-status-progress); }
+    .prof-aba[data-estado="rejected"]  { --estado: var(--c-status-rejected); }
+    .prof-aba[data-estado] { border-color: var(--estado); color: var(--estado); }
+    .prof-aba[data-estado]:hover { background: var(--estado); color: var(--c-black); }
+
+    .prof-legenda { display: flex; flex-wrap: wrap; align-items: center;
+      gap: 10px 18px; margin: var(--space-4) 0 var(--space-5);
+      padding-top: var(--space-4); border-top: 1px solid rgba(255,255,255,.08); }
+    .prof-legenda__i { display: inline-flex; align-items: center; gap: 7px;
+      font-family: Raleway, sans-serif; font-size: .64rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--c-textsub); }
+    .prof-legenda__i::before { content: ""; width: 9px; height: 9px;
+      border-radius: 50%; background: var(--ponto); flex: none; }
+    .prof-legenda__link { margin-left: auto; font-family: Raleway, sans-serif;
+      font-size: .64rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--c-lime); }
+
+    .prof-propostas { display: flex; flex-wrap: wrap; gap: 8px;
+      margin: 0 0 var(--space-5); }
+    .prof-proposta { display: inline-flex; align-items: center; gap: 7px;
+      font-family: Montserrat, sans-serif; font-size: .8rem; color: var(--c-textbody);
+      border: 1px solid rgba(255,255,255,.14); border-radius: 999px; padding: 5px 13px; }
+    .prof-proposta::before { content: ""; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--c-status-alert); flex: none; }
     .prof-aba { font-family: Raleway, sans-serif; font-size: .72rem;
                 text-transform: uppercase; letter-spacing: .06em;
                 padding: 5px 10px; border-radius: 4px; cursor: pointer;
@@ -114,6 +151,23 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
     <p class="prof-sub" id="prof-sub">Carregando…</p>
 
     <div id="prof-msg" class="prof-msg" hidden></div>
+
+    <!-- Legenda do código de cores das abas. Fica oculta enquanto não houver
+         cartão na tela: sem carteira, não há cor a explicar. -->
+    <div id="prof-legenda" class="prof-legenda" hidden>
+      <span class="prof-legenda__i" style="--ponto:var(--c-textsub)">Rascunho</span>
+      <span class="prof-legenda__i" style="--ponto:var(--c-status-alert)">Em revisão</span>
+      <span class="prof-legenda__i" style="--ponto:var(--c-lime)">Devolvida</span>
+      <span class="prof-legenda__i" style="--ponto:var(--c-status-progress)">Publicada</span>
+      <span class="prof-legenda__i" style="--ponto:var(--c-status-rejected)">Recusada</span>
+      <a class="prof-legenda__link" href="/profissional/guia#resposta">O que significa cada estado</a>
+    </div>
+
+    <!-- Contador de propostas de acervo aguardando o Coach. SEPARADO POR TIPO:
+         a função de listagem exige um tipo por requisição, e somar as duas numa
+         linha esconderia qual delas está parada. -->
+    <div id="prof-propostas" class="prof-propostas" hidden></div>
+
     <div id="prof-grid" class="prof-grid" hidden></div>
 
     <section id="prof-editor" hidden></section>
@@ -357,6 +411,7 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
 
     const $ = (id) => document.getElementById(id);
     const titulo = $("prof-title"), sub = $("prof-sub"), msg = $("prof-msg");
+    const legenda = $("prof-legenda"), propostas = $("prof-propostas");
     const grid = $("prof-grid");
 
     // A gaveta substitui a antiga <section id="prof-editor"> mostrada inline.
@@ -376,6 +431,16 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
       draft: "Rascunho — ainda não enviado ao Coach.",
       returned: "Devolvida pelo Coach para ajuste.",
       pending: "Enviada ao Coach e em revisão.",
+    };
+    // Dois mapas para os mesmos estados, e não um: o de cima é FRASE, dita
+    // dentro da gaveta com o plano aberto; este é NOME, e vai no atributo de
+    // título da aba, onde só cabe uma palavra. Cobre também `published` e
+    // `rejected`, que a gaveta nunca precisa anunciar porque não abre nesses
+    // estados. Os nomes são os mesmos do trilho do guia do profissional — a
+    // tela e o documento têm de usar a mesma palavra para o mesmo estado.
+    const NOME_ESTADO = {
+      draft: "Rascunho", pending: "Em revisão", returned: "Devolvida",
+      published: "Publicada", rejected: "Recusada",
     };
     const GENERO_LABEL = { masculino: "Masculino", feminino: "Feminino", outro: "Outro" };
 
@@ -423,12 +488,45 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
         if (!resp.ok) throw new Error(String(resp.status));
         const { atletas } = await resp.json();
         renderCarteira(atletas ?? []);
+        carregarPropostas();
       } catch {
         // Falha de rede não é falha de autorização, e dizer "sem acesso" aqui
         // mandaria a pessoa procurar o Coach por um problema que não é dela.
         mostrarMensagem("Não foi possível carregar a carteira agora. Tente novamente em instantes.");
       }
     });
+
+    // Propostas de acervo aguardando o Coach, UMA CHAMADA POR TIPO porque a
+    // função exige o tipo no corpo. Falha e tipo sem especialidade (a função
+    // devolve 403 nesse caso, por decisão de escopo) somem em silêncio: é
+    // informação acessória, e um erro aqui não deve poluir a carteira.
+    async function carregarPropostas() {
+      const tipos = [
+        { tipo: "exercicio", um: "proposta de exercício", varios: "propostas de exercício" },
+        { tipo: "alimento",  um: "proposta de alimento",  varios: "propostas de alimento" },
+      ];
+      const linhas = [];
+      for (const t of tipos) {
+        try {
+          const resp = await chamar("listar-minhas-propostas", { tipo: t.tipo });
+          if (!resp.ok) continue;
+          const { propostas: lista } = await resp.json();
+          const pendentes = (lista ?? []).filter((p) => p.status === "pendente").length;
+          if (pendentes > 0) {
+            linhas.push(`${pendentes} ${pendentes === 1 ? t.um : t.varios} aguardando o Coach`);
+          }
+        } catch { /* acessório: silêncio é melhor que ruído na carteira */ }
+      }
+      if (!linhas.length) return;
+      propostas.innerHTML = "";
+      for (const texto of linhas) {
+        const el = document.createElement("span");
+        el.className = "prof-proposta";
+        el.textContent = texto;
+        propostas.appendChild(el);
+      }
+      propostas.hidden = false;
+    }
 
     function renderCarteira(atletas) {
       msg.hidden = true; sub.hidden = false;
@@ -437,6 +535,7 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
         mostrarMensagem("Nenhum atleta atribuído a você no momento.");
         return;
       }
+      legenda.hidden = false;
       sub.textContent = atletas.length === 1
         ? "1 atleta sob sua responsabilidade."
         : `${atletas.length} atletas sob sua responsabilidade.`;
@@ -481,6 +580,14 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
           b.type = "button";
           b.className = "prof-aba";
           b.textContent = ROTULO_ABA[s] ?? s;
+          // Cor do estado. Ausência de estado NÃO é ausência de dado: o
+          // servidor devolve `null` quando não há sugestão nenhuma, e a aba
+          // fica neutra de propósito — "plano não começado".
+          const estado = item.planStatus?.[s] ?? null;
+          if (estado) {
+            b.dataset.estado = estado;
+            b.title = `${ROTULO_ABA[s] ?? s} · ${NOME_ESTADO[estado] ?? estado}`;
+          }
           b.addEventListener("click", () => abrirGaveta(a.uid, s));
           abas.appendChild(b);
         }
