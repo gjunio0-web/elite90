@@ -22,8 +22,13 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 import { validarIdDocumento } from "./_m2-validacao";
+import { sendMail, isMailerConfigured } from "./_mailer";
+import { emblemaAttachment } from "./_email-emblema";
+import { buildDecisaoSugestaoEmail, ROTULO_PLANO } from "./_email-decisao-sugestao";
 
 const COLECAO_SUGESTOES = "suggestions";
+const COLECAO_PROFISSIONAIS = "professionals";
+const COLECAO_ATLETAS = "athletes";
 
 const json = (statusCode: number, corpo: unknown) => ({
   statusCode,
@@ -73,11 +78,22 @@ export const handler = async (event: any) => {
   const db = getFirestore(app);
   const ref = db.collection(COLECAO_SUGESTOES).doc(suggestionId);
 
+  // Capturados DENTRO da transação, usados DEPOIS dela — para o e-mail, que
+  // não participa da consistência que a transação protege (mesmo padrão de
+  // `idFinal` em submeter-sugestao.ts).
+  let professionalId: string | null = null;
+  let planType: string | null = null;
+  let athleteUid: string | null = null;
+
   try {
     await db.runTransaction(async (tx) => {
       const atual = await tx.get(ref);
       if (!atual.exists) throw new NaoEncontrada();
       if (atual.get("status") !== "pending") throw new EstadoInvalido(String(atual.get("status")));
+
+      professionalId = atual.get("professionalId") ?? null;
+      planType = atual.get("planType") ?? null;
+      athleteUid = atual.get("athleteUid") ?? null;
 
       tx.update(ref, {
         status: "returned",
@@ -104,6 +120,39 @@ export const handler = async (event: any) => {
     alvo: { colecao: COLECAO_SUGESTOES, id: suggestionId } as Alvo,
     _test: process.env.CONTEXT !== "production",
   });
+
+  // ── AVISO AO PROFISSIONAL (AC-36, CA-116/CA-117) ───────────────────────
+  // Não-fatal (CA-118): a devolução já aconteceu; falha aqui não desfaz nada.
+  // `reviewNote` sempre presente aqui — a função a exige antes de aceitar a
+  // requisição (ver acima).
+  try {
+    if (professionalId && planType && isMailerConfigured()) {
+      const [profSnap, athleteSnap] = await Promise.all([
+        db.collection(COLECAO_PROFISSIONAIS).doc(professionalId).get(),
+        athleteUid ? db.collection(COLECAO_ATLETAS).doc(athleteUid).get() : Promise.resolve(null),
+      ]);
+      const prof = profSnap.data() ?? {};
+      const emailProf = typeof prof.email === "string" ? prof.email.trim().toLowerCase() : "";
+      if (emailProf) {
+        const nomeAtleta = String(athleteSnap?.data()?.name ?? "o atleta");
+        const urlPortal =
+          process.env.CONTEXT === "production"
+            ? "https://coachruiz.com.br/profissional"
+            : "https://quality-env--elite90.netlify.app/profissional";
+        await sendMail({
+          to: emailProf,
+          subject: `Sugestão devolvida para ajuste — ${ROTULO_PLANO[planType as "training" | "nutrition"]} — ELITE 90 PRO`,
+          html: buildDecisaoSugestaoEmail(
+            String(prof.name ?? ""), nomeAtleta, planType as "training" | "nutrition",
+            "returned", reviewNote, urlPortal,
+          ),
+          attachments: [emblemaAttachment()],
+        });
+      }
+    }
+  } catch (e) {
+    console.error("[devolver-sugestao] aviso ao profissional não enviado (não-fatal):", e);
+  }
 
   return json(200, { ok: true, suggestionId, status: "returned" });
 };

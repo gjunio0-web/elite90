@@ -38,6 +38,10 @@ import { getApp } from "./_firebase";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 import { conferirProfissionalAtivo } from "./_profissional-ativo";
 import { validarUid, validarPlanType, validarIdDocumento, SPECIALTIES } from "./_m2-validacao";
+import { sendMail, isMailerConfigured } from "./_mailer";
+import { emblemaAttachment } from "./_email-emblema";
+import { EMAIL_BASE_CSS, emailHeader } from "./_email-header";
+import { ROTULO_PLANO } from "./_email-decisao-sugestao";
 
 const COLECAO_PROFISSIONAIS = "professionals";
 const COLECAO_ATRIBUICOES = "assignments";
@@ -247,5 +251,73 @@ export const handler = async (event: any) => {
     _test: emTeste,
   });
 
+  // ── AVISO AO COACH (AC-36, CA-115/CA-119) ──────────────────────────────
+  // Um e-mail POR SUBMISSÃO, sem agregação — cada sugestão é fato distinto,
+  // com rastro próprio; agregar esconderia volume real de trabalho pendente.
+  // Dispara igual em submissão nova e em ressubmissão: as duas passam por
+  // aqui, e as duas são coisa que o Coach precisa saber que chegou.
+  //
+  // Mesmo mecanismo de submit-lead.ts: ausência de COACH_NOTIFICATION_EMAIL
+  // DESLIGA o aviso, não é erro — e-mail que falha por outro motivo é
+  // não-fatal (CA-118), como em toda a AC-36.
+  const coachEmail = process.env.COACH_NOTIFICATION_EMAIL?.trim();
+  if (coachEmail && isMailerConfigured()) {
+    try {
+      const [profSnap, athleteSnap] = await Promise.all([
+        db.collection(COLECAO_PROFISSIONAIS).doc(professionalId).get(),
+        db.collection("athletes").doc(athleteUid).get(),
+      ]);
+      const nomeProfissional = String(profSnap.data()?.name ?? "Um profissional");
+      const nomeAtleta = String(athleteSnap.data()?.name ?? "um atleta");
+      const rotuloPlano = ROTULO_PLANO[planType as "training" | "nutrition"];
+      const urlAdmin =
+        process.env.CONTEXT === "production"
+          ? "https://coachruiz.com.br/admin/login"
+          : "https://quality-env--elite90.netlify.app/admin/login";
+      await sendMail({
+        to: coachEmail,
+        subject: `Nova sugestão para revisar — ${rotuloPlano} — ELITE 90 PRO`,
+        html: buildSubmissaoEmail(nomeProfissional, nomeAtleta, rotuloPlano, urlAdmin),
+        attachments: [emblemaAttachment()],
+      });
+    } catch (e) {
+      console.error("[submeter-sugestao] aviso ao Coach não enviado (não-fatal):", e);
+    }
+  }
+
   return json(200, { ok: true, suggestionId: idFinal, status: "pending" });
 };
+
+function buildSubmissaoEmail(
+  nomeProfissional: string,
+  nomeAtleta: string,
+  rotuloPlano: string,
+  urlAdmin: string,
+): string {
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ELITE 90 PRO — Nova sugestão</title>
+<style>
+${EMAIL_BASE_CSS}
+  h1{font-size:22px;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:.04em;margin:0 0 16px;}
+  p{font-size:15px;line-height:1.7;margin:0 0 16px;}
+  .btn{display:inline-block;background:#A6C300;color:#0D0D0D;font-weight:700;text-decoration:none;
+       padding:14px 28px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;font-size:14px;margin:8px 0 8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+${emailHeader("Nova sugestão de plano")}
+  <h1>Uma sugestão chegou para revisão.</h1>
+  <p>
+    <span style="color:#A6C300;font-weight:700;">${nomeProfissional}</span> enviou um
+    ${rotuloPlano.toLowerCase()} para <span style="color:#A6C300;font-weight:700;">${nomeAtleta}</span>.
+  </p>
+  <p><a class="btn" href="${urlAdmin}">Revisar agora</a></p>
+</div>
+</body>
+</html>`;
+}

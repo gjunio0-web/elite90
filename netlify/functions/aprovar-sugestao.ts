@@ -42,6 +42,9 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 import { validarIdDocumento } from "./_m2-validacao";
+import { sendMail, isMailerConfigured } from "./_mailer";
+import { emblemaAttachment } from "./_email-emblema";
+import { buildDecisaoSugestaoEmail, ROTULO_PLANO } from "./_email-decisao-sugestao";
 
 const COLECAO_PROFISSIONAIS = "professionals";
 const COLECAO_SUGESTOES = "suggestions";
@@ -257,6 +260,33 @@ export const handler = async (event: any) => {
     alvo: { colecao: COLECAO_SUGESTOES, id: suggestionId } as Alvo,
     _test: process.env.CONTEXT !== "production",
   });
+
+  // ── AVISO AO PROFISSIONAL (AC-36, CA-116) ──────────────────────────────
+  // Não-fatal (CA-118): a publicação já aconteceu; falha aqui não desfaz nada
+  // e não impede a resposta 200. Aprovação nunca tem `reviewNote` — não há o
+  // que ajustar quando o trabalho já está publicado.
+  try {
+    const emailProf = typeof prof.email === "string" ? prof.email.trim().toLowerCase() : "";
+    if (emailProf && isMailerConfigured()) {
+      const athleteSnap = await db.collection(COLECAO_ATLETAS).doc(athleteUid).get();
+      const nomeAtleta = String(athleteSnap.data()?.name ?? "o atleta");
+      const urlPortal =
+        process.env.CONTEXT === "production"
+          ? "https://coachruiz.com.br/profissional"
+          : "https://quality-env--elite90.netlify.app/profissional";
+      await sendMail({
+        to: emailProf,
+        subject: `Sugestão aprovada — ${ROTULO_PLANO[planType as "training" | "nutrition"]} — ELITE 90 PRO`,
+        html: buildDecisaoSugestaoEmail(
+          String(prof.name ?? ""), nomeAtleta, planType as "training" | "nutrition",
+          "published", null, urlPortal,
+        ),
+        attachments: [emblemaAttachment()],
+      });
+    }
+  } catch (e) {
+    console.error("[aprovar-sugestao] aviso ao profissional não enviado (não-fatal):", e);
+  }
 
   return json(200, { ok: true, suggestionId, version: versaoCriada, versionId: idDaVersao(versaoCriada) });
 };
