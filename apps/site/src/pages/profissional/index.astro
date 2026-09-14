@@ -320,6 +320,15 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
   <script is:inline set:html={buscaNucleo}></script>
   <script is:inline set:html={editorComunsNucleo}></script>
   <script is:inline set:html={editorPlanoNucleo}></script>
+  <!-- nucleo.js só DECLARA nteFormulaConfig (var nteFormulaConfig;), nunca
+       inicializa — quem faz isso é admin/atletas.astro, na própria tela,
+       porque só lá existe o painel que lê/grava a personalização em
+       localStorage (nte-formula-panel). Sem esta linha, nteBuildBasePlan —
+       chamada por "Criar plano" — lia propriedade de undefined e lançava,
+       e o clique não fazia nada visível: o erro só aparecia no console. O
+       profissional não tem esse painel nesta rota, então basta a fórmula
+       padrão, sem tentar ler um localStorage que aqui nunca foi escrito. -->
+  <script is:inline>nteFormulaConfig = JSON.parse(JSON.stringify(NTE_FORMULA_DEFAULTS));</script>
   <script is:inline>window.E90_CHARTS_CONTAINER = 'prof-charts';</script>
   <script is:inline set:html={graficosNucleo}></script>
 
