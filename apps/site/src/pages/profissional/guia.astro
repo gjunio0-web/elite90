@@ -187,6 +187,41 @@ const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].i
   .faixa .r{font-family:var(--font-label); font-size:.65rem; font-weight:700; letter-spacing:.1em;
             text-transform:uppercase; color:var(--c-textsub); margin-top:4px}
 
+  /* ── Mapa reduzido, com link para os fluxos ─── */
+  .mapa{
+    display:block; text-decoration:none; color:inherit;
+    background:var(--c-darkbg); border:var(--line); border-left:3px solid var(--c-lime);
+    border-radius:0 var(--radius-card) var(--radius-card) 0;
+    padding:var(--space-4); margin-bottom:var(--space-6);
+    transition:border-color var(--transition-base), background var(--transition-base);
+  }
+  .mapa:hover{background:var(--c-surface-2)}
+  .mapa-r{
+    display:block; font-family:var(--font-label); font-size:.62rem; font-weight:700;
+    letter-spacing:var(--tracking-label); text-transform:uppercase; color:var(--c-textsub);
+    margin-bottom:var(--space-3);
+  }
+  .mapa-t{display:flex; align-items:center; flex-wrap:wrap; gap:var(--space-2)}
+  .mapa-p{
+    display:inline-flex; align-items:baseline; gap:6px; white-space:nowrap;
+    border:1px solid rgba(255,255,255,.14); border-radius:var(--radius-pill);
+    padding:5px 12px; font-size:.8rem; color:var(--c-textbody);
+  }
+  .mapa-p b{
+    font-family:var(--font-display); font-weight:400; font-size:.95rem;
+    letter-spacing:.04em; color:var(--c-textsub);
+  }
+  .mapa-p--voce{border-color:rgba(166,195,0,.45); color:var(--c-white)}
+  .mapa-p--voce b{color:var(--c-lime)}
+  .mapa-p--coach{border-color:rgba(39,174,96,.45)}
+  .mapa-p--coach b{color:#27AE60}
+  .mapa-s{flex:none; width:14px; height:1px; background:rgba(255,255,255,.18)}
+  .mapa-l{
+    display:block; margin-top:var(--space-3);
+    font-family:var(--font-label); font-size:.64rem; font-weight:700;
+    letter-spacing:var(--tracking-label); text-transform:uppercase; color:var(--c-lime);
+  }
+
   /* ── Entra / Sai ─────────────────────────────── */
   .fluxo{display:grid; gap:var(--space-3); grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
   .fluxo .col{background:var(--c-darkbg); border:var(--line); border-radius:var(--radius-card); padding:var(--space-4)}
@@ -389,6 +424,27 @@ const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].i
   <div class="wrap">
     <h3>A jornada, passo a passo</h3>
     <h2>Do convite ao plano publicado</h2>
+
+    <!-- Mapa reduzido, e não o fluxograma inteiro (decisão de sessão). O leitor
+         aqui está em primeiro contato e provavelmente não sabe que existe um
+         desenho a procurar — daí embutir. Mas embutir o fluxo completo faria o
+         texto virar legenda do desenho: o mapa dá a forma do percurso em cinco
+         marcos, e o link leva a quem quiser a versão com raias. -->
+    <a href="/profissional/fluxos" class="mapa" aria-label="Ver os fluxos completos da delegação">
+      <span class="mapa-r">O percurso, em cinco marcos</span>
+      <span class="mapa-t">
+        <span class="mapa-p"><b>01</b>Acesso</span>
+        <span class="mapa-s" aria-hidden="true"></span>
+        <span class="mapa-p"><b>02</b>Carteira</span>
+        <span class="mapa-s" aria-hidden="true"></span>
+        <span class="mapa-p mapa-p--voce"><b>03</b>Montar</span>
+        <span class="mapa-s" aria-hidden="true"></span>
+        <span class="mapa-p"><b>04</b>Enviar</span>
+        <span class="mapa-s" aria-hidden="true"></span>
+        <span class="mapa-p mapa-p--coach"><b>05</b>Resposta</span>
+      </span>
+      <span class="mapa-l">Ver o fluxo completo</span>
+    </a>
 
     <!-- 1 -->
     <div class="etapa" id="acesso">
