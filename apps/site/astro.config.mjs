@@ -15,16 +15,17 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      // Rotas de acesso restrito ficam fora do sitemap. Além de /admin/,
-      // /avaliacao/ e /progresso/, entram três rotas de nível raiz: a área do
-      // profissional, a página de definição de senha, e /acesso-equipe
-      // (AC-35, CA-98 — esta última NÃO pode ser descoberta pelo sitemap, já
-      // que substitui a obscuridade que o portão de /admin/login dava).
-      // As duas primeiras já tinham `noindex` na própria página, mas constavam
-      // do sitemap assim mesmo — publicar o endereço e pedir para não indexar
-      // é contraditório.
-      filter: page => !/\/(admin|avaliacao|progresso)\//.test(page)
-                   && !/\/(profissional|definir-senha|acesso-equipe)\/?$/.test(page),
+      // Rotas de acesso restrito ficam fora do sitemap. `profissional` é
+      // tratado como SEGMENTO de caminho, igual a admin/avaliacao/progresso —
+      // não como rota-folha — porque a área do profissional cresceu: existem
+      // hoje /profissional/, /profissional/guia/ e /profissional/propor-item/
+      // (AC-34), e um filtro que só batesse a raiz exata deixaria as
+      // sub-rotas vazando. Foi achado em execução, testando o build desta
+      // mesma entrega — o filtro anterior (v1.24/AC-35) só cobria a raiz.
+      // /definir-senha e /acesso-equipe continuam como rota-folha: não têm
+      // sub-rotas, e não deveriam ganhar uma sem decisão nova.
+      filter: page => !/\/(admin|avaliacao|progresso|profissional)\//.test(page)
+                   && !/\/(definir-senha|acesso-equipe)\/?$/.test(page),
       // Declara a relacao entre as duas versoes de idioma no proprio sitemap.
       // A chave 'pt-br' nunca aparece na rota (prefixDefaultLocale: false), e a
       // integracao trata como idioma padrao tudo o que nao contiver outro locale.

@@ -22,10 +22,36 @@
                um exercício que não existe nasce AQUI, com o plano aberto — não
                no hub. Abre em ABA NOVA de propósito: o plano em edição vive só
                na memória da página (wkePlanCache; o auto-salvamento ainda é um
-               comentário), e sair da página o perderia. -->
-          <a class="wke-search-catalogo" href="/admin/exercicios" target="_blank" rel="noopener">
+               comentário), e sair da página o perderia.
+
+               CA-42 · componente sem cópia entre a gaveta do Coach e a rota do
+               profissional — o destino deste link, porém, PRECISA diferir: o
+               Coach vai para a gestão completa (/admin/exercicios); o
+               profissional não tem acesso lá (403), e vai para a tela de
+               propor item (AC-34). O texto e o `href` nascem para o Coach, e
+               o script logo abaixo os corrige se a página for a restrita —
+               nunca o contrário, para o caso comum (Coach) não depender de
+               JS extra rodando a tempo. -->
+          <a class="wke-search-catalogo" id="wke-search-catalogo" href="/admin/exercicios" target="_blank" rel="noopener">
             Gerenciar catálogo
             <span data-lucide="external-link"></span>
           </a>
         </div>
       </div>
+
+      <script is:inline>
+        // Adiado para DOMContentLoaded, de propósito: este componente é
+        // injetado ANTES do <script is:inline> da página que declara `var
+        // E90` (tanto em atletas.astro quanto em profissional/index.astro) —
+        // checar aqui, sem esperar, veria sempre `undefined`, mesmo na rota
+        // do profissional. `E90` só existe na rota restrita (AC-19);
+        // ausência dele é como o Coach se distingue aqui, sem precisar de
+        // uma flag nova.
+        document.addEventListener("DOMContentLoaded", function () {
+          if (typeof window.E90 === "undefined") return; // é o Coach — link já está certo
+          var a = document.getElementById("wke-search-catalogo");
+          if (!a) return;
+          a.href = "/profissional/propor-item?tipo=exercicio";
+          a.firstChild.textContent = "Propor exercício";
+        });
+      </script>

@@ -1,0 +1,337 @@
+---
+export const prerender = false;
+import '@fontsource/bebas-neue';
+import '@fontsource/raleway/400.css';
+import '@fontsource/raleway/700.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/700.css';
+import '../../styles/tokens.css';
+import '../../styles/global.css';
+import AdminHeader from '../../components/AdminHeader.astro';
+---
+{/*
+  ELITE90 PRO · /profissional/propor-item — Adendo 07, AC-34 (v1.28), §5.
+
+  A TELA MÍNIMA QUE A ESPECIFICAÇÃO PREVIU. "Mínima" tem sentido preciso, não
+  é adjetivo vago: formulário para propor, lista das próprias propostas com o
+  estado de cada uma, e SÓ ISSO — sem editar, sem excluir proposta já
+  enviada. Essas duas ações ficaram deliberadamente sem decisão, não
+  deliberadamente proibidas: decidi-las levantaria perguntas que a AC-34 não
+  precisou responder para o canal existir (editar reseta revisão? excluir
+  depois de aprovado desfaz a aprovação? até quando?). Ver a conversa que
+  fechou este escopo, se algum dia o conjunto maior for aberto.
+
+  ABRE EM ABA NOVA a partir da sobreposição de busca (SobreposicoesTreino.astro
+  / SobreposicoesNutricional.astro), pelo mesmo motivo que o link do Coach
+  para /admin/exercicios já usa essa técnica: o plano em edição vive só na
+  memória da página, e navegar para longe o perderia.
+
+  `?tipo=exercicio` OU `?tipo=alimento` NA URL decide a base — não há
+  detecção automática pela especialidade do profissional, porque quem tem as
+  duas especialidades precisa dizer qual base está propondo agora. Sem o
+  parâmetro, ou com valor que não seja um dos dois, a página recusa antes de
+  montar formulário nenhum — o servidor recusaria de qualquer forma (amarra 2
+  de atualizar-exercicio.ts/atualizar-alimento.ts), então não vale a pena
+  fingir que um formulário genérico funcionaria.
+
+  A validação cruzada de calorias (macros.kcal contra proteína×4 + carboidrato
+  ×4 + gordura×9, ±tolerância) é feita pelo SERVIDOR — ver validarMacros em
+  _vocabulario-alimentos.ts. Esta página CALCULA kcal automaticamente a partir
+  dos três macros, em vez de pedir que o profissional digite e arrisque um
+  422 por erro de conta — é conveniência de tela, não duplicação de regra: o
+  servidor segue sendo quem decide se está certo.
+*/}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELITE90 PRO — Propor item de catálogo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <meta name="fb-api"    content={import.meta.env.PUBLIC_FIREBASE_API_KEY} />
+  <meta name="fb-auth"   content={import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN} />
+  <meta name="fb-proj"   content={import.meta.env.PUBLIC_FIREBASE_PROJECT_ID} />
+  <meta name="fb-bucket" content={import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET} />
+  <meta name="fb-sender" content={import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID} />
+  <meta name="fb-appid"  content={import.meta.env.PUBLIC_FIREBASE_APP_ID} />
+
+  <style is:global>
+    .pi-main { max-width: 720px; margin: 0 auto; padding: 32px 24px 64px; }
+    .pi-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem;
+                letter-spacing: .04em; margin: 0 0 6px; }
+    .pi-sub { font-family: Montserrat, sans-serif; font-size: .85rem; opacity: .7; margin: 0 0 28px; }
+    .pi-card { background: #1A1A1A; border: 1px solid rgba(255,255,255,.1); border-radius: 4px;
+               padding: 24px; margin-bottom: 32px; }
+    .pi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 14px; }
+    .pi-grid[hidden] { display: none; }
+    .pi-campo { display: flex; flex-direction: column; gap: 4px; }
+    .pi-campo label { font-family: Raleway, sans-serif; font-size: .72rem; text-transform: uppercase;
+                       letter-spacing: .05em; opacity: .75; }
+    .pi-campo input, .pi-campo select, .pi-campo textarea {
+      background: #0D0D0D; border: 1px solid rgba(255,255,255,.15); color: #EEE;
+      font-family: Montserrat, sans-serif; font-size: .85rem; padding: 9px 10px; border-radius: 4px;
+    }
+    .pi-campo textarea { min-height: 70px; resize: vertical; }
+    .pi-campo--largo { grid-column: 1 / -1; }
+    .pi-kcal-calc { font-family: Montserrat, sans-serif; font-size: .78rem; opacity: .65; margin-top: 4px; }
+    .pi-erro { font-family: Montserrat, sans-serif; font-size: .78rem; color: #C0392B; margin: 12px 0 0; }
+    .pi-btn { font-family: Raleway, sans-serif; font-weight: 700; font-size: .8rem; text-transform: uppercase;
+              letter-spacing: .05em; padding: 12px 22px; border-radius: 4px; cursor: pointer; border: none;
+              background: var(--c-lime, #A6C300); color: #0D0D0D; margin-top: 18px; }
+    .pi-btn[disabled] { opacity: .4; cursor: not-allowed; }
+    .pi-lista__item { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+                       padding: 10px 0; border-top: 1px solid rgba(255,255,255,.06); }
+    .pi-lista__nome { font-family: Montserrat, sans-serif; font-size: .85rem; }
+    .pi-estado { font-family: Raleway, sans-serif; font-size: .68rem; text-transform: uppercase;
+                 letter-spacing: .05em; padding: 3px 10px; border-radius: 12px; white-space: nowrap; }
+    .pi-estado--pendente { border: 1px solid rgba(255,255,255,.25); color: #999; }
+    .pi-estado--aprovado { border: 1px solid var(--c-lime, #A6C300); color: var(--c-lime, #A6C300); }
+    .pi-vazio { font-family: Montserrat, sans-serif; font-size: .82rem; opacity: .6; padding: 8px 0; }
+  </style>
+</head>
+<body>
+  <AdminHeader badge="Profissional" showGuide={false} />
+
+  <main class="pi-main">
+    <h1 class="pi-title" id="pi-title">Propor item</h1>
+    <p class="pi-sub" id="pi-sub">Carregando…</p>
+    <div id="pi-msg" hidden></div>
+
+    <form class="pi-card" id="pi-form" hidden>
+      <div class="pi-grid" id="pi-campos-exercicio" hidden>
+        <div class="pi-campo pi-campo--largo">
+          <label for="ex-nome">Nome</label>
+          <input type="text" id="ex-nome" required />
+        </div>
+        <div class="pi-campo pi-campo--largo">
+          <label for="ex-instrucao">Instrução de execução</label>
+          <textarea id="ex-instrucao" required></textarea>
+        </div>
+        <div class="pi-campo">
+          <label for="ex-grupo">Grupamento</label>
+          <select id="ex-grupo" required></select>
+        </div>
+        <div class="pi-campo">
+          <label for="ex-musculo">Músculo primário</label>
+          <input type="text" id="ex-musculo" required />
+        </div>
+        <div class="pi-campo">
+          <label for="ex-equipamento">Equipamento</label>
+          <select id="ex-equipamento" required></select>
+        </div>
+        <div class="pi-campo">
+          <label for="ex-nivel">Nível</label>
+          <select id="ex-nivel" required></select>
+        </div>
+      </div>
+
+      <div class="pi-grid" id="pi-campos-alimento" hidden>
+        <div class="pi-campo pi-campo--largo">
+          <label for="al-nome">Nome de exibição</label>
+          <input type="text" id="al-nome" required />
+        </div>
+        <div class="pi-campo pi-campo--largo">
+          <label for="al-categoria">Categoria</label>
+          <select id="al-categoria" required></select>
+        </div>
+        <div class="pi-campo">
+          <label for="al-proteina">Proteína (g / 100g)</label>
+          <input type="number" id="al-proteina" min="0" step="0.1" required />
+        </div>
+        <div class="pi-campo">
+          <label for="al-carboidrato">Carboidrato (g / 100g)</label>
+          <input type="number" id="al-carboidrato" min="0" step="0.1" required />
+        </div>
+        <div class="pi-campo">
+          <label for="al-lipideos">Lipídeos (g / 100g)</label>
+          <input type="number" id="al-lipideos" min="0" step="0.1" required />
+        </div>
+        <div class="pi-campo">
+          <label>Calorias (calculado)</label>
+          <p class="pi-kcal-calc" id="al-kcal-calc">— kcal / 100g</p>
+        </div>
+      </div>
+
+      <p class="pi-erro" id="pi-erro" hidden></p>
+      <button class="pi-btn" id="pi-enviar" type="submit">Enviar para aprovação</button>
+    </form>
+
+    <div id="pi-lista-wrap" hidden>
+      <h2 class="pi-title" style="font-size:1.2rem;">Suas propostas</h2>
+      <div class="pi-card" id="pi-lista"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const cfg = {
+      apiKey:            document.querySelector('meta[name="fb-api"]')?.content,
+      authDomain:        document.querySelector('meta[name="fb-auth"]')?.content,
+      projectId:         document.querySelector('meta[name="fb-proj"]')?.content,
+      storageBucket:     document.querySelector('meta[name="fb-bucket"]')?.content,
+      messagingSenderId: document.querySelector('meta[name="fb-sender"]')?.content,
+      appId:             document.querySelector('meta[name="fb-appid"]')?.content,
+    };
+    const auth = getAuth(initializeApp(cfg));
+
+    document.getElementById("btn-logout")?.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "/acesso-equipe";
+    });
+
+    const $ = (id) => document.getElementById(id);
+    const titulo = $("pi-title"), sub = $("pi-sub"), msg = $("pi-msg");
+    const form = $("pi-form");
+    const listaWrap = $("pi-lista-wrap"), lista = $("pi-lista");
+    const erro = $("pi-erro"), enviar = $("pi-enviar");
+
+    // Vocabulário fechado, repetido aqui como em toda tela desta fase: recusa
+    // em vez de assumir lista desatualizada, nunca reimporta módulo do
+    // servidor no cliente.
+    const GRUPOS = ['Peito', 'Costas', 'Ombros', 'Bíceps', 'Tríceps', 'Antebraço', 'Pernas', 'Abdômen'];
+    const EQUIPAMENTOS = ['Barra', 'Halteres', 'Polia', 'Máquina', 'Peso Corporal', 'Barra W', 'Kettlebell'];
+    const NIVEIS = ['iniciante', 'intermediario', 'avancado'];
+    const CATEGORIAS = [
+      'Alimentos preparados', 'Bebidas (alcoólicas e não alcoólicas)', 'Carnes e derivados',
+      'Cereais e derivados', 'Frutas e derivados', 'Gorduras e óleos', 'Leguminosas e derivados',
+      'Leite e derivados', 'Miscelâneas', 'Nozes e sementes', 'Outros alimentos industrializados',
+      'Ovos e derivados', 'Pescados e frutos do mar', 'Produtos açucarados',
+      'Verduras, hortaliças e derivados',
+    ];
+
+    const params = new URLSearchParams(window.location.search);
+    const tipo = params.get("tipo");
+
+    if (tipo !== "exercicio" && tipo !== "alimento") {
+      titulo.textContent = "Link inválido";
+      sub.textContent = "";
+      msg.textContent = "Este link não indica o que propor. Volte à tela de edição do plano e use o botão \"Propor item\" de dentro da busca.";
+      msg.hidden = false;
+      throw new Error("tipo ausente ou inválido");
+    }
+
+    function preencherSelect(select, opcoes, rotulos) {
+      select.innerHTML = opcoes.map((v) =>
+        `<option value="${v}">${rotulos ? rotulos[v] ?? v : v}</option>`).join("");
+    }
+
+    if (tipo === "exercicio") {
+      titulo.textContent = "Propor exercício";
+      preencherSelect($("ex-grupo"), GRUPOS);
+      preencherSelect($("ex-equipamento"), EQUIPAMENTOS);
+      preencherSelect($("ex-nivel"), NIVEIS, { iniciante: "Iniciante", intermediario: "Intermediário", avancado: "Avançado" });
+      $("pi-campos-exercicio").hidden = false;
+    } else {
+      titulo.textContent = "Propor alimento";
+      preencherSelect($("al-categoria"), CATEGORIAS);
+      $("pi-campos-alimento").hidden = false;
+
+      function atualizarKcal() {
+        const p = parseFloat($("al-proteina").value) || 0;
+        const c = parseFloat($("al-carboidrato").value) || 0;
+        const l = parseFloat($("al-lipideos").value) || 0;
+        const kcal = p * 4 + c * 4 + l * 9;
+        $("al-kcal-calc").textContent = `${Math.round(kcal)} kcal / 100g`;
+      }
+      ["al-proteina", "al-carboidrato", "al-lipideos"].forEach((id) =>
+        $(id).addEventListener("input", atualizarKcal));
+      atualizarKcal();
+    }
+
+    function chamar(fn, corpo) {
+      return fetch("/.netlify/functions/" + fn, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${window.__token}` },
+        body: JSON.stringify(corpo ?? {}),
+      });
+    }
+
+    async function erroDe(resp) {
+      try {
+        const d = await resp.json();
+        return d.detalhes ? `${d.erro} (${d.detalhes.join("; ")})` : (d.erro || `Erro ${resp.status}`);
+      } catch { return `Erro ${resp.status}`; }
+    }
+
+    async function carregarLista() {
+      const resp = await chamar("listar-minhas-propostas", { tipo });
+      if (!resp.ok) return;
+      const { propostas } = await resp.json();
+      listaWrap.hidden = false;
+      if (propostas.length === 0) {
+        lista.innerHTML = `<p class="pi-vazio">Nenhuma proposta enviada ainda.</p>`;
+        return;
+      }
+      lista.innerHTML = propostas.map((p) => `
+        <div class="pi-lista__item">
+          <span class="pi-lista__nome">${p.nome ?? "(sem nome)"}</span>
+          <span class="pi-estado pi-estado--${p.status}">${p.status === "aprovado" ? "Aprovado" : "Pendente"}</span>
+        </div>
+      `).join("");
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      erro.hidden = true;
+      enviar.disabled = true;
+
+      let campos;
+      if (tipo === "exercicio") {
+        campos = {
+          nome_pt: $("ex-nome").value.trim(),
+          instrucao_pt: $("ex-instrucao").value.trim(),
+          grupo: $("ex-grupo").value,
+          musculoPrimario: $("ex-musculo").value.trim(),
+          equipamento: $("ex-equipamento").value,
+          nivel: $("ex-nivel").value,
+        };
+      } else {
+        const p = parseFloat($("al-proteina").value);
+        const c = parseFloat($("al-carboidrato").value);
+        const l = parseFloat($("al-lipideos").value);
+        campos = {
+          nomeExibicao: $("al-nome").value.trim(),
+          categoria: $("al-categoria").value,
+          // kcal calculado aqui, nunca digitado — ver o comentário no topo do
+          // arquivo sobre por que isso é conveniência, não duplicação de regra.
+          macros: { proteinaG: p, carboidratoG: c, lipideosG: l, kcal: Math.round(p * 4 + c * 4 + l * 9) },
+        };
+      }
+
+      const fn = tipo === "exercicio" ? "atualizar-exercicio" : "atualizar-alimento";
+      try {
+        const resp = await chamar(fn, { operacao: "criar", campos });
+        if (!resp.ok) throw new Error(await erroDe(resp));
+        form.reset();
+        if (tipo === "alimento") $("al-kcal-calc").textContent = "0 kcal / 100g";
+        await carregarLista();
+      } catch (e2) {
+        erro.textContent = e2?.message || "Não foi possível enviar agora.";
+        erro.hidden = false;
+      } finally {
+        enviar.disabled = false;
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "/acesso-equipe"; return; }
+      const tokenResult = await user.getIdTokenResult(true).catch(() => null);
+      if (!tokenResult?.claims?.professional) {
+        // Mesma recusa silenciosa que /profissional já usa para quem não tem
+        // o papel: não é erro de rede, é conta sem acesso a esta área.
+        await signOut(auth);
+        window.location.href = "/acesso-equipe";
+        return;
+      }
+      window.__token = tokenResult.token;
+      sub.textContent = "Vai para a mesma fila de revisão que o Coach já usa. Aprovado, passa a existir para todo mundo.";
+      form.hidden = false;
+      await carregarLista();
+    });
+  </script>
+</body>
+</html>
