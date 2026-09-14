@@ -32,7 +32,7 @@ import Fluxogramas from './Fluxogramas.astro';
         <div class="gvf-eyebrow">Coach Ruiz · Elite 90 Pro</div>
         <h2 class="gvf-h1" id="gvf-titulo">Fluxos da delegação</h2>
       </div>
-      <button type="button" class="gvf-fechar" data-gvf-fechar aria-label="Fechar os fluxos">Fechar</button>
+      <button type="button" class="gvf-fechar" data-gvf-fechar aria-label="Fechar os fluxos">✕</button>
     </div>
 
     <div class="gvf-corpo" tabindex="-1">
@@ -124,14 +124,15 @@ import Fluxogramas from './Fluxogramas.astro';
     line-height:1; letter-spacing:var(--tracking-display); text-transform:uppercase;
     color:var(--c-white); margin:var(--space-2) 0 0;
   }
+  /* Mesmo .drawer-close de editor-plano.css (usado em #athlete-drawer): "✕"
+     nu, sem moldura de botão-pílula — não é a gaveta dos fluxos que deveria
+     inventar outra convenção de fechar. */
   .gvf-fechar{
-    flex:none; background:none; border:1px solid rgba(255,255,255,.18); color:var(--c-textsub);
-    font-family:var(--font-label); font-size:.66rem; font-weight:700;
-    letter-spacing:var(--tracking-label); text-transform:uppercase;
-    padding:8px 16px; border-radius:var(--radius-pill); cursor:pointer;
-    transition:color var(--transition-base), border-color var(--transition-base);
+    flex:none; background:none; border:none; color:var(--c-textsub);
+    font-size:20px; line-height:1; cursor:pointer;
+    transition:color var(--dur-med) var(--ease-std);
   }
-  .gvf-fechar:hover{color:var(--c-white); border-color:var(--c-lime)}
+  .gvf-fechar:hover{color:var(--c-lime)}
 
   /* A rolagem é DESTE painel, e não da página: o corpo fica travado atrás
      enquanto a gaveta está aberta. Os desenhos têm 1757 e 2317 de altura e não
@@ -172,8 +173,20 @@ import Fluxogramas from './Fluxogramas.astro';
 
   html.gvf-travado, html.gvf-travado body{overflow:hidden}
 
-  @media (max-width:640px){
-    .gvf-panel{width:100vw}
+  /* Mesma conversão de #athlete-drawer/.drawer-panel neste breakpoint (editor-
+     plano.css): abaixo de 768px a gaveta deixa de ancorar na lateral e vira
+     folha inferior, porque uma faixa de 94vw docada à direita já não sobra
+     espaço nenhum do guia por trás para o backdrop separar visualmente — na
+     base, cobrindo quase a tela toda mas ainda deixando ver que é um painel
+     por cima, não a própria página. */
+  @media (max-width:768px){
+    .gvf{align-items:flex-end; justify-content:center}
+    .gvf-panel{
+      width:100%; height:92vh; height:92svh;
+      border-left:none; border-top:none; border-radius:20px 20px 0 0;
+      transform:translateY(100%);
+    }
+    .gvf.open .gvf-panel{transform:translateY(0)}
   }
 
   @media (prefers-reduced-motion:reduce){
