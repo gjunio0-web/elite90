@@ -1654,7 +1654,16 @@ function piCriarDropdown(campoId, itens) {
   return alca;
 }
 document.addEventListener('click', function() { piFecharDropdowns(); });
-window.addEventListener('scroll', piFecharDropdowns, true);
+// Fecha ao rolar a PÁGINA (o gatilho sai do lugar, o menu fixo ficaria
+// desalinhado) — mas não ao rolar a LISTA do próprio menu: 'scroll' não
+// borbulha, então só chega em window por causa da fase de captura (`true`),
+// e sem este filtro rolar a lista fechava o menu no primeiro gesto, antes de
+// mover um pixel sequer (achado testando com uma categoria de 15 itens,
+// mais alta que os 260px do menu).
+window.addEventListener('scroll', function(e) {
+  if (e.target && e.target.closest && e.target.closest('.pi-dd-menu')) return;
+  piFecharDropdowns();
+}, true);
 
 var piSelectsPreenchidos = false;
 
