@@ -95,10 +95,19 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .alm-campo:focus { outline: none; border-color: var(--c-lime); box-shadow: var(--glow-lime-sm); }
   #alm-busca { flex: 1; min-width: 220px; }
   /* Base escondido — só existe no celular (regra em @media 600px abaixo). Sem
-     este `display:none` de base o botão apareceria também no computador,
+     este `display:none` de base o rótulo apareceria também no computador,
      onde a faixa de estado já cobre revisão e a medida caseira não tem
-     destaque nenhum (divergência 3 é celular-only). */
-  #alm-sem-medida { display: none; }
+     destaque nenhum (divergência 3 é celular-only).
+
+     CAIXA DE VERIFICAÇÃO, NÃO PÍLULA — ver .alm-estado logo abaixo, que é
+     onde este filtro morava antes. Pílula é o formato certo para ESCOLHER UM
+     entre vários (estado, categoria) — aqui não há "vários": é um único
+     alternador independente, ligado ou desligado, que se soma a qualquer
+     filtro já escolhido. Uma pílula sozinha, sem outras ao lado para formar
+     o conjunto de opções que o formato pressupõe, lia como campo inerte —
+     .exc-rotulo--musculo em exercicios.astro já resolve esse mesmo problema
+     do mesmo jeito, para o mesmo tipo de alternador (checkbox nativo). */
+  .alm-check { display: none; }
 
   /* Faixa de categorias — só existe no celular (spec 6), mesmo papel de
      .exc-grupos-faixa: o <select> de 15 valores abre uma roleta que esconde a
@@ -113,6 +122,10 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .alm-estado { font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; padding: 6px 14px; border-radius: var(--radius-pill); background: transparent; border: 1px solid var(--c-line-muted); color: var(--c-textsub); cursor: pointer; transition: color var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std); }
   .alm-estado:hover { color: var(--c-textbody); }
   .alm-estado[aria-pressed="true"] { background: rgba(166,195,0,0.12); border-color: rgba(166,195,0,0.4); color: var(--c-lime); }
+  /* Mesma receita de .exc-rotulo--musculo (exercicios.astro): checkbox nativo,
+     sem estilo próprio — o navegador já sabe comunicar ligado/desligado
+     melhor do que uma pílula sozinha conseguiria. */
+  .alm-check { align-items: center; gap: 8px; font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textbody); cursor: pointer; }
 
   /* Faixa de revisão em bloco — mesmo papel de .exc-lote: só existe com o
      filtro em "aguardando" e com resultado, e some quando não há o que
@@ -272,7 +285,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     #alm-categoria { display: none; }
     #alm-busca { flex: 1 1 100%; min-width: 0; }
     .alm-categorias-faixa { display: flex; }
-    #alm-sem-medida { display: inline-flex; }
+    .alm-check { display: inline-flex; }
 
     .alm-cab { display: none; }
     .alm-linha { display: block; padding: var(--space-3); }
@@ -329,7 +342,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     <select class="alm-campo" id="alm-categoria"><option value="">Todas as categorias</option></select>
     <!-- Filtro rápido do celular (divergência 3): ao lado da faixa de
          categorias, não da busca — é outro eixo de recorte, não texto. -->
-    <button class="alm-estado" id="alm-sem-medida" type="button" aria-pressed="false">Sem medida caseira</button>
+    <label class="alm-check" for="alm-sem-medida"><input type="checkbox" id="alm-sem-medida" /> Sem medida caseira</label>
   </div>
 
   <div class="alm-categorias-faixa" id="alm-categorias-faixa" role="group" aria-label="Filtrar por categoria"></div>
@@ -968,10 +981,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
     const b = ev.target.closest('[data-categoria]');
     if (b) trocarCategoria(b.dataset.categoria);
   });
-  $('alm-sem-medida').addEventListener('click', () => {
-    estado.semMedidaCaseira = !estado.semMedidaCaseira;
+  $('alm-sem-medida').addEventListener('change', () => {
+    estado.semMedidaCaseira = $('alm-sem-medida').checked;
     estado.pagina = 1;
-    $('alm-sem-medida').setAttribute('aria-pressed', String(estado.semMedidaCaseira));
     carregar();
   });
   $('alm-estados').addEventListener('click', (ev) => {
