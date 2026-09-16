@@ -221,6 +221,16 @@ export const handler = async (event: any) => {
         publishedAt: FieldValue.serverTimestamp(),
       });
 
+      // AC-28 · P-1 com D-2 (Fase 5, item 7). O ponteiro do plano acompanha a
+      // versão, no mesmo commit. `hasUnpublishedChanges: true` por D-2: o
+      // conteúdo publicado veio do profissional, e o rascunho do Coach, que
+      // NUNCA é sobrescrito aqui, passa a divergir da versão corrente.
+      tx.set(refPlano, {
+        currentVersion: versaoCriada,
+        status: "published",
+        hasUnpublishedChanges: true,
+      }, { merge: true });
+
       // A sugestão resolvida, no MESMO commit.
       tx.update(refSugestao, {
         status: "published",

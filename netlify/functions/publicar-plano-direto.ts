@@ -253,6 +253,17 @@ export const handler = async (event: any) => {
         publishedBy,
         publishedAt: FieldValue.serverTimestamp(),
       });
+
+      // AC-28 · P-1 (Fase 5, item 7). O ponteiro do plano acompanha a versão,
+      // no MESMO commit (P4 do esquema). Sem isto, `currentVersion` nunca
+      // passava de null e `salvar-rascunho-plano.ts` jamais reconhecia plano
+      // publicado. `false`: o conteúdo publicado aqui É o rascunho do Coach.
+      // `merge: true` preserva `draft`, que tem outro dono.
+      tx.set(refPlano, {
+        currentVersion: versaoCriada,
+        status: "published",
+        hasUnpublishedChanges: false,
+      }, { merge: true });
     });
   } catch (e) {
     console.error("[publicar-plano-direto] falha ao gravar versão:", e);

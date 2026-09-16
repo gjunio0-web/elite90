@@ -139,6 +139,10 @@ export const handler = async (event: any) => {
         draft: null,
         draftUpdatedAt: null,
         status: "none",
+        // AC-28 · P-3. Mesmo formato do ramo abaixo, para o cliente não
+        // precisar distinguir documento ausente de campo ausente.
+        currentVersion: null,
+        hasUnpublishedChanges: false,
       });
     }
 
@@ -159,6 +163,10 @@ export const handler = async (event: any) => {
       draft: d.draft ?? null,
       draftUpdatedAt: atualizadoEm,
       status: d.status ?? "none",
+      // AC-28 · P-3. Gravados por publicar-plano-direto.ts, aprovar-sugestao.ts
+      // e salvar-rascunho-plano.ts. Normalizados: ausência vira null / false.
+      currentVersion: typeof d.currentVersion === "number" ? d.currentVersion : null,
+      hasUnpublishedChanges: d.hasUnpublishedChanges === true,
     });
   } catch (e: any) {
     console.error("[ler-rascunho-plano]", e?.stack ?? e);

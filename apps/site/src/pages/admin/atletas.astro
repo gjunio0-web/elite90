@@ -2069,7 +2069,14 @@ tbody { display: block; width: 100%; }
             ? String(dt.getDate()).padStart(2,'0') + '/' + String(dt.getMonth()+1).padStart(2,'0') + '/' + dt.getFullYear()
               + ' ' + String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0')
             : '';
-          athlete[key] = { status: 'publicado', publishedAt: carimbo, hasUnpublishedChanges: false };
+          // AC-28 · P-4. Esta resposta chega sem ordem garantida em relação à
+          // edição e à leitura do rascunho. Nunca rebaixa `true` para `false`:
+          // preserva o `true` ligado pelo editor nesta sessão e o `true`
+          // persistido que m2CarregarRascunho já tenha trazido do servidor.
+          const anterior = athlete[key];
+          const pendente = !!(anterior && anterior.hasUnpublishedChanges)
+            || m2PendenteServidor[athlete.id + ':' + kind] === true;
+          athlete[key] = { status: 'publicado', publishedAt: carimbo, hasUnpublishedChanges: pendente };
           renderPubHeader(kind);
         } catch (e) {
           console.error('[wkeAtualizarCabecalhoPublicacao]', kind, e);
@@ -2465,6 +2472,9 @@ tbody { display: block; width: 100%; }
         p.status = 'publicado';
         p.publishedAt = dd + ' ' + hh;
         p.hasUnpublishedChanges = false;
+        // AC-28 · P-4. Sem isto, um `true` lido antes da publicação voltaria a
+        // acender o selo na próxima abertura da gaveta.
+        delete m2PendenteServidor[a.id + ':' + kind];
         renderPubHeader(kind);
         notifyAthletePublish(a.id, kind);
         wkeToast(label + ' publicado para o atleta.', { type: 'success' });
@@ -3149,10 +3159,27 @@ tbody { display: block; width: 100%; }
     // ele trabalha. Lançar aqui deixaria a aba em branco por indisponibilidade
     // momentânea de rede, o que é pior que o estado anterior a este item.
     // O erro vai para o console e para o indicador de estado.
+    // AC-28 · P-3/P-4. `true` persistido lido do servidor, por `uid:kind`.
+    // Só guarda `true`; doPublish limpa a entrada ao publicar.
+    const m2PendenteServidor = {};
+
     async function m2CarregarRascunho(kind, athleteId) {
       if (!athleteId) return null;
       try {
         const r = await m2Ler('ler-rascunho-plano', { athleteUid: athleteId, planType: kind });
+        // AC-28 · P-3. O sinal persistido sobrevive a recarregar a tela. Se o
+        // cabeçalho já estiver como publicado (resposta de
+        // wkeAtualizarCabecalhoPublicacao chegou antes), aplica agora; se não,
+        // aquela função o lê de m2PendenteServidor quando chegar.
+        if (r && r.hasUnpublishedChanges === true) {
+          m2PendenteServidor[athleteId + ':' + kind] = true;
+          const a = wke04CurrentAthlete;
+          const key = kind === 'training' ? 'trainingPlan' : 'nutritionPlan';
+          if (a && a.id === athleteId && a[key] && a[key].status === 'publicado' && !a[key].hasUnpublishedChanges) {
+            a[key].hasUnpublishedChanges = true;
+            renderPubHeader(kind);
+          }
+        }
         return (r && r.draft) || null;
       } catch (e) {
         console.error('[m2CarregarRascunho]', kind, e);
