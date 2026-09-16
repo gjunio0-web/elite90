@@ -35,15 +35,19 @@
 // base externa que possa mudar depois. Por isso o bloco de treino abaixo é
 // portado tal como está no preview, sem uma segunda versão "congelada".
 //
-// PREMISSA DE FORMATO — A CONFIRMAR COM QUEM PERSISTIR trainingPlan/nutritionPlan
-// Hoje esses campos só existem em memória no navegador (ver o comentário de
-// doPublish em atletas.astro: "AGUARDA A PERSISTÊNCIA DO M2"). Este módulo
-// assume que a persistência real vai gravar o MESMO formato que já existe em
-// memória hoje:
-//   trainingPlan.plan   = { order: string[], days: { [chave]: { label?, exercises: [{ name, sets: [{ reps, load }] }] } } }
-//   nutritionPlan.plan  = { days: { treino: { meals }, descanso: { meals } } },
-//                         meals = [{ name, foods: [{ snapshot?: {...}, name, qty, base? }] }]
-// Se o formato final divergir, ajustar aqui — não redesenhar o documento.
+// DE ONDE VEM O CONTEÚDO RENDERIZADO
+// O plano chega aqui como `versions/{vNNN}.content`, lido por
+// buscarVersaoPublicada (lib/versao-publicada.ts) em /plano/[token].astro.
+// Quem grava `content` são publicar-plano-direto.ts e aprovar-sugestao.ts.
+// Os campos `trainingPlan`/`nutritionPlan` do documento do atleta NÃO são
+// fonte: nenhuma função os grava (DV-4). Em atletas.astro, esses mesmos nomes
+// designam apenas o estado de interface do cabeçalho de publicação
+// (getPlanRef), sem relação com o conteúdo do plano. O formato esperado de
+// `content` é o que o editor mantém em memória:
+//   treino     = { order: string[], days: { [chave]: { label?, exercises: [{ name, sets: [{ reps, load }] }] } } }
+//   nutrição   = { days: { treino: { meals }, descanso: { meals } } },
+//                meals = [{ name, foods: [{ snapshot?: {...}, name, qty, base? }] }]
+// Se o formato gravado em `content` mudar, ajustar aqui — não redesenhar o documento.
 
 export type TrainingSet = { reps?: string | number; load?: number | string | null };
 export type TrainingExercise = { name?: string; sets?: TrainingSet[] };

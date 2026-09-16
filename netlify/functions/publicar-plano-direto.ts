@@ -6,9 +6,10 @@
 //
 // `doPublish`, em atletas.astro, altera um objeto em memória —
 // `p.status = 'publicado'` sobre o retorno de `getPlanRef(kind)` — que some ao
-// recarregar a página. Nenhuma função grava `trainingPlan` nem `nutritionPlan`
-// no documento do atleta, e a página pública, que lê justamente esse campo,
-// respondia "Nada publicado ainda" para todo atleta, sempre. O botão confirmava
+// recarregar a página. Nenhuma função gravava `trainingPlan` nem `nutritionPlan`
+// no documento do atleta, e a página pública, que na época lia justamente esse
+// campo, respondia "Nada publicado ainda" para todo atleta, sempre. (Desde a
+// AC-27 a página pública lê `versions/`; o campo segue sem gravação — DV-4.) O botão confirmava
 // ao Coach uma publicação que não acontecia — a mesma falha que a AC-24 evita do
 // lado do profissional, agora do lado de quem publica.
 //
