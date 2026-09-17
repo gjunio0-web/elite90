@@ -87,6 +87,25 @@ function normalizar(valor: unknown): unknown {
 const mesmoConteudo = (a: unknown, b: unknown) =>
   JSON.stringify(normalizar(a)) === JSON.stringify(normalizar(b));
 
+/**
+ * Plano sem nada dentro, na forma que a tela monta quando não há versão
+ * publicada: `{ order: [], days: {}, isNew: true }` no treino e
+ * `{ days: {}, isNew: true }` na nutrição. Vale também para o dia que existe
+ * sem conteúdo — dia de treino sem exercício, dia de nutrição sem refeição —,
+ * porque montar o recipiente vazio não é montar o plano.
+ */
+function semConteudo(plano: unknown): boolean {
+  const p = (plano ?? {}) as Record<string, unknown>;
+  const dias = (p.days ?? {}) as Record<string, unknown>;
+  for (const chave of Object.keys(dias)) {
+    const dia = (dias[chave] ?? {}) as Record<string, unknown>;
+    const exercicios = Array.isArray(dia.exercises) ? dia.exercises : [];
+    const refeicoes = Array.isArray(dia.meals) ? dia.meals : [];
+    if (exercicios.length > 0 || refeicoes.length > 0) return false;
+  }
+  return true;
+}
+
 const json = (statusCode: number, corpo: unknown) => ({
   statusCode,
   headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -196,10 +215,15 @@ export const handler = async (event: any) => {
     return json(403, { ...NEGADO, reason: "sem-atribuicao-ativa" });
   }
 
-  // Envio sem alteração. Só se aplica quando há versão de partida: sem ela não
-  // existe "o que o profissional abriu" com que comparar. A leitura é do
-  // documento da versão, pelo número — não da última publicada: comparar com
-  // outra versão recusaria trabalho real feito sobre a versão de partida.
+  // Envio sem alteração, nos DOIS casos de abertura da tela (AC-23).
+  //
+  //   com versão publicada  → a base é o `content` dessa versão;
+  //   sem versão publicada  → a base é o plano vazio que a própria tela monta,
+  //                           em `profissional/index.astro`.
+  //
+  // A regra é uma só: enviar o que se abriu não é proposta. A leitura da versão
+  // é pelo NÚMERO de partida, e não pela última publicada — comparar com outra
+  // recusaria trabalho real feito sobre a versão que o profissional abriu.
   if (basedOnVersion !== null) {
     const refVersao = db
       .collection(COLECAO_ATLETAS).doc(athleteUid)
@@ -212,6 +236,11 @@ export const handler = async (event: any) => {
         reason: "sem-alteracao",
       });
     }
+  } else if (semConteudo(corpo.content)) {
+    return json(409, {
+      erro: "Este plano está vazio. Monte ao menos um dia antes de enviar.",
+      reason: "sem-alteracao",
+    });
   }
 
   const agora = FieldValue.serverTimestamp();
