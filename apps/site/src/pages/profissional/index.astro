@@ -327,6 +327,11 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
       suggestionId: null,
       status: null,
       somenteLeitura: false,
+      // AC-23 · fonte 2. Número da versão publicada de onde este trabalho
+      // partiu, devolvido por `abrir-plano-profissional`. Vai junto na primeira
+      // gravação e na submissão; o servidor só o grava enquanto estiver vazio,
+      // então ele fica preso à versão de partida.
+      basedOnVersion: null,
     };
 
     var EditorPlanoHost = {
@@ -349,6 +354,7 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
             athleteUid: E90.athleteUid,
             planType: planType,
             content: plano,
+            basedOnVersion: E90.basedOnVersion ?? undefined,
           }),
         }).then(function (r) {
           return r.ok ? r.json() : null;
@@ -753,6 +759,7 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
         athleteUid, planType,
         suggestionId: dados.suggestionId,
         status: dados.status,
+        basedOnVersion: dados.basedOnVersion ?? null,
         // AC-24 · a precedência escolheu O QUÊ; o estado determina COMO.
         somenteLeitura: dados.status === "pending",
       });
@@ -826,6 +833,7 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
           planType,
           content: plano,
           suggestionId: window.E90.suggestionId ?? undefined,
+          basedOnVersion: window.E90.basedOnVersion ?? undefined,
         });
         if (resp.ok) {
           const d = await resp.json();

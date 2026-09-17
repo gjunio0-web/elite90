@@ -16,13 +16,20 @@
 // PRECEDÊNCIA, COM DUAS FONTES E NÃO TRÊS (AC-23)
 //
 //   1. sugestão própria não resolvida — `draft`, `pending` ou `returned`
-//   2. (última versão publicada — INALCANÇÁVEL: a subcoleção de versões não é
-//      escrita por código algum, e passa a existir com a AC-06)
+//   2. última versão publicada — `versions/{vNNN}.content`
 //   3. vazio
 //
-// `basedOnVersion` volta sempre nulo enquanto a fonte 2 não existir. A
-// precedência da AC-18 permanece correta como destino: a fonte 2 falta por
-// AUSÊNCIA DE DADO, não por decisão.
+// AS TRÊS FONTES EXISTEM DESDE A FASE 5 (Adendo 07 v1.39)
+//
+// O comentário anterior registrava a fonte 2 como inalcançável, porque a
+// subcoleção de versões não era escrita por código algum. Isso caducou: a AC-06
+// e a AC-25 passaram a gravá-la em toda publicação, e o comentário ficou para
+// trás. Sem a fonte 2, um atleta com plano publicado e sem sugestão em aberto
+// abria VAZIO para o profissional, que só podia recomeçar do zero.
+//
+// A fonte 2 traz junto o número da versão de partida, em `basedOnVersion`. É o
+// dado de que o aviso de rascunho desatualizado precisa — a comparação em si
+// não é feita aqui.
 //
 // O `status` VAI JUNTO, E É O QUE DECIDE O MODO DA TELA (AC-24)
 //
@@ -34,6 +41,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
+import { buscarVersaoPublicada } from "../../apps/site/src/lib/versao-publicada";
 import { conferirProfissionalAtivo } from "./_profissional-ativo";
 import { nivelPara, projetarAtleta } from "./_projecao-atleta";
 import { validarUid, validarPlanType, SPECIALTIES } from "./_m2-validacao";
@@ -53,6 +61,10 @@ const NAO_RESOLVIDOS = ["draft", "returned", "pending"];
  * tela por causa de um documento que já foi superado pelo trabalho em curso.
  */
 const PREFERENCIA = ["returned", "draft", "pending"];
+
+/** `v007` → 7. O identificador do documento é a numeração da versão. */
+const numeroDaVersao = (id: string): number | null =>
+  Number(String(id).replace(/^v/, "")) || null;
 
 const json = (statusCode: number, corpo: unknown) => ({
   statusCode,
@@ -169,7 +181,24 @@ export const handler = async (event: any) => {
     });
   }
 
-  // Fonte 3: vazio. A fonte 2 seria consultada aqui, e não é (AC-23).
+  // Fonte 2: a última versão publicada. Mesma leitura da AC-27 — a função
+  // compartilhada com a página pública e com o cabeçalho da gaveta, sem consulta
+  // nova. Abre EDITÁVEL (`status: null`): o profissional não escreve na versão
+  // nem no `draft` do plano, e a gravação nasce como sugestão própria.
+  const publicada = await buscarVersaoPublicada(db, athleteUid, planType);
+  if (publicada.existe && publicada.versao) {
+    return json(200, {
+      atleta,
+      origem: "versao-publicada",
+      suggestionId: null,
+      status: null,
+      content: publicada.versao.content,
+      basedOnVersion: numeroDaVersao(publicada.versao.id),
+      reviewNote: null,
+    });
+  }
+
+  // Fonte 3: vazio. Nem sugestão em aberto, nem versão publicada.
   return json(200, {
     atleta,
     origem: "vazio",
