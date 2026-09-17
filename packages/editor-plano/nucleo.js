@@ -1370,6 +1370,7 @@ function nteRenameMeal(mealIdx, el) {
   const name = el.textContent.trim();
   if (!name) { el.textContent = nteCurrentDay().meals[mealIdx].name; return; }
   nteCurrentDay().meals[mealIdx].name = name;
+  wkeToast('Refeição renomeada');
   nteAutoSave();
 }
 
