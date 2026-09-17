@@ -847,7 +847,16 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
         } else {
           enviar.disabled = false;
           const estado = $(`prof-estado-${planType}`);
-          estado.textContent = "Não foi possível enviar agora. Tente novamente em instantes.";
+          // A recusa por envio sem alteração traz o motivo no corpo da resposta,
+          // e ele precisa chegar ao profissional: a frase genérica pede para
+          // tentar de novo, e tentar de novo falharia igual — o que falta é
+          // alterar alguma coisa. Falha de rede continua com a frase genérica.
+          let texto = "Não foi possível enviar agora. Tente novamente em instantes.";
+          try {
+            const d = await resp.json();
+            if (d && d.erro) texto = d.erro;
+          } catch (_) {}
+          estado.textContent = texto;
           estado.hidden = false;
         }
       });

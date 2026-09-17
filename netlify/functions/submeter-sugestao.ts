@@ -50,6 +50,43 @@ const COLECAO_SUGESTOES = "suggestions";
 /** Estados de que uma sugestão pode ser submetida ou ressubmetida (AD-08). */
 const ESTADOS_SUBMETIVEIS = ["draft", "returned"] as const;
 
+const COLECAO_ATLETAS = "athletes";
+
+const idDaVersao = (n: number) => "v" + String(n).padStart(3, "0");
+
+/**
+ * ENVIO SEM ALTERAÇÃO É RECUSADO
+ *
+ * A tela do profissional abre a versão publicada corrente (AC-23, fonte 2) e
+ * informa o número dela em `basedOnVersion`. Submeter o mesmo conteúdo que se
+ * abriu produziria versão nova, imutável e sem efeito para o atleta, e tomaria
+ * o tempo do Coach numa revisão que não tem o que revisar.
+ *
+ * A comparação é de FORMA, não de identidade de objeto: chaves ordenadas, e
+ * fora dela os campos que o servidor acrescenta ou que só existem no navegador.
+ * `snapshot` e `congeladoEm` são produzidos na publicação, nunca vêm do
+ * profissional; `isNew` é marca de estado vazio da tela.
+ */
+const IGNORADAS = new Set(["snapshot", "congeladoEm", "_congeladoNoCliente", "isNew"]);
+
+function normalizar(valor: unknown): unknown {
+  if (Array.isArray(valor)) return valor.map(normalizar);
+  if (valor !== null && typeof valor === "object" && (valor as object).constructor === Object) {
+    const saida: Record<string, unknown> = {};
+    for (const chave of Object.keys(valor as Record<string, unknown>).sort()) {
+      if (IGNORADAS.has(chave)) continue;
+      const v = (valor as Record<string, unknown>)[chave];
+      if (v === undefined) continue;
+      saida[chave] = normalizar(v);
+    }
+    return saida;
+  }
+  return valor;
+}
+
+const mesmoConteudo = (a: unknown, b: unknown) =>
+  JSON.stringify(normalizar(a)) === JSON.stringify(normalizar(b));
+
 const json = (statusCode: number, corpo: unknown) => ({
   statusCode,
   headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -157,6 +194,24 @@ export const handler = async (event: any) => {
     // profissional": a segunda resposta confirmaria a existência do atleta a
     // quem não deveria enxergá-lo.
     return json(403, { ...NEGADO, reason: "sem-atribuicao-ativa" });
+  }
+
+  // Envio sem alteração. Só se aplica quando há versão de partida: sem ela não
+  // existe "o que o profissional abriu" com que comparar. A leitura é do
+  // documento da versão, pelo número — não da última publicada: comparar com
+  // outra versão recusaria trabalho real feito sobre a versão de partida.
+  if (basedOnVersion !== null) {
+    const refVersao = db
+      .collection(COLECAO_ATLETAS).doc(athleteUid)
+      .collection("plans").doc(planType)
+      .collection("versions").doc(idDaVersao(basedOnVersion));
+    const versao = await refVersao.get();
+    if (versao.exists && mesmoConteudo(corpo.content, versao.get("content"))) {
+      return json(409, {
+        erro: "Nada foi alterado em relação ao plano publicado. Faça ao menos um ajuste antes de enviar.",
+        reason: "sem-alteracao",
+      });
+    }
   }
 
   const agora = FieldValue.serverTimestamp();
