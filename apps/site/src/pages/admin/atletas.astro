@@ -2261,6 +2261,13 @@ tbody { display: block; width: 100%; }
         const salvo = await m2CarregarRascunho('training', athlete.id);
         if (salvo) wkePlanCache[athlete.id] = salvo;
       }
+      // AC-28 · P-6. Sem rascunho, a versão publicada real vem antes do
+      // plano-base, que só entra quando não há nenhum dos dois (CA-131). Sem
+      // calibração: a versão publicada já traz as cargas deste atleta.
+      if (!wkePlanCache[athlete.id]) {
+        const publicado = await m2CarregarVersaoPublicada('training', athlete.id);
+        if (publicado) wkePlanCache[athlete.id] = publicado;
+      }
       // Recupera plano do cache OU escala o plano-base p/ este atleta
       if (!wkePlanCache[athlete.id]) {
         const base = athlete.planStatus === 'none' ? null : wkeBuildBasePlan();
@@ -3152,6 +3159,28 @@ tbody { display: block; width: 100%; }
       return resp.json();
     }
 
+    // AC-28 · P-3/P-4. `true` persistido lido do servidor, por `uid:kind`.
+    // Só guarda `true`; doPublish limpa a entrada ao publicar.
+    const m2PendenteServidor = {};
+
+    // AC-28 · P-6 (Adendo 07 v1.37). Devolve o `content` da versão publicada
+    // corrente, ou null quando não há versão. Usada só quando não há rascunho:
+    // sem ela, a gaveta montava o plano-base, e "Republicar" publicava por cima
+    // da versão real — inclusive a aprovada de um profissional (CA-130, CA-132).
+    //
+    // NUNCA LANÇA, pela mesma razão de m2CarregarRascunho: falha de leitura
+    // degrada para o comportamento anterior (plano-base), com erro no console.
+    async function m2CarregarVersaoPublicada(kind, athleteId) {
+      if (!athleteId) return null;
+      try {
+        const r = await m2Ler('buscar-versao-publicada', { athleteUid: athleteId, planType: kind });
+        return (r && r.existe && r.versao && r.versao.content) || null;
+      } catch (e) {
+        console.error('[m2CarregarVersaoPublicada]', kind, e);
+        return null;
+      }
+    }
+
     // Devolve o rascunho gravado, ou null quando não há.
     //
     // NUNCA LANÇA. Falha de leitura degrada para "monta como montava antes" — o
@@ -3159,10 +3188,6 @@ tbody { display: block; width: 100%; }
     // ele trabalha. Lançar aqui deixaria a aba em branco por indisponibilidade
     // momentânea de rede, o que é pior que o estado anterior a este item.
     // O erro vai para o console e para o indicador de estado.
-    // AC-28 · P-3/P-4. `true` persistido lido do servidor, por `uid:kind`.
-    // Só guarda `true`; doPublish limpa a entrada ao publicar.
-    const m2PendenteServidor = {};
-
     async function m2CarregarRascunho(kind, athleteId) {
       if (!athleteId) return null;
       try {
@@ -3340,6 +3365,12 @@ tbody { display: block; width: 100%; }
       if (!ntePlanCache[athlete.id]) {
         const salvo = await m2CarregarRascunho('nutrition', athlete.id);
         if (salvo) ntePlanCache[athlete.id] = salvo;
+      }
+      // AC-28 · P-6. Mesma ordem da aba de Treino: rascunho > versão publicada
+      // > plano-base.
+      if (!ntePlanCache[athlete.id]) {
+        const publicado = await m2CarregarVersaoPublicada('nutrition', athlete.id);
+        if (publicado) ntePlanCache[athlete.id] = publicado;
       }
       if (!ntePlanCache[athlete.id]) {
         if (athlete.planStatus === 'none') {

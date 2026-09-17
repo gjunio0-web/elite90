@@ -210,6 +210,11 @@ export const handler = async (event: any) => {
       const anterior = ultima.empty ? 0 : Number(String(ultima.docs[0].id).replace(/^v/, "")) || 0;
       versaoCriada = anterior + 1;
 
+      // AC-28 · P-5 (Fase 5, item 7; D-2 corrigida, Adendo 07 v1.37). Lido aqui,
+      // antes de qualquer escrita, porque a transação exige leituras primeiro.
+      const planoAtual = await tx.get(refPlano);
+      const temRascunho = planoAtual.exists && Boolean(planoAtual.get("draft"));
+
       const refVersao = refPlano.collection("versions").doc(idDaVersao(versaoCriada));
 
       // A versão. Deliberadamente mínima — a Fase 5 acrescenta `coachNotes` e
@@ -221,14 +226,15 @@ export const handler = async (event: any) => {
         publishedAt: FieldValue.serverTimestamp(),
       });
 
-      // AC-28 · P-1 com D-2 (Fase 5, item 7). O ponteiro do plano acompanha a
-      // versão, no mesmo commit. `hasUnpublishedChanges: true` por D-2: o
-      // conteúdo publicado veio do profissional, e o rascunho do Coach, que
-      // NUNCA é sobrescrito aqui, passa a divergir da versão corrente.
+      // AC-28 · P-1 com D-2 corrigida (P-5). O ponteiro do plano acompanha a
+      // versão, no mesmo commit. `true` só se o Coach TEM rascunho: o conteúdo
+      // publicado veio do profissional, e esse rascunho, que NUNCA é
+      // sobrescrito aqui, passa a divergir da versão corrente. Sem rascunho, não
+      // há o que divergir — `false` (CA-128, CA-129).
       tx.set(refPlano, {
         currentVersion: versaoCriada,
         status: "published",
-        hasUnpublishedChanges: true,
+        hasUnpublishedChanges: temRascunho,
       }, { merge: true });
 
       // A sugestão resolvida, no MESMO commit.
