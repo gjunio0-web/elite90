@@ -456,6 +456,21 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .nte-formula-btn { flex: 1; padding: 8px; border-radius: var(--radius-card); font-family: var(--font-label); font-size: var(--fs-label); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); cursor: pointer; transition: opacity 150ms ease; background: transparent; border: 1px solid rgba(255, 255, 255, 0.14); color: var(--c-textsub); }
 .nte-formula-btn.primary { background: var(--c-lime); border-color: var(--c-lime); color: #0D0D0D; }
 .nte-formula-btn:hover { opacity: 0.85; }
+/* AC-38 · modal de conflito entre rascunho do Coach e versão aprovada.
+   Segue o padrão do modal de fotos, que era o único da gaveta até aqui. */
+#conflito-modal-overlay { position: fixed; inset: 0; z-index: 320; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; padding: 20px; }
+#conflito-modal-overlay[data-open="false"] { display: none; }
+.conflito-box { width: 100%; max-width: 560px; background: var(--c-darkbg); border: 0.75px solid var(--c-white); border-radius: var(--radius-card); padding: 22px; max-height: 88vh; overflow-y: auto; }
+.conflito-titulo { font-weight: 700; margin-bottom: 10px; }
+.conflito-texto { font-size: 14px; line-height: 1.5; margin-bottom: 14px; }
+.conflito-resumo { border: 0.75px solid rgba(255,255,255,.25); border-radius: var(--radius-card); padding: 12px 14px; margin-bottom: 16px; font-size: 14px; }
+.conflito-resumo ul { margin: 6px 0 0; padding-left: 18px; }
+.conflito-resumo li { margin-bottom: 4px; }
+.conflito-acoes { display: flex; flex-direction: column; gap: 8px; }
+.conflito-acoes button { width: 100%; text-align: left; padding: 11px 14px; border-radius: var(--radius-card); border: 0.75px solid var(--c-white); background: transparent; color: var(--c-white); cursor: pointer; font-family: inherit; font-size: 14px; }
+.conflito-acoes button:hover { border-color: var(--c-lime); color: var(--c-lime); }
+.conflito-acoes .conflito-perigo:hover { border-color: #ff6b6b; color: #ff6b6b; }
+
 #photo-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 300; background: rgba(0,0,0,.95); display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
 #photo-modal-overlay[data-open="false"] { display: none; }
 .photo-modal-container { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; max-width: 100%; }
@@ -1143,6 +1158,17 @@ tbody { display: block; width: 100%; }
   
 
   <!-- MODAL: PHOTO MODAL -->
+  <!-- AC-38 · conflito entre o rascunho do Coach e a versão aprovada de um
+       profissional. Preenchido por abrirModalConflito. -->
+  <div id="conflito-modal-overlay" data-open="false">
+    <div class="conflito-box">
+      <div class="conflito-titulo" id="conflito-titulo"></div>
+      <div class="conflito-texto" id="conflito-texto"></div>
+      <div class="conflito-resumo" id="conflito-resumo"></div>
+      <div class="conflito-acoes" id="conflito-acoes"></div>
+    </div>
+  </div>
+
   <div id="photo-modal-overlay" data-open="false" style="display:none;">
     <div class="photo-modal-container">
       <button class="photo-modal-close" onclick="closePhotoModal()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
@@ -2445,6 +2471,177 @@ tbody { display: block; width: 100%; }
     // peça de comunicação. Aqui é preciso congelar o VALOR.
 
 
+    // ── AC-38 · CONFLITO ENTRE RASCUNHO DO COACH E VERSÃO APROVADA ────────
+    //
+    // Gatilho (decisão (a) do Adendo 07 v1.41): há rascunho do Coach, a versão
+    // corrente veio de sugestão de profissional, e foi publicada DEPOIS da
+    // última gravação do rascunho. Publicação direta do Coach sobre o próprio
+    // rascunho antigo não aciona nada.
+    //
+    // Falha de leitura devolve null e a publicação segue: o modal é proteção,
+    // e indisponibilidade de rede não deve travar o ato de publicar.
+    const CONFLITO_IGNORAR = ['snapshot', 'congeladoEm', '_congeladoNoCliente', 'isNew'];
+
+    function m2NormalizarConteudo(valor) {
+      if (Array.isArray(valor)) return valor.map(m2NormalizarConteudo);
+      if (valor !== null && typeof valor === 'object' && valor.constructor === Object) {
+        const saida = {};
+        for (const chave of Object.keys(valor).sort()) {
+          if (CONFLITO_IGNORAR.indexOf(chave) !== -1) continue;
+          if (valor[chave] === undefined) continue;
+          saida[chave] = m2NormalizarConteudo(valor[chave]);
+        }
+        return saida;
+      }
+      return valor;
+    }
+
+    function m2Iguais(a, b) {
+      return JSON.stringify(m2NormalizarConteudo(a)) === JSON.stringify(m2NormalizarConteudo(b));
+    }
+
+    // Contagem por dia e por item (decisão (b)): quantos itens a mais, a menos
+    // e alterados. Não lista item a item.
+    function m2ContarItens(kind, dia) {
+      if (!dia) return [];
+      if (kind === 'training') return Array.isArray(dia.exercises) ? dia.exercises : [];
+      const refeicoes = Array.isArray(dia.meals) ? dia.meals : [];
+      const itens = [];
+      for (const refeicao of refeicoes) {
+        itens.push({ nome: refeicao.name || '', foods: refeicao.foods || [] });
+      }
+      return itens;
+    }
+
+    function m2ResumoDivergencia(kind, rascunho, publicado) {
+      const substantivo = kind === 'training' ? 'exercício' : 'refeição';
+      const plural = kind === 'training' ? 'exercícios' : 'refeições';
+      const alterado = kind === 'training' ? 'alterado' : 'alterada';
+      const alteradosPl = kind === 'training' ? 'alterados' : 'alteradas';
+      // Na nutrição os dias são fixos e têm nome próprio; no treino são letras.
+      const ROTULO_DIA = { treino: 'Dia de treino', descanso: 'Dia de descanso' };
+      const diasR = (rascunho && rascunho.days) || {};
+      const diasP = (publicado && publicado.days) || {};
+      const chaves = Object.keys(diasR).concat(Object.keys(diasP))
+        .filter(function (c, i, todas) { return todas.indexOf(c) === i; });
+
+      const linhas = [];
+      for (const chave of chaves) {
+        const rotulo = ROTULO_DIA[chave]
+          || ('Dia ' + ((diasR[chave] && diasR[chave].label) || (diasP[chave] && diasP[chave].label) || chave));
+        if (!diasP[chave]) { linhas.push(rotulo + ': dia novo no seu rascunho'); continue; }
+        if (!diasR[chave]) { linhas.push(rotulo + ': dia removido no seu rascunho'); continue; }
+
+        const itensR = m2ContarItens(kind, diasR[chave]);
+        const itensP = m2ContarItens(kind, diasP[chave]);
+        const comuns = Math.min(itensR.length, itensP.length);
+        let alterados = 0;
+        for (let i = 0; i < comuns; i++) if (!m2Iguais(itensR[i], itensP[i])) alterados++;
+        const aMais = Math.max(0, itensR.length - itensP.length);
+        const aMenos = Math.max(0, itensP.length - itensR.length);
+
+        const partes = [];
+        if (alterados) partes.push(alterados + ' ' + (alterados === 1 ? substantivo + ' ' + alterado : plural + ' ' + alteradosPl));
+        if (aMais) partes.push(aMais + ' a mais');
+        if (aMenos) partes.push(aMenos + ' a menos');
+        if (partes.length) linhas.push(rotulo + ': ' + partes.join(', '));
+      }
+      if (!linhas.length) linhas.push('Nenhuma diferença de conteúdo encontrada entre os dois.');
+      return linhas;
+    }
+
+    async function m2ContextoConflito(kind, athleteId, rascunhoLocal) {
+      try {
+        const rascunho = await m2Ler('ler-rascunho-plano', { athleteUid: athleteId, planType: kind });
+        if (!rascunho || !rascunho.draft) return null;
+        const publicada = await m2Ler('buscar-versao-publicada', { athleteUid: athleteId, planType: kind });
+        if (!publicada || !publicada.existe || !publicada.versao) return null;
+
+        const versao = publicada.versao;
+        const origem = versao.originatedBy || {};
+        if (origem.role !== 'professional') return null;
+
+        const tPublicado = versao.publishedAt ? Date.parse(versao.publishedAt) : 0;
+        const tRascunho = rascunho.draftUpdatedAt ? Date.parse(rascunho.draftUpdatedAt) : 0;
+        if (!(tPublicado > tRascunho)) return null;
+
+        return {
+          versao: versao,
+          autor: origem.name || 'o profissional',
+          // O que vai ser publicado é o estado em memória do editor, que é o
+          // rascunho vivo; o do servidor pode estar alguns segundos atrás.
+          rascunho: rascunhoLocal || rascunho.draft,
+        };
+      } catch (e) {
+        console.error('[m2ContextoConflito]', kind, e);
+        return null;
+      }
+    }
+
+    function abrirModalConflito(kind, ctx) {
+      const overlay = document.getElementById('conflito-modal-overlay');
+      const acoes = document.getElementById('conflito-acoes');
+      const rotuloPlano = kind === 'training' ? 'plano de treino' : 'plano nutricional';
+      document.getElementById('conflito-titulo').textContent = 'Há duas versões deste ' + rotuloPlano;
+      document.getElementById('conflito-texto').textContent =
+        'Você aprovou a sugestão de ' + ctx.autor + ', e ela é a versão que o atleta '
+        + 'está recebendo agora. Você também tem alterações suas, não publicadas, '
+        + 'feitas antes dessa aprovação. Publicar agora substituiria a versão '
+        + 'aprovada pelo seu rascunho.';
+      document.getElementById('conflito-resumo').innerHTML =
+        '<div>Diferenças entre o seu rascunho e a versão aprovada:</div><ul>'
+        + m2ResumoDivergencia(kind, ctx.rascunho, ctx.versao.content)
+            .map(function (l) { return '<li>' + l + '</li>'; }).join('')
+        + '</ul>';
+
+      const opcoes = [
+        ['publicar',  'Publicar o meu rascunho (substitui a versão aprovada)'],
+        ['manter',    'Manter a versão aprovada (meu rascunho continua salvo)'],
+        ['voltar',    'Voltar e editar'],
+        ['descartar', 'Descartar o meu rascunho e aceitar a versão aprovada'],
+      ];
+
+      return new Promise(function (resolver) {
+        acoes.innerHTML = '';
+        for (const [valor, texto] of opcoes) {
+          const botao = document.createElement('button');
+          botao.type = 'button';
+          botao.textContent = texto;
+          if (valor === 'descartar') botao.className = 'conflito-perigo';
+          botao.addEventListener('click', function () {
+            overlay.setAttribute('data-open', 'false');
+            resolver(valor);
+          });
+          acoes.appendChild(botao);
+        }
+        overlay.setAttribute('data-open', 'true');
+      });
+    }
+
+    // Quarta ação (CA-145 a CA-147). Só daqui, e só por clique explícito.
+    async function m2DescartarRascunho(kind, athlete, p, ctx) {
+      try {
+        await m2Escrever('descartar-rascunho-plano', { athleteUid: athlete.id, planType: kind });
+        // O editor passa a mostrar a versão aprovada: manter o rascunho na tela
+        // depois de descartá-lo no servidor faria o próximo autossalvo
+        // ressuscitá-lo.
+        if (kind === 'training') {
+          wkePlanCache[athlete.id] = ctx.versao.content;
+          wkeAplicarPlano(athlete, wkePlanCache[athlete.id]);
+        } else {
+          ntePlanCache[athlete.id] = ctx.versao.content;
+          nteAplicarPlano(athlete, ntePlanCache[athlete.id]);
+        }
+        p.hasUnpublishedChanges = false;
+        delete m2PendenteServidor[athlete.id + ':' + kind];
+        renderPubHeader(kind);
+        wkeToast('Rascunho descartado. A versão aprovada continua valendo.', { type: 'success' });
+      } catch (e) {
+        const detalhe = (e && e.message) ? e.message : 'Tente novamente.';
+        wkeToast('Não foi possível descartar o rascunho agora. ' + detalhe, { type: 'error' });
+      }
+    }
+
     async function doPublish(kind, label) {
       const p = getPlanRef(kind);
       if (!p) return;
@@ -2458,6 +2655,22 @@ tbody { display: block; width: 100%; }
       if (!a || !a.id) return;
       const conteudo = kind === 'training' ? wkePlanCache[a.id] : ntePlanCache[a.id];
       if (!conteudo) return;
+
+      // AC-38. Antes de publicar, confere se há conflito com versão aprovada de
+      // profissional. O modal decide se a publicação acontece.
+      const conflito = await m2ContextoConflito(kind, a.id, conteudo);
+      if (conflito) {
+        const escolha = await abrirModalConflito(kind, conflito);
+        if (escolha === 'voltar') return;
+        if (escolha === 'manter') {
+          wkeToast('Versão aprovada mantida. Seu rascunho continua salvo.', { type: 'success' });
+          return;
+        }
+        if (escolha === 'descartar') {
+          await m2DescartarRascunho(kind, a, p, conflito);
+          return;
+        }
+      }
 
       const pfx = kind === 'training' ? 'tr' : 'nu';
       const btn = document.getElementById(pfx + '-pubbtn');
