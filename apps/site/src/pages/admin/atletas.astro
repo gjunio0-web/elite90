@@ -250,6 +250,11 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .pub-dot.live { animation: pub-pulse 1.6s ease-in-out infinite; }
 .pub-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .pub-ts { font-family: var(--font-body); font-size: 0.62rem; color: var(--c-textsub); white-space: nowrap; }
+/* AC-39 · sugestão de profissional aguardando revisão NESTE plano. Informa,
+   não bloqueia (CA-151): cor de atenção, sem peso de erro. */
+.sug-aviso { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-family: var(--font-body); font-size: 0.68rem; line-height: 1.3; color: var(--c-status-new); text-decoration: none; }
+.sug-aviso[hidden] { display: none; }
+.sug-aviso:hover { text-decoration: underline; }
 .btn-protocol { display: inline-flex; align-items: center; gap: 7px; padding: 9px 15px; background: transparent; border: 1px solid rgba(166, 195, 0, 0.50); border-radius: var(--radius-card); color: var(--c-lime); font-family: var(--font-label); font-size: 0.62rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: background 140ms ease, border-color 140ms ease; white-space: nowrap; }
 .btn-protocol:hover { background: rgba(166, 195, 0, 0.12); border-color: var(--c-lime); }
 .btn-protocol [data-lucide] { width: 14px; height: 14px; }
@@ -1056,6 +1061,8 @@ tbody { display: block; width: 100%; }
             <div class="pub-titlewrap">
               <div class="drawer-section-title" style="margin-bottom:6px">Plano de Treino</div>
               <span class="pub-badge" id="tr-pubbadge"></span>
+              <!-- AC-39 · preenchido por m2RenderSugestaoPendente. -->
+              <a class="sug-aviso" id="tr-sugaviso" href="/admin/aprovacoes" hidden></a>
             </div>
             <div class="pub-actions">
               <span class="pub-ts" id="tr-pubts"></span>
@@ -1084,6 +1091,8 @@ tbody { display: block; width: 100%; }
             <div class="pub-titlewrap">
               <div class="drawer-section-title" style="margin-bottom:6px">Plano Nutricional</div>
               <span class="pub-badge" id="nu-pubbadge"></span>
+              <!-- AC-39 · preenchido por m2RenderSugestaoPendente. -->
+              <a class="sug-aviso" id="nu-sugaviso" href="/admin/aprovacoes" hidden></a>
             </div>
             <div class="pub-actions">
               <span class="pub-ts" id="nu-pubts"></span>
@@ -2043,6 +2052,8 @@ tbody { display: block; width: 100%; }
 
       initWorkout(athlete).catch(function (e) { console.error('initWorkout:', e); });
       initNutrition(athlete).catch(function (e) { console.error('initNutrition:', e); });
+      // AC-39. Uma leitura por abertura, cobrindo as duas abas.
+      m2CarregarSugestoesPendentes(athlete);
 
       // WKE-04: cabeçalhos de publicação.
       // Primeiro desenho: otimista, com o que já estiver em `athlete.trainingPlan`
@@ -2470,6 +2481,55 @@ tbody { display: block; width: 100%; }
     // Note a diferença em relação aos exercícios: lá congela-se o NOME, por ser
     // peça de comunicação. Aqui é preciso congelar o VALOR.
 
+
+    // ── AC-39 · SUGESTÃO PENDENTE NESTE PLANO ─────────────────────────────
+    //
+    // Informa, não bloqueia (decisão (a) do Adendo 07 v1.42): a sugestão ainda
+    // não foi decidida, e publicar por cima é ato válido do Coach. O que não
+    // pode é ele decidir sem saber que a proposta existe — o indicador global
+    // do topo da página diz que há trabalho pendente em algum lugar; este diz
+    // que há trabalho pendente AQUI.
+    //
+    // Uma leitura por abertura de gaveta, para os dois tipos de plano de uma
+    // vez. Falha de rede deixa o aviso oculto, como no indicador global
+    // (CA-72): melhor não mostrar do que mostrar informação que pode estar
+    // errada.
+    function m2DataSugestao(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      const dois = function (n) { return String(n).padStart(2, '0'); };
+      // Data fixa, não relativa: o Coach costuma decidir dias depois, e
+      // "há 2 horas" perde sentido quando ele volta amanhã.
+      return ' · enviada em ' + dois(d.getDate()) + '/' + dois(d.getMonth() + 1)
+        + ' às ' + dois(d.getHours()) + ':' + dois(d.getMinutes());
+    }
+
+    function m2RenderSugestaoPendente(kind, sugestao) {
+      const el = document.getElementById((kind === 'training' ? 'tr' : 'nu') + '-sugaviso');
+      if (!el) return;
+      if (!sugestao) { el.hidden = true; el.textContent = ''; return; }
+      el.textContent = 'Sugestão de ' + sugestao.professionalName + ' aguardando revisão'
+        + m2DataSugestao(sugestao.submittedAt) + ' · Ver em Aprovações';
+      el.hidden = false;
+    }
+
+    async function m2CarregarSugestoesPendentes(athlete) {
+      m2RenderSugestaoPendente('training', null);
+      m2RenderSugestaoPendente('nutrition', null);
+      try {
+        const r = await m2Ler('sugestoes-pendentes-do-atleta', { athleteUid: athlete.id });
+        const lista = (r && r.sugestoes) || [];
+        // A gaveta pode ter sido trocada de atleta enquanto a resposta vinha.
+        if (!wke04CurrentAthlete || wke04CurrentAthlete.id !== athlete.id) return;
+        for (const kind of ['training', 'nutrition']) {
+          const achada = lista.filter(function (s) { return s.planType === kind; })[0] || null;
+          m2RenderSugestaoPendente(kind, achada);
+        }
+      } catch (e) {
+        console.error('[m2CarregarSugestoesPendentes]', e);
+      }
+    }
 
     // ── AC-38 · CONFLITO ENTRE RASCUNHO DO COACH E VERSÃO APROVADA ────────
     //
