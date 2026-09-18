@@ -255,6 +255,11 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .sug-aviso { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-family: var(--font-body); font-size: 0.68rem; line-height: 1.3; color: var(--c-status-new); text-decoration: none; }
 .sug-aviso[hidden] { display: none; }
 .sug-aviso:hover { text-decoration: underline; }
+/* AC-42 · sinal permanente de origem: plano sem rascunho do Coach, corrente
+   é sugestão de profissional já aprovada. Contexto, não chamada à ação — por
+   isso sem link e sem hover, mesmo herdando a cor da AC-39 por consistência. */
+.origem-sugestao { display: block; margin-top: 6px; font-family: var(--font-body); font-size: 0.68rem; line-height: 1.3; color: var(--c-status-new); }
+.origem-sugestao[hidden] { display: none; }
 .btn-protocol { display: inline-flex; align-items: center; gap: 7px; padding: 9px 15px; background: transparent; border: 1px solid rgba(166, 195, 0, 0.50); border-radius: var(--radius-card); color: var(--c-lime); font-family: var(--font-label); font-size: 0.62rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: background 140ms ease, border-color 140ms ease; white-space: nowrap; }
 .btn-protocol:hover { background: rgba(166, 195, 0, 0.12); border-color: var(--c-lime); }
 .btn-protocol [data-lucide] { width: 14px; height: 14px; }
@@ -1063,6 +1068,8 @@ tbody { display: block; width: 100%; }
               <span class="pub-badge" id="tr-pubbadge"></span>
               <!-- AC-39 · preenchido por m2RenderSugestaoPendente. -->
               <a class="sug-aviso" id="tr-sugaviso" href="/admin/aprovacoes" hidden></a>
+              <!-- AC-42 · preenchido por m2RenderOrigemSugestao. -->
+              <div class="origem-sugestao" id="tr-origemsugestao" hidden></div>
             </div>
             <div class="pub-actions">
               <span class="pub-ts" id="tr-pubts"></span>
@@ -1093,6 +1100,8 @@ tbody { display: block; width: 100%; }
               <span class="pub-badge" id="nu-pubbadge"></span>
               <!-- AC-39 · preenchido por m2RenderSugestaoPendente. -->
               <a class="sug-aviso" id="nu-sugaviso" href="/admin/aprovacoes" hidden></a>
+              <!-- AC-42 · preenchido por m2RenderOrigemSugestao. -->
+              <div class="origem-sugestao" id="nu-origemsugestao" hidden></div>
             </div>
             <div class="pub-actions">
               <span class="pub-ts" id="nu-pubts"></span>
@@ -2301,9 +2310,20 @@ tbody { display: block; width: 100%; }
       // AC-28 · P-6. Sem rascunho, a versão publicada real vem antes do
       // plano-base, que só entra quando não há nenhum dos dois (CA-131). Sem
       // calibração: a versão publicada já traz as cargas deste atleta.
+      //
+      // AC-42 (CA-166): só chega aqui quando não há rascunho — é exatamente
+      // o gatilho do sinal permanente de origem, quando a versão é de
+      // sugestão de profissional aprovada.
+      m2RenderOrigemSugestao('training', null);
       if (!wkePlanCache[athlete.id]) {
-        const publicado = await m2CarregarVersaoPublicada('training', athlete.id);
-        if (publicado) wkePlanCache[athlete.id] = publicado;
+        const versao = await m2CarregarVersaoPublicada('training', athlete.id);
+        if (versao) {
+          wkePlanCache[athlete.id] = versao.content;
+          const origem = versao.originatedBy || {};
+          if (origem.role === 'professional') {
+            m2RenderOrigemSugestao('training', { autor: origem.name || 'o profissional', publishedAt: versao.publishedAt });
+          }
+        }
       }
       // Recupera plano do cache OU escala o plano-base p/ este atleta
       if (!wkePlanCache[athlete.id]) {
@@ -2494,15 +2514,36 @@ tbody { display: block; width: 100%; }
     // vez. Falha de rede deixa o aviso oculto, como no indicador global
     // (CA-72): melhor não mostrar do que mostrar informação que pode estar
     // errada.
-    function m2DataSugestao(iso) {
+    // Data fixa, não relativa: o Coach costuma decidir dias depois, e
+    // "há 2 horas" perde sentido quando ele volta amanhã. Núcleo comum à
+    // AC-39 e à AC-42, cada uma com seu próprio texto ao redor.
+    function m2FormatarDataHora(iso) {
       if (!iso) return '';
       const d = new Date(iso);
       if (isNaN(d.getTime())) return '';
       const dois = function (n) { return String(n).padStart(2, '0'); };
-      // Data fixa, não relativa: o Coach costuma decidir dias depois, e
-      // "há 2 horas" perde sentido quando ele volta amanhã.
-      return ' · enviada em ' + dois(d.getDate()) + '/' + dois(d.getMonth() + 1)
+      return dois(d.getDate()) + '/' + dois(d.getMonth() + 1)
         + ' às ' + dois(d.getHours()) + ':' + dois(d.getMinutes());
+    }
+
+    function m2DataSugestao(iso) {
+      const data = m2FormatarDataHora(iso);
+      return data ? ' · enviada em ' + data : '';
+    }
+
+    // AC-42. "Este plano reflete a sugestão de <autor>, aprovada em <data>."
+    // Sinal PERMANENTE — ao contrário do aviso da AC-39, não é chamada à
+    // ação sobre algo pendente: é contexto sobre algo já decidido, que o
+    // Coach está evoluindo. Por isso fica visível a sessão de edição inteira,
+    // sem link, e é recalculado só na próxima abertura da gaveta (CA-168).
+    function m2RenderOrigemSugestao(kind, info) {
+      const el = document.getElementById((kind === 'training' ? 'tr' : 'nu') + '-origemsugestao');
+      if (!el) return;
+      if (!info) { el.hidden = true; el.textContent = ''; return; }
+      const data = m2FormatarDataHora(info.publishedAt);
+      el.textContent = 'Este plano reflete a sugestão de ' + info.autor
+        + (data ? ', aprovada em ' + data : '') + '.';
+      el.hidden = false;
     }
 
     function m2RenderSugestaoPendente(kind, sugestao) {
@@ -3447,7 +3488,10 @@ tbody { display: block; width: 100%; }
       if (!athleteId) return null;
       try {
         const r = await m2Ler('buscar-versao-publicada', { athleteUid: athleteId, planType: kind });
-        return (r && r.existe && r.versao && r.versao.content) || null;
+        if (!r || !r.existe || !r.versao || !r.versao.content) return null;
+        // A versão inteira, não só o conteúdo: AC-42 precisa de
+        // `originatedBy` e `publishedAt`, que antes eram descartados aqui.
+        return r.versao;
       } catch (e) {
         console.error('[m2CarregarVersaoPublicada]', kind, e);
         return null;
@@ -3640,10 +3684,17 @@ tbody { display: block; width: 100%; }
         if (salvo) ntePlanCache[athlete.id] = salvo;
       }
       // AC-28 · P-6. Mesma ordem da aba de Treino: rascunho > versão publicada
-      // > plano-base.
+      // > plano-base. AC-42, mesmo motivo da aba de Treino.
+      m2RenderOrigemSugestao('nutrition', null);
       if (!ntePlanCache[athlete.id]) {
-        const publicado = await m2CarregarVersaoPublicada('nutrition', athlete.id);
-        if (publicado) ntePlanCache[athlete.id] = publicado;
+        const versao = await m2CarregarVersaoPublicada('nutrition', athlete.id);
+        if (versao) {
+          ntePlanCache[athlete.id] = versao.content;
+          const origem = versao.originatedBy || {};
+          if (origem.role === 'professional') {
+            m2RenderOrigemSugestao('nutrition', { autor: origem.name || 'o profissional', publishedAt: versao.publishedAt });
+          }
+        }
       }
       if (!ntePlanCache[athlete.id]) {
         if (athlete.planStatus === 'none') {
