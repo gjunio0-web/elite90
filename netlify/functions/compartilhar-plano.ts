@@ -31,15 +31,13 @@
 
 import { getAuth } from "firebase-admin/auth";
 import { getApp, getDb } from "./_firebase";
-import { randomBytes } from "crypto";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
+// AC-41 · C-2. Token e validade passaram para módulo compartilhado: o e-mail
+// ao atleta precisa do MESMO link que este endpoint entrega ao Coach.
+import { garantirLinkPlano, siteUrlDoEvento, CAMPO_TOKEN, ROTULO_PLANO_PUBLICO as ROTULO } from "./_link-plano";
 
 const COLECAO = "athletes";
-const VALIDADE_MS = 90 * 24 * 60 * 60 * 1000; // 90 dias — mesma janela da avaliação (seção 9 do repasse)
 
-const CAMPO_TOKEN = { training: "trainingPlanToken", nutrition: "nutritionPlanToken" } as const;
-const CAMPO_EXPIRA = { training: "trainingPlanTokenExpiresAt", nutrition: "nutritionPlanTokenExpiresAt" } as const;
-const ROTULO = { training: "Plano de Treino", nutrition: "Plano Nutricional" } as const;
 
 type Kind = keyof typeof CAMPO_TOKEN;
 
@@ -92,25 +90,9 @@ export const handler = async (event: any) => {
 
     const dados = doc.data() ?? {};
 
-    const agora = Date.now();
-    const campoToken = CAMPO_TOKEN[k];
-    const campoExpira = CAMPO_EXPIRA[k];
-
-    let token: string | undefined = dados[campoToken];
-    const expiraEmMs: number = dados[campoExpira]?.toMillis?.() ?? 0;
-    const precisaRenovar = !token || expiraEmMs < agora;
-
-    if (!token) token = randomBytes(16).toString("hex");
-
-    if (precisaRenovar) {
-      await ref.update({
-        [campoToken]: token,
-        [campoExpira]: new Date(agora + VALIDADE_MS),
-      });
-    }
-
-    const siteUrl = `${event.headers["x-forwarded-proto"] ?? "https"}://${event.headers["host"]}`;
-    const url = `${siteUrl}/plano/${token}`;
+    const { url, renovado: precisaRenovar } = await garantirLinkPlano(
+      db, athleteId, k, siteUrlDoEvento(event), dados,
+    );
 
     const phone: string | null = typeof dados.phone === "string" ? dados.phone : null;
     const primeiroNome = String(dados.name ?? "").trim().split(/\s+/)[0] || null;

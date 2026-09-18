@@ -45,6 +45,8 @@ import { validarIdDocumento } from "./_m2-validacao";
 import { sendMail, isMailerConfigured } from "./_mailer";
 import { emblemaAttachment } from "./_email-emblema";
 import { buildDecisaoSugestaoEmail, ROTULO_PLANO } from "./_email-decisao-sugestao";
+import { garantirLinkPlano, siteUrlDoEvento, type KindPlano } from "./_link-plano";
+import { assuntoPlanoRepublicado, buildPlanoRepublicadoEmail } from "./_email-plano-republicado";
 
 const COLECAO_PROFISSIONAIS = "professionals";
 const COLECAO_SUGESTOES = "suggestions";
@@ -302,6 +304,28 @@ export const handler = async (event: any) => {
     }
   } catch (e) {
     console.error("[aprovar-sugestao] aviso ao profissional não enviado (não-fatal):", e);
+  }
+
+  // ── AVISO AO ATLETA (AC-41 · C-2, CA-158 a CA-165) ─────────────────────
+  // Não-fatal (CA-159), como o aviso ao profissional acima. O atleta não é
+  // informado de que a mudança veio de um profissional (CA-165): quem responde
+  // pelo plano, para ele, é sempre o Coach.
+  try {
+    const snapAtleta = await db.collection(COLECAO_ATLETAS).doc(athleteUid).get();
+    const dadosAtleta = snapAtleta.data() ?? {};
+    const emailAtleta = typeof dadosAtleta.email === "string" ? dadosAtleta.email.trim().toLowerCase() : "";
+    if (emailAtleta && isMailerConfigured()) {
+      const { url } = await garantirLinkPlano(
+        db, athleteUid, planType as KindPlano, siteUrlDoEvento(event), dadosAtleta,
+      );
+      await sendMail({
+        to: emailAtleta,
+        subject: assuntoPlanoRepublicado(planType as KindPlano),
+        html: buildPlanoRepublicadoEmail(dadosAtleta.name ?? null, planType as KindPlano, url),
+      });
+    }
+  } catch (e) {
+    console.error("[aprovar-sugestao] aviso ao atleta não enviado (não-fatal):", e);
   }
 
   return json(200, { ok: true, suggestionId, version: versaoCriada, versionId: idDaVersao(versaoCriada) });

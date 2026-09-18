@@ -65,6 +65,7 @@ let semPlano = false;
 // AC-27 (F-29), CA-65: a fonte deixa de ser athlete.trainingPlan/nutritionPlan
 // (DV-4 — campo não mais escrito) e passa a ser a subcoleção de versões.
 let versaoPublicada: TrainingPlan | NutritionPlan | null = null;
+let publicadoEm: string | null = null;
 
 try {
   const db = getDb();
@@ -91,6 +92,10 @@ try {
       const resultado = await buscarVersaoPublicada(db, athleteUid, kind);
       if (resultado.existe) {
         versaoPublicada = resultado.versao.content as TrainingPlan | NutritionPlan;
+        // AC-41 · C-1. O link é sempre o mesmo e o conteúdo muda a cada
+        // republicação: sem esta data o atleta não tem como saber que o plano
+        // que ele está seguindo mudou, nem quando.
+        publicadoEm = resultado.versao.publishedAt;
       } else {
         semPlano = true;
       }
@@ -99,6 +104,17 @@ try {
 } catch (e) {
   notFound = true;
 }
+
+// AC-41 · C-1. Data de publicação da versão corrente, no fuso de São Paulo:
+// a página é lida pelo atleta, não pelo servidor que a monta.
+const publicadoEmTexto =
+  publicadoEm
+    ? new Date(publicadoEm).toLocaleString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      })
+    : null;
 
 const documentoHtml =
   athlete && kind && !notFound && !isExpired && !semPlano && versaoPublicada
@@ -127,6 +143,8 @@ const tituloAba = notFound
   <style>
     body { background: var(--c-black); padding: 40px 20px 64px; }
     main { max-width: 880px; margin: 0 auto; }
+    /* AC-41 · C-1. Discreto: informa quando mudou, sem competir com o plano. */
+    .plano-atualizado { font-family: var(--font-body); font-size: 12px; color: var(--c-textsub); text-align: right; margin: 0 0 12px; }
     .plano-vazio { text-align: center; padding: 80px 24px; }
     .plano-vazio h2 {
       font-family: var(--font-display); font-size: 3rem; color: var(--c-lime);
@@ -155,7 +173,14 @@ const tituloAba = notFound
         <p>Este link é válido, mas o Coach Ruiz ainda não publicou este protocolo. Volte a checar em breve.</p>
       </div>
     )}
-    {documentoHtml && <div set:html={documentoHtml} />}
+    {documentoHtml && (
+      <>
+        {publicadoEmTexto && (
+          <p class="plano-atualizado">Plano atualizado em {publicadoEmTexto}</p>
+        )}
+        <div set:html={documentoHtml} />
+      </>
+    )}
   </main>
 </body>
 </html>

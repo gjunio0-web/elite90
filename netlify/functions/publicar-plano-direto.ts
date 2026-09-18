@@ -53,6 +53,9 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
+import { sendMail, isMailerConfigured } from "./_mailer";
+import { garantirLinkPlano, siteUrlDoEvento, type KindPlano } from "./_link-plano";
+import { assuntoPlanoRepublicado, buildPlanoRepublicadoEmail } from "./_email-plano-republicado";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 import { validarUid, validarPlanType } from "./_m2-validacao";
 
@@ -249,6 +252,7 @@ export const handler = async (event: any) => {
     return json(500, { erro: "Não foi possível verificar o atleta agora — " + msg });
   }
   if (!athleteSnap.exists) return json(404, { erro: "Atleta não encontrado." });
+  const dadosAtleta = athleteSnap.data() ?? {};
 
   // O congelamento acontece ANTES da transação: é cálculo puro sobre o corpo da
   // requisição, sem leitura de banco, e não precisa competir pela janela da
@@ -324,6 +328,29 @@ export const handler = async (event: any) => {
     alvo: { colecao: COLECAO_ATLETAS, id: athleteUid } as Alvo,
     _test: process.env.CONTEXT !== "production",
   });
+
+
+  // ── AVISO AO ATLETA (AC-41 · C-2, CA-158 a CA-165) ─────────────────────
+  // Não-fatal (CA-159): a versão já está publicada, e falha de e-mail não
+  // desfaz publicação nem muda a resposta. Sempre, sem julgar se a mudança é
+  // "relevante o suficiente" — não há exceção a avaliar.
+  try {
+    const emailAtleta = typeof dadosAtleta?.email === "string" ? dadosAtleta.email.trim().toLowerCase() : "";
+    if (emailAtleta && isMailerConfigured()) {
+      // Mesmo link de sempre: `garantirLinkPlano` devolve o token já existente
+      // do atleta, renovando só a validade (CA-163).
+      const { url } = await garantirLinkPlano(
+        getFirestore(app), athleteUid, planType as KindPlano, siteUrlDoEvento(event), dadosAtleta,
+      );
+      await sendMail({
+        to: emailAtleta,
+        subject: assuntoPlanoRepublicado(planType as KindPlano),
+        html: buildPlanoRepublicadoEmail(dadosAtleta?.name ?? null, planType as KindPlano, url),
+      });
+    }
+  } catch (e) {
+    console.error("[publicar-plano-direto] aviso ao atleta não enviado (não-fatal):", e);
+  }
 
   return json(200, { ok: true, version: versaoCriada, versionId: idDaVersao(versaoCriada) });
 };
