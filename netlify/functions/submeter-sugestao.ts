@@ -42,6 +42,7 @@ import { sendMail, isMailerConfigured } from "./_mailer";
 import { emblemaAttachment } from "./_email-emblema";
 import { EMAIL_BASE_CSS, emailHeader } from "./_email-header";
 import { ROTULO_PLANO } from "./_email-decisao-sugestao";
+import { planoSemConteudo } from "./_conteudo-plano";
 
 const COLECAO_PROFISSIONAIS = "professionals";
 const COLECAO_ATRIBUICOES = "assignments";
@@ -86,25 +87,6 @@ function normalizar(valor: unknown): unknown {
 
 const mesmoConteudo = (a: unknown, b: unknown) =>
   JSON.stringify(normalizar(a)) === JSON.stringify(normalizar(b));
-
-/**
- * Plano sem nada dentro, na forma que a tela monta quando não há versão
- * publicada: `{ order: [], days: {}, isNew: true }` no treino e
- * `{ days: {}, isNew: true }` na nutrição. Vale também para o dia que existe
- * sem conteúdo — dia de treino sem exercício, dia de nutrição sem refeição —,
- * porque montar o recipiente vazio não é montar o plano.
- */
-function semConteudo(plano: unknown): boolean {
-  const p = (plano ?? {}) as Record<string, unknown>;
-  const dias = (p.days ?? {}) as Record<string, unknown>;
-  for (const chave of Object.keys(dias)) {
-    const dia = (dias[chave] ?? {}) as Record<string, unknown>;
-    const exercicios = Array.isArray(dia.exercises) ? dia.exercises : [];
-    const refeicoes = Array.isArray(dia.meals) ? dia.meals : [];
-    if (exercicios.length > 0 || refeicoes.length > 0) return false;
-  }
-  return true;
-}
 
 const json = (statusCode: number, corpo: unknown) => ({
   statusCode,
@@ -236,7 +218,7 @@ export const handler = async (event: any) => {
         reason: "sem-alteracao",
       });
     }
-  } else if (semConteudo(corpo.content)) {
+  } else if (planoSemConteudo(corpo.content)) {
     return json(409, {
       erro: "Este plano está vazio. Monte ao menos um dia antes de enviar.",
       reason: "sem-alteracao",
