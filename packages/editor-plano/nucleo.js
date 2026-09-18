@@ -415,7 +415,7 @@ function wkeOpenPreview() {
           : (ex.sets && ex.sets[0] ? ex.sets[0].rest : null);
         var restNum = Number(restBruto);
         var restHtml = (restBruto !== undefined && restBruto !== null && restBruto !== '' && isFinite(restNum))
-          ? '<span class="doc-ex-rest">descanso ' + restNum + 's</span>'
+          ? '<span class="doc-ex-rest">Descanso: ' + restNum + 's</span>'
           : '';
         return '<div class="doc-ex"><div class="doc-ex-name">' + (ex.name || 'Exercício') + restHtml + '</div><div class="doc-ex-sets">' + sets + '</div></div>';
       }).join('');

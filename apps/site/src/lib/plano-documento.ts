@@ -141,7 +141,7 @@ export function renderTreino(athleteName: string | null, plan: TrainingPlan): st
           // `descanso ? ...` esconderia um descanso de 0s — valor real e
           // válido (wkeEditRest aceita 0-900), não ausência de dado. Só
           // `null` (o próprio contrato de restoDoExercicio) omite.
-          const restHtml = descanso !== null ? `<span class="doc-ex-rest">descanso ${esc(descanso)}s</span>` : '';
+          const restHtml = descanso !== null ? `<span class="doc-ex-rest">Descanso: ${esc(descanso)}s</span>` : '';
           return `<div class="doc-ex"><div class="doc-ex-name">${esc(ex.name || 'Exercício')}${restHtml}</div><div class="doc-ex-sets">${esc(sets)}</div></div>`;
         }).join('');
     const sec = `<div class="doc-section">` +
