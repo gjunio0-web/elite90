@@ -110,6 +110,12 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
     .prof-legenda__link { margin-left: auto; font-family: Raleway, sans-serif;
       font-size: .64rem; font-weight: 700; letter-spacing: .1em;
       text-transform: uppercase; color: var(--c-lime); }
+    @media (max-width: 760px) {
+      /* `margin-left: auto` empurra o link para a direita mesmo quando ele
+         quebra para a própria linha — no mobile ele deve vir abaixo da
+         legenda, alinhado à esquerda como qualquer outro item. */
+      .prof-legenda__link { margin-left: 0; width: 100%; margin-top: 2px; }
+    }
 
     .prof-propostas { display: flex; flex-wrap: wrap; gap: 8px;
       margin: 0 0 var(--space-5); }
