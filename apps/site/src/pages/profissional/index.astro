@@ -112,9 +112,10 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
       text-transform: uppercase; color: var(--c-lime); }
     @media (max-width: 760px) {
       /* `margin-left: auto` empurra o link para a direita mesmo quando ele
-         quebra para a própria linha — no mobile ele deve vir abaixo da
-         legenda, alinhado à esquerda como qualquer outro item. */
-      .prof-legenda__link { margin-left: 0; width: 100%; margin-top: 2px; }
+         quebra para a própria linha — no mobile ele vem ACIMA da legenda,
+         alinhado à esquerda. `order` muda só a posição visual: a ordem no
+         HTML continua a mesma (o link depois dos itens). */
+      .prof-legenda__link { order: -1; margin-left: 0; width: 100%; margin-bottom: 4px; }
     }
 
     .prof-propostas { display: flex; flex-wrap: wrap; gap: 8px;
