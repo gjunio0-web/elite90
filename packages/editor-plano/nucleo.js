@@ -407,7 +407,17 @@ function wkeOpenPreview() {
           var load = (s.load !== undefined && s.load !== null && s.load !== '') ? (s.load + 'kg') : '—';
           return (s.reps || '?') + ' × ' + load;
         }).join('  ·  ');
-        return '<div class="doc-ex"><div class="doc-ex-name">' + (ex.name || 'Exercício') + '</div><div class="doc-ex-sets">' + sets + '</div></div>';
+        // Descanso do exercício: rest_default é o campo que wkeEditRest grava;
+        // sets[0].rest só entra como reserva (plano que não passou por
+        // wkeCalibrarPlano). Sem nenhum dos dois, o documento omite.
+        var restBruto = (ex.rest_default !== undefined && ex.rest_default !== null && ex.rest_default !== '')
+          ? ex.rest_default
+          : (ex.sets && ex.sets[0] ? ex.sets[0].rest : null);
+        var restNum = Number(restBruto);
+        var restHtml = (restBruto !== undefined && restBruto !== null && restBruto !== '' && isFinite(restNum))
+          ? '<span class="doc-ex-rest">descanso ' + restNum + 's</span>'
+          : '';
+        return '<div class="doc-ex"><div class="doc-ex-name">' + (ex.name || 'Exercício') + restHtml + '</div><div class="doc-ex-sets">' + sets + '</div></div>';
       }).join('');
     }
     var sec = '<div class="doc-section">' +

@@ -49,8 +49,8 @@
 //                meals = [{ name, foods: [{ snapshot?: {...}, name, qty, base? }] }]
 // Se o formato gravado em `content` mudar, ajustar aqui — não redesenhar o documento.
 
-export type TrainingSet = { reps?: string | number; load?: number | string | null };
-export type TrainingExercise = { name?: string; sets?: TrainingSet[] };
+export type TrainingSet = { reps?: string | number; load?: number | string | null; rest?: number | string | null };
+export type TrainingExercise = { name?: string; sets?: TrainingSet[]; rest_default?: number | string | null };
 export type TrainingDay = { label?: string; exercises?: TrainingExercise[] };
 export type TrainingPlan = { order: string[]; days: Record<string, TrainingDay> };
 
@@ -106,6 +106,22 @@ function dayName(d: TrainingDay | undefined, chave: string): string {
   return l.split('—')[0].trim();
 }
 
+/** Descanso do exercício, em segundos, tal como o Coach o editou.
+ *  A fonte é `rest_default` — é o único campo que wkeEditRest grava (o `rest`
+ *  de cada série só é escrito quando a série é criada, e por isso envelhece).
+ *  `sets[0].rest` entra apenas como reserva, para plano que nunca passou por
+ *  wkeCalibrarPlano e portanto não tem o campo derivado. Sem nenhum dos dois,
+ *  devolve null e o documento omite o descanso — exibir um valor inventado
+ *  seria pior do que não exibir. */
+function restoDoExercicio(ex: TrainingExercise): number | string | null {
+  const bruto = (ex.rest_default !== undefined && ex.rest_default !== null && ex.rest_default !== '')
+    ? ex.rest_default
+    : ex.sets?.[0]?.rest;
+  if (bruto === undefined || bruto === null || bruto === '') return null;
+  const n = Number(bruto);
+  return Number.isFinite(n) ? n : null;
+}
+
 /** Bloco de treino — porta wkeOpenPreview() tal como está, sem congelamento
  *  (ver o cabeçalho: reps/carga são do próprio plano, nome já vem fixado). */
 export function renderTreino(athleteName: string | null, plan: TrainingPlan): string {
@@ -121,7 +137,12 @@ export function renderTreino(athleteName: string | null, plan: TrainingPlan): st
             const load = (s.load !== undefined && s.load !== null && s.load !== '') ? `${s.load}kg` : '—';
             return `${s.reps ?? '?'} × ${load}`;
           }).join('  ·  ');
-          return `<div class="doc-ex"><div class="doc-ex-name">${esc(ex.name || 'Exercício')}</div><div class="doc-ex-sets">${esc(sets)}</div></div>`;
+          const descanso = restoDoExercicio(ex);
+          // `descanso ? ...` esconderia um descanso de 0s — valor real e
+          // válido (wkeEditRest aceita 0-900), não ausência de dado. Só
+          // `null` (o próprio contrato de restoDoExercicio) omite.
+          const restHtml = descanso !== null ? `<span class="doc-ex-rest">descanso ${esc(descanso)}s</span>` : '';
+          return `<div class="doc-ex"><div class="doc-ex-name">${esc(ex.name || 'Exercício')}${restHtml}</div><div class="doc-ex-sets">${esc(sets)}</div></div>`;
         }).join('');
     const sec = `<div class="doc-section">` +
       `<div class="doc-section-h"><span class="doc-section-num">${num}</span><span class="doc-section-title">${esc(dayName(dia, chave))}</span></div>` +
@@ -264,6 +285,7 @@ export const DOC_CSS = `
   .doc-ex:first-of-type { border-top: none; padding-top: 4px; }
   .doc-ex-name { font-family: var(--font-label); font-size: 0.72rem; font-weight: var(--fw-label); color: var(--c-white); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
   .doc-ex-sets { font-family: var(--font-body); font-size: 0.76rem; color: var(--c-textbody); }
+  .doc-ex-rest { font-family: var(--font-body); font-size: 0.68rem; font-weight: 400; color: var(--c-textsub); text-transform: none; letter-spacing: 0; white-space: nowrap; margin-left: 8px; }
   .doc-footer { text-align: center; padding: 24px 0 8px; margin-top: 28px; }
   .doc-footer-div { width: 100%; height: 1px; background: linear-gradient(to right, transparent, var(--c-lime) 20%, var(--c-lime) 80%, transparent); opacity: 0.25; margin-bottom: 18px; }
   .doc-footer-fonte { font-size: 0.6rem; line-height: 1.45; color: rgba(153,153,153,0.75); margin-bottom: 10px; }
