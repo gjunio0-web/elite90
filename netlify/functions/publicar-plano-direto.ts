@@ -60,6 +60,23 @@ const COLECAO_ATLETAS = "athletes";
 
 const idDaVersao = (n: number) => "v" + String(n).padStart(3, "0");
 
+/**
+ * AC-40. Plano sem nada dentro: sem dia, ou com dia sem exercício (treino) e
+ * sem refeição (nutrição). Montar o recipiente vazio não é montar o plano.
+ * Mesma definição de `submeter-sugestao.ts` — se uma mudar, a outra muda.
+ */
+function semConteudo(plano: unknown): boolean {
+  const p = (plano ?? {}) as Record<string, unknown>;
+  const dias = (p.days ?? {}) as Record<string, unknown>;
+  for (const chave of Object.keys(dias)) {
+    const dia = (dias[chave] ?? {}) as Record<string, unknown>;
+    const exercicios = Array.isArray(dia.exercises) ? dia.exercises : [];
+    const refeicoes = Array.isArray(dia.meals) ? dia.meals : [];
+    if (exercicios.length > 0 || refeicoes.length > 0) return false;
+  }
+  return true;
+}
+
 const json = (statusCode: number, corpo: unknown) => ({
   statusCode,
   headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -200,6 +217,21 @@ export const handler = async (event: any) => {
 
   if (corpo.content === null || typeof corpo.content !== "object" || Array.isArray(corpo.content)) {
     return json(400, { erro: "content precisa ser um mapa." });
+  }
+
+  // AC-40 (Adendo 07 v1.45). Mesma guarda que já existe do lado do
+  // profissional, em `submeter-sugestao.ts`: a validação acima aceita `{}` e
+  // `{ days: {} }`, e um plano vazio publicado vira VERSÃO IMUTÁVEL que a
+  // página do atleta entrega como plano ativo — foi o que aconteceu com o
+  // atleta mock #77 em homologação.
+  //
+  // Recusa SEMPRE, sem via de confirmação: semana de descanso é conteúdo
+  // representável ("sem treino esta semana"), não ausência de conteúdo.
+  if (semConteudo(corpo.content)) {
+    return json(409, {
+      erro: "Este plano está vazio. Monte ao menos um dia antes de publicar.",
+      reason: "sem-conteudo",
+    });
   }
 
   let athleteSnap;
