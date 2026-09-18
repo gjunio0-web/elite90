@@ -56,6 +56,7 @@ import { getApp } from "./_firebase";
 import { sendMail, isMailerConfigured } from "./_mailer";
 import { garantirLinkPlano, siteUrlDoEvento, type KindPlano } from "./_link-plano";
 import { assuntoPlanoRepublicado, buildPlanoRepublicadoEmail } from "./_email-plano-republicado";
+import { emblemaAttachment } from "./_email-emblema";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 import { validarUid, validarPlanType } from "./_m2-validacao";
 import { planoSemConteudo } from "./_conteudo-plano";
@@ -330,6 +331,10 @@ export const handler = async (event: any) => {
         to: emailAtleta,
         subject: assuntoPlanoRepublicado(planType as KindPlano),
         html: buildPlanoRepublicadoEmail(dadosAtleta?.name ?? null, planType as KindPlano, url),
+        // Contrato de emailHeader() (_email-header.ts): o emblema vem por
+        // "cid:", e sem este anexo o cliente de e-mail mostra ícone quebrado
+        // — foi o que aconteceu no teste do Bloco D antes desta correção.
+        attachments: [emblemaAttachment()],
       });
     }
   } catch (e) {

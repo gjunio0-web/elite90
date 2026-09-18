@@ -322,6 +322,9 @@ export const handler = async (event: any) => {
         to: emailAtleta,
         subject: assuntoPlanoRepublicado(planType as KindPlano),
         html: buildPlanoRepublicadoEmail(dadosAtleta.name ?? null, planType as KindPlano, url),
+        // Mesmo contrato de emailHeader() já respeitado acima, para o e-mail
+        // do profissional (linha ~302) — faltava aqui, para o do atleta.
+        attachments: [emblemaAttachment()],
       });
     }
   } catch (e) {
