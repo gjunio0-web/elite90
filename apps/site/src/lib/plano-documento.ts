@@ -52,7 +52,7 @@
 export type TrainingSet = { reps?: string | number; load?: number | string | null; rest?: number | string | null };
 export type TrainingExercise = { name?: string; sets?: TrainingSet[]; rest_default?: number | string | null };
 export type TrainingDay = { label?: string; exercises?: TrainingExercise[] };
-export type TrainingPlan = { order: string[]; days: Record<string, TrainingDay> };
+export type TrainingPlan = { order: string[]; days: Record<string, TrainingDay>; coachNotes?: string };
 
 export type FoodSnapshot = {
   quantidadeG?: number;
@@ -62,7 +62,7 @@ export type FoodSnapshot = {
 };
 export type PlanFood = { snapshot?: FoodSnapshot; name?: string; qty?: number; base?: { unit?: string } };
 export type Meal = { name?: string; foods?: PlanFood[] };
-export type NutritionPlan = { days: { treino?: { meals?: Meal[] }; descanso?: { meals?: Meal[] } } };
+export type NutritionPlan = { days: { treino?: { meals?: Meal[] }; descanso?: { meals?: Meal[] } }; coachNotes?: string };
 
 const DOC_LOGO_IMG =
   '<img src="/images/brand/logo-emblema.webp" srcset="/images/brand/logo-emblema.webp 1x, /images/brand/logo-emblema@2x.webp 2x" alt="" width="51" height="56" decoding="async" aria-hidden="true"/>';
@@ -151,7 +151,8 @@ export function renderTreino(athleteName: string | null, plan: TrainingPlan): st
     return sec + (idx < order.length - 1 ? '<div class="doc-divider"></div>' : '');
   }).join('');
 
-  return docEnvelope('Plano de Treino', 'Plano de Treino', athleteName, ' com base na sua fase e objetivo do ciclo', inner);
+  return docEnvelope('Plano de Treino', 'Plano de Treino', athleteName, ' com base na sua fase e objetivo do ciclo',
+    inner + docNotesSection(plan?.coachNotes, order.length + 1));
 }
 
 /** Macros de um item, a partir do retrato congelado na publicação — nunca do
@@ -197,6 +198,21 @@ function docDayTotals(meals: Meal[] | undefined): { kcal: number; p: number; c: 
   return t;
 }
 
+/** Adendo 01 — espelha docNotesSection (nucleo.js) por inteiro: mesmo título,
+ *  mesma regra de ausência (texto vazio ou só espaço não gera seção), mesma
+ *  numeração (dias + 1). Se uma mudar, a outra muda — ver o cabeçalho deste
+ *  arquivo. */
+function docNotesSection(notes: string | undefined, sectionNum: number): string {
+  const txt = (notes ?? '').trim();
+  if (!txt) return '';
+  const num = String(sectionNum).padStart(2, '0');
+  return '<div class="doc-divider"></div>' +
+    '<div class="doc-section">' +
+      `<div class="doc-section-h"><span class="doc-section-num">${num}</span><span class="doc-section-title">Orientações do Coach</span></div>` +
+      `<div class="doc-section-body doc-notes">${esc(txt)}</div>` +
+    '</div>';
+}
+
 function docMacrosBlock(t: { kcal: number; p: number; c: number; g: number }): string {
   return (
     '<div class="doc-macros">' +
@@ -226,7 +242,8 @@ export function renderNutricional(athleteName: string | null, plan: NutritionPla
     return sec + (i < defs.length - 1 ? '<div class="doc-divider"></div>' : '');
   }).join('');
 
-  return docEnvelope('Plano Nutricional', 'Plano Nutricional', athleteName, ' com base na sua fase e composição corporal', inner, DOC_FONTE_NUTRICIONAL);
+  return docEnvelope('Plano Nutricional', 'Plano Nutricional', athleteName, ' com base na sua fase e composição corporal',
+    inner + docNotesSection(plan?.coachNotes, defs.length + 1), DOC_FONTE_NUTRICIONAL);
 }
 
 /**
@@ -268,6 +285,7 @@ export const DOC_CSS = `
   .doc-section-title { font-family: var(--font-display); font-size: clamp(1.1rem, 3vw, 1.5rem); letter-spacing: 0.06em; color: var(--c-white); text-transform: uppercase; }
   .doc-section-body { font-family: var(--font-body); font-size: 0.82rem; line-height: 1.85; color: var(--c-textbody); }
   .doc-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 28px 0; }
+  .doc-notes { white-space: pre-wrap; }
   .doc-macros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 4px 0 6px; }
   .doc-macro { background: var(--c-black); border-radius: var(--radius-card); padding: 10px; text-align: center; }
   .doc-macro-v { font-family: var(--font-display); font-size: 1.2rem; color: var(--c-lime); line-height: 1; }
