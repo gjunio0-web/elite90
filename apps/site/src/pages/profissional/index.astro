@@ -138,7 +138,11 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
                    color: #CCCCCC; }
     .prof-estado { font-family: Montserrat, sans-serif; font-size: .82rem;
                    line-height: 1.5; padding: 12px 16px; border-radius: 6px;
-                   margin-bottom: 20px; border: 1px solid #E67E22; color: #E67E22; }
+                   margin-bottom: 20px; border: 1px solid var(--c-status-alert); color: var(--c-status-alert); }
+    /* Decisão terminal do Coach (sem sugestão em aberto): cor de acordo com o
+       próprio selo da aba (prof-aba[data-estado]), não a cor de alerta padrão. */
+    .prof-estado--rejected { border-color: var(--c-status-rejected); color: var(--c-status-rejected); }
+    .prof-estado--published { border-color: var(--c-status-progress); color: var(--c-status-progress); }
     .prof-enviar { font-family: Raleway, sans-serif; font-weight: 700;
                    text-transform: uppercase; letter-spacing: .06em;
                    font-size: .8rem; padding: 10px 20px; border-radius: 4px;
@@ -794,13 +798,49 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
       aplicarModo(planType);
     }
 
+    // Mesmo formato de data usado no cabeçalho de publicação da gaveta do
+    // Coach (m2FormatarDataHora, admin/atletas.astro): DD/MM às HH:MM, sem
+    // ano — a mesma palavra para a mesma informação nas duas pontas.
+    function formatarDataHora(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      const dois = (n) => String(n).padStart(2, '0');
+      return dois(d.getDate()) + '/' + dois(d.getMonth() + 1) + ' às ' + dois(d.getHours()) + ':' + dois(d.getMinutes());
+    }
+
     // CA-62 · o estado é DECLARADO, e com a via de retomada junto. Declarar o
     // estado sem dizer a saída deixaria o profissional sem ação — e a via
     // existe: pending → o Coach devolve → returned → editável (AD-08).
+    //
+    // SEM SUGESTÃO EM ABERTO, A ÚLTIMA DECISÃO TERMINAL TAMBÉM É ANUNCIADA.
+    // Antes desta correção, recusar ou aprovar não deixava rastro nenhum na
+    // tela do profissional — abrir o plano depois de uma recusa parecia
+    // idêntico a nunca ter enviado nada. `dados.ultimaDecisao` (devolvido por
+    // abrir-plano-profissional.ts só quando não há nada pendente) fecha essa
+    // lacuna, com o mesmo texto que "Devolvida" já usava para a observação do
+    // Coach.
     function declararEstado(dados, planType) {
       const estado = $(`prof-estado-${planType}`);
       if (!estado) return;
-      if (!dados.status) { estado.hidden = true; return; }
+      estado.className = 'prof-estado';
+      if (!dados.status) {
+        const decisao = dados.ultimaDecisao;
+        if (!decisao) { estado.hidden = true; estado.textContent = ''; return; }
+        const data = formatarDataHora(decisao.resolvedAt);
+        let texto;
+        if (decisao.status === 'rejected') {
+          estado.classList.add('prof-estado--rejected');
+          texto = 'Sua sugestão foi recusada pelo Coach' + (data ? ' em ' + data : '') + '.';
+          if (decisao.reviewNote) texto += ' Observação do Coach: ' + decisao.reviewNote;
+        } else {
+          estado.classList.add('prof-estado--published');
+          texto = 'Sua sugestão foi aprovada pelo Coach' + (data ? ' em ' + data : '') + '.';
+        }
+        estado.textContent = texto;
+        estado.hidden = false;
+        return;
+      }
       let texto = ROTULO_ESTADO[dados.status] ?? "";
       if (dados.status === "pending") {
         texto += " Enquanto estiver em revisão o conteúdo fica em somente leitura;"
@@ -863,6 +903,9 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
             const d = await resp.json();
             if (d && d.erro) texto = d.erro;
           } catch (_) {}
+          // Reseta para a cor padrão de alerta: um banner de decisão terminal
+          // (recusada/aprovada) pode ter ficado na tela antes deste erro.
+          estado.className = 'prof-estado';
           estado.textContent = texto;
           estado.hidden = false;
         }

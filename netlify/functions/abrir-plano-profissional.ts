@@ -54,6 +54,10 @@ const COLECAO_ATLETAS = "athletes";
 /** Estados em que a sugestão ainda não foi resolvida pelo Coach (AC-18). */
 const NAO_RESOLVIDOS = ["draft", "returned", "pending"];
 
+/** Estados terminais — o Coach já decidiu, e não há mais ação do profissional
+ *  sobre ESTE documento específico. */
+const RESOLVIDOS_TERMINAIS = ["published", "rejected"];
+
 /**
  * Ordem de preferência quando houver mais de uma não resolvida para o mesmo par.
  * Editável primeiro: se existe um `draft` ou um `returned`, é nele que o
@@ -65,6 +69,38 @@ const PREFERENCIA = ["returned", "draft", "pending"];
 /** `v007` → 7. O identificador do documento é a numeração da versão. */
 const numeroDaVersao = (id: string): number | null =>
   Number(String(id).replace(/^v/, "")) || null;
+
+/**
+ * A decisão terminal mais recente do Coach sobre uma sugestão deste
+ * profissional para este atleta/plano — só chamada quando NÃO há sugestão em
+ * aberto (fonte 1 vazia): com algo pendente, é nisso que o profissional
+ * trabalha, e anunciar uma decisão antiga ao lado seria ruído.
+ *
+ * Sem consulta nova: `docs` já é o resultado da MESMA busca da fonte 1
+ * (professionalId + athleteUid + planType), sem filtro de status — os
+ * documentos resolvidos já estavam ali, só não entravam em `candidatas`.
+ *
+ * Critério de "mais recente": `resolvedAt`, não `submittedAt` — é o instante
+ * da decisão do Coach que interessa aqui, não o do envio.
+ */
+function ultimaDecisaoTerminal(docs: FirebaseFirestore.QueryDocumentSnapshot[]) {
+  const resolvidas = docs.filter((d) => RESOLVIDOS_TERMINAIS.includes(d.get("status")));
+  if (!resolvidas.length) return null;
+
+  resolvidas.sort((a, b) => {
+    const ta = a.get("resolvedAt")?.toMillis?.() ?? 0;
+    const tb = b.get("resolvedAt")?.toMillis?.() ?? 0;
+    return tb - ta;
+  });
+
+  const doc = resolvidas[0];
+  const resolvedAt = doc.get("resolvedAt");
+  return {
+    status: doc.get("status") as "published" | "rejected",
+    reviewNote: doc.get("reviewNote") ?? null,
+    resolvedAt: resolvedAt?.toDate ? resolvedAt.toDate().toISOString() : null,
+  };
+}
 
 const json = (statusCode: number, corpo: unknown) => ({
   statusCode,
@@ -181,6 +217,11 @@ export const handler = async (event: any) => {
     });
   }
 
+  // Sem sugestão em aberto: a decisão terminal mais recente (se houver) vai
+  // junto nas duas fontes abaixo — é informação de fundo, não o que decide o
+  // conteúdo da tela.
+  const ultimaDecisao = ultimaDecisaoTerminal(sugestoes.docs);
+
   // Fonte 2: a última versão publicada. Mesma leitura da AC-27 — a função
   // compartilhada com a página pública e com o cabeçalho da gaveta, sem consulta
   // nova. Abre EDITÁVEL (`status: null`): o profissional não escreve na versão
@@ -195,6 +236,7 @@ export const handler = async (event: any) => {
       content: publicada.versao.content,
       basedOnVersion: numeroDaVersao(publicada.versao.id),
       reviewNote: null,
+      ultimaDecisao,
     });
   }
 
@@ -207,5 +249,6 @@ export const handler = async (event: any) => {
     content: null,
     basedOnVersion: null,
     reviewNote: null,
+    ultimaDecisao,
   });
 };
