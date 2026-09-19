@@ -3594,27 +3594,70 @@ tbody { display: block; width: 100%; }
     // ter uma fórmula diferente para o mesmo atleta.
     //
     // `nteFormulaConfig` começa com os valores de origem SEMPRE — de forma
-    // síncrona, no carregamento da página — para nenhum chamador (inclusive
-    // `nteBuildBasePlan`, que roda antes de qualquer clique) encontrar a
-    // variável vazia enquanto a busca ao servidor está em voo. Quando a busca
-    // volta, sobrescreve com o que está salvo de verdade. Falha de rede aqui
-    // é não-fatal: a prévia segue funcionando com os valores de origem, e a
-    // publicação real, que é o que importa, calcula no servidor de qualquer
-    // forma (calcularFormulaSnapshot) — não confia neste valor do cliente.
+    // síncrona, para nenhum chamador (inclusive `nteBuildBasePlan`) encontrar
+    // a variável vazia antes da primeira busca real terminar.
+    //
+    // ACHADO EM TESTE MANUAL (19/09/2026): a primeira versão desta busca
+    // rodava aqui mesmo, num IIFE solto, disparado na carga do script. Falhava
+    // SEMPRE, não às vezes — `window.__getFreshToken` só existe dentro do
+    // `<script type="module">`, que fica DEPOIS deste script clássico no
+    // documento, e só roda depois que ESTE termina de ser interpretado
+    // inteiro. A busca chamava uma função que ainda não existia, o erro caía
+    // no catch em silêncio, e `nteFormulaConfig` nunca era atualizado —
+    // permanentemente, para a sessão inteira, não importa quanto tempo se
+    // esperasse depois. Não era corrida de tempo: era ordem de execução, e
+    // sempre na mesma direção errada.
+    //
+    // Correção: a busca de verdade (`nteGarantirFormulaConfig`, abaixo) só é
+    // disparada de dentro de `initNutrition` e de `nteToggleFormulaPanel` —
+    // os dois só rodam depois de o Coach já estar autenticado e interagindo
+    // com a página, quando `window.__getFreshToken` já existe há muito tempo.
     nteFormulaConfig = JSON.parse(JSON.stringify(NTE_FORMULA_DEFAULTS));
-    (async function nteCarregarFormulaConfigInicial() {
-      try {
-        const r = await m2Ler('ler-config-formula', {});
-        if (r && r.phases) nteFormulaConfig = r.phases;
-      } catch (e) {
-        console.error('[nteCarregarFormulaConfigInicial]', e);
+
+    // Memoizada: uma busca só para a sessão inteira, reusada por quem quer que
+    // precise, sem refazer a chamada a cada athlete aberto nem a cada clique
+    // na engrenagem. Falha de rede é não-fatal — mantém os valores de origem
+    // e loga; a publicação real calcula no servidor de qualquer forma
+    // (calcularFormulaSnapshot), então este valor do cliente nunca é a fonte
+    // que decide o que o atleta recebe.
+    var nteFormulaConfigPromise = null;
+    function nteGarantirFormulaConfig() {
+      if (!nteFormulaConfigPromise) {
+        nteFormulaConfigPromise = (async function () {
+          try {
+            const r = await m2Ler('ler-config-formula', {});
+            // Forma do servidor: { proteinPerKg, carbPerKg, fatPerKg } por
+            // fase (espelha nteApplyFormula, que faz a conversão inversa ao
+            // salvar). nteFormulaConfig só existe em forma de cliente — { p,
+            // c, g } —, lida por nteGetFormulaForPhase/nteBuildBasePlan/a
+            // tabela do painel. Atribuir r.phases direto deixaria .p/.c/.g
+            // undefined assim que uma config customizada fosse salva.
+            if (r && r.phases) {
+              const traduzido = {};
+              Object.keys(r.phases).forEach(function (fase) {
+                const c = r.phases[fase];
+                traduzido[fase] = { p: c.proteinPerKg, c: c.carbPerKg, g: c.fatPerKg };
+              });
+              nteFormulaConfig = traduzido;
+            }
+          } catch (e) {
+            console.error('[nteGarantirFormulaConfig]', e);
+          }
+        })();
       }
-    })();
+      return nteFormulaConfigPromise;
+    }
 
 
-    function nteToggleFormulaPanel() {
+    async function nteToggleFormulaPanel() {
       const panel = document.getElementById('nte-formula-panel');
       if (panel.hidden) {
+        // Na prática já resolvida por initNutrition antes de a engrenagem
+        // ficar visível — este await é rede de segurança, não o mecanismo.
+        const gear = document.getElementById('nu-formulabtn');
+        if (gear) gear.disabled = true;
+        await nteGarantirFormulaConfig();
+        if (gear) gear.disabled = false;
         nteRenderFormulaPanel();
         panel.hidden = false;
       } else {
@@ -3725,6 +3768,10 @@ tbody { display: block; width: 100%; }
 
     async function initNutrition(athlete) {
       if (!athlete) return;
+      // Garante a fórmula antes de qualquer cálculo que dependa dela nesta
+      // função (nteBuildBasePlan, mais abaixo). Depois da primeira vez, é
+      // memoizada — não refaz a busca a cada atleta.
+      await nteGarantirFormulaConfig();
       // ITEM 1.4 — mesma ordem de precedência da aba de Treino.
       if (!ntePlanCache[athlete.id]) {
         const salvo = await m2CarregarRascunho('nutrition', athlete.id);
