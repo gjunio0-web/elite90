@@ -92,6 +92,30 @@ import { DOC_CSS } from '../../lib/plano-documento';
     .apr-nota__botoes { display: flex; gap: 8px; margin-top: 8px; }
     .apr-erro { width: 100%; font-family: Montserrat, sans-serif; font-size: .8rem;
                 color: var(--c-status-rejected); margin: 10px 0 0; }
+
+    /* Toast de confirmação de ação (aprovar/devolver/recusar).
+       Réplica fiel de .wke-toast (editor-plano.css) — mesma posição, forma e
+       tokens do Design System — mas SEM ícone Lucide: esta página não carrega
+       o script do Lucide, e trazê-lo só para isto seria dependência nova,
+       contra a razão de ser desta tela (ver comentário no topo do arquivo:
+       nenhuma dependência do editor). Decisão registrada em conversa com o
+       dono do produto — toast sem ícone, opção (1) entre as duas propostas. */
+    .apr-toast-wrap { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+                       z-index: 340; display: flex; flex-direction: column; gap: 8px;
+                       align-items: center; pointer-events: none; }
+    .apr-toast { background: var(--c-surface-2); border: 1px solid rgba(255,255,255,.14);
+                 border-radius: var(--radius-pill); padding: 9px 18px;
+                 font-family: var(--font-body); font-size: var(--fs-body-sm);
+                 color: var(--c-white); box-shadow: var(--shadow-md);
+                 animation: apr-toast-in 200ms var(--ease-out) both; }
+    /* Bordas por ação, nas MESMAS cores que os botões desta página já usam —
+       não cores novas: aprovar = --c-lime (.apr-btn--aprovar), devolver =
+       --c-status-new (.apr-btn--devolver, #E67E22), recusar =
+       --c-status-rejected (.apr-btn--recusar, .apr-erro). */
+    .apr-toast--aprovar  { border-color: var(--c-lime); }
+    .apr-toast--devolver { border-color: var(--c-status-new); }
+    .apr-toast--recusar  { border-color: var(--c-status-rejected); }
+    @keyframes apr-toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   </style>
   <style set:html={DOC_CSS}></style>
 </head>
@@ -105,6 +129,8 @@ import { DOC_CSS } from '../../lib/plano-documento';
     <div id="apr-msg" class="apr-msg" hidden></div>
     <div id="apr-lista"></div>
   </main>
+
+  <div id="apr-toast-wrap" class="apr-toast-wrap" aria-live="polite"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -130,6 +156,23 @@ import { DOC_CSS } from '../../lib/plano-documento';
     function mostrarMensagem(texto) {
       sub.textContent = ""; lista.innerHTML = "";
       msg.textContent = texto; msg.hidden = false;
+    }
+
+    // Confirmação de que a ação realmente aconteceu — antes desta função,
+    // aprovar/devolver/recusar com sucesso só se percebia pelo cartão sumir
+    // da lista, sem nenhuma frase dizendo o quê. Some sozinho; sem ícone
+    // (ver comentário do CSS acima, .apr-toast-wrap).
+    const toastWrap = document.getElementById("apr-toast-wrap");
+    function aprToast(texto, tipo) {
+      const t = document.createElement("div");
+      t.className = "apr-toast apr-toast--" + tipo;
+      t.textContent = texto;
+      toastWrap.appendChild(t);
+      setTimeout(() => {
+        t.style.transition = "opacity 200ms ease";
+        t.style.opacity = "0";
+        setTimeout(() => t.remove(), 220);
+      }, 2000);
     }
 
     async function chamar(fn, corpo) {
@@ -219,7 +262,7 @@ import { DOC_CSS } from '../../lib/plano-documento';
           return;
         }
         if (tipo === "aprovar") {
-          await executarAcao(card, acoes, "aprovar-sugestao", { suggestionId });
+          await executarAcao(card, acoes, "aprovar-sugestao", { suggestionId }, "aprovar");
         }
       });
     }
@@ -243,11 +286,11 @@ import { DOC_CSS } from '../../lib/plano-documento';
         const reviewNote = textarea.value.trim();
         if (obrigatoria && !reviewNote) { textarea.focus(); return; }
         const fn = tipo === "devolver" ? "devolver-sugestao" : "recusar-sugestao";
-        await executarAcao(card, acoes, fn, { suggestionId, reviewNote: reviewNote || undefined });
+        await executarAcao(card, acoes, fn, { suggestionId, reviewNote: reviewNote || undefined }, tipo);
       });
     }
 
-    async function executarAcao(card, acoes, fn, corpo) {
+    async function executarAcao(card, acoes, fn, corpo, tipoAcao) {
       for (const b of acoes.querySelectorAll("button")) b.disabled = true;
       acoes.querySelector(".apr-erro")?.remove();
       try {
@@ -261,6 +304,13 @@ import { DOC_CSS } from '../../lib/plano-documento';
         // aconteceu, e recarregar a lista inteira por uma sugestão é
         // desperdício simétrico ao que a contagem separada evita do lado do
         // indicador.
+        const TEXTO_TOAST = {
+          aprovar: "Sugestão aprovada.",
+          devolver: "Sugestão devolvida.",
+          recusar: "Sugestão recusada.",
+        };
+        aprToast(TEXTO_TOAST[tipoAcao], tipoAcao);
+
         card.remove();
         if (!lista.children.length) {
           sub.textContent = "";
