@@ -3721,6 +3721,16 @@ tbody { display: block; width: 100%; }
         var full = nteBuildBasePlan(nteState.athlete);
         nteState.plan.target = full.target;
         if (ntePlanCache[nteState.athlete.id]) ntePlanCache[nteState.athlete.id].target = full.target;
+        // Achado em teste manual (B4, 19/09/2026): esta função mudava
+        // `plan.target` só em memória e nunca chamava `nteAutoSave()` — a
+        // única das dez chamadas que editam o plano nutricional a pular esse
+        // passo. Sem ela, o rascunho no servidor nunca recebia a meta nova:
+        // um F5 recarregava o rascunho antigo, e o que ia para
+        // `formulaSnapshot` na publicação não batia com o que a tela tinha
+        // mostrado. Mesmo padrão dos outros nove pontos de edição deste
+        // arquivo — grava o rascunho e acende "Alterações não publicadas" se
+        // já havia versão publicada, exatamente como qualquer outra edição.
+        nteAutoSave();
       }
       document.getElementById('nte-formula-panel').hidden = true;
       renderNutrition();
