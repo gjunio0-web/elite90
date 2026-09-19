@@ -47,6 +47,7 @@ import { emblemaAttachment } from "./_email-emblema";
 import { buildDecisaoSugestaoEmail, ROTULO_PLANO } from "./_email-decisao-sugestao";
 import { garantirLinkPlano, siteUrlDoEvento, type KindPlano } from "./_link-plano";
 import { assuntoPlanoRepublicado, buildPlanoRepublicadoEmail } from "./_email-plano-republicado";
+import { calcularFormulaSnapshot, FaseInvalidaError } from "./_formula-nutricional";
 
 const COLECAO_PROFISSIONAIS = "professionals";
 const COLECAO_SUGESTOES = "suggestions";
@@ -191,6 +192,29 @@ export const handler = async (event: any) => {
     .collection(COLECAO_ATLETAS).doc(athleteUid)
     .collection("plans").doc(planType);
 
+  // Adendo 03, AF-01/AF-02, mesmo raciocínio de `publicar-plano-direto.ts`.
+  // Leitura FORA da transação, no mesmo espírito do cadastro do profissional
+  // acima: fase e peso do atleta não são o que a transação protege.
+  let formulaSnapshot: Record<string, unknown> | null = null;
+  if (planType === "nutrition") {
+    const athleteSnap = await db.collection(COLECAO_ATLETAS).doc(athleteUid).get();
+    const dadosAtletaFormula = athleteSnap.data() ?? {};
+    try {
+      formulaSnapshot = await calcularFormulaSnapshot(
+        db, dadosAtletaFormula?.phase, Number(dadosAtletaFormula?.weightCurrentKg) || 0,
+      );
+    } catch (e) {
+      if (e instanceof FaseInvalidaError) {
+        return json(400, {
+          erro: "A fase do atleta não está no vocabulário de fórmula (" + String(e.fase) + "). Corrija o cadastro antes de aprovar.",
+          reason: "fase-invalida",
+        });
+      }
+      const msg = e instanceof Error ? e.message : String(e);
+      return json(500, { erro: "Não foi possível calcular a fórmula nutricional agora — " + msg });
+    }
+  }
+
   let versaoCriada = 0;
 
   try {
@@ -219,10 +243,16 @@ export const handler = async (event: any) => {
 
       const refVersao = refPlano.collection("versions").doc(idDaVersao(versaoCriada));
 
-      // A versão. Deliberadamente mínima — a Fase 5 acrescenta `coachNotes` e
-      // `formulaSnapshot`, e generaliza sem recriar.
+      // Adendo 01 (`coachNotes`, já parte de `content`, sem mudança aqui) e
+      // Adendo 03 (`formulaSnapshot`, calculado acima, fora da transação).
+      // Mantém `?? null` como fallback fora do caso de nutrição — mesmo
+      // comportamento de antes desta mudança quando não há retrato a somar.
+      const conteudoOriginal = atual.get("content") ?? null;
+      const conteudoComFormula = formulaSnapshot && conteudoOriginal
+        ? { ...(conteudoOriginal as Record<string, unknown>), formulaSnapshot }
+        : conteudoOriginal;
       tx.set(refVersao, {
-        content: sanearUndefined(atual.get("content") ?? null),
+        content: sanearUndefined(conteudoComFormula),
         originatedBy,
         publishedBy,
         publishedAt: FieldValue.serverTimestamp(),

@@ -3587,12 +3587,28 @@ tbody { display: block; width: 100%; }
     // formato do banco por toda a tela.
 
 
-    // ── Fórmula de Macros — configuração parametrizável ──
-    (function() {
+    // ── Fórmula de Macros — configuração parametrizável (Adendo 03) ──
+    // `config/nutritionFormula` no servidor substitui o antigo
+    // `localStorage` (chave `elite90_nte_formula`, removida — CF-10): a
+    // configuração era perdida ao trocar de máquina, e cada navegador podia
+    // ter uma fórmula diferente para o mesmo atleta.
+    //
+    // `nteFormulaConfig` começa com os valores de origem SEMPRE — de forma
+    // síncrona, no carregamento da página — para nenhum chamador (inclusive
+    // `nteBuildBasePlan`, que roda antes de qualquer clique) encontrar a
+    // variável vazia enquanto a busca ao servidor está em voo. Quando a busca
+    // volta, sobrescreve com o que está salvo de verdade. Falha de rede aqui
+    // é não-fatal: a prévia segue funcionando com os valores de origem, e a
+    // publicação real, que é o que importa, calcula no servidor de qualquer
+    // forma (calcularFormulaSnapshot) — não confia neste valor do cliente.
+    nteFormulaConfig = JSON.parse(JSON.stringify(NTE_FORMULA_DEFAULTS));
+    (async function nteCarregarFormulaConfigInicial() {
       try {
-        const s = localStorage.getItem('elite90_nte_formula');
-        nteFormulaConfig = s ? JSON.parse(s) : JSON.parse(JSON.stringify(NTE_FORMULA_DEFAULTS));
-      } catch(e) { nteFormulaConfig = JSON.parse(JSON.stringify(NTE_FORMULA_DEFAULTS)); }
+        const r = await m2Ler('ler-config-formula', {});
+        if (r && r.phases) nteFormulaConfig = r.phases;
+      } catch (e) {
+        console.error('[nteCarregarFormulaConfigInicial]', e);
+      }
     })();
 
 
@@ -3618,7 +3634,7 @@ tbody { display: block; width: 100%; }
         const cell = (macro, min, max) =>
           '<td><span class="nte-stepper"><input class="nte-formula-input" data-phase="' + phase + '" data-macro="' + macro + '" type="number" step="0.1" min="' + min + '" max="' + max + '" value="' + vals[macro] + '" />' + ARROWS + '</span></td>';
         return '<tr>' +
-          '<td class="nte-formula-phase">' + phase + '</td>' +
+          '<td class="nte-formula-phase">' + rotuloFase(phase) + '</td>' +
           cell('p', '0.5', '5') +
           cell('c', '0.5', '10') +
           cell('g', '0.1', '3') +
@@ -3626,14 +3642,37 @@ tbody { display: block; width: 100%; }
       }).join('');
     }
 
-    function nteApplyFormula() {
+    async function nteApplyFormula() {
+      var candidato = JSON.parse(JSON.stringify(nteFormulaConfig));
       var inputs = document.querySelectorAll('.nte-formula-input');
       inputs.forEach(function(inp) {
         var phase = inp.dataset.phase, macro = inp.dataset.macro;
         var val = parseFloat(inp.value);
-        if (!isNaN(val) && val > 0 && nteFormulaConfig[phase]) nteFormulaConfig[phase][macro] = Math.round(val * 10) / 10;
+        if (!isNaN(val) && val > 0 && candidato[phase]) candidato[phase][macro] = Math.round(val * 10) / 10;
       });
-      try { localStorage.setItem('elite90_nte_formula', JSON.stringify(nteFormulaConfig)); } catch(e) {}
+
+      // Adendo 03, AF-05/AF-07: a configuração é da casa, e a escrita passa
+      // por função de servidor. Só troca o valor em memória DEPOIS de o
+      // servidor confirmar — nenhum otimismo aqui, porque esta tela é
+      // exatamente onde a fórmula que vira meta do atleta é decidida.
+      var btn = document.querySelector('#nte-formula-panel .nte-formula-btn.primary');
+      if (btn) btn.disabled = true;
+      try {
+        // Forma do servidor: { proteinPerKg, carbPerKg, fatPerKg } por fase.
+        var phasesParaEnviar = {};
+        Object.keys(candidato).forEach(function(fase) {
+          phasesParaEnviar[fase] = { proteinPerKg: candidato[fase].p, carbPerKg: candidato[fase].c, fatPerKg: candidato[fase].g };
+        });
+        await m2Escrever('salvar-config-formula', { phases: phasesParaEnviar });
+        nteFormulaConfig = candidato;
+      } catch (e) {
+        console.error('[nteApplyFormula]', e);
+        wkeToast('Não foi possível salvar a fórmula agora. ' + (e && e.message ? e.message : ''), { type: 'error' });
+        if (btn) btn.disabled = false;
+        return;
+      }
+      if (btn) btn.disabled = false;
+
       // Recalcula meta para o atleta atual
       if (nteState.athlete && nteState.plan && !nteState.plan.isNew) {
         var full = nteBuildBasePlan(nteState.athlete);
@@ -3667,11 +3706,19 @@ tbody { display: block; width: 100%; }
       inp.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
+    // Só preenche os campos com os valores de origem — não salva. É
+    // "Recalcular metas" quem persiste (mesmo botão, mesma chamada ao
+    // servidor de qualquer edição): dois botões que gravam seria dois
+    // caminhos para o mesmo dado, exatamente o que este adendo veio evitar.
     function nteResetFormula() {
-      nteFormulaConfig = JSON.parse(JSON.stringify(NTE_FORMULA_DEFAULTS));
-      try { localStorage.removeItem('elite90_nte_formula'); } catch(e) {}
-      nteRenderFormulaPanel();
-      wkeToast('Fórmula restaurada ao padrão', {type:'info'});
+      var tbody = document.getElementById('nte-formula-rows');
+      if (tbody) {
+        tbody.querySelectorAll('.nte-formula-input').forEach(function(inp) {
+          var origem = NTE_FORMULA_DEFAULTS[inp.dataset.phase];
+          if (origem) inp.value = origem[inp.dataset.macro];
+        });
+      }
+      wkeToast('Campos preenchidos com os valores de origem — clique em Recalcular metas para salvar.', { type: 'info' });
     }
 
 

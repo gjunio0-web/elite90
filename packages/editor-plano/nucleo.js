@@ -80,11 +80,15 @@ var nteCatalogoMotivo = '';
 
 var nteCatalogoSemente = false;
 
+// Adendo 03, AF-08: as quatro chaves em inglês, iguais ao vocabulário fechado
+// do servidor (PLAN_PHASES, _m2-validacao.ts). Era 'Manutenção' — nunca batia
+// com o valor real do atleta (`Maintenance`), e a busca por substring abaixo
+// escondia isso caindo sempre em Bulking (CF-12, corrigido junto).
 var NTE_FORMULA_DEFAULTS = {
   'Bulking':     { p: 2.0, c: 5.0, g: 1.1 },
   'Cutting':     { p: 2.4, c: 3.0, g: 0.8 },
-  'Manutenção':  { p: 2.0, c: 4.0, g: 1.0 },
-  'Diet Break':  { p: 2.2, c: 3.5, g: 0.9 }
+  'Diet Break':  { p: 2.2, c: 3.5, g: 0.9 },
+  'Maintenance': { p: 2.0, c: 4.0, g: 1.0 }
 };
 
 var nteFormulaConfig;
@@ -205,11 +209,15 @@ function nteCongelarPlano(plan) {
   });
 }
 
+// Adendo 03, AF-03/AF-09 (CF-13): correspondência EXATA, não substring. Fase
+// fora do vocabulário cai em Bulking com aviso no console — a UI nunca trava
+// a edição por isso, mas o cálculo autoritativo, no servidor, no instante da
+// publicação (calcularFormulaSnapshot), recusa em vez de cair em silêncio.
 function nteGetFormulaForPhase(phase) {
-  const p = (phase || '').toLowerCase();
-  if (p.includes('cut')) return nteFormulaConfig['Cutting'] || NTE_FORMULA_DEFAULTS['Cutting'];
-  if (p.includes('diet break')) return nteFormulaConfig['Diet Break'] || NTE_FORMULA_DEFAULTS['Diet Break'];
-  if (p.includes('manu')) return nteFormulaConfig['Manutenção'] || NTE_FORMULA_DEFAULTS['Manutenção'];
+  if (Object.prototype.hasOwnProperty.call(NTE_FORMULA_DEFAULTS, phase)) {
+    return nteFormulaConfig[phase] || NTE_FORMULA_DEFAULTS[phase];
+  }
+  console.warn('[NTE] fase fora do vocabulário: ' + phase + ' — usando Bulking para a prévia.');
   return nteFormulaConfig['Bulking'] || NTE_FORMULA_DEFAULTS['Bulking'];
 }
 
@@ -377,11 +385,9 @@ function wkeRenderCalcContext() {
   var chip = document.getElementById('wke-phasechip');
   var wv = document.getElementById('wke-weightval');
   if (chip) {
-    var key = phase.toLowerCase();
-    var cls = 'bulking';
-    if (key.indexOf('cut') > -1) cls = 'cutting';
-    else if (key.indexOf('diet') > -1) cls = 'dietbreak';
-    else if (key.indexOf('manu') > -1) cls = 'manutencao';
+    // Adendo 03, AF-09 (CF-13): correspondência exata, não substring.
+    var CLASSE_POR_FASE = { 'Bulking': 'bulking', 'Cutting': 'cutting', 'Diet Break': 'dietbreak', 'Maintenance': 'manutencao' };
+    var cls = CLASSE_POR_FASE[phase] || 'bulking';
     chip.className = 'nte-phasechip ' + cls;
     chip.textContent = rotuloFase(phase);
   }
@@ -1214,11 +1220,9 @@ function nteRenderCalcContext() {
   var chip = document.getElementById('nte-phasechip');
   var wv = document.getElementById('nte-weightval');
   if (chip) {
-    var key = phase.toLowerCase();
-    var cls = 'bulking';
-    if (key.indexOf('cut') > -1) cls = 'cutting';
-    else if (key.indexOf('diet') > -1) cls = 'dietbreak';
-    else if (key.indexOf('manu') > -1) cls = 'manutencao';
+    // Adendo 03, AF-09 (CF-13): correspondência exata, não substring.
+    var CLASSE_POR_FASE = { 'Bulking': 'bulking', 'Cutting': 'cutting', 'Diet Break': 'dietbreak', 'Maintenance': 'manutencao' };
+    var cls = CLASSE_POR_FASE[phase] || 'bulking';
     chip.className = 'nte-phasechip ' + cls;
     chip.textContent = rotuloFase(phase);
   }

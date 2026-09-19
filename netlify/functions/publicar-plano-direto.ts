@@ -57,6 +57,7 @@ import { sendMail, isMailerConfigured } from "./_mailer";
 import { garantirLinkPlano, siteUrlDoEvento, type KindPlano } from "./_link-plano";
 import { assuntoPlanoRepublicado, buildPlanoRepublicadoEmail } from "./_email-plano-republicado";
 import { emblemaAttachment } from "./_email-emblema";
+import { calcularFormulaSnapshot, FaseInvalidaError } from "./_formula-nutricional";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 import { validarUid, validarPlanType } from "./_m2-validacao";
 import { planoSemConteudo } from "./_conteudo-plano";
@@ -239,15 +240,42 @@ export const handler = async (event: any) => {
   if (!athleteSnap.exists) return json(404, { erro: "Atleta não encontrado." });
   const dadosAtleta = athleteSnap.data() ?? {};
 
+  const db = getFirestore(app);
+
+  // Adendo 03, AF-01/AF-02: o retrato da fórmula entra ANTES do congelamento
+  // de alimentos, para os dois ficarem prontos no mesmo objeto. Calculado
+  // aqui — fora da transação, como o cadastro do profissional em
+  // `aprovar-sugestao.ts` — porque não é o que a transação protege (a
+  // numeração da versão); é leitura da configuração vigente no instante da
+  // publicação (CF-04). CORRESPONDÊNCIA EXATA (AF-03): fase fora do
+  // vocabulário fechado é erro explícito, nunca recurso silencioso a
+  // Bulking (CF-01, CF-12) — a falha que o estado anterior cometia.
+  let formulaSnapshot: Record<string, unknown> | null = null;
+  if (planType === "nutrition") {
+    try {
+      formulaSnapshot = await calcularFormulaSnapshot(
+        db, dadosAtleta?.phase, Number(dadosAtleta?.weightCurrentKg) || 0,
+      );
+    } catch (e) {
+      if (e instanceof FaseInvalidaError) {
+        return json(400, {
+          erro: "A fase do atleta não está no vocabulário de fórmula (" + String(e.fase) + "). Corrija o cadastro antes de publicar.",
+          reason: "fase-invalida",
+        });
+      }
+      const msg = e instanceof Error ? e.message : String(e);
+      return json(500, { erro: "Não foi possível calcular a fórmula nutricional agora — " + msg });
+    }
+  }
+
   // O congelamento acontece ANTES da transação: é cálculo puro sobre o corpo da
   // requisição, sem leitura de banco, e não precisa competir pela janela da
   // transação com a numeração da versão. `sanearUndefined` roda por último —
   // ver o cabeçalho do arquivo, F-27.
+  const conteudoBase = planType === "nutrition" ? congelarPlanoNutricional(corpo.content) : corpo.content;
   const conteudoCongelado = sanearUndefined(
-    planType === "nutrition" ? congelarPlanoNutricional(corpo.content) : corpo.content,
+    formulaSnapshot ? { ...(conteudoBase as Record<string, unknown>), formulaSnapshot } : conteudoBase,
   );
-
-  const db = getFirestore(app);
   const refPlano = db
     .collection(COLECAO_ATLETAS).doc(athleteUid)
     .collection("plans").doc(planType);

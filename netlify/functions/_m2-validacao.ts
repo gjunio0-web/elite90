@@ -44,6 +44,35 @@ export type PlanType = (typeof PLAN_TYPES)[number];
 export const PLAN_STATUS = ["none", "draft", "published"] as const;
 
 /**
+ * Vocabulário de fase para FÓRMULA e TRANSIÇÃO (Adendo 03, AF-08). Quatro
+ * valores, todos em inglês — o quarto (`Maintenance`) só existe aqui.
+ *
+ * NÃO É `FASES_VALIDAS`, de `promote-lead.ts` (três valores). Aquele é o
+ * contrato de PROMOÇÃO: ninguém é promovido direto para manutenção (AF-04,
+ * §7.2 do Adendo 03). Este é o vocabulário de TRANSIÇÃO — o que um atleta já
+ * em programa pode alcançar — e a fórmula nutricional lê a partir deste, não
+ * daquele. Os dois nunca se fundem: fundir os dois faria acrescentar um valor
+ * de transição abrir, em silêncio, um valor de promoção que ninguém decidiu.
+ *
+ * CORRESPONDÊNCIA EXATA (AF-03/AF-09), NUNCA SUBSTRING. O estado anterior —
+ * `p.includes('manu')` em três pontos do cliente — deixava `Maintenance`
+ * (o valor decidido) cair sem aviso nos coeficientes de Bulking, porque
+ * `'manu'` não casa com `'maintenance'`. Ver Adendo 03, §7.4 (CF-13).
+ */
+export const PLAN_PHASES = ["Bulking", "Cutting", "Diet Break", "Maintenance"] as const;
+export type PlanPhase = (typeof PLAN_PHASES)[number];
+
+export function validarPlanPhase(valor: unknown): ResultadoValidacao {
+  if (!PLAN_PHASES.includes(valor as PlanPhase)) {
+    return {
+      ok: false,
+      erro: `phase inválida. Esperado um de: ${PLAN_PHASES.join(", ")}.`,
+    };
+  }
+  return { ok: true };
+}
+
+/**
  * Teto de tamanho do rascunho, em caracteres do JSON serializado.
  *
  * O Firestore limita um documento a 1 MiB, e o rascunho vive embutido no

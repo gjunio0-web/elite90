@@ -147,6 +147,12 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Chegou (Fase 5, Adendo 03) — herda o padrão anunciado no bloco acima.
+    // Leitura e escrita só por função de servidor (AF-07).
+    match /config/nutritionFormula {
+      allow read, write: if false;
+    }
+
     // `suggestions`: reservada no esquema (versão 3, seção 4), sem função de
     // escrita — depende de ator profissional autenticado, que é o M4.
     match /suggestions/{suggestionId} {
