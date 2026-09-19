@@ -51,13 +51,14 @@
 // sugestao.ts`, que tinha a mesma lacuna parcial.
 
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
 import { sendMail, isMailerConfigured } from "./_mailer";
 import { garantirLinkPlano, siteUrlDoEvento, type KindPlano } from "./_link-plano";
 import { assuntoPlanoRepublicado, buildPlanoRepublicadoEmail } from "./_email-plano-republicado";
 import { emblemaAttachment } from "./_email-emblema";
 import { calcularFormulaSnapshot, FaseInvalidaError } from "./_formula-nutricional";
+import { congelarPlanoNutricional } from "./_congelamento-nutricional";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 import { validarUid, validarPlanType } from "./_m2-validacao";
 import { planoSemConteudo } from "./_conteudo-plano";
@@ -71,63 +72,6 @@ const json = (statusCode: number, corpo: unknown) => ({
   headers: { "Content-Type": "application/json; charset=utf-8" },
   body: JSON.stringify(corpo),
 });
-
-/**
- * Congela um item de refeição para o retrato definitivo do servidor.
- *
- * Espelha `nteCongelarItem` do núcleo, campo a campo, com uma única troca: o
- * carimbo de tempo. O núcleo grava `congeladoEm: null` e
- * `_congeladoNoCliente` porque, do lado do cliente, não existe relógio de
- * confiança. Aqui existe — é o próprio Firestore.
- */
-function congelarItemNoServidor(f: any, congeladoEm: Timestamp): Record<string, unknown> {
-  const b = f?.base ?? {};
-  return {
-    foodId: f?.foodId ?? b.id ?? null,
-    quantidadeG: f?.qty ?? null,
-    nomeSnapshot: f?.name ?? null,
-    medidaCaseiraSnapshot: b.medidaCaseira ?? null,
-    macrosSnapshot: {
-      kcal: b.kcal || 0,
-      p: b.p || 0,
-      c: b.c || 0,
-      g: b.g || 0,
-    },
-    fonteSnapshot: b.categoria ? { base: "foods", categoria: b.categoria } : { base: "foods" },
-    // `Timestamp`, não `FieldValue.serverTimestamp()`: os itens vivem dentro de
-    // `meals[]` e `foods[]`, e o Firestore recusa serverTimestamp() dentro de
-    // array ("cannot be used inside of an array"). O carimbo é o relógio da
-    // função — ainda do servidor, nunca do navegador — e é o mesmo para todos
-    // os itens de uma publicação.
-    congeladoEm,
-  };
-}
-
-/**
- * Congela um plano nutricional inteiro. Muda em relação a `nteCongelarPlano` do
- * núcleo só no que o núcleo não pode fazer: usar o relógio do servidor.
- *
- * Devolve um plano NOVO em vez de alterar `plano` no lugar — o objeto recebido
- * é o corpo da requisição, e mutar entrada não é hábito desta função.
- */
-function congelarPlanoNutricional(plano: any): Record<string, unknown> {
-  const congeladoEm = Timestamp.now();
-  const dias: Record<string, unknown> = {};
-  for (const dk of Object.keys(plano?.days ?? {})) {
-    const dia = plano.days[dk];
-    dias[dk] = {
-      ...dia,
-      meals: (dia.meals ?? []).map((meal: any) => ({
-        ...meal,
-        foods: (meal.foods ?? []).map((f: any) => ({
-          ...f,
-          snapshot: congelarItemNoServidor(f, congeladoEm),
-        })),
-      })),
-    };
-  }
-  return { ...plano, days: dias };
-}
 
 /**
  * Remove recursivamente qualquer chave cujo valor seja `undefined`, de mapas

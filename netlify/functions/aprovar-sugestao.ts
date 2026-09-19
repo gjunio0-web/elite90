@@ -48,6 +48,7 @@ import { buildDecisaoSugestaoEmail, ROTULO_PLANO } from "./_email-decisao-sugest
 import { garantirLinkPlano, siteUrlDoEvento, type KindPlano } from "./_link-plano";
 import { assuntoPlanoRepublicado, buildPlanoRepublicadoEmail } from "./_email-plano-republicado";
 import { calcularFormulaSnapshot, FaseInvalidaError } from "./_formula-nutricional";
+import { congelarPlanoNutricional } from "./_congelamento-nutricional";
 
 const COLECAO_PROFISSIONAIS = "professionals";
 const COLECAO_SUGESTOES = "suggestions";
@@ -243,14 +244,19 @@ export const handler = async (event: any) => {
 
       const refVersao = refPlano.collection("versions").doc(idDaVersao(versaoCriada));
 
-      // Adendo 01 (`coachNotes`, já parte de `content`, sem mudança aqui) e
-      // Adendo 03 (`formulaSnapshot`, calculado acima, fora da transação).
-      // Mantém `?? null` como fallback fora do caso de nutrição — mesmo
-      // comportamento de antes desta mudança quando não há retrato a somar.
-      const conteudoOriginal = atual.get("content") ?? null;
-      const conteudoComFormula = formulaSnapshot && conteudoOriginal
-        ? { ...(conteudoOriginal as Record<string, unknown>), formulaSnapshot }
-        : conteudoOriginal;
+      // Adendo 01 (`coachNotes`, já parte de `content`, sem mudança aqui),
+      // AC-43 (congelamento de alimento — DV-6, mesmo módulo do outro
+      // caminho de publicação) e Adendo 03 (`formulaSnapshot`, calculado
+      // acima, fora da transação). Mantém `?? null` como fallback fora do
+      // caso de nutrição — mesmo comportamento de antes desta mudança
+      // quando não há retrato a somar.
+      const conteudoBruto = atual.get("content") ?? null;
+      const conteudoCongelado = planType === "nutrition" && conteudoBruto
+        ? congelarPlanoNutricional(conteudoBruto)
+        : conteudoBruto;
+      const conteudoComFormula = formulaSnapshot && conteudoCongelado
+        ? { ...(conteudoCongelado as Record<string, unknown>), formulaSnapshot }
+        : conteudoCongelado;
       tx.set(refVersao, {
         content: sanearUndefined(conteudoComFormula),
         originatedBy,
