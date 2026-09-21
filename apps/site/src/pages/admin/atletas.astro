@@ -505,12 +505,12 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .tf-menu-item { display: block; width: 100%; text-align: left; background: transparent; border: none; color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 9px 10px; border-radius: calc(var(--radius-card) - 4px); cursor: pointer; }
 .tf-menu-item:hover { background: rgba(255,255,255,.06); }
 /* Mesmo atalho do menu (tfAbrirModal), mas em linha na aba Evolução (§8.3).
-   MESMO FORMATO de .evo-btn.ghost ("Editar rascunho", mesma aba) — mesmo
-   padding, border-radius, font-size, letter-spacing, cor de contorno/texto
-   e hover; só width/display/margin mudam, e só porque este vive em linha,
-   ao lado do selo de semana, e não pode ser width:100% como o original. */
-.tf-evo-fase-btn { display: inline-flex; align-items: center; justify-content: center; width: auto; margin-left: auto; padding: 13px 18px; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); background: transparent; color: var(--c-textsub); font-family: var(--font-label); font-size: 0.7rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: opacity 140ms ease, box-shadow 140ms ease; }
-.tf-evo-fase-btn:hover { color: var(--c-textbody); }
+   MESMA CLASSE de .btn-protocol ("Publicar Protocolo", cabeçalho desta
+   gaveta) — já é inline-flex por natureza, cabe na linha ao lado do selo de
+   semana sem nenhum ajuste estrutural, só margin-left:auto para alinhar à
+   direita. */
+.tf-evo-fase-btn { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; padding: 9px 15px; background: transparent; border: 1px solid rgba(166, 195, 0, 0.50); border-radius: var(--radius-card); color: var(--c-lime); font-family: var(--font-label); font-size: 0.62rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: background 140ms ease, border-color 140ms ease; white-space: nowrap; }
+.tf-evo-fase-btn:hover { background: rgba(166, 195, 0, 0.12); border-color: var(--c-lime); }
 
 #tf-modal-overlay { position: fixed; inset: 0; z-index: 320; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; padding: 20px; }
 #tf-modal-overlay[data-open="false"] { display: none; }
