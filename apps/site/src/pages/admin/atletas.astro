@@ -265,6 +265,13 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .btn-protocol [data-lucide] { width: 14px; height: 14px; }
 .btn-protocol.unpub { border-color: var(--c-status-new); color: var(--c-status-new); }
 .btn-protocol.unpub:hover { background: rgba(230,126,34,0.10); }
+/* Publicação leva alguns segundos (token, leituras/escrita no Firestore,
+   e-mail ao atleta) — sem um estado visível de "aguarde", o botão ficava
+   idêntico durante a espera e o Coach não tinha como saber que o clique
+   surtiu efeito, arriscando clicar de novo por achar que nada aconteceu. */
+.btn-protocol:disabled { opacity: 0.55; cursor: not-allowed; background: transparent; }
+.btn-protocol:disabled:hover { background: transparent; }
+.btn-protocol-spin { width: 12px; height: 12px; border: 2px solid rgba(166, 195, 0, 0.30); border-top-color: var(--c-lime); border-radius: 50%; animation: evo-spin 0.75s linear infinite; flex: none; }
 .btn-report { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; background: var(--grad-cta); border: none; border-radius: var(--radius-card); color: #000; font-family: var(--font-label); font-size: 0.62rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: box-shadow 140ms ease; white-space: nowrap; }
 .btn-report:hover { box-shadow: var(--glow-lime); }
 .btn-report [data-lucide] { width: 14px; height: 14px; }
@@ -2775,7 +2782,15 @@ tbody { display: block; width: 100%; }
 
       const pfx = kind === 'training' ? 'tr' : 'nu';
       const btn = document.getElementById(pfx + '-pubbtn');
-      if (btn) btn.disabled = true;
+      if (btn) {
+        btn.disabled = true;
+        // Publicação leva alguns segundos (token, leituras/escrita no
+        // Firestore, e-mail ao atleta) — ver o cabeçalho do arquivo, F-27, e
+        // o comentário de .btn-protocol:disabled acima. Sem um estado visível
+        // de espera, o botão ficava idêntico durante todo esse tempo, e o
+        // Coach não tinha como saber que o clique surtiu efeito.
+        btn.innerHTML = '<span class="btn-protocol-spin"></span> Publicando…';
+      }
       try {
         const resultado = await m2Escrever('publicar-plano-direto', {
           athleteUid: a.id,
@@ -2796,7 +2811,6 @@ tbody { display: block; width: 100%; }
         // AC-28 · P-4. Sem isto, um `true` lido antes da publicação voltaria a
         // acender o selo na próxima abertura da gaveta.
         delete m2PendenteServidor[a.id + ':' + kind];
-        renderPubHeader(kind);
         notifyAthletePublish(a.id, kind);
         wkeToast(label + ' publicado para o atleta.', { type: 'success' });
       } catch (e) {
@@ -2815,6 +2829,11 @@ tbody { display: block; width: 100%; }
         console.error('[doPublish]', kind, e);
       } finally {
         if (btn) btn.disabled = false;
+        // Redesenha o botão a partir do estado real de `p` — sucesso ou
+        // falha: sucesso mudou `p` acima, falha não mudou nada, então isto
+        // sempre restaura o rótulo/ícone corretos (substituindo o
+        // "Publicando…" acima), num lugar só.
+        renderPubHeader(kind);
       }
     }
     async function wkePublish() { await doPublish('training', 'Plano de treino'); }
