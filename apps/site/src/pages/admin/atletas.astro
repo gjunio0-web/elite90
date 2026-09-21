@@ -630,7 +630,6 @@ tbody { display: block; width: 100%; }
 .status-badge { font-size: 0.6rem; padding: 3px 10px; white-space: nowrap; }
 .td--actions { order: 4; width: 100%; text-align: right; }
 #drawer-tabs-nav { display: none; }
-#drawer-close { display: none; }
 .drawer-tab-indicator { display: flex !important; }
 .metric-grid[style*="1fr 1fr 1fr 1fr"] { grid-template-columns: 1fr 1fr !important; }
 .metric-grid[style*="1fr 1fr 1fr"] { grid-template-columns: 1fr 1fr !important; }
@@ -754,22 +753,24 @@ tbody { display: block; width: 100%; }
       <div class="drawer-header">
         <span class="drawer-title">Atleta <span id="drawer-athlete-name"></span></span>
         <span class="drawer-external-label" id="drawer-external-label"></span>
-        <!-- Adendo 05 · §8.1 — menu de ações de nível de atleta. -->
+        <!-- Hamburger (navegação, mobile) -->
+        <div class="drawer-hamburger-wrap" id="drawer-hamburger-wrap">
+          <button class="drawer-hamburger-btn" id="drawer-hamburger-btn" onclick="toggleDrawerMenu()" aria-label="Menu de navegação">
+            <i data-lucide="menu"></i>
+          </button>
+        </div>
+        <!-- Menu único de ações/fechar (Adendo 05 · §8.1) — mesmo padrão do
+             restante do app: um só ícone "⋮" na extremidade, não um "⋮" e um
+             "×" coexistindo. "Fechar" substitui o antigo #drawer-close. -->
         <div class="tf-menu-wrap">
           <button class="tf-menu-btn" id="tf-menu-btn" onclick="tfToggleMenu()" aria-label="Mais ações">
             <i data-lucide="more-vertical"></i>
           </button>
           <div class="tf-menu-dropdown" id="tf-menu-dropdown" hidden>
             <button class="tf-menu-item" onclick="tfToggleMenu(); tfAbrirModal();">Ajustar fase do ciclo</button>
+            <button class="tf-menu-item" onclick="tfToggleMenu(); closeAthleteDrawer();">Fechar</button>
           </div>
         </div>
-        <!-- Hamburger (mobile) / X (desktop) -->
-        <div class="drawer-hamburger-wrap" id="drawer-hamburger-wrap">
-          <button class="drawer-hamburger-btn" id="drawer-hamburger-btn" onclick="toggleDrawerMenu()" aria-label="Menu de navegação">
-            <i data-lucide="menu"></i>
-          </button>
-        </div>
-        <button class="drawer-close" id="drawer-close" aria-label="Fechar gaveta">✕</button>
       </div>
 
       <!-- DRAWER BODY: sidenav + content -->
@@ -4250,7 +4251,6 @@ tbody { display: block; width: 100%; }
 
 
     // ── EVENTS ──
-    document.getElementById('drawer-close').addEventListener('click', closeAthleteDrawer);
     document.getElementById('athlete-drawer').addEventListener('click', (e) => {
       if (e.target.id === 'athlete-drawer') closeAthleteDrawer();
     });
