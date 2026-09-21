@@ -1258,23 +1258,6 @@ tbody { display: block; width: 100%; }
     </div>
   </div>
 
-  <!-- Adendo 05 · §8.2 — modal de troca de fase. -->
-  <div id="tf-modal-overlay" data-open="false">
-    <div class="tf-box">
-      <div class="tf-titulo">Ajustar fase do ciclo</div>
-      <div class="tf-fases" id="tf-fases"></div>
-      <div class="tf-aviso">A troca recalcula a próxima publicação de treino e nutrição — não altera o que já foi publicado.</div>
-      <label class="tf-label" for="tf-justificativa">Justificativa (obrigatória)</label>
-      <textarea class="tf-textarea" id="tf-justificativa" placeholder="Por que trocar de fase agora…"></textarea>
-      <div class="tf-acoes">
-        <button onclick="tfFecharModal()">Cancelar</button>
-        <button class="tf-confirmar" id="tf-confirmar-btn" onclick="tfConfirmar()">Confirmar troca</button>
-      </div>
-      <div class="tf-hist-title">Histórico de fases</div>
-      <div id="tf-historico"></div>
-    </div>
-  </div>
-
   <div id="photo-modal-overlay" data-open="false" style="display:none;">
     <div class="photo-modal-container">
       <button class="photo-modal-close" onclick="closePhotoModal()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
@@ -1296,6 +1279,29 @@ tbody { display: block; width: 100%; }
   </div>
 
   <!-- /drawer-body -->
+    </div>
+  </div>
+
+  <!-- Adendo 05 · §8.2 — modal de troca de fase. Fora do .drawer-panel (mesmo
+       motivo do HAMBURGER NAV logo abaixo): .drawer-panel tem transform +
+       overflow:hidden, então um <div id="tf-modal-overlay" position:fixed>
+       aninhado ali dentro não cobre o viewport — fica confinado à caixa do
+       painel (no mobile, os 92svh da folha inferior) e o que passar disso é
+       cortado sem scroll possível, já que quem clipa é o ancestral, não a
+       .tf-box (que já tem overflow-y:auto e nunca teve o problema sozinha). -->
+  <div id="tf-modal-overlay" data-open="false">
+    <div class="tf-box">
+      <div class="tf-titulo">Ajustar fase do ciclo</div>
+      <div class="tf-fases" id="tf-fases"></div>
+      <div class="tf-aviso">A troca recalcula a próxima publicação de treino e nutrição — não altera o que já foi publicado.</div>
+      <label class="tf-label" for="tf-justificativa">Justificativa (obrigatória)</label>
+      <textarea class="tf-textarea" id="tf-justificativa" placeholder="Por que trocar de fase agora…"></textarea>
+      <div class="tf-acoes">
+        <button onclick="tfFecharModal()">Cancelar</button>
+        <button class="tf-confirmar" id="tf-confirmar-btn" onclick="tfConfirmar()">Confirmar troca</button>
+      </div>
+      <div class="tf-hist-title">Histórico de fases</div>
+      <div id="tf-historico"></div>
     </div>
   </div>
 
