@@ -76,6 +76,16 @@ const LIMITE_ALVOS = 50;
  * remover reserva de vocabulário custa mais do que mantê-la. Constam aqui em
  * comentário para que o M2 não precise reabrir o vocabulário.
  *
+ * 'atleta.fase-alterada' SAIU desta reserva (Adendo 05 v1.5, TF-06):
+ * `alterar-fase-atleta.ts` a emite. NÃO reaproveita 'atleta.status-alterado'
+ * — aquela reserva nunca descreveu um ato deliberado (a situação mudava com a
+ * passagem do tempo, o Adendo 06 removeu o campo por isso), e a transição de
+ * fase é ato deliberado, com autor, instante e justificativa. `detalhe: { de,
+ * para }`, vocabulário fechado de quatro valores — permitido em `detalhe`
+ * porque nem `Bulking`, `Cutting`, `Diet Break` nem `Maintenance` identificam
+ * ninguém ou são dado de saúde (mesma categoria que já cobre a desativação de
+ * profissional e as transições de status de sugestão do Adendo 02).
+ *
  * 'plano.publicado' SAIU desta reserva na Fase 4-C (Adendo 07, seção 6, passo
  * 5): a função de aprovação de sugestão a emite. Entra agrupada com as ações de
  * delegação abaixo, junto do comentário que declara o que ela grava.
@@ -173,6 +183,7 @@ export const ACOES = [
   // e o histórico de quem foi titular quando se lê pela sequência de eventos
   // sobre ele.
   "titular.definido",
+  "atleta.fase-alterada",
 ] as const;
 
 export type Acao = (typeof ACOES)[number];
