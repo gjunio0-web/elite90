@@ -492,6 +492,38 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .conflito-acoes button:hover { border-color: var(--c-lime); color: var(--c-lime); }
 .conflito-acoes .conflito-perigo:hover { border-color: var(--c-status-rejected); color: var(--c-status-rejected); }
 
+/* Adendo 05 · TF-08 a TF-13 — menu de ações do cabeçalho e modal de troca de
+   fase. Único elemento novo no drawer-header (§8.1): as reticências verticais
+   previstas guardam lugar para os outros três atos de nível de atleta que o
+   adendo cita (data de início, delegação, exclusão) — nenhum deles é desta
+   fase; só "Ajustar fase do ciclo" existe hoje. */
+.tf-menu-wrap { position: relative; }
+.tf-menu-btn { background: transparent; border: none; color: var(--c-textsub); cursor: pointer; padding: 6px; display: flex; align-items: center; }
+.tf-menu-btn:hover { color: var(--c-white); }
+.tf-menu-dropdown { position: absolute; top: calc(100% + 4px); right: 0; z-index: 60; background: var(--c-surface-2); border: 1px solid rgba(255,255,255,.14); border-radius: var(--radius-card); min-width: 220px; padding: 6px; box-shadow: var(--shadow-md); }
+.tf-menu-dropdown[hidden] { display: none; }
+.tf-menu-item { display: block; width: 100%; text-align: left; background: transparent; border: none; color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 9px 10px; border-radius: calc(var(--radius-card) - 4px); cursor: pointer; }
+.tf-menu-item:hover { background: rgba(255,255,255,.06); }
+
+#tf-modal-overlay { position: fixed; inset: 0; z-index: 320; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; padding: 20px; }
+#tf-modal-overlay[data-open="false"] { display: none; }
+.tf-box { width: 100%; max-width: 480px; background: var(--c-darkbg); border: 0.75px solid var(--c-white); border-radius: var(--radius-card); padding: 22px; max-height: 88vh; overflow-y: auto; }
+.tf-titulo { font-weight: 700; margin-bottom: 14px; }
+.tf-fases { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.tf-fase-opt { padding: 10px; border-radius: var(--radius-card); border: 0.75px solid rgba(255,255,255,.25); background: transparent; color: var(--c-white); cursor: pointer; font-family: inherit; font-size: 13px; text-align: center; }
+.tf-fase-opt.selected { border-color: var(--c-lime); color: var(--c-lime); }
+.tf-fase-opt:disabled { opacity: .35; cursor: not-allowed; }
+.tf-aviso { font-size: 12px; color: var(--c-status-new); margin-bottom: 14px; line-height: 1.5; }
+.tf-label { display: block; font-size: 12px; color: var(--c-textsub); margin-bottom: 6px; }
+.tf-textarea { width: 100%; min-height: 70px; background: var(--c-black); border: 1px solid rgba(255,255,255,.14); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: var(--space-3); resize: vertical; margin-bottom: 16px; }
+.tf-acoes { display: flex; gap: 8px; margin-bottom: 18px; }
+.tf-acoes button { flex: 1; padding: 10px; border-radius: var(--radius-card); border: 0.75px solid var(--c-white); background: transparent; color: var(--c-white); cursor: pointer; font-family: inherit; font-size: 13px; }
+.tf-acoes .tf-confirmar { background: var(--c-lime); color: var(--c-black); border-color: var(--c-lime); font-weight: 700; }
+.tf-acoes button:disabled { opacity: .5; cursor: not-allowed; }
+.tf-hist-title { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--c-textsub); margin-bottom: 8px; }
+.tf-hist-item { font-size: 12px; color: var(--c-textsub); padding: 6px 0; border-top: 1px solid rgba(255,255,255,.08); }
+.tf-hist-item strong { color: var(--c-white); }
+
 #photo-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 300; background: rgba(0,0,0,.95); display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
 #photo-modal-overlay[data-open="false"] { display: none; }
 .photo-modal-container { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; max-width: 100%; }
@@ -715,6 +747,15 @@ tbody { display: block; width: 100%; }
       <div class="drawer-header">
         <span class="drawer-title">Atleta <span id="drawer-athlete-name"></span></span>
         <span class="drawer-external-label" id="drawer-external-label"></span>
+        <!-- Adendo 05 · §8.1 — menu de ações de nível de atleta. -->
+        <div class="tf-menu-wrap">
+          <button class="tf-menu-btn" id="tf-menu-btn" onclick="tfToggleMenu()" aria-label="Mais ações">
+            <i data-lucide="more-vertical"></i>
+          </button>
+          <div class="tf-menu-dropdown" id="tf-menu-dropdown" hidden>
+            <button class="tf-menu-item" onclick="tfToggleMenu(); tfAbrirModal();">Ajustar fase do ciclo</button>
+          </div>
+        </div>
         <!-- Hamburger (mobile) / X (desktop) -->
         <div class="drawer-hamburger-wrap" id="drawer-hamburger-wrap">
           <button class="drawer-hamburger-btn" id="drawer-hamburger-btn" onclick="toggleDrawerMenu()" aria-label="Menu de navegação">
@@ -963,6 +1004,9 @@ tbody { display: block; width: 100%; }
           <div class="evo-wsrow">
             <span class="evo-wk" id="evo-wkbadge">Semana 5 — S5</span>
             <span class="evo-pill none" id="evo-pill"><span class="evo-dot" id="evo-pilldot" style="display:none"></span><span id="evo-pilltxt">Sem relatório</span></span>
+            <!-- Adendo 05 · §8.3 — mesma modal do menu de ações, com a semana
+                 em revisão pré-preenchida. -->
+            <button class="tf-menu-item" style="width:auto;border:0.75px solid rgba(255,255,255,.25);border-radius:var(--radius-pill);padding:5px 12px;font-size:0.62rem;margin-left:auto" onclick="tfAbrirModal(evoViewWeek)">Ajustar fase do ciclo</button>
           </div>
 
           <div id="evo-capsec">
@@ -1199,6 +1243,23 @@ tbody { display: block; width: 100%; }
       <div class="conflito-texto" id="conflito-texto"></div>
       <div class="conflito-resumo" id="conflito-resumo"></div>
       <div class="conflito-acoes" id="conflito-acoes"></div>
+    </div>
+  </div>
+
+  <!-- Adendo 05 · §8.2 — modal de troca de fase. -->
+  <div id="tf-modal-overlay" data-open="false">
+    <div class="tf-box">
+      <div class="tf-titulo">Ajustar fase do ciclo</div>
+      <div class="tf-fases" id="tf-fases"></div>
+      <div class="tf-aviso">A troca recalcula a próxima publicação de treino e nutrição — não altera o que já foi publicado.</div>
+      <label class="tf-label" for="tf-justificativa">Justificativa (obrigatória)</label>
+      <textarea class="tf-textarea" id="tf-justificativa" placeholder="Por que trocar de fase agora…"></textarea>
+      <div class="tf-acoes">
+        <button onclick="tfFecharModal()">Cancelar</button>
+        <button class="tf-confirmar" id="tf-confirmar-btn" onclick="tfConfirmar()">Confirmar troca</button>
+      </div>
+      <div class="tf-hist-title">Histórico de fases</div>
+      <div id="tf-historico"></div>
     </div>
   </div>
 
@@ -2619,7 +2680,127 @@ tbody { display: block; width: 100%; }
       }
     }
 
-    // ── AC-38 · CONFLITO ENTRE RASCUNHO DO COACH E VERSÃO APROVADA ────────
+    // ── Adendo 05 · TF-08 a TF-13 — TROCA DE FASE DO CICLO ────────────────
+    //
+    // Vocabulário e rótulo: mesmos já usados pela fórmula nutricional
+    // (Adendo 03) — não duplica, reusa. `TF_FASES` bate exatamente com
+    // `PLAN_PHASES` do servidor (_m2-validacao.ts).
+    var TF_FASES = ['Bulking', 'Cutting', 'Diet Break', 'Maintenance'];
+    var tfFaseSelecionada = null;
+
+    function tfToggleMenu() {
+      var d = document.getElementById('tf-menu-dropdown');
+      if (!d) return;
+      d.hidden = !d.hidden;
+    }
+    document.addEventListener('click', function (e) {
+      var wrap = document.getElementById('tf-menu-btn');
+      var d = document.getElementById('tf-menu-dropdown');
+      if (!d || d.hidden || !wrap) return;
+      if (!wrap.parentElement.contains(e.target)) d.hidden = true;
+    });
+
+    function tfFecharModal() {
+      document.getElementById('tf-modal-overlay').setAttribute('data-open', 'false');
+      tfFaseSelecionada = null;
+    }
+
+    function tfRenderFases(faseAtual) {
+      var el = document.getElementById('tf-fases');
+      if (!el) return;
+      tfFaseSelecionada = null;
+      el.innerHTML = '';
+      TF_FASES.forEach(function (f) {
+        var vigente = f === faseAtual;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tf-fase-opt';
+        btn.textContent = rotuloFase(f);
+        // TF-09/TF-10 (§5.2): a fase vigente não pode ser reselecionada — o
+        // próprio botão fica desabilitado, em vez de deixar clicar e recusar
+        // depois no servidor.
+        btn.disabled = vigente;
+        if (!vigente) {
+          btn.onclick = function () {
+            tfFaseSelecionada = f;
+            el.querySelectorAll('.tf-fase-opt').forEach(function (b) { b.classList.remove('selected'); });
+            btn.classList.add('selected');
+          };
+        }
+        el.appendChild(btn);
+      });
+    }
+
+    function tfRenderHistorico(periodos) {
+      var el = document.getElementById('tf-historico');
+      if (!el) return;
+      if (!periodos || !periodos.length) {
+        el.innerHTML = '<div class="tf-hist-item">Nenhum período registrado ainda.</div>';
+        return;
+      }
+      el.innerHTML = periodos.map(function (p) {
+        var ini = m2FormatarDataHora(p.startedAt) || '—';
+        var fim = p.endedAt ? m2FormatarDataHora(p.endedAt) : 'vigente';
+        var motivo = p.reason ? ' · ' + p.reason : '';
+        return '<div class="tf-hist-item"><strong>' + rotuloFase(p.phase) + '</strong> — ' + ini + ' a ' + fim + motivo + '</div>';
+      }).join('');
+    }
+
+    // `semana` opcional (§8.3): quando vem da revisão do relatório semanal na
+    // aba Evolução, pré-preenche `weeklyReportWeek` no envio.
+    async function tfAbrirModal(semana) {
+      var a = wke04CurrentAthlete;
+      if (!a) return;
+      var overlay = document.getElementById('tf-modal-overlay');
+      document.getElementById('tf-justificativa').value = '';
+      tfRenderFases(a.phase);
+      document.getElementById('tf-historico').innerHTML = '<div class="tf-hist-item">Carregando…</div>';
+      overlay.setAttribute('data-open', 'true');
+      overlay.dataset.semana = (typeof semana === 'number') ? String(semana) : '';
+      try {
+        var r = await m2Ler('historico-fase-atleta', { athleteUid: a.id });
+        if (!wke04CurrentAthlete || wke04CurrentAthlete.id !== a.id) return;
+        tfRenderHistorico((r && r.periodos) || []);
+      } catch (e) {
+        console.error('[tfAbrirModal]', e);
+        document.getElementById('tf-historico').innerHTML = '<div class="tf-hist-item">Não foi possível carregar o histórico agora.</div>';
+      }
+    }
+
+    async function tfConfirmar() {
+      var a = wke04CurrentAthlete;
+      if (!a) return;
+      var justificativa = document.getElementById('tf-justificativa').value.trim();
+      if (!tfFaseSelecionada) { wkeToast('Escolha uma fase.', { type: 'error' }); return; }
+      if (!justificativa) { wkeToast('A justificativa é obrigatória.', { type: 'error' }); return; }
+
+      var btn = document.getElementById('tf-confirmar-btn');
+      btn.disabled = true;
+      try {
+        var overlay = document.getElementById('tf-modal-overlay');
+        var semanaStr = overlay.dataset.semana;
+        var corpo = { athleteUid: a.id, phase: tfFaseSelecionada, reason: justificativa };
+        if (semanaStr) corpo.weeklyReportWeek = parseInt(semanaStr, 10);
+        await m2Escrever('alterar-fase-atleta', corpo);
+
+        // Atualiza o objeto do atleta em memória — mesma referência usada por
+        // wkeState.athlete/nteState.athlete (AC-38 já estabeleceu esse
+        // padrão de referência compartilhada) — e os dois selos de fase.
+        a.phase = tfFaseSelecionada;
+        if (typeof wkeRenderCalcContext === 'function') wkeRenderCalcContext();
+        if (typeof nteRenderCalcContext === 'function') nteRenderCalcContext();
+
+        wkeToast('Fase alterada para ' + rotuloFase(tfFaseSelecionada) + '.', { type: 'success' });
+        tfFecharModal();
+      } catch (e) {
+        var detalhe = (e && e.message) ? e.message : 'Tente novamente.';
+        wkeToast('Não foi possível trocar a fase agora. ' + detalhe, { type: 'error' });
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+
     //
     // Gatilho (decisão (a) do Adendo 07 v1.41): há rascunho do Coach, a versão
     // corrente veio de sugestão de profissional, e foi publicada DEPOIS da
