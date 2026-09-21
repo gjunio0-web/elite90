@@ -505,11 +505,14 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .tf-menu-item { display: block; width: 100%; text-align: left; background: transparent; border: none; color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 9px 10px; border-radius: calc(var(--radius-card) - 4px); cursor: pointer; }
 .tf-menu-item:hover { background: rgba(255,255,255,.06); }
 /* Mesmo atalho do menu (tfAbrirModal), mas em linha na aba Evolução (§8.3) —
-   pílula de CTA, no mesmo padrão de .evo-linkbtn (mesma aba): fonte de
-   rótulo, maiúsculas, tracking e cor da marca, não o estilo neutro de item
-   de menu suspenso. */
-.tf-evo-fase-btn { width: auto; margin-left: auto; padding: 5px 12px; border: 1px solid rgba(166, 195, 0, 0.50); border-radius: var(--radius-pill); background: transparent; color: var(--c-lime); font-family: var(--font-label); font-size: 0.62rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: background 120ms ease; }
-.tf-evo-fase-btn:hover { background: rgba(166, 195, 0, 0.12); }
+   pílula compacta, mesma tipografia de botão de ação da aba (fonte de
+   rótulo, maiúsculas, tracking). Cor NEUTRA por padrão, lima só no hover —
+   mesma convenção de .conflito-acoes button/.photo-modal-close: contorno e
+   texto branco em repouso, e lima é reservado para ações primárias (como
+   .btn-report "Aprovar e Publicar") ou para o hover, não para o estado
+   parado de uma ação secundária. */
+.tf-evo-fase-btn { width: auto; margin-left: auto; padding: 5px 12px; border: 0.75px solid var(--c-white); border-radius: var(--radius-pill); background: transparent; color: var(--c-white); font-family: var(--font-label); font-size: 0.62rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: border-color 120ms ease, color 120ms ease; }
+.tf-evo-fase-btn:hover { border-color: var(--c-lime); color: var(--c-lime); }
 
 #tf-modal-overlay { position: fixed; inset: 0; z-index: 320; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; padding: 20px; }
 #tf-modal-overlay[data-open="false"] { display: none; }
