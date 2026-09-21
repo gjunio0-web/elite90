@@ -572,6 +572,10 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .stat-card__value { font-size: clamp(1.5rem, 4vw, 2.5rem); }
 }
 @media (max-width: 768px) {
+/* Mesmo raciocínio de #prof-drawer-close em editor-plano.css: "⋮" some no
+   mobile porque o hambúrguer já ocupa aquele canto — a ação entra dentro
+   do próprio menu do hambúrguer (ver .drawer-tab-opt--sair acima). */
+.tf-menu-wrap { display: none; }
 .title-row { padding: var(--space-3) var(--space-4) var(--space-5); }
 .page-title { font-size: var(--fs-display-xl); }
 .action-btns { position: static; margin-top: var(--space-4); }
@@ -1335,6 +1339,11 @@ tbody { display: block; width: 100%; }
     <button class="drawer-tab-opt" data-tab="evolution" onclick="selectDrawerTab('evolution','Evolução')">Evolução</button>
     <button class="drawer-tab-opt" data-tab="training" onclick="selectDrawerTab('training','Treino')">Treino</button>
     <button class="drawer-tab-opt" data-tab="nutrition" onclick="selectDrawerTab('nutrition','Nutricional')">Nutricional</button>
+    <!-- Mesmo padrão de /profissional (.drawer-tab-opt--sair, "Sair"): no
+         mobile, "⋮" (Adendo 05) e "☰" (hambúrguer) competiam pelo mesmo canto
+         — aqui a ação entra dentro do próprio menu do hambúrguer, com o
+         espaçamento/cor que já distingue ação de troca de aba. -->
+    <button class="drawer-tab-opt drawer-tab-opt--sair" onclick="toggleDrawerMenu(); tfAbrirModal();">Ajustar fase do ciclo</button>
   </div>
 
 
