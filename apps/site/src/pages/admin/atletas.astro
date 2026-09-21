@@ -504,15 +504,13 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .tf-menu-dropdown[hidden] { display: none; }
 .tf-menu-item { display: block; width: 100%; text-align: left; background: transparent; border: none; color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 9px 10px; border-radius: calc(var(--radius-card) - 4px); cursor: pointer; }
 .tf-menu-item:hover { background: rgba(255,255,255,.06); }
-/* Mesmo atalho do menu (tfAbrirModal), mas em linha na aba Evolução (§8.3) —
-   pílula compacta, mesma tipografia de botão de ação da aba (fonte de
-   rótulo, maiúsculas, tracking). Cor NEUTRA por padrão, lima só no hover —
-   mesma convenção de .conflito-acoes button/.photo-modal-close: contorno e
-   texto branco em repouso, e lima é reservado para ações primárias (como
-   .btn-report "Aprovar e Publicar") ou para o hover, não para o estado
-   parado de uma ação secundária. */
-.tf-evo-fase-btn { width: auto; margin-left: auto; padding: 5px 12px; border: 0.75px solid var(--c-white); border-radius: var(--radius-pill); background: transparent; color: var(--c-white); font-family: var(--font-label); font-size: 0.62rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: border-color 120ms ease, color 120ms ease; }
-.tf-evo-fase-btn:hover { border-color: var(--c-lime); color: var(--c-lime); }
+/* Mesmo atalho do menu (tfAbrirModal), mas em linha na aba Evolução (§8.3).
+   MESMO FORMATO de .evo-btn.ghost ("Editar rascunho", mesma aba) — mesmo
+   padding, border-radius, font-size, letter-spacing, cor de contorno/texto
+   e hover; só width/display/margin mudam, e só porque este vive em linha,
+   ao lado do selo de semana, e não pode ser width:100% como o original. */
+.tf-evo-fase-btn { display: inline-flex; align-items: center; justify-content: center; width: auto; margin-left: auto; padding: 13px 18px; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); background: transparent; color: var(--c-textsub); font-family: var(--font-label); font-size: 0.7rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: color 140ms ease; }
+.tf-evo-fase-btn:hover { color: var(--c-textbody); }
 
 #tf-modal-overlay { position: fixed; inset: 0; z-index: 320; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; padding: 20px; }
 #tf-modal-overlay[data-open="false"] { display: none; }
