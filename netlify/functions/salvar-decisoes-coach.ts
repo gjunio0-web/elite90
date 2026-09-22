@@ -38,7 +38,7 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
   // Validação estrutural mínima — recusa qualquer coisa fora do formato
   // esperado, sem tentar ser flexível. Não há usuário autenticado para
   // confiar; a validação é a única guarda.
-  const { itens, novas, fases } = corpo;
+  const { itens, novas, fases, pendencias } = corpo;
   if (itens !== undefined && (typeof itens !== "object" || itens === null || Array.isArray(itens))) {
     return json(400, { erro: "itens precisa ser um objeto." });
   }
@@ -48,6 +48,9 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
   if (fases !== undefined && (typeof fases !== "object" || fases === null || Array.isArray(fases))) {
     return json(400, { erro: "fases precisa ser um objeto." });
   }
+  if (pendencias !== undefined && (typeof pendencias !== "object" || pendencias === null || Array.isArray(pendencias))) {
+    return json(400, { erro: "pendencias precisa ser um objeto." });
+  }
 
   try {
     const db = getDb();
@@ -55,6 +58,7 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       itens: itens || {},
       novas: novas || [],
       fases: fases || {},
+      pendencias: pendencias || {},
       atualizadoEm: FieldValue.serverTimestamp(),
     });
 

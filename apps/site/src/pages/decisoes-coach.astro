@@ -91,6 +91,14 @@ p { margin: 0 0 var(--space-3); }
 .phase-input { width: 100%; background: var(--c-surface-2); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-white); padding: var(--space-3); font-family: var(--font-body); font-size: 0.9375rem; min-height: 80px; resize: vertical; }
 .save-status { font-family: var(--font-label); font-size: var(--fs-label); color: var(--c-textsub); text-align: center; margin-top: var(--space-5); letter-spacing: var(--tracking-label); text-transform: uppercase; }
 .save-status.saved { color: var(--c-lime); }
+.pend-card { background: var(--c-surface-2); border-radius: var(--radius-card); padding: var(--space-4); margin-bottom: var(--space-4); border-left: 3px solid var(--c-lime); }
+.pend-titulo { font-family: var(--font-label); font-weight: 700; font-size: 1.05rem; color: var(--c-white); margin-bottom: var(--space-3); line-height: 1.4; }
+.pend-toggle { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--tracking-label); background: transparent; border: 1.5px solid rgba(166,195,0,0.4); color: var(--c-lime); border-radius: var(--radius-pill); padding: 8px 14px; cursor: pointer; margin-bottom: var(--space-3); }
+.pend-descricao { display: none; background: var(--c-black); border-radius: var(--radius-card); border: 1px dashed rgba(255,255,255,0.14); padding: var(--space-3); margin-bottom: var(--space-3); font-size: 0.875rem; line-height: 1.6; color: var(--c-textbody); }
+.pend-descricao.show { display: block; }
+.pend-descricao strong { color: var(--c-white); }
+.pend-resposta { width: 100%; background: var(--c-black); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-white); padding: var(--space-3); font-family: var(--font-body); font-size: 0.9375rem; min-height: 80px; resize: vertical; }
+.pend-resposta::placeholder { color: var(--c-textsub); }
 .footer-note { text-align: center; color: var(--c-textsub); font-size: 0.8rem; margin-top: var(--space-4); }
 .confirm-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75); align-items: center; justify-content: center; padding: var(--space-4); }
 .confirm-overlay.show { display: flex; }
@@ -127,6 +135,11 @@ p { margin: 0 0 var(--space-3); }
     <span class="phase-label">Pausa na dieta (Diet Break)</span>
     <textarea class="phase-input" id="phase-dietbreak" placeholder="Descreva aqui..."></textarea>
   </div>
+
+  <h2>Pendências adicionais</h2>
+  <p>Sete perguntas novas, uma de cada vez. Cada uma tem um resumo em destaque e um campo para sua resposta logo abaixo — o contexto completo fica escondido por padrão, e você abre só se quiser reler antes de responder.</p>
+  <div id="pendencias"></div>
+
   <div class="save-status" id="saveStatus">Carregando...</div>
   <div class="footer-note">Suas respostas ficam salvas automaticamente.</div>
   <div style="text-align:center; margin-top: var(--space-5);">
@@ -210,9 +223,47 @@ const EXEMPLOS = {
   "g5-4": { nao: "Bons treinos!", sim: "Agende sua reavaliação em 30 dias para ajustarmos o plano." }
 };
 
+const PENDENCIAS = [
+  {
+    id: "p01",
+    titulo: "Com que frequência o relatório de evolução deve sair?",
+    descricao: "O sistema vai gerar, periodicamente, um relatório de evolução para cada atleta — um resumo dizendo como ele está indo, se algum ajuste no treino ou na dieta é recomendado, e por quê. Hoje o plano é gerar esse relatório <strong>toda semana</strong>, automaticamente.<br><br>A dúvida é se semana a semana é o ritmo certo. Mudança de treino ou dieta costuma levar um tempo para aparecer de verdade no corpo — se o relatório sair rápido demais, ele pode concluir coisas sobre uma mudança que ainda nem teve tempo de fazer efeito. Se sair devagar demais, o atleta fica sem feedback por tempo excessivo.<br><br><strong>A decisão:</strong> o relatório deve continuar saindo toda semana, ou faria mais sentido um espaçamento maior — a cada duas semanas, por exemplo?"
+  },
+  {
+    id: "p02",
+    titulo: "A partir de que aderência um resultado conta como confiável?",
+    descricao: "Já está decidido, como parte do desenho do sistema, que quando um atleta seguiu pouco o plano — pulou treinos, não seguiu a dieta direito —, e mesmo assim não teve o resultado esperado, o sistema <strong>não vai contar isso como prova de que o plano estava errado</strong>. Vai marcar como \"inconclusivo\": não dá para saber se foi o plano que falhou, ou se foi a falta de adesão do atleta.<br><br>O que falta é só um número: <strong>a partir de que percentual de aderência ao plano</strong> (por exemplo, 70% dos treinos feitos, 80% da dieta seguida) o sistema deve considerar que o atleta seguiu \"o suficiente\" para o resultado dele contar como informação confiável, em vez de descartável.<br><br><strong>A decisão:</strong> qual é esse percentual mínimo de aderência?"
+  },
+  {
+    id: "p03",
+    titulo: "O que faz dois atletas serem \"parecidos\"?",
+    descricao: "O sistema, com o tempo, vai comparar atletas entre si — para, por exemplo, mostrar ao Coach ou ao próprio atleta: \"atletas parecidos com este tiveram bom resultado seguindo tal conduta\". Para isso funcionar, o sistema precisa de um critério de \"parecido\".<br><br>Vários fatores poderiam entrar nessa comparação — idade, fase do ciclo (ganho de massa, definição), tempo de treino, estrutura física, e outros. O problema é que nem todos pesam igual: na experiência prática, alguns desses fatores costumam prever resposta parecida do corpo muito melhor do que outros.<br><br><strong>A decisão:</strong> na sua experiência, ao olhar para dois atletas e pensar \"esses casos são parecidos\", o que pesa mais primeiro — idade? fase do ciclo? tempo de treino? estrutura física? Pode listar mais de um fator, e dizer qual vem antes do outro em importância."
+  },
+  {
+    id: "p04",
+    titulo: "Quantos exemplos de outros atletas mostrar, e de que tipo?",
+    descricao: "Quando o sistema já encontrou \"casos parecidos\" (a partir da resposta à pergunta anterior), ele precisa decidir o que mostrar como referência — seja para você, seja para o próprio atleta.<br><br>Duas perguntas dentro desta:<br><br><strong>Quantos exemplos mostrar de uma vez?</strong> Poucos dão referência rápida, mas podem não representar bem o quadro geral; muitos dão mais contexto, mas sobrecarregam quem está lendo.<br><br><strong>Mostrar só os casos de sucesso, ou também os que não deram certo?</strong> Mostrar só sucesso pode criar expectativa irreal no atleta — \"todo mundo que fez isso deu certo\" nem sempre é verdade. Mostrar também os fracassos é mais honesto, mas pode ser mais desconfortável de apresentar.<br><br><strong>A decisão:</strong> quantos casos mostrar de cada vez, e se deve haver equilíbrio entre casos de sucesso e de fracasso, ou só mostrar os de sucesso."
+  },
+  {
+    id: "p05",
+    titulo: "A data de início do programa pode ser no futuro?",
+    descricao: "Quando você promove um candidato a atleta dentro do sistema, é preciso registrar a data em que o programa dele começa. Essa data é usada para calcular, a cada momento, em que semana do ciclo de 90 dias o atleta está.<br><br>Já está decidido que a data pode ser <strong>no passado</strong> — isso serve para regularizar atletas que já estavam treinando com você antes de o sistema existir, sem perder a contagem real de onde eles estão no ciclo.<br><br>O que não foi perguntado ainda é sobre o <strong>futuro</strong>: às vezes você pode querer cadastrar um atleta antes de ele efetivamente começar — por exemplo, fechando a matrícula de alguém que só vai começar a treinar na semana seguinte.<br><br><strong>A decisão:</strong> a data de início pode ser marcada para uma data futura (o atleta aparece no sistema, mas o ciclo dele só \"começa a contar\" quando aquela data chegar), ou a data de início tem que ser sempre hoje ou uma data que já passou?"
+  },
+  {
+    id: "p06",
+    titulo: "As versões antigas do plano ficam guardadas para sempre?",
+    descricao: "Cada vez que você publica uma versão nova do plano de treino ou nutricional de um atleta, o sistema guarda a versão anterior — não é sobrescrita, fica registrada. Isso permite, por exemplo, olhar para trás e ver exatamente o que estava prescrito numa semana específica.<br><br>Depois que o ciclo de 90 dias do atleta termina, essas versões antigas podem continuar guardadas para sempre, ou podem ser descartadas naquele momento. Guardar tudo tem valor — permite auditoria, permite olhar histórico de qualquer atleta, a qualquer momento. Descartar economiza espaço, mas apaga esse histórico de vez.<br><br>A recomendação técnica é manter tudo, porque o espaço ocupado é pequeno e o valor de poder consultar depois é real. Mas essa é uma recomendação, não uma decisão tomada.<br><br><strong>A decisão:</strong> depois que o ciclo de um atleta termina, os planos antigos dele ficam guardados para sempre, ou são descartados nesse momento?"
+  },
+  {
+    id: "p07",
+    titulo: "Os números da fórmula nutricional estão clinicamente corretos?",
+    descricao: "O sistema já tem uma estrutura pronta para calcular metas de proteína, carboidrato e gordura para cada atleta, com base no peso dele e na fase em que está (ganho de massa, definição, etc.). Essa estrutura funciona tecnicamente — o que falta confirmar é se os <strong>números usados no cálculo em si</strong> estão certos, do ponto de vista clínico.<br><br>Um exemplo concreto do tipo de problema que pode existir: em um teste, os coeficientes usados hoje, aplicados a um atleta de 100kg, resultaram numa meta de <strong>1.700 calorias por dia</strong> — um valor que pode estar abaixo do que seria seguro, dependendo do caso. Isso sugere que talvez falte um <strong>piso mínimo de calorias</strong>, abaixo do qual o sistema nunca deveria recomendar, independente do cálculo.<br><br><strong>A decisão:</strong> os coeficientes usados hoje para calcular a meta nutricional são clinicamente adequados? Se não, quais deveriam ser os valores corretos, e deve existir um piso mínimo de calorias que o sistema nunca ultrapassa para baixo?"
+  }
+];
+
 function keyFor(grupoId, idx) { return grupoId + "-" + idx; }
 
-let state = { itens: {}, novas: [], fases: {} };
+let state = { itens: {}, novas: [], fases: {}, pendencias: {} };
 let saveTimer = null;
 
 async function chamar(fn, corpo) {
@@ -313,6 +364,37 @@ function render() {
   });
 }
 
+function renderPendencias() {
+  const container = document.getElementById("pendencias");
+  container.innerHTML = "";
+  PENDENCIAS.forEach(p => {
+    const valor = (state.pendencias && state.pendencias[p.id]) || "";
+    const div = document.createElement("div");
+    div.className = "pend-card";
+    div.innerHTML =
+      '<div class="pend-titulo">' + p.titulo + '</div>' +
+      '<button class="pend-toggle" data-pend-toggle="' + p.id + '">Ver contexto completo</button>' +
+      '<div class="pend-descricao" id="pend-desc-' + p.id + '">' + p.descricao + '</div>' +
+      '<textarea class="pend-resposta" data-pend="' + p.id + '" placeholder="Escreva sua resposta aqui...">' + valor + '</textarea>';
+    container.appendChild(div);
+  });
+
+  container.querySelectorAll("[data-pend-toggle]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const box = document.getElementById("pend-desc-" + btn.dataset.pendToggle);
+      box.classList.toggle("show");
+      btn.textContent = box.classList.contains("show") ? "Ocultar contexto" : "Ver contexto completo";
+    });
+  });
+  container.querySelectorAll(".pend-resposta").forEach(ta => {
+    ta.addEventListener("input", () => {
+      state.pendencias = state.pendencias || {};
+      state.pendencias[ta.dataset.pend] = ta.value;
+      agendarSalvamento();
+    });
+  });
+}
+
 function agendarSalvamento() {
   const el = document.getElementById("saveStatus");
   el.textContent = "Salvando...";
@@ -324,7 +406,7 @@ function agendarSalvamento() {
 async function salvar() {
   const el = document.getElementById("saveStatus");
   try {
-    await chamar("salvar-decisoes-coach", { itens: state.itens, novas: state.novas, fases: state.fases });
+    await chamar("salvar-decisoes-coach", { itens: state.itens, novas: state.novas, fases: state.fases, pendencias: state.pendencias });
     el.textContent = "Respostas salvas";
     el.classList.add("saved");
   } catch (e) {
@@ -349,20 +431,22 @@ document.getElementById("btnConfirmCancel").addEventListener("click", () => {
 });
 document.getElementById("btnConfirmOk").addEventListener("click", async () => {
   document.getElementById("confirmOverlay").classList.remove("show");
-  state = { itens: {}, novas: [], fases: {} };
+  state = { itens: {}, novas: [], fases: {}, pendencias: {} };
   ["bulking","cutting","dietbreak"].forEach(k => { document.getElementById("phase-" + k).value = ""; });
   render();
+  renderPendencias();
   await salvar();
 });
 
 async function init() {
   try {
     const dados = await chamar("ler-decisoes-coach", {});
-    state = { itens: dados.itens || {}, novas: dados.novas || [], fases: dados.fases || {} };
+    state = { itens: dados.itens || {}, novas: dados.novas || [], fases: dados.fases || {}, pendencias: dados.pendencias || {} };
   } catch (e) {
-    state = { itens: {}, novas: [], fases: {} };
+    state = { itens: {}, novas: [], fases: {}, pendencias: {} };
   }
   render();
+  renderPendencias();
   document.getElementById("saveStatus").textContent = "Aguardando suas respostas";
   if (state.fases) {
     if (state.fases.bulking) document.getElementById("phase-bulking").value = state.fases.bulking;
