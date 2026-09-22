@@ -1,0 +1,377 @@
+---
+// ELITE90 PRO · decisoes-coach
+// Página pública, sem autenticação, para o Coach Fernando responder duas
+// decisões pendentes da Fase 5 (rubrica de 25 critérios; desfecho favorável
+// por fase). Rota-folha, fora do sitemap — mesmo padrão de /definir-senha e
+// /acesso-equipe.
+//
+// ARTEFATO TEMPORÁRIO — ver docs/DECISOES-COACH-COMO-EXCLUIR.md para o plano
+// de remoção completo desta página, das duas funções de servidor irmãs, e
+// do documento no Firestore.
+---
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Decisões — Coach Fernando</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Raleway:wght@700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<!-- is:global — o essencial da tela (itens, botões, preview, edit-box) é
+     montado em JS via innerHTML (render()); um <style> escopado do Astro só
+     tagueia com data-astro-cid-* os elementos presentes no template em tempo
+     de build, então nenhuma dessas regras bateria nos elementos dinâmicos
+     (confirmado: .item sem estilo nenhum, e pior, .edit-box/.preview-box
+     ficavam sempre visíveis porque o display:none nunca chegava a se
+     aplicar). Mesmo padrão já usado em toda página com DOM dinâmico deste
+     projeto — /definir-senha e /acesso-equipe incluídas. -->
+<style is:global>
+:root {
+  --c-lime:     #A6C300;
+  --c-black:    #0D0D0D;
+  --c-darkbg:   #1A1A1A;
+  --c-white:    #FFFFFF;
+  --c-textbody: #CCCCCC;
+  --c-textsub:  #999999;
+  --c-surface-2: #242424;
+  --c-status-rejected: #C0392B;
+  --c-status-checkin:  #E67E22;
+  --font-display: "Bebas Neue", sans-serif;
+  --font-label:   "Raleway", sans-serif;
+  --font-body:    "Montserrat", sans-serif;
+  --fs-display-lg: clamp(2rem, 4.5vw, 3rem);
+  --fs-display-md: clamp(1.5rem, 3vw, 2rem);
+  --fs-label: 0.75rem;
+  --fs-body-md: 0.9375rem;
+  --space-2: 0.5rem; --space-3: 1rem; --space-4: 1.5rem; --space-5: 2rem; --space-6: 3rem;
+  --radius-card: 4px; --radius-pill: 50px;
+  --tracking-label: 0.15em; --tracking-display: 0.04em;
+  --dur-med: 240ms; --ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { background: var(--c-black); color: var(--c-textbody); font-family: var(--font-body); font-size: var(--fs-body-md); line-height: 1.6; margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 760px; margin: 0 auto; padding: var(--space-6) var(--space-4) var(--space-6); }
+.eyebrow { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-lime); margin-bottom: var(--space-2); }
+h1 { font-family: var(--font-display); font-size: var(--fs-display-lg); line-height: 1.1; letter-spacing: var(--tracking-display); color: var(--c-white); text-transform: uppercase; margin: 0 0 var(--space-4); }
+h2 { font-family: var(--font-display); font-size: var(--fs-display-md); letter-spacing: var(--tracking-display); color: var(--c-lime); text-transform: uppercase; margin: var(--space-6) 0 var(--space-3); }
+h3 { font-family: var(--font-label); font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-white); margin: var(--space-5) 0 var(--space-3); }
+p { margin: 0 0 var(--space-3); }
+.intro { background: var(--c-darkbg); border-left: 3px solid var(--c-lime); border-radius: var(--radius-card); padding: var(--space-4); margin-bottom: var(--space-5); }
+.progress { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: rgba(13,13,13,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid rgba(255,255,255,0.1); padding: var(--space-3) var(--space-4); margin: 0 0 var(--space-5); font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); }
+.progress strong { color: var(--c-lime); font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0; }
+.item { background: var(--c-surface-2); border-radius: var(--radius-card); padding: var(--space-4); margin-bottom: var(--space-3); border: 1px solid rgba(255,255,255,0.06); }
+.item.status-removido { opacity: 0.5; }
+.item-text { color: var(--c-white); font-size: 0.9375rem; line-height: 1.5; margin-bottom: var(--space-3); }
+.item-text em { color: var(--c-lime); font-style: normal; }
+.actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.btn { font-family: var(--font-label); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: var(--tracking-label); padding: 8px 14px; border-radius: var(--radius-pill); cursor: pointer; border: 1.5px solid rgba(255,255,255,0.2); background: transparent; color: var(--c-textsub); transition: all var(--dur-med) var(--ease-std); }
+.btn:hover { border-color: rgba(255,255,255,0.4); color: var(--c-white); }
+.btn.active-aprovado { background: var(--c-lime); border-color: var(--c-lime); color: #0D0D0D; }
+.btn.active-editado { background: var(--c-status-checkin); border-color: var(--c-status-checkin); color: #0D0D0D; }
+.btn.active-removido { background: var(--c-status-rejected); border-color: var(--c-status-rejected); color: var(--c-white); }
+.btn-preview { border-color: rgba(166,195,0,0.4); color: var(--c-lime); }
+.preview-box { display: none; margin-top: var(--space-3); padding: var(--space-3); background: var(--c-black); border-radius: var(--radius-card); border: 1px dashed rgba(255,255,255,0.14); }
+.preview-box.show { display: block; }
+.preview-row { display: flex; align-items: flex-start; gap: var(--space-2); margin-bottom: var(--space-2); }
+.preview-row:last-child { margin-bottom: 0; }
+.pill { font-family: var(--font-label); font-weight: 700; font-size: 0.65rem; text-transform: uppercase; letter-spacing: var(--tracking-label); padding: 3px 10px; border-radius: var(--radius-pill); flex-shrink: 0; }
+.pill-sim { background: var(--c-lime); color: #0D0D0D; }
+.pill-nao { background: var(--c-status-rejected); color: var(--c-white); }
+.preview-text { font-size: 0.8rem; color: var(--c-textbody); font-style: italic; line-height: 1.4; }
+.edit-box { display: none; margin-top: var(--space-3); width: 100%; background: var(--c-black); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-white); padding: var(--space-3); font-family: var(--font-body); font-size: 0.875rem; resize: vertical; min-height: 70px; }
+.edit-box.show { display: block; }
+.add-row { display: flex; gap: var(--space-2); margin-top: var(--space-4); align-items: flex-start; }
+.add-row textarea { flex: 1; background: var(--c-darkbg); border: 1px dashed rgba(166,195,0,0.4); border-radius: var(--radius-card); color: var(--c-white); padding: var(--space-3); font-family: var(--font-body); font-size: 0.875rem; min-height: 44px; resize: vertical; }
+.btn-add { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--tracking-label); background: transparent; border: 1.5px solid var(--c-lime); color: var(--c-lime); border-radius: var(--radius-card); padding: 10px 16px; cursor: pointer; white-space: nowrap; }
+.new-item { border-left: 3px solid var(--c-lime); }
+.phase-block { margin-bottom: var(--space-4); }
+.phase-label { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-lime); margin-bottom: var(--space-2); display: block; }
+.phase-input { width: 100%; background: var(--c-surface-2); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-white); padding: var(--space-3); font-family: var(--font-body); font-size: 0.9375rem; min-height: 80px; resize: vertical; }
+.save-status { font-family: var(--font-label); font-size: var(--fs-label); color: var(--c-textsub); text-align: center; margin-top: var(--space-5); letter-spacing: var(--tracking-label); text-transform: uppercase; }
+.save-status.saved { color: var(--c-lime); }
+.footer-note { text-align: center; color: var(--c-textsub); font-size: 0.8rem; margin-top: var(--space-4); }
+.confirm-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75); align-items: center; justify-content: center; padding: var(--space-4); }
+.confirm-overlay.show { display: flex; }
+.confirm-box { background: var(--c-surface-2); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); padding: var(--space-5); max-width: 420px; width: 100%; }
+.confirm-text { color: var(--c-white); font-size: 0.9375rem; line-height: 1.5; margin: 0 0 var(--space-4); }
+.confirm-actions { display: flex; gap: var(--space-3); justify-content: flex-end; }
+</style>
+</head>
+<body>
+<div class="progress">
+  <span>Respondidas</span>
+  <span><strong id="progCount">0</strong> / 25</span>
+</div>
+<div class="wrap">
+  <div class="eyebrow">Elite 90 Pro · Duas decisões</div>
+  <h1>Para o Coach Fernando</h1>
+  <div class="intro">
+    <p>Está neste momento em construção uma parte do sistema que usa inteligência artificial para ajudar a gerar as avaliações estratégicas dos candidatos.</p>
+    <p style="margin-bottom:0">Para cada pergunta abaixo, marque se <strong style="color:var(--c-white)">aprova</strong> como está, quer <strong style="color:var(--c-white)">editar</strong> o texto, ou prefere <strong style="color:var(--c-white)">remover</strong>. Pode também acrescentar pergunta nova em qualquer grupo.</p>
+  </div>
+  <h2>Decisão 1 — A régua de qualidade</h2>
+  <div id="grupos"></div>
+  <h2>Decisão 2 — O que conta como "resultado bom"</h2>
+  <p>Para cada fase, descreva o que conta como evolução saudável de peso e cintura.</p>
+  <div class="phase-block">
+    <span class="phase-label">Fase de ganho de massa (Bulking)</span>
+    <textarea class="phase-input" id="phase-bulking" placeholder="Descreva aqui..."></textarea>
+  </div>
+  <div class="phase-block">
+    <span class="phase-label">Fase de definição (Cutting)</span>
+    <textarea class="phase-input" id="phase-cutting" placeholder="Descreva aqui..."></textarea>
+  </div>
+  <div class="phase-block">
+    <span class="phase-label">Pausa na dieta (Diet Break)</span>
+    <textarea class="phase-input" id="phase-dietbreak" placeholder="Descreva aqui..."></textarea>
+  </div>
+  <div class="save-status" id="saveStatus">Carregando...</div>
+  <div class="footer-note">Suas respostas ficam salvas automaticamente.</div>
+  <div style="text-align:center; margin-top: var(--space-5);">
+    <button class="btn" id="btnReset" style="border-color: var(--c-status-rejected); color: var(--c-status-rejected);">Reiniciar respostas</button>
+  </div>
+  <div id="confirmOverlay" class="confirm-overlay">
+    <div class="confirm-box">
+      <p class="confirm-text">Isto apaga todas as respostas salvas — aprovações, edições, perguntas acrescentadas e as três fases. Não tem volta.</p>
+      <div class="confirm-actions">
+        <button class="btn" id="btnConfirmCancel">Cancelar</button>
+        <button class="btn active-removido" id="btnConfirmOk">Sim, apagar tudo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+const GRUPOS = [
+  { id: "g1", nome: "Grupo 1 — Diagnóstico visual e proporções", perguntas: [
+    "Quando o texto estima o percentual de gordura, ele deveria apontar o que, especificamente, nas fotos levou a esse número — por exemplo, \"veias aparentes no abdômen\", \"gordura concentrada na lombar\", \"definição visível nos oblíquos\" —, em vez de só dar o número sozinho?",
+    "Quando o texto fala de simetria do corpo, ele deveria dizer qual parte está desalinhada ou desproporcional — por exemplo, \"ombro direito mais desenvolvido que o esquerdo\", \"peitoral superior menos cheio que o inferior\" —, em vez de uma frase vaga como \"boa simetria geral\"?",
+    "O vocabulário usado deveria combinar com a categoria de competição e o sexo do candidato — por exemplo, não usar termo de categoria feminina para um candidato homem, nem confundir a linguagem técnica de uma categoria com a de outra?",
+    "O texto deveria evitar dizer, como se fosse fato, algo que uma foto parada não permite saber — por exemplo, afirmar que o candidato \"tem ótima flexibilidade\" ou \"recupera-se rápido de lesões\", quando isso não dá para ver numa imagem?",
+    "O texto deveria evitar frase de elogio vazio ou \"discurso motivacional\" — por exemplo, \"você tem um potencial incrível!\" —, e se limitar a descrever o que de fato foi observado?"
+  ]},
+  { id: "g2", nome: "Grupo 2 — Plano de treino e cardio", perguntas: [
+    "A projeção de resultado em 30 dias deveria ser dada como uma faixa (por exemplo, \"entre X e Y\"), não um número único e fechado?",
+    "A prescrição de treino deveria levar em conta quantos dias por semana o candidato disse, no formulário de cadastro, que pode treinar?",
+    "O treino deveria mudar ao longo das semanas — carga, repetição ou série aumentando com o tempo —, em vez de repetir a mesma prescrição toda semana sem progressão nenhuma?",
+    "A projeção de resultado deveria ser compatível com o tempo de treino que o candidato declarou ter disponível — por exemplo, não prometer resultado de quem treina 6 dias para alguém que só tem 3?",
+    "O texto deveria evitar prometer resultado como certeza garantida — por exemplo, evitar frases como \"você vai perder 5kg com certeza\", preferindo \"é esperado perder entre X e Y, dependendo da aderência\"?"
+  ]},
+  { id: "g3", nome: "Grupo 3 — Protocolo de saúde e suporte", perguntas: [
+    "A recomendação deveria levar em conta as condições de saúde que o candidato relatou no próprio formulário de cadastro — por exemplo, problema de joelho, pressão alta, ou outra condição declarada?",
+    "Quando falta informação na ficha para dar uma recomendação segura, o texto deveria avisar isso claramente — por exemplo, \"sem dado suficiente sobre X, recomendo consulta antes de prosseguir\" —, em vez de simplesmente inventar uma resposta?",
+    "O texto deveria evitar recomendar qualquer substância que só pode ser obtida com receita médica — por exemplo, hormônio, esteroide ou medicamento controlado?",
+    "A orientação deveria dar algo prático e específico para fazer — por exemplo, \"beba 500ml de água ao acordar\", em vez de \"beba mais água\", que não diz quanto nem quando?",
+    "Onde falta informação de verdade na ficha do candidato, o texto deveria usar a marcação `[COMPLETAR]` — um sinalizador do próprio sistema que indica \"aqui falta dado, alguém precisa preencher à mão\" —, em vez de inventar uma resposta para preencher o vazio?"
+  ]},
+  { id: "g4", nome: "Grupo 4 — Estratégia de competição", perguntas: [
+    "A categoria de competição recomendada deveria ser compatível com o histórico esportivo e o tipo de corpo do candidato — por exemplo, não recomendar uma categoria que exige anos de treino para quem está começando agora?",
+    "O prazo dado até a competição deveria ser realista, considerando o quanto o candidato já está preparado hoje?",
+    "O texto deveria evitar afirmar que o candidato é competitivo (tem chance real de colocação) sem ter, na própria ficha, informação que sustente essa afirmação?",
+    "Deveria ficar claro, no texto, se o objetivo do candidato é só estético (melhorar a aparência) ou competitivo (disputar um campeonato), sem misturar os dois como se fossem a mesma coisa?",
+    "Quando o texto recomenda algo, ele deveria explicar o porquê — por exemplo, \"categoria X, porque sua estrutura óssea e proporção combinam com o padrão que os jurados avaliam nela\" —, em vez de só afirmar a recomendação sem explicação?"
+  ]},
+  { id: "g5", nome: "Grupo 5 — Amarração final do texto", perguntas: [
+    "Os ajustes finais do texto deveriam bater com o que foi dito nas seções anteriores, sem contradições? Por exemplo, dizer numa parte que o candidato tem \"pouco tempo disponível\" e depois recomendar treino de 6 dias por semana?",
+    "Lendo o texto, deveria dar para saber qual recomendação específica levou a qual resultado esperado — por exemplo, \"porque reduzimos o carboidrato, a expectativa é X\" —, em vez de várias mudanças jogadas juntas sem dizer o que cada uma deveria causar?",
+    "O texto deveria evitar repetir, com outras palavras, algo que já foi dito antes em outra seção (para evitar que se torne mais longo sem acrescentar informação nova)?",
+    "A linguagem deveria ser direta, do jeito que você falaria com um candidato ocupado — frases curtas, sem enrolação nem jargão desnecessário?",
+    "O texto deveria terminar dizendo, com clareza, qual é o próximo passo do candidato — por exemplo, \"agende sua reavaliação em 30 dias\" —, em vez de só uma frase de fechamento genérica?"
+  ]}
+];
+
+const EXEMPLOS = {
+  "g1-0": { nao: "Percentual de gordura estimado em 12%.", sim: "Percentual de gordura estimado em 12%, evidenciado pela definição visível nos oblíquos." },
+  "g1-1": { nao: "Boa simetria geral.", sim: "Ombro direito visivelmente mais desenvolvido que o esquerdo." },
+  "g1-2": { nao: "Recomendo categoria Bikini para candidato do sexo masculino.", sim: "Recomendo categoria Classic Physique, compatível com estrutura e sexo do candidato." },
+  "g1-3": { nao: "O candidato tem excelente flexibilidade e recuperação rápida.", sim: "Definição abdominal visível, com baixa retenção de líquido aparente." },
+  "g1-4": { nao: "Você tem um potencial incrível, vai longe!", sim: "Estrutura de ombros larga em relação à cintura, proporção favorável para a categoria." },
+  "g2-0": { nao: "Você vai perder exatamente 4kg em 30 dias.", sim: "Espera-se perda entre 3kg e 5kg em 30 dias, dependendo da aderência." },
+  "g2-1": { nao: "Treino de 6 dias por semana.", sim: "Treino de 4 dias por semana, compatível com a disponibilidade declarada." },
+  "g2-2": { nao: "Agachamento 3x12 toda semana, sem alteração.", sim: "Agachamento inicia em 3x10 e progride para 4x8 com carga maior na semana 4." },
+  "g2-3": { nao: "Projeção de ganho de massa considerável, para quem treina 3 dias.", sim: "Projeção ajustada aos 3 dias de treino que o candidato declarou ter disponível." },
+  "g2-4": { nao: "Você vai perder 5kg com certeza.", sim: "É esperado perder entre 3kg e 5kg, dependendo da aderência ao plano." },
+  "g3-0": { nao: "Recomendo cardio intenso diário.", sim: "Cardio moderado, considerando o problema de joelho relatado no cadastro." },
+  "g3-1": { nao: "[segue direto para a recomendação, sem mencionar a lacuna]", sim: "Sem dado suficiente sobre pressão arterial — recomendo consulta médica antes de prosseguir." },
+  "g3-2": { nao: "Considere o uso de determinado hormônio para acelerar resultado.", sim: "Para otimizar resultado, priorize sono e hidratação adequados." },
+  "g3-3": { nao: "Beba mais água.", sim: "Beba 500ml de água ao acordar, antes do café da manhã." },
+  "g3-4": { nao: "[inventa um dado que não está na ficha]", sim: "Frequência cardíaca de repouso: [COMPLETAR] — ficha não trouxe esse dado." },
+  "g4-0": { nao: "Recomendo categoria profissional para quem começou a treinar há 2 meses.", sim: "Recomendo categoria Novice, compatível com o tempo de treino declarado." },
+  "g4-1": { nao: "Pronto para competir em 60 dias.", sim: "Prazo realista de 8 a 10 meses, considerando o ponto de partida atual." },
+  "g4-2": { nao: "Você tem grande chance de colocação na categoria.", sim: "[evita afirmar competitividade sem dado da ficha que sustente isso]" },
+  "g4-3": { nao: "[mistura objetivo estético e competitivo na mesma frase, sem distinguir]", sim: "Seu objetivo é estético — melhorar a aparência geral, sem foco em competição." },
+  "g4-4": { nao: "Categoria recomendada: Classic Physique.", sim: "Categoria recomendada: Classic Physique, porque sua estrutura óssea combina com o padrão avaliado nela." },
+  "g5-0": { nao: "Candidato tem pouco tempo disponível... recomendo treino de 6 dias por semana.", sim: "Candidato tem pouco tempo disponível — treino ajustado para 3 dias por semana." },
+  "g5-1": { nao: "Reduza o carboidrato. Aumente o cardio. Durma mais.", sim: "Reduzindo o carboidrato nos dias sem treino, a expectativa é acelerar a perda de gordura abdominal." },
+  "g5-2": { nao: "[repete, com outras palavras, o que já foi dito na seção anterior]", sim: "[cada seção acrescenta informação nova, sem repetir a anterior]" },
+  "g5-3": { nao: "Diante do exposto, e considerando a multiplicidade de fatores envolvidos...", sim: "Em resumo: treino 4x por semana, foco em pernas, reavaliação em 30 dias." },
+  "g5-4": { nao: "Bons treinos!", sim: "Agende sua reavaliação em 30 dias para ajustarmos o plano." }
+};
+
+function keyFor(grupoId, idx) { return grupoId + "-" + idx; }
+
+let state = { itens: {}, novas: [], fases: {} };
+let saveTimer = null;
+
+async function chamar(fn, corpo) {
+  const resp = await fetch("/.netlify/functions/" + fn, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(corpo || {}),
+  });
+  if (!resp.ok) throw new Error("Falha em " + fn);
+  return resp.json();
+}
+
+function render() {
+  const container = document.getElementById("grupos");
+  container.innerHTML = "";
+  let respondidas = 0;
+
+  GRUPOS.forEach(grupo => {
+    const h3 = document.createElement("h3");
+    h3.textContent = grupo.nome;
+    container.appendChild(h3);
+
+    grupo.perguntas.forEach((texto, idx) => {
+      const k = keyFor(grupo.id, idx);
+      const item = state.itens[k] || { status: null, textoEditado: "" };
+      if (item.status) respondidas++;
+
+      const ex = EXEMPLOS[k];
+      const div = document.createElement("div");
+      div.className = "item" + (item.status === "removido" ? " status-removido" : "");
+      div.innerHTML =
+        '<div class="item-text">' + texto + '</div>' +
+        '<div class="actions">' +
+          '<button class="btn ' + (item.status === "aprovado" ? "active-aprovado" : "") + '" data-k="' + k + '" data-act="aprovado">Aprovar</button>' +
+          '<button class="btn ' + (item.status === "editado" ? "active-editado" : "") + '" data-k="' + k + '" data-act="editado">Editar</button>' +
+          '<button class="btn ' + (item.status === "removido" ? "active-removido" : "") + '" data-k="' + k + '" data-act="removido">Remover</button>' +
+          (ex ? '<button class="btn btn-preview" data-preview="' + k + '">👁 Ver exemplo</button>' : '') +
+        '</div>' +
+        '<textarea class="edit-box ' + (item.status === "editado" ? "show" : "") + '" data-k="' + k + '" placeholder="Escreva o novo texto...">' + (item.textoEditado || "") + '</textarea>' +
+        (ex ? '<div class="preview-box" id="preview-' + k + '">' +
+          '<div class="preview-row"><span class="pill pill-nao">Não</span><span class="preview-text">' + ex.nao + '</span></div>' +
+          '<div class="preview-row"><span class="pill pill-sim">Sim</span><span class="preview-text">' + ex.sim + '</span></div>' +
+        '</div>' : '');
+      container.appendChild(div);
+    });
+
+    (state.novas || []).filter(n => n.grupo === grupo.id).forEach((n) => {
+      const div = document.createElement("div");
+      div.className = "item new-item";
+      div.innerHTML = '<div class="item-text"><em>Pergunta acrescentada por você:</em><br>' + n.texto + '</div>';
+      container.appendChild(div);
+    });
+
+    const addRow = document.createElement("div");
+    addRow.className = "add-row";
+    addRow.innerHTML =
+      '<textarea placeholder="Acrescentar pergunta nova neste grupo..." data-grupo="' + grupo.id + '"></textarea>' +
+      '<button class="btn-add" data-grupo-add="' + grupo.id + '">Acrescentar</button>';
+    container.appendChild(addRow);
+  });
+
+  document.getElementById("progCount").textContent = respondidas;
+
+  container.querySelectorAll(".btn-preview").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const box = document.getElementById("preview-" + btn.dataset.preview);
+      box.classList.toggle("show");
+      btn.textContent = box.classList.contains("show") ? "👁 Ocultar exemplo" : "👁 Ver exemplo";
+    });
+  });
+  container.querySelectorAll(".btn[data-act]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const k = btn.dataset.k, act = btn.dataset.act;
+      const cur = state.itens[k] || {};
+      state.itens[k] = { status: act, textoEditado: cur.textoEditado || "" };
+      render();
+      agendarSalvamento();
+    });
+  });
+  container.querySelectorAll(".edit-box").forEach(box => {
+    box.addEventListener("input", () => {
+      const k = box.dataset.k;
+      state.itens[k] = state.itens[k] || { status: "editado" };
+      state.itens[k].textoEditado = box.value;
+      agendarSalvamento();
+    });
+  });
+  container.querySelectorAll(".btn-add").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const grupoId = btn.dataset.grupoAdd;
+      const ta = container.querySelector('textarea[data-grupo="' + grupoId + '"]');
+      if (!ta.value.trim()) return;
+      state.novas = state.novas || [];
+      state.novas.push({ grupo: grupoId, texto: ta.value.trim() });
+      render();
+      agendarSalvamento();
+    });
+  });
+}
+
+function agendarSalvamento() {
+  const el = document.getElementById("saveStatus");
+  el.textContent = "Salvando...";
+  el.classList.remove("saved");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(salvar, 700);
+}
+
+async function salvar() {
+  const el = document.getElementById("saveStatus");
+  try {
+    await chamar("salvar-decisoes-coach", { itens: state.itens, novas: state.novas, fases: state.fases });
+    el.textContent = "Respostas salvas";
+    el.classList.add("saved");
+  } catch (e) {
+    el.textContent = "Não foi possível salvar agora — tente novamente em instantes";
+  }
+}
+
+["bulking","cutting","dietbreak"].forEach(k => {
+  const ta = document.getElementById("phase-" + k);
+  ta.addEventListener("input", () => {
+    state.fases = state.fases || {};
+    state.fases[k] = ta.value;
+    agendarSalvamento();
+  });
+});
+
+document.getElementById("btnReset").addEventListener("click", () => {
+  document.getElementById("confirmOverlay").classList.add("show");
+});
+document.getElementById("btnConfirmCancel").addEventListener("click", () => {
+  document.getElementById("confirmOverlay").classList.remove("show");
+});
+document.getElementById("btnConfirmOk").addEventListener("click", async () => {
+  document.getElementById("confirmOverlay").classList.remove("show");
+  state = { itens: {}, novas: [], fases: {} };
+  ["bulking","cutting","dietbreak"].forEach(k => { document.getElementById("phase-" + k).value = ""; });
+  render();
+  await salvar();
+});
+
+async function init() {
+  try {
+    const dados = await chamar("ler-decisoes-coach", {});
+    state = { itens: dados.itens || {}, novas: dados.novas || [], fases: dados.fases || {} };
+  } catch (e) {
+    state = { itens: {}, novas: [], fases: {} };
+  }
+  render();
+  document.getElementById("saveStatus").textContent = "Aguardando suas respostas";
+  if (state.fases) {
+    if (state.fases.bulking) document.getElementById("phase-bulking").value = state.fases.bulking;
+    if (state.fases.cutting) document.getElementById("phase-cutting").value = state.fases.cutting;
+    if (state.fases.dietbreak) document.getElementById("phase-dietbreak").value = state.fases.dietbreak;
+  }
+}
+
+init();
+</script>
+</body>
+</html>

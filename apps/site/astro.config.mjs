@@ -27,7 +27,7 @@ export default defineConfig({
       // /definir-senha e /acesso-equipe continuam como rota-folha: não têm
       // sub-rotas, e não deveriam ganhar uma sem decisão nova.
       filter: page => !/\/(admin|avaliacao|progresso|profissional)\//.test(page)
-                   && !/\/(definir-senha|acesso-equipe)\/?$/.test(page),
+                   && !/\/(definir-senha|acesso-equipe|decisoes-coach)\/?$/.test(page),
       // Declara a relacao entre as duas versoes de idioma no proprio sitemap.
       // A chave 'pt-br' nunca aparece na rota (prefixDefaultLocale: false), e a
       // integracao trata como idioma padrao tudo o que nao contiver outro locale.
