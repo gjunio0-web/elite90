@@ -116,6 +116,10 @@ p { margin: 0 0 var(--space-3); }
 .confirm-box { background: var(--c-surface-2); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); padding: var(--space-5); max-width: 420px; width: 100%; }
 .confirm-text { color: var(--c-white); font-size: 0.9375rem; line-height: 1.5; margin: 0 0 var(--space-4); }
 .confirm-actions { display: flex; gap: var(--space-3); justify-content: flex-end; }
+@media (max-width: 768px) {
+.add-row { flex-direction: column; }
+.add-row .btn-add { align-self: stretch; }
+}
 </style>
 </head>
 <body>
