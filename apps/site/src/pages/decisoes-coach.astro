@@ -8,6 +8,9 @@
 // ARTEFATO TEMPORÁRIO — ver docs/DECISOES-COACH-COMO-EXCLUIR.md para o plano
 // de remoção completo desta página, das duas funções de servidor irmãs, e
 // do documento no Firestore.
+//
+// Three blocks: (1) AI in evaluations and reports, (2) Portal assistant and
+// content library, (3) program operation (non-AI questions p05–p07).
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -99,6 +102,14 @@ p { margin: 0 0 var(--space-3); }
 .pend-descricao strong { color: var(--c-white); }
 .pend-resposta { width: 100%; background: var(--c-black); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-white); padding: var(--space-3); font-family: var(--font-body); font-size: 0.9375rem; min-height: 80px; resize: vertical; }
 .pend-resposta::placeholder { color: var(--c-textsub); }
+.bloco { margin-top: var(--space-6); }
+.bloco-head { border-top: 2px solid var(--c-lime); padding-top: var(--space-4); margin-bottom: var(--space-4); }
+.bloco-titulo { font-family: var(--font-display); font-size: var(--fs-display-lg); line-height: 1.1; letter-spacing: var(--tracking-display); color: var(--c-white); text-transform: uppercase; margin: 0 0 var(--space-3); }
+.progress-items { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: flex-end; }
+.as-lista { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-3); }
+.as-linha { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; background: var(--c-black); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-card); padding: var(--space-2) var(--space-3); }
+.as-rotulo { color: var(--c-white); font-size: 0.9375rem; line-height: 1.4; flex: 1 1 220px; }
+.as-sub { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-textsub); margin: var(--space-3) 0 var(--space-2); }
 .footer-note { text-align: center; color: var(--c-textsub); font-size: 0.8rem; margin-top: var(--space-4); }
 .confirm-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75); align-items: center; justify-content: center; padding: var(--space-4); }
 .confirm-overlay.show { display: flex; }
@@ -110,14 +121,27 @@ p { margin: 0 0 var(--space-3); }
 <body>
 <div class="progress">
   <span>Respondidas</span>
-  <span><strong id="progCount">0</strong> / 25</span>
+  <span class="progress-items">
+    <span>IA <strong id="progIA">0</strong> / 32</span>
+    <span>Assistente <strong id="progAS">0</strong> / 24</span>
+    <span>Programa <strong id="progPR">0</strong> / 3</span>
+  </span>
 </div>
 <div class="wrap">
-  <div class="eyebrow">Elite 90 Pro · Duas decisões</div>
+  <div class="eyebrow">Elite 90 Pro · Decisões do Coach</div>
   <h1>Para o Coach Fernando</h1>
   <div class="intro">
-    <p>Está neste momento em construção uma parte do sistema que usa inteligência artificial para ajudar a gerar as avaliações estratégicas dos candidatos.</p>
-    <p style="margin-bottom:0">Para cada pergunta abaixo, marque se <strong style="color:var(--c-white)">aprova</strong> como está, quer <strong style="color:var(--c-white)">editar</strong> o texto, ou prefere <strong style="color:var(--c-white)">remover</strong>. Pode também acrescentar pergunta nova em qualquer grupo.</p>
+    <p style="margin-bottom:0">Esta página reúne decisões que dependem do seu conhecimento prático. Estão divididas em três blocos, por assunto. Suas respostas ficam salvas automaticamente, e você pode responder aos poucos, na ordem que preferir.</p>
+  </div>
+
+  <section class="bloco" id="bloco-ia">
+  <div class="bloco-head">
+    <div class="eyebrow">Bloco 1 de 3</div>
+    <div class="bloco-titulo">Inteligência artificial nas avaliações e nos relatórios</div>
+    <div class="intro">
+      <p>Está em construção uma parte do sistema que usa inteligência artificial para ajudar a gerar as avaliações estratégicas dos candidatos e os relatórios de evolução dos atletas. As perguntas deste bloco definem o que conta como trabalho bem feito e como o sistema aprende com os resultados dos atletas.</p>
+      <p style="margin-bottom:0">Na régua de qualidade, para cada pergunta, marque se <strong style="color:var(--c-white)">aprova</strong> como está, quer <strong style="color:var(--c-white)">editar</strong> o texto, ou prefere <strong style="color:var(--c-white)">remover</strong>. Pode também acrescentar pergunta nova em qualquer grupo.</p>
+    </div>
   </div>
   <h2>Decisão 1 — A régua de qualidade</h2>
   <div id="grupos"></div>
@@ -137,8 +161,33 @@ p { margin: 0 0 var(--space-3); }
   </div>
 
   <h2>Pendências adicionais</h2>
-  <p>Sete perguntas novas, uma de cada vez. Cada uma tem um resumo em destaque e um campo para sua resposta logo abaixo — o contexto completo fica escondido por padrão, e você abre só se quiser reler antes de responder.</p>
-  <div id="pendencias"></div>
+  <p>Quatro perguntas, uma de cada vez. Cada uma tem um resumo em destaque e um campo para sua resposta logo abaixo — o contexto completo fica escondido por padrão, e você abre só se quiser reler antes de responder.</p>
+  <div id="pendencias-ia"></div>
+  </section>
+
+  <section class="bloco" id="bloco-assistente">
+  <div class="bloco-head">
+    <div class="eyebrow">Bloco 2 de 3</div>
+    <div class="bloco-titulo">Assistente do Portal e biblioteca de conteúdo</div>
+    <div class="intro">
+      <p>O Portal do Atleta vai ter duas funções novas, e as duas dependem de escolhas que só você pode fazer, porque exigem o seu conhecimento prático:</p>
+      <p><strong style="color:var(--c-white)">Um assistente automático</strong>, disponível ao atleta a qualquer hora. Ele responde dúvidas simples do dia a dia sobre o protocolo daquele atleta — sempre dentro do que você prescreveu, nunca além. Quando a dúvida exige o seu julgamento, ele não responde: avisa o atleta que vai levar a questão até você, e você recebe um aviso na hora, no painel.</p>
+      <p style="margin-bottom:0"><strong style="color:var(--c-white)">Uma biblioteca de conteúdo</strong>, onde você cadastra cartilhas, vídeos, podcasts e artigos. O sistema recomenda a cada atleta o material certo para o momento em que ele está no programa.</p>
+    </div>
+  </div>
+  <div id="assistente"></div>
+  </section>
+
+  <section class="bloco" id="bloco-programa">
+  <div class="bloco-head">
+    <div class="eyebrow">Bloco 3 de 3</div>
+    <div class="bloco-titulo">Funcionamento do programa</div>
+    <div class="intro">
+      <p style="margin-bottom:0">Três perguntas sobre o funcionamento do programa, sem relação com inteligência artificial: quando o programa de um atleta pode começar, por quanto tempo os planos antigos ficam guardados, e se os números usados para calcular as metas de alimentação estão clinicamente corretos.</p>
+    </div>
+  </div>
+  <div id="pendencias-programa"></div>
+  </section>
 
   <div class="save-status" id="saveStatus">Carregando...</div>
   <div class="footer-note">Suas respostas ficam salvas automaticamente.</div>
@@ -147,7 +196,7 @@ p { margin: 0 0 var(--space-3); }
   </div>
   <div id="confirmOverlay" class="confirm-overlay">
     <div class="confirm-box">
-      <p class="confirm-text">Isto apaga todas as respostas salvas — aprovações, edições, perguntas acrescentadas e as três fases. Não tem volta.</p>
+      <p class="confirm-text">Isto apaga todas as respostas salvas, nos três blocos — aprovações, edições, perguntas acrescentadas, fases, respostas escritas e escolhas do assistente e da biblioteca. Não tem volta.</p>
       <div class="confirm-actions">
         <button class="btn" id="btnConfirmCancel">Cancelar</button>
         <button class="btn active-removido" id="btnConfirmOk">Sim, apagar tudo</button>
@@ -261,9 +310,46 @@ const PENDENCIAS = [
   }
 ];
 
+// Block 2 (assistant and content library): the three Coach decisions, with
+// the validated explanatory text kept verbatim in "contexto".
+const ASSISTENTE = {
+  palavras: {
+    titulo: "Quais palavras fazem o assistente passar a conversa para você, sem tentar responder",
+    contexto: "Algumas mensagens nunca devem ser respondidas pelo assistente, por mais simples que pareçam. Já está definido que tudo que envolva <strong>dor, sintoma, medicação ou mudança no protocolo</strong> vai sempre para você, sem exceção.<br><br>Para garantir isso, o assistente confere cada mensagem contra uma lista de palavras. Se encontrar qualquer uma delas, passa a conversa para você na hora, antes de qualquer outra análise. A lista inicial é esta:<br>• dor, lesão, fisgada, inchaço, sangramento, tontura, falta de ar, desmaio;<br>• nomes de medicamentos;<br>• nomes de substâncias controladas.<br><br><strong>O que precisamos de você:</strong><br>• acrescentar as palavras que seus atletas costumam usar para descrever um problema — inclusive gírias;<br>• listar os medicamentos e substâncias mais comuns entre eles;<br>• retirar o que achar que não deveria estar na lista.<br><br><strong>Na dúvida, prefira incluir.</strong> Uma palavra a mais custa um aviso desnecessário para você. Uma palavra a menos pode fazer o assistente responder sozinho a algo que precisava de você.",
+    itens: ["dor", "lesão", "fisgada", "inchaço", "sangramento", "tontura", "falta de ar", "desmaio"],
+    campo: "Acrescente aqui palavras, gírias, medicamentos e substâncias — separados por vírgula"
+  },
+  exemplos: {
+    titulo: "Até onde o assistente pode responder sozinho",
+    contexto: "A regra geral já está fixada: o assistente só explica o que está no protocolo. Qualquer <strong>mudança</strong> no protocolo vai para você. Na prática, porém, a fronteira entre \"explicar\" e \"mudar\" nem sempre é óbvia, e é aí que precisamos do seu critério.<br><br>Para cada pergunta abaixo, diga se o assistente <strong>responde sozinho</strong> ou <strong>passa para você</strong>.<br><br>Se puder, diga também, com as suas palavras, a regra que você usaria para separar os dois casos. O assistente vai seguir essa regra nas perguntas que não estão na lista.",
+    itens: [
+      { id: "e1", texto: "\"A que horas eu tomo o whey?\"" },
+      { id: "e2", texto: "\"Quantas séries são no agachamento de quinta?\"" },
+      { id: "e3", texto: "\"Esqueci a refeição das 10h. O que eu faço?\"" },
+      { id: "e4", texto: "\"A máquina está ocupada. Posso trocar o supino reto pelo supino com halteres hoje?\"" },
+      { id: "e5", texto: "\"Posso trocar o frango do almoço por carne vermelha?\"" }
+    ],
+    campo: "A regra que você usaria para separar os dois casos, com as suas palavras"
+  },
+  etiquetas: {
+    titulo: "As etiquetas da biblioteca de conteúdo",
+    contexto: "Para recomendar o material certo, cada item da biblioteca recebe <strong>etiquetas</strong>, e cada atleta também, conforme o momento dele no programa. O sistema cruza as duas coisas. Por exemplo: um atleta em fase de definição recebe o material com a etiqueta \"fase de definição\".<br><br>A lista inicial de etiquetas é esta:<br>• fase de definição;<br>• fase de ganho de massa;<br>• pré-competição;<br>• cardio;<br>• reposição hormonal;<br>• lesão de ombro;<br>• uma etiqueta por categoria de competição.<br><br><strong>O que precisamos de você:</strong><br>• dizer se essas são as etiquetas certas;<br>• acrescentar as que faltam;<br>• retirar as que não fazem sentido.<br><br>As etiquetas devem ser as que <strong>você</strong> usaria para organizar esse material. A recomendação só acerta se falar a sua língua.",
+    itens: ["fase de definição", "fase de ganho de massa", "pré-competição", "cardio", "reposição hormonal", "lesão de ombro",
+            "categoria Classic Physique", "categoria Men's Bodybuilding", "categoria Men's Physique", "categoria Women's Bikini", "categoria Women's Wellness"],
+    campo: "Acrescente aqui as etiquetas que faltam — separadas por vírgula"
+  }
+};
+
+// Which block each pending question belongs to. p05–p07 are not AI-related.
+const BLOCO_PENDENCIA = { p01: "ia", p02: "ia", p03: "ia", p04: "ia", p05: "programa", p06: "programa", p07: "programa" };
+
+function estadoVazio() {
+  return { itens: {}, novas: [], fases: {}, pendencias: {}, assistente: {} };
+}
+
 function keyFor(grupoId, idx) { return grupoId + "-" + idx; }
 
-let state = { itens: {}, novas: [], fases: {}, pendencias: {} };
+let state = estadoVazio();
 let saveTimer = null;
 
 async function chamar(fn, corpo) {
@@ -325,7 +411,7 @@ function render() {
     container.appendChild(addRow);
   });
 
-  document.getElementById("progCount").textContent = respondidas;
+  atualizarContadores();
 
   container.querySelectorAll(".btn-preview").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -365,9 +451,14 @@ function render() {
 }
 
 function renderPendencias() {
-  const container = document.getElementById("pendencias");
-  container.innerHTML = "";
+  const containers = {
+    ia: document.getElementById("pendencias-ia"),
+    programa: document.getElementById("pendencias-programa")
+  };
+  containers.ia.innerHTML = "";
+  containers.programa.innerHTML = "";
   PENDENCIAS.forEach(p => {
+    const container = containers[BLOCO_PENDENCIA[p.id]];
     const valor = (state.pendencias && state.pendencias[p.id]) || "";
     const div = document.createElement("div");
     div.className = "pend-card";
@@ -379,20 +470,123 @@ function renderPendencias() {
     container.appendChild(div);
   });
 
-  container.querySelectorAll("[data-pend-toggle]").forEach(btn => {
+  document.querySelectorAll("[data-pend-toggle]").forEach(btn => {
     btn.addEventListener("click", () => {
       const box = document.getElementById("pend-desc-" + btn.dataset.pendToggle);
       box.classList.toggle("show");
       btn.textContent = box.classList.contains("show") ? "Ocultar contexto" : "Ver contexto completo";
     });
   });
-  container.querySelectorAll(".pend-resposta").forEach(ta => {
+  document.querySelectorAll(".pend-resposta").forEach(ta => {
     ta.addEventListener("input", () => {
       state.pendencias = state.pendencias || {};
       state.pendencias[ta.dataset.pend] = ta.value;
+      atualizarContadores();
       agendarSalvamento();
     });
   });
+}
+
+function escapar(t) {
+  return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function botaoEscolha(grupo, chave, valor, rotulo, classeAtiva, atual) {
+  return '<button class="btn ' + (atual === valor ? classeAtiva : "") + '" data-as-grupo="' + grupo +
+    '" data-as-chave="' + escapar(chave) + '" data-as-valor="' + valor + '">' + rotulo + '</button>';
+}
+
+function renderAssistente() {
+  const a = state.assistente || {};
+  const container = document.getElementById("assistente");
+  let html = "";
+
+  // Decision: trigger words
+  const P = ASSISTENTE.palavras, pal = a.palavras || {};
+  html += '<div class="pend-card"><div class="pend-titulo">' + P.titulo + '</div>' +
+    '<button class="pend-toggle" data-as-toggle="palavras">Ver contexto completo</button>' +
+    '<div class="pend-descricao" id="as-desc-palavras">' + P.contexto + '</div>' +
+    '<div class="as-lista">' + P.itens.map(w =>
+      '<div class="as-linha"><span class="as-rotulo">' + escapar(w) + '</span><span class="actions">' +
+      botaoEscolha("palavras", w, "manter", "Manter", "active-aprovado", pal[w]) +
+      botaoEscolha("palavras", w, "retirar", "Retirar", "active-removido", pal[w]) +
+      '</span></div>').join("") + '</div>' +
+    '<div class="as-sub">Acrescentar</div>' +
+    '<textarea class="pend-resposta" data-as-campo="palavrasAcrescentadas" placeholder="' + escapar(P.campo) + '">' + escapar(a.palavrasAcrescentadas || "") + '</textarea></div>';
+
+  // Decision: level-1 boundary
+  const E = ASSISTENTE.exemplos, ex = a.exemplos || {};
+  html += '<div class="pend-card"><div class="pend-titulo">' + E.titulo + '</div>' +
+    '<button class="pend-toggle" data-as-toggle="exemplos">Ver contexto completo</button>' +
+    '<div class="pend-descricao" id="as-desc-exemplos">' + E.contexto + '</div>' +
+    '<div class="as-lista">' + E.itens.map(it =>
+      '<div class="as-linha"><span class="as-rotulo">' + escapar(it.texto) + '</span><span class="actions">' +
+      botaoEscolha("exemplos", it.id, "sozinho", "Responde sozinho", "active-aprovado", ex[it.id]) +
+      botaoEscolha("exemplos", it.id, "coach", "Passa para mim", "active-editado", ex[it.id]) +
+      '</span></div>').join("") + '</div>' +
+    '<div class="as-sub">Regra geral</div>' +
+    '<textarea class="pend-resposta" data-as-campo="regraGeral" placeholder="' + escapar(E.campo) + '">' + escapar(a.regraGeral || "") + '</textarea></div>';
+
+  // Decision: library tags
+  const T = ASSISTENTE.etiquetas, et = a.etiquetas || {};
+  html += '<div class="pend-card"><div class="pend-titulo">' + T.titulo + '</div>' +
+    '<button class="pend-toggle" data-as-toggle="etiquetas">Ver contexto completo</button>' +
+    '<div class="pend-descricao" id="as-desc-etiquetas">' + T.contexto + '</div>' +
+    '<div class="as-lista">' + T.itens.map(w =>
+      '<div class="as-linha"><span class="as-rotulo">' + escapar(w) + '</span><span class="actions">' +
+      botaoEscolha("etiquetas", w, "manter", "Manter", "active-aprovado", et[w]) +
+      botaoEscolha("etiquetas", w, "retirar", "Retirar", "active-removido", et[w]) +
+      '</span></div>').join("") + '</div>' +
+    '<div class="as-sub">Acrescentar</div>' +
+    '<textarea class="pend-resposta" data-as-campo="etiquetasAcrescentadas" placeholder="' + escapar(T.campo) + '">' + escapar(a.etiquetasAcrescentadas || "") + '</textarea></div>';
+
+  container.innerHTML = html;
+
+  container.querySelectorAll("[data-as-toggle]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const box = document.getElementById("as-desc-" + btn.dataset.asToggle);
+      box.classList.toggle("show");
+      btn.textContent = box.classList.contains("show") ? "Ocultar contexto" : "Ver contexto completo";
+    });
+  });
+  container.querySelectorAll("[data-as-grupo]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const g = btn.dataset.asGrupo, k = btn.dataset.asChave, v = btn.dataset.asValor;
+      state.assistente = state.assistente || {};
+      state.assistente[g] = state.assistente[g] || {};
+      state.assistente[g][k] = v;
+      renderAssistente();
+      agendarSalvamento();
+    });
+  });
+  container.querySelectorAll("[data-as-campo]").forEach(ta => {
+    ta.addEventListener("input", () => {
+      state.assistente = state.assistente || {};
+      state.assistente[ta.dataset.asCampo] = ta.value;
+      atualizarContadores();
+      agendarSalvamento();
+    });
+  });
+  atualizarContadores();
+}
+
+// One counter per block, required items only. Totals: block 1 = 25 + 3 + 4; block 2 = 8 + 5 + 11; block 3 = 3.
+// The three free-text fields of block 2 are optional: saved, but never counted.
+function atualizarContadores() {
+  const preenchido = v => typeof v === "string" && v.trim() !== "";
+  let ia = 0, as = 0, pr = 0;
+  GRUPOS.forEach(g => g.perguntas.forEach((_, i) => { if ((state.itens[keyFor(g.id, i)] || {}).status) ia++; }));
+  ["bulking", "cutting", "dietbreak"].forEach(k => { if (preenchido((state.fases || {})[k])) ia++; });
+  PENDENCIAS.forEach(p => {
+    if (!preenchido((state.pendencias || {})[p.id])) return;
+    if (BLOCO_PENDENCIA[p.id] === "ia") ia++; else pr++;
+  });
+  const a = state.assistente || {};
+  ASSISTENTE.palavras.itens.forEach(w => { if ((a.palavras || {})[w]) as++; });
+  ASSISTENTE.exemplos.itens.forEach(it => { if ((a.exemplos || {})[it.id]) as++; });
+  ASSISTENTE.etiquetas.itens.forEach(w => { if ((a.etiquetas || {})[w]) as++; });
+  const put = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+  put("progIA", ia); put("progAS", as); put("progPR", pr);
 }
 
 function agendarSalvamento() {
@@ -406,7 +600,7 @@ function agendarSalvamento() {
 async function salvar() {
   const el = document.getElementById("saveStatus");
   try {
-    await chamar("salvar-decisoes-coach", { itens: state.itens, novas: state.novas, fases: state.fases, pendencias: state.pendencias });
+    await chamar("salvar-decisoes-coach", { itens: state.itens, novas: state.novas, fases: state.fases, pendencias: state.pendencias, assistente: state.assistente });
     el.textContent = "Respostas salvas";
     el.classList.add("saved");
   } catch (e) {
@@ -419,6 +613,7 @@ async function salvar() {
   ta.addEventListener("input", () => {
     state.fases = state.fases || {};
     state.fases[k] = ta.value;
+    atualizarContadores();
     agendarSalvamento();
   });
 });
@@ -431,22 +626,24 @@ document.getElementById("btnConfirmCancel").addEventListener("click", () => {
 });
 document.getElementById("btnConfirmOk").addEventListener("click", async () => {
   document.getElementById("confirmOverlay").classList.remove("show");
-  state = { itens: {}, novas: [], fases: {}, pendencias: {} };
+  state = estadoVazio();
   ["bulking","cutting","dietbreak"].forEach(k => { document.getElementById("phase-" + k).value = ""; });
   render();
   renderPendencias();
+  renderAssistente();
   await salvar();
 });
 
 async function init() {
   try {
     const dados = await chamar("ler-decisoes-coach", {});
-    state = { itens: dados.itens || {}, novas: dados.novas || [], fases: dados.fases || {}, pendencias: dados.pendencias || {} };
+    state = { itens: dados.itens || {}, novas: dados.novas || [], fases: dados.fases || {}, pendencias: dados.pendencias || {}, assistente: dados.assistente || {} };
   } catch (e) {
-    state = { itens: {}, novas: [], fases: {}, pendencias: {} };
+    state = estadoVazio();
   }
   render();
   renderPendencias();
+  renderAssistente();
   document.getElementById("saveStatus").textContent = "Aguardando suas respostas";
   if (state.fases) {
     if (state.fases.bulking) document.getElementById("phase-bulking").value = state.fases.bulking;

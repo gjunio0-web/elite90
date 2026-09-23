@@ -26,7 +26,7 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     const snap = await db.collection(COLECAO).doc(DOCUMENTO).get();
 
     if (!snap.exists) {
-      return json(200, { itens: {}, novas: [], fases: {}, pendencias: {} });
+      return json(200, { itens: {}, novas: [], fases: {}, pendencias: {}, assistente: {} });
     }
 
     const dados = snap.data() || {};
@@ -35,6 +35,7 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       novas: dados.novas || [],
       fases: dados.fases || {},
       pendencias: dados.pendencias || {},
+      assistente: dados.assistente || {},
     });
   } catch (e: any) {
     return json(500, { erro: "Falha ao ler.", detalhe: e?.message });
