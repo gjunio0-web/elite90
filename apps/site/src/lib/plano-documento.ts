@@ -275,14 +275,14 @@ export const DOC_CSS = `
   .doc-badge { padding: 6px 14px; border-radius: var(--radius-pill); font-family: var(--font-label); font-size: 0.6rem; font-weight: var(--fw-label); letter-spacing: 0.12em; text-transform: uppercase; background: rgba(85,102,0,0.3); color: var(--c-lime); border: 1px solid rgba(166, 195, 0, 0.50); white-space: nowrap; }
   .doc-card { position: relative; background: #121212; border-radius: 18px; padding: 32px; border: 1px solid rgba(255,255,255,0.05); }
   .doc-card::after { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: linear-gradient(to bottom right, rgba(166,195,0,0.35), rgba(85,102,0,0.05)); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
-  .doc-title { font-family: var(--font-display); font-size: clamp(1.6rem, 4vw, 2.4rem); letter-spacing: 0.04em; color: var(--c-white); line-height: 1.1; margin-bottom: 24px; }
+  .doc-title { font-family: var(--font-display); font-size: clamp(1.6rem, 4vw, 2.4rem); letter-spacing: 0.04em; color: var(--c-light); line-height: 1.1; margin-bottom: 24px; }
   .doc-summary { padding: 18px 20px; background: rgba(0,0,0,0.4); border-left: 3px solid var(--c-lime); border-radius: 0 10px 10px 0; font-family: var(--font-body); font-size: 0.8rem; color: var(--c-textbody); line-height: 1.8; margin-bottom: 36px; }
-  .doc-summary strong { color: var(--c-white); }
+  .doc-summary strong { color: var(--c-light); }
   .doc-section { margin-bottom: 32px; }
   .doc-section:last-child { margin-bottom: 0; }
   .doc-section-h { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
   .doc-section-num { font-family: var(--font-display); font-size: 1.7rem; color: var(--c-lime); line-height: 1; }
-  .doc-section-title { font-family: var(--font-display); font-size: clamp(1.1rem, 3vw, 1.5rem); letter-spacing: 0.06em; color: var(--c-white); text-transform: uppercase; }
+  .doc-section-title { font-family: var(--font-display); font-size: clamp(1.1rem, 3vw, 1.5rem); letter-spacing: 0.06em; color: var(--c-light); text-transform: uppercase; }
   .doc-section-body { font-family: var(--font-body); font-size: 0.82rem; line-height: 1.85; color: var(--c-textbody); }
   .doc-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 28px 0; }
   .doc-notes { white-space: pre-wrap; }
@@ -293,7 +293,7 @@ export const DOC_CSS = `
   .doc-meal { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 12px; }
   .doc-meal:first-of-type { border-top: none; margin-top: 8px; padding-top: 0; }
   .doc-meal-h { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
-  .doc-meal-name { font-family: var(--font-label); font-size: 0.68rem; font-weight: var(--fw-label); color: var(--c-white); text-transform: uppercase; letter-spacing: 0.06em; }
+  .doc-meal-name { font-family: var(--font-label); font-size: 0.68rem; font-weight: var(--fw-label); color: var(--c-light); text-transform: uppercase; letter-spacing: 0.06em; }
   .doc-meal-kcal { font-family: var(--font-display); font-size: 0.9rem; color: var(--c-lime); }
   .doc-food { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 3px 0; }
   .doc-food-name { font-family: var(--font-body); font-size: 0.76rem; color: var(--c-textbody); }
@@ -301,7 +301,7 @@ export const DOC_CSS = `
   .doc-empty { font-family: var(--font-body); font-size: 0.74rem; color: var(--c-textsub); font-style: italic; padding: 4px 0; }
   .doc-ex { border-top: 1px solid rgba(255,255,255,0.06); padding: 10px 0; }
   .doc-ex:first-of-type { border-top: none; padding-top: 4px; }
-  .doc-ex-name { font-family: var(--font-label); font-size: 0.72rem; font-weight: var(--fw-label); color: var(--c-white); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .doc-ex-name { font-family: var(--font-label); font-size: 0.72rem; font-weight: var(--fw-label); color: var(--c-light); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
   .doc-ex-sets { font-family: var(--font-body); font-size: 0.76rem; color: var(--c-textbody); }
   .doc-ex-rest { font-family: var(--font-body); font-size: 0.68rem; font-weight: 400; color: var(--c-textsub); text-transform: none; letter-spacing: 0; white-space: nowrap; margin-left: 8px; }
   .doc-footer { text-align: center; padding: 24px 0 8px; margin-top: 28px; }

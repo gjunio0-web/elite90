@@ -195,7 +195,7 @@ const items = c.items.filter(item =>
   .content__search-wrap svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--c-textsub); pointer-events: none; }
   .content__search-input {
     width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.14);
-    border-radius: var(--radius-pill); padding: 9px 14px 9px 36px; color: var(--c-white);
+    border-radius: var(--radius-pill); padding: 9px 14px 9px 36px; color: var(--c-light);
     font-family: var(--font-body); font-size: 0.8rem; transition: border-color var(--transition-base);
   }
   .content__search-input:focus { outline: none; border-color: var(--c-lime); }
@@ -207,14 +207,14 @@ const items = c.items.filter(item =>
     padding: 8px 4px; text-decoration: underline; text-underline-offset: 3px;
     transition: color var(--transition-base); margin-left: auto;
   }
-  .content__clear-btn:hover, .content__clear-btn:focus-visible { color: var(--c-white); }
+  .content__clear-btn:hover, .content__clear-btn:focus-visible { color: var(--c-light); }
   .content__clear-btn:disabled { opacity: 0.35; cursor: default; text-decoration: none; }
 
   .content__status {
     font-family: var(--font-label); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em;
     color: var(--c-textsub); margin-bottom: var(--space-4);
   }
-  .content__status b { color: var(--c-white); }
+  .content__status b { color: var(--c-light); }
 
   /* ---------- Grid / carousel wrap — réplica de .team__carousel-wrap ---------- */
   .content__carousel-wrap { position: relative; }
@@ -249,7 +249,7 @@ const items = c.items.filter(item =>
 
   .content-card__title {
     font-family: var(--font-display); font-size: var(--fs-display-sm); letter-spacing: 0.01em;
-    color: var(--c-white); text-transform: uppercase; line-height: 1.15; margin: 0;
+    color: var(--c-light); text-transform: uppercase; line-height: 1.15; margin: 0;
   }
   .content-card__body { font-size: var(--fs-body-sm); line-height: 1.65; color: var(--c-textbody); flex-grow: 1; margin: 0; }
   .content-card__meta { font-family: var(--font-label); font-size: 0.68rem; font-weight: 500; color: var(--c-textsub); margin: 0; }
@@ -271,7 +271,7 @@ const items = c.items.filter(item =>
   /* ---------- Setas — réplica exata de .team__arrow (44px) ---------- */
   .content__arrow {
     display: none; position: absolute; top: 88px; z-index: 3; width: 44px; height: 44px; background: transparent;
-    border: 0.75px solid var(--c-white); border-radius: 50%; color: var(--c-white); align-items: center;
+    border: 0.75px solid var(--c-light); border-radius: 50%; color: var(--c-light); align-items: center;
     justify-content: center; padding: 0; cursor: pointer; transition: all var(--transition-base);
     -webkit-tap-highlight-color: transparent;
   }
@@ -294,15 +294,15 @@ const items = c.items.filter(item =>
     font-family: var(--font-label); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase;
     cursor: pointer; border-radius: var(--radius-pill); transition: background var(--transition-base), color var(--transition-base);
   }
-  .content__load-more { color: var(--c-white); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); padding: 12px 26px; }
+  .content__load-more { color: var(--c-light); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); padding: 12px 26px; }
   .content__load-more:hover, .content__load-more:focus-visible { background: rgba(255,255,255,0.11); outline: none; }
   .content__show-less { color: var(--c-textsub); background: transparent; border: 1px solid transparent; padding: 12px 18px; text-decoration: underline; text-underline-offset: 3px; }
-  .content__show-less:hover, .content__show-less:focus-visible { color: var(--c-white); outline: none; }
+  .content__show-less:hover, .content__show-less:focus-visible { color: var(--c-light); outline: none; }
   .content__load-more.is-hidden, .content__show-less.is-hidden { display: none; }
 
   /* ---------- Estado vazio ---------- */
   .content__empty { max-width: 960px; text-align: center; padding: var(--space-6) var(--space-4); border: 1px dashed rgba(255,255,255,0.15); border-radius: var(--radius-card); margin-top: var(--space-4); }
-  .content__empty-title { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); text-transform: uppercase; margin-bottom: 8px; }
+  .content__empty-title { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-light); text-transform: uppercase; margin-bottom: 8px; }
   .content__empty-body { font-size: var(--fs-body-sm); color: var(--c-textsub); margin-bottom: var(--space-4); line-height: 1.6; }
   .content__empty button {
     font-family: var(--font-label); font-weight: 700; font-size: 0.68rem; letter-spacing: 0.04em; text-transform: uppercase;

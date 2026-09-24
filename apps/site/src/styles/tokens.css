@@ -5,11 +5,10 @@
   /* PALETA */
   --c-lime:     #A6C300;
   --c-olive:    #556600;
-  --c-charcoal: #A0A820;
-  --c-light:    #EDEDE0;
+  --c-olive-light: #A0A820; /* secondary text accent, paired with lime (was --c-charcoal) */
+  --c-light:    #EDEDED;  /* brand light grey; primary text and titles (replaces --c-white) */
   --c-black:    #0D0D0D;
   --c-darkbg:   #1A1A1A;
-  --c-white:    #FFFFFF;
   --c-textbody: #CCCCCC;
   --c-textsub:  #999999;
 

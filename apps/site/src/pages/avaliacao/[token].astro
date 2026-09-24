@@ -177,7 +177,7 @@ const t = en ? {
     }
     .card-title {
       font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3.25rem);
-      letter-spacing: 0.02em; color: var(--c-white); line-height: 1.04; text-transform: uppercase; margin: 0;
+      letter-spacing: 0.02em; color: var(--c-light); line-height: 1.04; text-transform: uppercase; margin: 0;
     }
     .summary {
       border-left: 3px solid var(--c-lime); background: var(--c-black);
@@ -189,7 +189,7 @@ const t = en ? {
     .section-num { font-family: var(--font-display); font-size: 30px; color: var(--c-lime); line-height: 1; }
     .section-title {
       font-family: var(--font-label); font-weight: 800; font-size: clamp(1rem, 2.4vw, 1.3rem);
-      letter-spacing: 0.04em; color: var(--c-white); text-transform: uppercase; margin: 0;
+      letter-spacing: 0.04em; color: var(--c-light); text-transform: uppercase; margin: 0;
     }
     .section-body {
       font-family: var(--font-body); font-size: 14px; line-height: 1.9;
@@ -290,7 +290,7 @@ const t = en ? {
           <h1 class="card-title">{t.docTitle}</h1>
 
           <div class="summary">
-            {t.summaryA} <strong style="color:var(--c-white)">{avaliacao?.nome}</strong> {t.summaryB}
+            {t.summaryA} <strong style="color:var(--c-light)">{avaliacao?.nome}</strong> {t.summaryB}
           </div>
 
           {sections.map((s, i) => (

@@ -71,7 +71,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-main { max-width: var(--max-w-content); margin: 0 auto; padding: var(--space-5) var(--space-5) var(--space-8); }
 
   .exc-topo { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
-  .exc-titulo { font-family: var(--font-display); font-size: var(--fs-display-md); color: var(--c-white); letter-spacing: var(--tracking-display); line-height: var(--lh-display); margin: 0; }
+  .exc-titulo { font-family: var(--font-display); font-size: var(--fs-display-md); color: var(--c-light); letter-spacing: var(--tracking-display); line-height: var(--lh-display); margin: 0; }
   .exc-contadores { font-size: var(--fs-body-sm); color: var(--c-textsub); margin-top: var(--space-1); }
   .exc-contadores strong { color: var(--c-textbody); font-weight: var(--fw-body-bold); }
   /* Vazado, e não lima: cadastrar é o ato raro desta tela — o acervo veio de
@@ -124,7 +124,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-linha { border-top: 1px solid rgba(255,255,255,0.05); cursor: pointer; background: transparent; border-left: 0; border-right: 0; border-bottom: 0; width: 100%; text-align: left; font: inherit; color: inherit; }
   .exc-linha:hover, .exc-linha:focus-visible { background: rgba(166,195,0,0.06); outline: none; }
   .exc-linha:focus-visible { box-shadow: inset 0 0 0 1px var(--c-lime); }
-  .exc-nome { font-size: var(--fs-body-sm); color: var(--c-white); }
+  .exc-nome { font-size: var(--fs-body-sm); color: var(--c-light); }
   .exc-col { font-size: var(--fs-body-sm); color: var(--c-textsub); }
   .exc-selo { display: inline-block; margin-top: 5px; margin-right: 6px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: 0.625rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 9px; border-radius: var(--radius-pill); }
   .exc-selo--pend { color: var(--c-pending); border: 1px solid rgba(230,126,34,0.45); background: rgba(230,126,34,0.12); }
@@ -151,7 +151,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-painel { width: min(440px, 100%); height: 100%; background: var(--c-darkbg); border-left: 1px solid var(--c-line-muted); padding: var(--space-5); overflow-y: auto; transform: translateX(100%); transition: transform var(--dur-med) var(--ease-out); }
   .exc-gaveta.aberta .exc-painel { transform: translateX(0); }
   .exc-painel-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
-  .exc-painel-nome { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); letter-spacing: var(--tracking-display); line-height: var(--lh-tight); }
+  .exc-painel-nome { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-light); letter-spacing: var(--tracking-display); line-height: var(--lh-tight); }
   .exc-fechar { background: transparent; border: 0; color: var(--c-textsub); font-size: 1.25rem; cursor: pointer; line-height: 1; padding: 0 4px; }
   /* Os dois glifos moram no HTML e trocam por CSS: no computador o painel é
      gaveta e fecha com "×"; no celular ele é a tela inteira, e ali "×" mente —
@@ -161,7 +161,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .exc-rotulo { display: block; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); margin: var(--space-4) 0 6px; }
   .exc-rotulo--musculo { display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; }
   .exc-rotulo--musculo[hidden] { display: none; }
-  .exc-input, .exc-select, .exc-area { width: 100%; background: var(--c-black); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 10px 12px; }
+  .exc-input, .exc-select, .exc-area { width: 100%; background: var(--c-black); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-light); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 10px 12px; }
   .exc-area { line-height: var(--lh-body); resize: vertical; min-height: 96px; }
   .exc-input:focus, .exc-select:focus, .exc-area:focus { outline: none; border-color: var(--c-lime); box-shadow: var(--glow-lime-sm); }
   .exc-dupla { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
@@ -202,7 +202,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .confirm-overlay { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); padding: var(--space-4); }
   .confirm-overlay[hidden] { display: none; }
   .confirm-box { background: var(--c-darkbg); border: var(--border-lime); border-radius: var(--radius-card); max-width: 520px; width: 100%; padding: var(--space-5); max-height: 85vh; overflow-y: auto; }
-  .confirm-title { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 var(--space-3); }
+  .confirm-title { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-light); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 var(--space-3); }
   .confirm-title span { color: var(--c-pending); }
   .confirm-summary { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: 1.7; margin-bottom: var(--space-4); }
   .confirm-summary strong { color: var(--c-textbody); }

@@ -48,7 +48,7 @@ h1, h2, h3, h4 {
   font-weight: 400;
   text-transform: uppercase;
   line-height: 1.1;
-  color: var(--c-white);
+  color: var(--c-light);
 }
 
 h1 { font-size: var(--fs-display-xl); }
@@ -96,7 +96,7 @@ h4 { font-size: var(--fs-display-sm); }
 .section__title {
   font-family: var(--font-display);
   font-size: var(--fs-display-lg);
-  color: var(--c-white);
+  color: var(--c-light);
   text-transform: uppercase;
   margin-bottom: var(--space-4);
 }
@@ -208,7 +208,7 @@ select:-webkit-autofill:hover,
 select:-webkit-autofill:focus,
 select:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0px 1000px var(--c-black) inset !important;
-  -webkit-text-fill-color: var(--c-white) !important;
+  -webkit-text-fill-color: var(--c-light) !important;
   transition: background-color 5000s ease-in-out 0s;
   caret-color: var(--c-lime);
 }

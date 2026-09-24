@@ -34,7 +34,7 @@
   --c-lime:     #A6C300;
   --c-black:    #0D0D0D;
   --c-darkbg:   #1A1A1A;
-  --c-white:    #FFFFFF;
+  --c-light:    #EDEDED;
   --c-textbody: #CCCCCC;
   --c-textsub:  #999999;
   --c-surface-2: #242424;
@@ -57,23 +57,23 @@ html { scroll-padding-top: env(safe-area-inset-top, 0px); }
 body { background: var(--c-black); color: var(--c-textbody); font-family: var(--font-body); font-size: var(--fs-body-md); line-height: 1.6; margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); -webkit-font-smoothing: antialiased; }
 .wrap { max-width: 760px; margin: 0 auto; padding: var(--space-6) var(--space-4) var(--space-6); }
 .eyebrow { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-lime); margin-bottom: var(--space-2); }
-h1 { font-family: var(--font-display); font-size: var(--fs-display-lg); line-height: 1.1; letter-spacing: var(--tracking-display); color: var(--c-white); text-transform: uppercase; margin: 0 0 var(--space-4); }
+h1 { font-family: var(--font-display); font-size: var(--fs-display-lg); line-height: 1.1; letter-spacing: var(--tracking-display); color: var(--c-light); text-transform: uppercase; margin: 0 0 var(--space-4); }
 h2 { font-family: var(--font-display); font-size: var(--fs-display-md); letter-spacing: var(--tracking-display); color: var(--c-lime); text-transform: uppercase; margin: var(--space-6) 0 var(--space-3); }
-h3 { font-family: var(--font-label); font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-white); margin: var(--space-5) 0 var(--space-3); }
+h3 { font-family: var(--font-label); font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-light); margin: var(--space-5) 0 var(--space-3); }
 p { margin: 0 0 var(--space-3); }
 .intro { background: var(--c-darkbg); border-left: 3px solid var(--c-lime); border-radius: var(--radius-card); padding: var(--space-4); margin-bottom: var(--space-5); }
 .progress { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: rgba(13,13,13,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid rgba(255,255,255,0.1); padding: var(--space-3) var(--space-4); margin: 0 0 var(--space-5); font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); }
 .progress strong { color: var(--c-lime); font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0; }
 .item { background: var(--c-surface-2); border-radius: var(--radius-card); padding: var(--space-4); margin-bottom: var(--space-3); border: 1px solid rgba(255,255,255,0.06); }
 .item.status-removido { opacity: 0.5; }
-.item-text { color: var(--c-white); font-size: 0.9375rem; line-height: 1.5; margin-bottom: var(--space-3); }
+.item-text { color: var(--c-light); font-size: 0.9375rem; line-height: 1.5; margin-bottom: var(--space-3); }
 .item-text em { color: var(--c-lime); font-style: normal; }
 .actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .btn { font-family: var(--font-label); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: var(--tracking-label); padding: 8px 14px; border-radius: var(--radius-pill); cursor: pointer; border: 1.5px solid rgba(255,255,255,0.2); background: transparent; color: var(--c-textsub); transition: all var(--dur-med) var(--ease-std); }
-.btn:hover { border-color: rgba(255,255,255,0.4); color: var(--c-white); }
+.btn:hover { border-color: rgba(255,255,255,0.4); color: var(--c-light); }
 .btn.active-aprovado { background: var(--c-lime); border-color: var(--c-lime); color: #0D0D0D; }
 .btn.active-editado { background: var(--c-status-checkin); border-color: var(--c-status-checkin); color: #0D0D0D; }
-.btn.active-removido { background: var(--c-status-rejected); border-color: var(--c-status-rejected); color: var(--c-white); }
+.btn.active-removido { background: var(--c-status-rejected); border-color: var(--c-status-rejected); color: var(--c-light); }
 .btn-preview { border-color: rgba(166,195,0,0.4); color: var(--c-lime); }
 .preview-box { display: none; margin-top: var(--space-3); padding: var(--space-3); background: var(--c-black); border-radius: var(--radius-card); border: 1px dashed rgba(255,255,255,0.14); }
 .preview-box.show { display: block; }
@@ -81,40 +81,40 @@ p { margin: 0 0 var(--space-3); }
 .preview-row:last-child { margin-bottom: 0; }
 .pill { font-family: var(--font-label); font-weight: 700; font-size: 0.65rem; text-transform: uppercase; letter-spacing: var(--tracking-label); padding: 3px 10px; border-radius: var(--radius-pill); flex-shrink: 0; }
 .pill-sim { background: var(--c-lime); color: #0D0D0D; }
-.pill-nao { background: var(--c-status-rejected); color: var(--c-white); }
+.pill-nao { background: var(--c-status-rejected); color: var(--c-light); }
 .preview-text { font-size: 0.8rem; color: var(--c-textbody); font-style: italic; line-height: 1.4; }
-.edit-box { display: none; margin-top: var(--space-3); width: 100%; background: var(--c-black); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-white); padding: var(--space-3); font-family: var(--font-body); font-size: 0.875rem; resize: vertical; min-height: 70px; }
+.edit-box { display: none; margin-top: var(--space-3); width: 100%; background: var(--c-black); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-light); padding: var(--space-3); font-family: var(--font-body); font-size: 0.875rem; resize: vertical; min-height: 70px; }
 .edit-box.show { display: block; }
 .add-row { display: flex; gap: var(--space-2); margin-top: var(--space-4); align-items: flex-start; }
-.add-row textarea { flex: 1; background: var(--c-darkbg); border: 1px dashed rgba(166,195,0,0.4); border-radius: var(--radius-card); color: var(--c-white); padding: var(--space-3); font-family: var(--font-body); font-size: 0.875rem; min-height: 44px; resize: vertical; }
+.add-row textarea { flex: 1; background: var(--c-darkbg); border: 1px dashed rgba(166,195,0,0.4); border-radius: var(--radius-card); color: var(--c-light); padding: var(--space-3); font-family: var(--font-body); font-size: 0.875rem; min-height: 44px; resize: vertical; }
 .btn-add { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--tracking-label); background: transparent; border: 1.5px solid var(--c-lime); color: var(--c-lime); border-radius: var(--radius-card); padding: 10px 16px; cursor: pointer; white-space: nowrap; }
 .new-item { border-left: 3px solid var(--c-lime); }
 .phase-block { margin-bottom: var(--space-4); }
 .phase-label { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-lime); margin-bottom: var(--space-2); display: block; }
-.phase-input { width: 100%; background: var(--c-surface-2); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-white); padding: var(--space-3); font-family: var(--font-body); font-size: 0.9375rem; min-height: 80px; resize: vertical; }
+.phase-input { width: 100%; background: var(--c-surface-2); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-light); padding: var(--space-3); font-family: var(--font-body); font-size: 0.9375rem; min-height: 80px; resize: vertical; }
 .save-status { font-family: var(--font-label); font-size: var(--fs-label); color: var(--c-textsub); text-align: center; margin-top: var(--space-5); letter-spacing: var(--tracking-label); text-transform: uppercase; }
 .save-status.saved { color: var(--c-lime); }
 .pend-card { background: var(--c-surface-2); border-radius: var(--radius-card); padding: var(--space-4); margin-bottom: var(--space-4); border-left: 3px solid var(--c-lime); }
-.pend-titulo { font-family: var(--font-label); font-weight: 700; font-size: 1.05rem; color: var(--c-white); margin-bottom: var(--space-3); line-height: 1.4; }
+.pend-titulo { font-family: var(--font-label); font-weight: 700; font-size: 1.05rem; color: var(--c-light); margin-bottom: var(--space-3); line-height: 1.4; }
 .pend-toggle { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--tracking-label); background: transparent; border: 1.5px solid rgba(166,195,0,0.4); color: var(--c-lime); border-radius: var(--radius-pill); padding: 8px 14px; cursor: pointer; margin-bottom: var(--space-3); }
 .pend-descricao { display: none; background: var(--c-black); border-radius: var(--radius-card); border: 1px dashed rgba(255,255,255,0.14); padding: var(--space-3); margin-bottom: var(--space-3); font-size: 0.875rem; line-height: 1.6; color: var(--c-textbody); }
 .pend-descricao.show { display: block; }
-.pend-descricao strong { color: var(--c-white); }
-.pend-resposta { width: 100%; background: var(--c-black); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-white); padding: var(--space-3); font-family: var(--font-body); font-size: 0.9375rem; min-height: 80px; resize: vertical; }
+.pend-descricao strong { color: var(--c-light); }
+.pend-resposta { width: 100%; background: var(--c-black); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-light); padding: var(--space-3); font-family: var(--font-body); font-size: 0.9375rem; min-height: 80px; resize: vertical; }
 .pend-resposta::placeholder { color: var(--c-textsub); }
 .bloco { margin-top: var(--space-6); }
 .bloco-head { border-top: 2px solid var(--c-lime); padding-top: var(--space-4); margin-bottom: var(--space-4); }
-.bloco-titulo { font-family: var(--font-display); font-size: var(--fs-display-lg); line-height: 1.1; letter-spacing: var(--tracking-display); color: var(--c-white); text-transform: uppercase; margin: 0 0 var(--space-3); }
+.bloco-titulo { font-family: var(--font-display); font-size: var(--fs-display-lg); line-height: 1.1; letter-spacing: var(--tracking-display); color: var(--c-light); text-transform: uppercase; margin: 0 0 var(--space-3); }
 .progress-items { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: flex-end; }
 .as-lista { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-3); }
 .as-linha { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; background: var(--c-black); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-card); padding: var(--space-2) var(--space-3); }
-.as-rotulo { color: var(--c-white); font-size: 0.9375rem; line-height: 1.4; flex: 1 1 220px; }
+.as-rotulo { color: var(--c-light); font-size: 0.9375rem; line-height: 1.4; flex: 1 1 220px; }
 .as-sub { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-textsub); margin: var(--space-3) 0 var(--space-2); }
 .footer-note { text-align: center; color: var(--c-textsub); font-size: 0.8rem; margin-top: var(--space-4); }
 .confirm-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75); align-items: center; justify-content: center; padding: var(--space-4); }
 .confirm-overlay.show { display: flex; }
 .confirm-box { background: var(--c-surface-2); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); padding: var(--space-5); max-width: 420px; width: 100%; }
-.confirm-text { color: var(--c-white); font-size: 0.9375rem; line-height: 1.5; margin: 0 0 var(--space-4); }
+.confirm-text { color: var(--c-light); font-size: 0.9375rem; line-height: 1.5; margin: 0 0 var(--space-4); }
 .confirm-actions { display: flex; gap: var(--space-3); justify-content: flex-end; }
 @media (max-width: 768px) {
 .add-row { flex-direction: column; }
@@ -144,7 +144,7 @@ p { margin: 0 0 var(--space-3); }
     <div class="bloco-titulo">Inteligência artificial nas avaliações e nos relatórios</div>
     <div class="intro">
       <p>Está em construção uma parte do sistema que usa inteligência artificial para ajudar a gerar as avaliações estratégicas dos candidatos e os relatórios de evolução dos atletas. As perguntas deste bloco definem o que conta como trabalho bem feito e como o sistema aprende com os resultados dos atletas.</p>
-      <p style="margin-bottom:0">Na régua de qualidade, para cada pergunta, marque se <strong style="color:var(--c-white)">aprova</strong> como está, quer <strong style="color:var(--c-white)">editar</strong> o texto, ou prefere <strong style="color:var(--c-white)">remover</strong>. Pode também acrescentar pergunta nova em qualquer grupo.</p>
+      <p style="margin-bottom:0">Na régua de qualidade, para cada pergunta, marque se <strong style="color:var(--c-light)">aprova</strong> como está, quer <strong style="color:var(--c-light)">editar</strong> o texto, ou prefere <strong style="color:var(--c-light)">remover</strong>. Pode também acrescentar pergunta nova em qualquer grupo.</p>
     </div>
   </div>
   <h2>Decisão 1 — A régua de qualidade</h2>
@@ -175,8 +175,8 @@ p { margin: 0 0 var(--space-3); }
     <div class="bloco-titulo">Assistente do Portal e biblioteca de conteúdo</div>
     <div class="intro">
       <p>O Portal do Atleta vai ter duas funções novas, e as duas dependem de escolhas que só você pode fazer, porque exigem o seu conhecimento prático:</p>
-      <p><strong style="color:var(--c-white)">Um assistente automático</strong>, disponível ao atleta a qualquer hora. Ele responde dúvidas simples do dia a dia sobre o protocolo daquele atleta — sempre dentro do que você prescreveu, nunca além. Quando a dúvida exige o seu julgamento, ele não responde: avisa o atleta que vai levar a questão até você, e você recebe um aviso na hora, no painel.</p>
-      <p style="margin-bottom:0"><strong style="color:var(--c-white)">Uma biblioteca de conteúdo</strong>, onde você cadastra cartilhas, vídeos, podcasts e artigos. O sistema recomenda a cada atleta o material certo para o momento em que ele está no programa.</p>
+      <p><strong style="color:var(--c-light)">Um assistente automático</strong>, disponível ao atleta a qualquer hora. Ele responde dúvidas simples do dia a dia sobre o protocolo daquele atleta — sempre dentro do que você prescreveu, nunca além. Quando a dúvida exige o seu julgamento, ele não responde: avisa o atleta que vai levar a questão até você, e você recebe um aviso na hora, no painel.</p>
+      <p style="margin-bottom:0"><strong style="color:var(--c-light)">Uma biblioteca de conteúdo</strong>, onde você cadastra cartilhas, vídeos, podcasts e artigos. O sistema recomenda a cada atleta o material certo para o momento em que ele está no programa.</p>
     </div>
   </div>
   <div id="assistente"></div>

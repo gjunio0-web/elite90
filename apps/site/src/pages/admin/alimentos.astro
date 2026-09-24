@@ -78,7 +78,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .alm-main { max-width: var(--max-w-content); margin: 0 auto; padding: var(--space-5) var(--space-5) var(--space-8); }
 
   .alm-topo { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
-  .alm-titulo { font-family: var(--font-display); font-size: var(--fs-display-md); color: var(--c-white); letter-spacing: var(--tracking-display); line-height: var(--lh-display); margin: 0; }
+  .alm-titulo { font-family: var(--font-display); font-size: var(--fs-display-md); color: var(--c-light); letter-spacing: var(--tracking-display); line-height: var(--lh-display); margin: 0; }
   .alm-contadores { font-size: var(--fs-body-sm); color: var(--c-textsub); margin-top: var(--space-1); }
   .alm-contadores strong { color: var(--c-textbody); font-weight: var(--fw-body-bold); }
   /* Vazado, e não lima: cadastrar é o ato raro desta tela — o acervo veio de
@@ -150,7 +150,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .alm-linha { border-top: 1px solid rgba(255,255,255,0.05); cursor: pointer; background: transparent; border-left: 0; border-right: 0; border-bottom: 0; width: 100%; text-align: left; font: inherit; color: inherit; }
   .alm-linha:hover, .alm-linha:focus-visible { background: rgba(166,195,0,0.06); outline: none; }
   .alm-linha:focus-visible { box-shadow: inset 0 0 0 1px var(--c-lime); }
-  .alm-nome { font-size: var(--fs-body-sm); color: var(--c-white); }
+  .alm-nome { font-size: var(--fs-body-sm); color: var(--c-light); }
   .alm-col { font-size: var(--fs-body-sm); color: var(--c-textsub); }
   .alm-selo { display: inline-block; margin-top: 5px; margin-right: 6px; font-family: var(--font-label); font-weight: var(--fw-label); font-size: 0.625rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 9px; border-radius: var(--radius-pill); }
   .alm-selo--pend { color: var(--c-pending); border: 1px solid rgba(230,126,34,0.45); background: rgba(230,126,34,0.12); }
@@ -182,7 +182,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .alm-painel { width: min(440px, 100%); height: 100%; background: var(--c-darkbg); border-left: 1px solid var(--c-line-muted); padding: var(--space-5); overflow-y: auto; transform: translateX(100%); transition: transform var(--dur-med) var(--ease-out); display: flex; flex-direction: column; }
   .alm-gaveta.aberta .alm-painel { transform: translateX(0); }
   .alm-painel-topo { order: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
-  .alm-painel-nome { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); letter-spacing: var(--tracking-display); line-height: var(--lh-tight); }
+  .alm-painel-nome { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-light); letter-spacing: var(--tracking-display); line-height: var(--lh-tight); }
   .alm-fechar { background: transparent; border: 0; color: var(--c-textsub); font-size: 1.25rem; cursor: pointer; line-height: 1; padding: 0 4px; }
   .alm-fechar-x { display: inline; }
   .alm-fechar-voltar { display: none; }
@@ -199,7 +199,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .alm-nota { order: 11; margin-top: var(--space-3); background: rgba(255,255,255,0.03); border-left: 2px solid var(--c-olive); padding: 10px 12px; font-size: 0.6875rem; color: var(--c-textsub); line-height: 1.65; }
 
   .alm-rotulo { display: block; font-family: var(--font-label); font-weight: var(--fw-label); font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-textsub); margin: var(--space-4) 0 6px; }
-  .alm-input, .alm-select { width: 100%; background: var(--c-black); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-white); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 10px 12px; }
+  .alm-input, .alm-select { width: 100%; background: var(--c-black); border: 1px solid var(--c-line-muted); border-radius: var(--radius-card); color: var(--c-light); font-family: var(--font-body); font-size: var(--fs-body-sm); padding: 10px 12px; }
   .alm-input:focus, .alm-select:focus { outline: none; border-color: var(--c-lime); box-shadow: var(--glow-lime-sm); }
   .alm-dupla { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
   .alm-somente-leitura { font-size: var(--fs-body-sm); color: var(--c-textbody); line-height: 1.7; }
@@ -225,7 +225,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
   .confirm-overlay { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); padding: var(--space-4); }
   .confirm-overlay[hidden] { display: none; }
   .confirm-box { background: var(--c-darkbg); border: var(--border-lime); border-radius: var(--radius-card); max-width: 520px; width: 100%; padding: var(--space-5); max-height: 85vh; overflow-y: auto; }
-  .confirm-title { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-white); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 var(--space-3); }
+  .confirm-title { font-family: var(--font-display); font-size: var(--fs-display-sm); color: var(--c-light); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 var(--space-3); }
   .confirm-title span { color: var(--c-pending); }
   .confirm-summary { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: 1.7; margin-bottom: var(--space-4); }
   .confirm-summary strong { color: var(--c-textbody); }
