@@ -112,7 +112,7 @@ h4 { font-size: var(--fs-display-sm); }
   align-items: center;
   justify-content: center;
   background-color: var(--c-lime);
-  color: #000000;
+  color: var(--c-black);
   font-family: var(--font-body);
   font-size: var(--fs-body-md);
   font-weight: 700;

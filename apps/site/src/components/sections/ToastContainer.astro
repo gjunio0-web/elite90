@@ -32,7 +32,7 @@ const { t } = Astro.props;
   /* Item de Notificação - Flat Brutalista Noir */
   .toast-item {
     pointer-events: auto; /* Reabilita cliques apenas para o botão de fechar */
-    background-color: #0A0A0A; /* Preto Absoluto */
+    background-color: var(--c-black); /* Preto Absoluto */
     color: var(--c-light);
     font-family: var(--font-label, sans-serif);
     font-size: 0.75rem;
@@ -41,7 +41,7 @@ const { t } = Astro.props;
     letter-spacing: 0.08em;
     padding: 16px 20px;
     border-radius: 0; /* Ângulos retos estritos */
-    box-shadow: 6px 6px 0px #000000; /* Sombra sólida Brutalista */
+    box-shadow: 6px 6px 0px var(--c-black); /* Sombra sólida Brutalista */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -61,12 +61,12 @@ const { t } = Astro.props;
 
   /* Variação de Status: Erro (Terracota / Vermelho Profundo Brutalista) */
   .toast-item--error {
-    border: 2px solid #922B21;
+    border: 2px solid var(--c-status-rejected);
   }
 
   /* Variação de Status: Sucesso (Lime Green) */
   .toast-item--success {
-    border: 2px solid var(--c-lime, #A6C300);
+    border: 2px solid var(--c-lime);
   }
 
   /* Botão de Fechamento Manual */

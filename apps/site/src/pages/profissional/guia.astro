@@ -50,7 +50,7 @@ const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].i
 
   :root{
     /* Codigo de autoria — quem age em cada etapa do guia */
-    --ator-sistema:#4A90D9; --ator-voce:#A6C300; --ator-coach:#27AE60;
+    --ator-sistema:var(--c-status-progress); --ator-voce:var(--c-lime); --ator-coach:var(--c-status-approved);
     --line: 1px solid rgba(255,255,255,0.08);
   }
   *{box-sizing:border-box}
@@ -62,7 +62,7 @@ const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].i
   /* ── Cabeçalho ───────────────────────────────── */
   .top{
     border-bottom:4px solid var(--c-lime);
-    background:linear-gradient(180deg,#0D0D0D 0%,#141414 100%);
+    background:linear-gradient(180deg,var(--c-black) 0%,var(--c-darkbg) 100%);
     padding:var(--space-7) 0 var(--space-6);
   }
   .eyebrow{
@@ -216,7 +216,7 @@ const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].i
   .mapa-p--voce{border-color:rgba(166,195,0,.45); color:var(--c-light)}
   .mapa-p--voce b{color:var(--c-lime)}
   .mapa-p--coach{border-color:rgba(39,174,96,.45)}
-  .mapa-p--coach b{color:#27AE60}
+  .mapa-p--coach b{color:var(--c-status-approved)}
   .mapa-s{flex:none; width:14px; height:1px; background:rgba(255,255,255,.18)}
   .mapa-l{
     display:block; margin-top:var(--space-3);
@@ -243,7 +243,7 @@ const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].i
   .aviso p{margin:0; font-size:.9rem}
   .a-laranja{--cor:var(--c-status-alert)} .a-lime{--cor:var(--c-lime)} .a-azul{--cor:var(--c-status-progress)}
 
-  .garantias{display:grid; gap:2px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); background:rgba(255,255,255,.09)}
+  .garantias{display:grid; gap:2px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); background:var(--c-surface-2)}
   .g{background:var(--c-black); padding:var(--space-5) var(--space-4)}
   .g .k{
     font-family:var(--font-display); font-size:2.4rem; line-height:1; color:var(--c-lime);
@@ -253,7 +253,7 @@ const depoisDaJornada = indice.filter((s) => !s.etapa && !['inicio', 'papeis'].i
   .g p b{color:var(--c-light); font-weight:600}
 
   /* ── Rodapé ──────────────────────────────────── */
-  footer{border-top:4px solid var(--c-lime); padding:var(--space-6) 0 var(--space-7); background:#141414}
+  footer{border-top:4px solid var(--c-lime); padding:var(--space-6) 0 var(--space-7); background:var(--c-darkbg)}
   footer .marca{
     font-family:var(--font-display); font-size:2rem; letter-spacing:.08em;
     text-transform:uppercase; color:var(--c-light);

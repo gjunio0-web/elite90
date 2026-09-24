@@ -75,7 +75,7 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
     .prof-grid { display: grid; gap: 16px;
                  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
     .prof-card { border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
-                 padding: 20px; background: #1A1A1A; }
+                 padding: 20px; background: var(--c-darkbg); }
     .prof-card__nome { font-family: Raleway, sans-serif; font-weight: 700;
                        font-size: 1.05rem; margin: 0 0 4px; }
     .prof-card__meta { font-family: Montserrat, sans-serif; font-size: .8rem;
@@ -129,13 +129,13 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
                 text-transform: uppercase; letter-spacing: .06em;
                 padding: 5px 10px; border-radius: 4px; cursor: pointer;
                 background: none;
-                border: 1px solid var(--lima, #A6C300); color: var(--lima, #A6C300); }
+                border: 1px solid var(--c-lime); color: var(--c-lime); }
     .prof-editor__topo { display: flex; align-items: center; gap: 16px;
                          flex-wrap: wrap; margin-bottom: 20px; }
     .prof-voltar { font-family: Raleway, sans-serif; font-size: .78rem;
                    background: none; cursor: pointer; padding: 6px 12px;
                    border-radius: 4px; border: 1px solid rgba(255,255,255,.2);
-                   color: #CCCCCC; }
+                   color: var(--c-textbody); }
     .prof-estado { font-family: Montserrat, sans-serif; font-size: .82rem;
                    line-height: 1.5; padding: 12px 16px; border-radius: 6px;
                    margin-bottom: 20px; border: 1px solid var(--c-status-alert); color: var(--c-status-alert); }
@@ -147,7 +147,7 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
                    text-transform: uppercase; letter-spacing: .06em;
                    font-size: .8rem; padding: 10px 20px; border-radius: 4px;
                    cursor: pointer; border: none; margin-left: auto;
-                   background: var(--lima, #A6C300); color: #0D0D0D; }
+                   background: var(--c-lime); color: var(--c-black); }
     .prof-enviar[disabled] { opacity: .35; cursor: not-allowed; }
     /* Modo de leitura (AC-24). A opacidade apenas ACOMPANHA o modo; a garantia
        é o `disabled` controle a controle, no roteiro — CSS não impede teclado. */
@@ -255,7 +255,7 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
                    ACHADO-graficos-simulados-producao.md. -->
               <div style="margin-top:24px;padding-top:24px;border-top:1px solid rgba(255,255,255,.08);">
                 <div class="drawer-section-title">Progressão Física</div>
-                <p style="font-family:var(--font-body,inherit);font-size:12px;color:var(--c-textsub,#999);margin:0 0 16px;">
+                <p style="font-family:var(--font-body,inherit);font-size:12px;color:var(--c-textsub);margin:0 0 16px;">
                   Peso, proporção e simetria ao longo do ciclo (Programa ELITE90 PRO)
                 </p>
                 <div id="prof-charts"></div>
@@ -712,9 +712,9 @@ import graficosNucleo from '../../scripts/graficos.generated.js?raw';
         }
       }
       $("prof-overview-cycle-label").innerHTML = semana != null
-        ? `Progresso: <span style="color:#EDEDE0;font-weight:700;">Semana ${semana} de 13</span>.`
-          + ` Em fase de <span style="color:#EDEDE0;font-weight:700;">${(typeof rotuloFase === "function" ? rotuloFase(atleta.phase) : atleta.phase) ?? "—"}</span>.`
-          + ` Iniciado em <span style="color:#EDEDE0;font-weight:700;">${new Date(atleta.startDate).toLocaleDateString("pt-BR")}</span>.`
+        ? `Progresso: <span style="color:var(--c-light);font-weight:700;">Semana ${semana} de 13</span>.`
+          + ` Em fase de <span style="color:var(--c-light);font-weight:700;">${(typeof rotuloFase === "function" ? rotuloFase(atleta.phase) : atleta.phase) ?? "—"}</span>.`
+          + ` Iniciado em <span style="color:var(--c-light);font-weight:700;">${new Date(atleta.startDate).toLocaleDateString("pt-BR")}</span>.`
         : "Progresso: início do programa não registrado.";
       $("prof-overview-progress").style.width = diaCorrido != null ? `${Math.min(100, (diaCorrido / 90) * 100)}%` : "0%";
 

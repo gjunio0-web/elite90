@@ -79,7 +79,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-msg { font-family: Montserrat, sans-serif; padding: 24px;
                border: 1px solid rgba(255,255,255,.12); border-radius: 4px; }
     .prf-card { border: 1px solid rgba(255,255,255,.12); border-radius: 4px;
-                margin-bottom: 20px; background: #1A1A1A; overflow: hidden; }
+                margin-bottom: 20px; background: var(--c-darkbg); overflow: hidden; }
     .prf-card__topo { padding: 18px 20px; display: flex; flex-wrap: wrap;
                       align-items: baseline; gap: 8px 16px; }
     .prf-card__esp { font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem;
@@ -91,22 +91,22 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-selo { font-family: Raleway, sans-serif; font-size: .68rem;
                 text-transform: uppercase; letter-spacing: .06em;
                 padding: 3px 8px; border-radius: 4px; border: 1px solid currentColor; }
-    .prf-selo--ativo { color: var(--c-lime, #A6C300); }
-    .prf-selo--inativo { color: #E67E22; }
-    .prf-selo--ausente { color: #C0392B; }
-    .prf-selo--sem { color: #999; }
+    .prf-selo--ativo { color: var(--c-lime); }
+    .prf-selo--inativo { color: var(--c-status-alert); }
+    .prf-selo--ausente { color: var(--c-status-rejected); }
+    .prf-selo--sem { color: var(--c-textsub); }
     .prf-card__contagem { font-family: Montserrat, sans-serif; font-size: .8rem;
                           opacity: .8; width: 100%; }
     .prf-card__contagem button { background: none; border: none; padding: 0;
-                                 color: var(--c-lime, #A6C300); cursor: pointer;
+                                 color: var(--c-lime); cursor: pointer;
                                  font: inherit; text-decoration: underline; }
     .prf-amostra { margin: 8px 0 0; padding: 0; list-style: none; font-family: Montserrat, sans-serif;
                    font-size: .8rem; opacity: .95; }
     .prf-amostra__item { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
                          padding: 6px 0; border-top: 1px solid rgba(255,255,255,.06); }
     .prf-amostra__item span:first-child { flex: 1; min-width: 140px; }
-    .prf-amostra__item select { background: #0D0D0D; border: 1px solid rgba(255,255,255,.15);
-                                color: #EEE; font-family: Montserrat, sans-serif; font-size: .78rem;
+    .prf-amostra__item select { background: var(--c-black); border: 1px solid rgba(255,255,255,.15);
+                                color: var(--c-light); font-family: Montserrat, sans-serif; font-size: .78rem;
                                 padding: 4px; border-radius: 4px; }
     .prf-amostra__vazio { font-size: .75rem; opacity: .6; }
     .prf-card__acoes { display: flex; gap: 10px; padding: 14px 20px; flex-wrap: wrap;
@@ -114,13 +114,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-btn { font-family: Raleway, sans-serif; font-weight: 700; font-size: .75rem;
                text-transform: uppercase; letter-spacing: .05em; padding: 8px 14px;
                border-radius: 4px; cursor: pointer; border: none; }
-    .prf-btn--principal { background: var(--c-lime, #A6C300); color: #0D0D0D; }
-    .prf-btn--secundario { background: none; border: 1px solid rgba(255,255,255,.3); color: #EEE; }
-    .prf-btn--perigo { background: none; border: 1px solid #C0392B; color: #C0392B; }
+    .prf-btn--principal { background: var(--c-lime); color: var(--c-black); }
+    .prf-btn--secundario { background: none; border: 1px solid rgba(255,255,255,.3); color: var(--c-light); }
+    .prf-btn--perigo { background: none; border: 1px solid var(--c-status-rejected); color: var(--c-status-rejected); }
     .prf-btn[disabled] { opacity: .35; cursor: not-allowed; }
     .prf-form { width: 100%; margin-top: 10px; }
-    .prf-form select { background: #0D0D0D; border: 1px solid rgba(255,255,255,.15);
-                       color: #EEE; font-family: Montserrat, sans-serif;
+    .prf-form select { background: var(--c-black); border: 1px solid rgba(255,255,255,.15);
+                       color: var(--c-light); font-family: Montserrat, sans-serif;
                        font-size: .85rem; padding: 8px; border-radius: 4px; min-width: 260px; }
     .prf-pend { border-top: 1px solid rgba(255,255,255,.08); padding: 14px 20px; }
     .prf-pend__aviso { font-family: Montserrat, sans-serif; font-size: .8rem;
@@ -135,9 +135,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
        a ação dele que mudou a lista ou uma atualização de outra pessoa. */
     .prf-recado { font-family: Montserrat, sans-serif; font-size: .8rem;
                   width: 100%; margin-top: 8px; padding: 7px 10px; border-radius: 4px; }
-    .prf-recado--ok { color: var(--c-lime, #A6C300); background: rgba(166,195,0,.08);
+    .prf-recado--ok { color: var(--c-lime); background: rgba(166,195,0,.08);
                       border: 1px solid rgba(166,195,0,.3); }
-    .prf-recado--erro { color: var(--c-pending, #E67E22); background: rgba(230,126,34,.08);
+    .prf-recado--erro { color: var(--c-pending); background: rgba(230,126,34,.08);
                         border: 1px solid rgba(230,126,34,.35); }
     /* Janela de confirmação — mesmo padrão de fichas.astro e exercicios.astro
        (classes .confirm-overlay/.confirm-box/.confirm-actions), com prefixo
@@ -153,20 +153,20 @@ import AdminHeader from '../../components/AdminHeader.astro';
                            align-items: center; justify-content: center;
                            background: rgba(0,0,0,.7); padding: 16px; }
     .prf-confirm-overlay[hidden] { display: none; }
-    .prf-confirm-box { background: #1A1A1A; border: 1px solid var(--c-lime, #A6C300);
+    .prf-confirm-box { background: var(--c-darkbg); border: 1px solid var(--c-lime);
                        border-radius: 4px; max-width: 480px; width: 100%; padding: 24px; }
     .prf-confirm-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem;
                          color: var(--c-light); text-transform: uppercase; letter-spacing: .03em;
                          margin: 0 0 12px; }
     .prf-confirm-summary { font-family: Montserrat, sans-serif; font-size: .85rem;
-                           color: #CCC; line-height: 1.7; margin: 0 0 20px; }
+                           color: var(--c-textbody); line-height: 1.7; margin: 0 0 20px; }
     .prf-confirm-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
 
     .prf-secao { margin-top: 44px; }
     .prf-secao__topo { display: flex; align-items: baseline; justify-content: space-between;
                        gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
     .prf-linha { border: 1px solid rgba(255,255,255,.12); border-radius: 4px;
-                 background: #1A1A1A; margin-bottom: 12px; }
+                 background: var(--c-darkbg); margin-bottom: 12px; }
     .prf-linha--inativo { opacity: .55; }
     .prf-linha__topo { display: flex; align-items: baseline; gap: 8px 14px;
                        flex-wrap: wrap; padding: 14px 18px; }
@@ -185,11 +185,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-painel__titulo { font-family: Raleway, sans-serif; font-weight: 700; font-size: .78rem;
                           text-transform: uppercase; letter-spacing: .05em; margin: 0 0 10px;
                           padding: 12px 18px 0; }
-    .prf-edicao { border-left: 3px solid var(--c-lime, #A6C300); }
-    .prf-edicao .prf-painel__titulo { color: var(--c-lime, #A6C300); }
-    .prf-carteira { border-top: 1px solid rgba(255,255,255,.08); border-left: 3px solid var(--c-modulo-m4, #D88C2C);
+    .prf-edicao { border-left: 3px solid var(--c-lime); }
+    .prf-edicao .prf-painel__titulo { color: var(--c-lime); }
+    .prf-carteira { border-top: 1px solid rgba(255,255,255,.08); border-left: 3px solid var(--c-modulo-m4);
                     padding: 14px 18px 14px 15px; }
-    .prf-carteira .prf-carteira__titulo { color: var(--c-modulo-m4, #D88C2C); font-weight: 700; text-transform: uppercase;
+    .prf-carteira .prf-carteira__titulo { color: var(--c-modulo-m4); font-weight: 700; text-transform: uppercase;
                                           letter-spacing: .05em; }
     .prf-carteira__titulo { font-family: Montserrat, sans-serif; font-size: .78rem;
                             opacity: .7; margin: 0 0 8px; }
@@ -206,7 +206,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-campo label { font-family: Raleway, sans-serif; font-size: .68rem;
                        text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
     .prf-campo input, .prf-campo select {
-      background: #0D0D0D; border: 1px solid rgba(255,255,255,.15); color: #EEE;
+      background: var(--c-black); border: 1px solid rgba(255,255,255,.15); color: var(--c-light);
       font-family: Montserrat, sans-serif; font-size: .85rem; padding: 7px; border-radius: 4px;
       transition: border-color 120ms ease, box-shadow 120ms ease; }
     /* Mesmo padrão de EditorTreino.astro (M2, .wke-cell-input.invalid /
@@ -215,7 +215,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
        (--c-status-rejected). Nomeado prf-* para ficar dentro do vocabulário
        desta tela, não porque o padrão em si seja diferente. */
     .prf-campo input.invalid, .prf-campo select.invalid {
-      border-color: var(--c-status-rejected, #C0392B);
+      border-color: var(--c-status-rejected);
       box-shadow: 0 0 0 2px rgba(231,76,60,0.15); }
     /* min-height reserva o espaço da mensagem SEMPRE, mesmo vazia — sem isto,
        o texto aparecendo ao sair do campo empurra o resto da coluna para
@@ -226,7 +226,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
        antemão elimina o deslocamento, não só o sintoma num teste automatizado. */
     .prf-campo-erro { display: block; font-family: Montserrat, sans-serif; font-size: 10px;
                       line-height: 12px; height: 12px; overflow: hidden;
-                      color: var(--c-status-rejected, #C0392B); margin-top: 2px; }
+                      color: var(--c-status-rejected); margin-top: 2px; }
     .prf-campo--esp { display: flex; flex-direction: row; gap: 14px; align-items: center; }
     .prf-nota { font-family: Montserrat, sans-serif; font-size: .78rem; opacity: .65;
                 border-top: 1px solid rgba(255,255,255,.08); margin-top: 28px; padding-top: 14px; }

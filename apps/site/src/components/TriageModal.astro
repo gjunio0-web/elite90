@@ -1483,7 +1483,7 @@ formEl?.addEventListener("submit", async e => {
   .field__req    { color:var(--c-lime); margin-left:2px; }
   .field__input,
   .field__textarea {
-    background:var(--c-black); border:1px solid #2a2a2a; border-radius:4px;
+    background:var(--c-black); border:1px solid var(--c-border); border-radius:4px;
     color:var(--c-light); font-family:var(--font-body); font-size:var(--fs-body-md);
     padding:0.75rem 1rem; width:100%;
     transition:border-color var(--transition-base);
@@ -1496,9 +1496,9 @@ formEl?.addEventListener("submit", async e => {
   .field__input:focus,
   .field__textarea:focus  { outline:none; border-color:var(--c-lime); }
   .field__input::placeholder,
-  .field__textarea::placeholder { color:#444; }
+  .field__textarea::placeholder { color:var(--c-textfaint); }
   .field__textarea { resize:vertical; min-height:72px; }
-  .field__error   { font-size:var(--fs-body-sm); color:#E74C3C; margin-top:calc(-1 * var(--space-1)); }
+  .field__error   { font-size:var(--fs-body-sm); color:var(--c-danger); margin-top:calc(-1 * var(--space-1)); }
 
   /* Condicional: transicao suave de entrada/saida */
   .field--cond         { border:none; padding:0; margin:0; }
@@ -1565,7 +1565,7 @@ formEl?.addEventListener("submit", async e => {
     position: absolute;
     left: 4px; top: 1px;
     width: 6px; height: 10px;
-    border: 2px solid #000;
+    border: 2px solid var(--c-black);
     border-top: none; border-left: none;
     transform: rotate(45deg);
   }
@@ -1579,7 +1579,7 @@ formEl?.addEventListener("submit", async e => {
     line-height: 1.5;
   }
   .form-submit    { width:100%; }
-  .form-error     { font-size:var(--fs-body-sm); color:#E74C3C; text-align:center; }
+  .form-error     { font-size:var(--fs-body-sm); color:var(--c-danger); text-align:center; }
 
   /* ===== SUCESSO ===== */
   .form-success          { display:flex; flex-direction:column; align-items:center; text-align:center; gap:var(--space-4); padding:var(--space-8) var(--space-5); }

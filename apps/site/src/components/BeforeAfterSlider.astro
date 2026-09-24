@@ -344,7 +344,7 @@ const { items, t } = Astro.props;
     display: flex; justify-content: center; gap: 8px; margin-top: var(--space-5);
   }
   .results-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: #3a3a3a;
+    width: 8px; height: 8px; border-radius: 50%; background: var(--c-border-strong);
     border: none; cursor: pointer; padding: 0; transition: all .2s ease;
   }
   .results-dot[aria-current="true"] { background: var(--c-lime); width: 22px; border-radius: 4px; }
@@ -390,7 +390,7 @@ const { items, t } = Astro.props;
       top: 88px;
       z-index: 3;
       /* Preenchimento sólido — mesmo par cor/contorno do handle do
-         slider de comparação (#0D0D0D + lime), que já resolve o mesmo
+         slider de comparação (var(--c-black) + lime), que já resolve o mesmo
          problema de contraste sobre fotos de tom/exposição variáveis. */
       background: var(--c-black);
     }
@@ -453,7 +453,7 @@ const { items, t } = Astro.props;
     width: 100%;
     display: block;
     position: relative; 
-    background-color: var(--c-darkbg, #0A0A0A);
+    background-color: var(--c-darkbg);
     /* O selo de arquitetura Z: aprisiona a tag DEPOIS no seu próprio contexto */
     isolation: isolate; 
   }
@@ -500,7 +500,7 @@ const { items, t } = Astro.props;
     display: flex; /* Alinhamento flex para controle rígido */
     flex-direction: column;
     position: relative;
-    background-color: var(--c-darkbg, #0A0A0A);
+    background-color: var(--c-darkbg);
     overflow: hidden; /* Corta qualquer transbordo acidental */
   }
 

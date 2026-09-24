@@ -76,7 +76,7 @@ const backHref =
 
   :root{
     /* Codigo de autoria — quem age em cada etapa do guia */
-    --ator-sistema:#4A90D9; --ator-ia:#A0A820; --ator-coach:#27AE60; --ator-prof:#8E6FD8;
+    --ator-sistema:var(--c-status-progress); --ator-ia:var(--c-olive-light); --ator-coach:var(--c-status-approved); --ator-prof:var(--c-status-returned);
     --line: 1px solid rgba(255,255,255,0.08);
   }
   *{box-sizing:border-box}
@@ -88,7 +88,7 @@ const backHref =
   /* ── Cabeçalho ───────────────────────────────── */
   .top{
     border-bottom:4px solid var(--c-lime);
-    background:linear-gradient(180deg,#0D0D0D 0%,#141414 100%);
+    background:linear-gradient(180deg,var(--c-black) 0%,var(--c-darkbg) 100%);
     padding:var(--space-7) 0 var(--space-6);
   }
   .eyebrow{
@@ -204,10 +204,10 @@ const backHref =
     position:absolute; left:0; right:0; top:26px; height:14px; display:flex;
     border-radius:2px; overflow:hidden;
   }
-  .barra .conta{flex:0 0 82%; background:linear-gradient(90deg,#3d4a00,var(--c-lime))}
+  .barra .conta{flex:0 0 82%; background:linear-gradient(90deg,var(--c-olive-dark),var(--c-lime))}
   .barra .ajuste{
     flex:0 0 18%;
-    background:repeating-linear-gradient(45deg,var(--c-olive),var(--c-olive) 5px,#3f4d00 5px,#3f4d00 10px);
+    background:repeating-linear-gradient(45deg,var(--c-olive),var(--c-olive) 5px,var(--c-olive-dark) 5px,var(--c-olive-dark) 10px);
   }
   .tick{position:absolute; top:0; transform:translateX(-50%); text-align:center}
   .tick span{
@@ -258,7 +258,7 @@ const backHref =
   .aviso p{margin:0; font-size:.9rem}
   .a-laranja{--cor:var(--c-status-alert)} .a-lime{--cor:var(--c-lime)} .a-azul{--cor:var(--c-status-progress)}
 
-  .garantias{display:grid; gap:2px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); background:rgba(255,255,255,.09)}
+  .garantias{display:grid; gap:2px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); background:var(--c-surface-2)}
   .g{background:var(--c-black); padding:var(--space-5) var(--space-4)}
   .g .k{
     font-family:var(--font-display); font-size:2.4rem; line-height:1; color:var(--c-lime);
@@ -268,7 +268,7 @@ const backHref =
   .g p b{color:var(--c-light); font-weight:600}
 
   /* ── Rodapé ──────────────────────────────────── */
-  footer{border-top:4px solid var(--c-lime); padding:var(--space-6) 0 var(--space-7); background:#141414}
+  footer{border-top:4px solid var(--c-lime); padding:var(--space-6) 0 var(--space-7); background:var(--c-darkbg)}
   footer .marca{
     font-family:var(--font-display); font-size:2rem; letter-spacing:.08em;
     text-transform:uppercase; color:var(--c-light);
@@ -560,7 +560,7 @@ const backHref =
           <h3 style="margin-top:var(--space-5)">Onde cada nota cai</h3>
           <div class="faixas">
             <div class="faixa" style="--cor:var(--c-lime)"><div class="p">80+</div><div class="r">Prioridade alta</div></div>
-            <div class="faixa" style="--cor:#E6C200"><div class="p">60+</div><div class="r">Prioridade média</div></div>
+            <div class="faixa" style="--cor:var(--c-status-warning)"><div class="p">60+</div><div class="r">Prioridade média</div></div>
             <div class="faixa" style="--cor:var(--c-status-alert)"><div class="p">40+</div><div class="r">Prioridade baixa</div></div>
             <div class="faixa" style="--cor:var(--c-textsub)"><div class="p">&lt;40</div><div class="r">Fora do perfil</div></div>
           </div>

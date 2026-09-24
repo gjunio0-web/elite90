@@ -63,7 +63,7 @@ import { DOC_CSS } from '../../lib/plano-documento';
     .apr-msg { font-family: Montserrat, sans-serif; padding: 24px;
                border: 1px solid rgba(255,255,255,.12); border-radius: 8px; }
     .apr-card { border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
-                margin-bottom: 24px; background: #1A1A1A; overflow: hidden; }
+                margin-bottom: 24px; background: var(--c-darkbg); overflow: hidden; }
     .apr-card__topo { padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,.08);
                        display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
     .apr-card__atleta { font-family: Raleway, sans-serif; font-weight: 700;
@@ -73,21 +73,21 @@ import { DOC_CSS } from '../../lib/plano-documento';
     .apr-card__tipo { font-family: Raleway, sans-serif; font-size: .68rem;
                        text-transform: uppercase; letter-spacing: .06em;
                        padding: 3px 8px; border-radius: 4px;
-                       border: 1px solid var(--lima, #A6C300); color: var(--lima, #A6C300); }
+                       border: 1px solid var(--c-lime); color: var(--c-lime); }
     .apr-card__doc { padding: 4px 20px 20px; max-height: 420px; overflow-y: auto; }
     .apr-card__acoes { display: flex; gap: 10px; padding: 16px 20px;
                         border-top: 1px solid rgba(255,255,255,.08); flex-wrap: wrap; }
     .apr-btn { font-family: Raleway, sans-serif; font-weight: 700; font-size: .78rem;
                text-transform: uppercase; letter-spacing: .05em; padding: 9px 16px;
                border-radius: 4px; cursor: pointer; border: none; }
-    .apr-btn--aprovar { background: var(--lima, #A6C300); color: #0D0D0D; }
-    .apr-btn--devolver { background: none; border: 1px solid #E67E22; color: #E67E22; }
-    .apr-btn--recusar { background: none; border: 1px solid #C0392B; color: #C0392B; }
+    .apr-btn--aprovar { background: var(--c-lime); color: var(--c-black); }
+    .apr-btn--devolver { background: none; border: 1px solid var(--c-status-alert); color: var(--c-status-alert); }
+    .apr-btn--recusar { background: none; border: 1px solid var(--c-status-rejected); color: var(--c-status-rejected); }
     .apr-btn[disabled] { opacity: .35; cursor: not-allowed; }
     .apr-nota { width: 100%; margin-top: 10px; }
-    .apr-nota textarea { width: 100%; min-height: 60px; background: #0D0D0D;
+    .apr-nota textarea { width: 100%; min-height: 60px; background: var(--c-black);
                           border: 1px solid rgba(255,255,255,.15); border-radius: 4px;
-                          color: #EEE; font-family: Montserrat, sans-serif;
+                          color: var(--c-light); font-family: Montserrat, sans-serif;
                           font-size: .85rem; padding: 8px; resize: vertical; }
     .apr-nota__botoes { display: flex; gap: 8px; margin-top: 8px; }
     .apr-erro { width: 100%; font-family: Montserrat, sans-serif; font-size: .8rem;
@@ -110,7 +110,7 @@ import { DOC_CSS } from '../../lib/plano-documento';
                  animation: apr-toast-in 200ms var(--ease-out) both; }
     /* Bordas por ação, nas MESMAS cores que os botões desta página já usam —
        não cores novas: aprovar = --c-lime (.apr-btn--aprovar), devolver =
-       --c-status-new (.apr-btn--devolver, #E67E22), recusar =
+       --c-status-new (.apr-btn--devolver, var(--c-status-alert)), recusar =
        --c-status-rejected (.apr-btn--recusar, .apr-erro). */
     .apr-toast--aprovar  { border-color: var(--c-lime); }
     .apr-toast--devolver { border-color: var(--c-status-new); }

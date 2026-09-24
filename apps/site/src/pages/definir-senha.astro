@@ -53,22 +53,22 @@ import AdminHeader from '../components/AdminHeader.astro';
     .ds-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem;
                 letter-spacing: .03em; margin: 0 0 8px; }
     .ds-sub { font-family: Montserrat, sans-serif; font-size: .9rem; opacity: .75; margin: 0 0 28px; }
-    .ds-card { background: #1A1A1A; border: 1px solid rgba(255,255,255,.12);
+    .ds-card { background: var(--c-darkbg); border: 1px solid rgba(255,255,255,.12);
                border-radius: 4px; padding: 24px; }
     .ds-msg { font-family: Montserrat, sans-serif; font-size: .85rem; line-height: 1.6; }
-    .ds-email { color: var(--c-lime, #A6C300); font-weight: 700; }
+    .ds-email { color: var(--c-lime); font-weight: 700; }
     .ds-campo { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
     .ds-campo label { font-family: Raleway, sans-serif; font-size: .7rem;
                       text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
-    .ds-campo input { background: #0D0D0D; border: 1px solid rgba(255,255,255,.15);
-                      color: #EEE; font-family: Montserrat, sans-serif; font-size: .9rem;
+    .ds-campo input { background: var(--c-black); border: 1px solid rgba(255,255,255,.15);
+                      color: var(--c-light); font-family: Montserrat, sans-serif; font-size: .9rem;
                       padding: 10px; border-radius: 4px; }
     .ds-erro { font-family: Montserrat, sans-serif; font-size: .78rem;
-              color: var(--c-status-rejected, #C0392B); margin: 4px 0 0; }
+              color: var(--c-status-rejected); margin: 4px 0 0; }
     .ds-btn { font-family: Raleway, sans-serif; font-weight: 700; font-size: .8rem;
               text-transform: uppercase; letter-spacing: .05em; padding: 12px 20px;
               border-radius: 4px; cursor: pointer; border: none;
-              background: var(--c-lime, #A6C300); color: #0D0D0D; width: 100%; }
+              background: var(--c-lime); color: var(--c-black); width: 100%; }
     .ds-btn[disabled] { opacity: .4; cursor: not-allowed; }
   </style>
 </head>

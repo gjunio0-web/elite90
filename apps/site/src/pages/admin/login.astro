@@ -14,7 +14,7 @@ import '../../styles/global.css';
   <!-- Anti-flash: esconde o body até que o JS valide o gateway -->
   <style is:inline>
     html.locked body { display: none !important; }
-    html.locked { background-color: var(--c-black, #0D0D0D); }
+    html.locked { background-color: var(--c-black); }
   </style>
   <script is:inline>
     (function() {
@@ -125,7 +125,7 @@ import '../../styles/global.css';
     .btn-login {
       width: 100%;
       background: var(--c-lime);
-      color: #000;
+      color: var(--c-black);
       font-family: var(--font-label);
       font-weight: 700;
       text-transform: uppercase;
@@ -188,7 +188,7 @@ import '../../styles/global.css';
     .error-msg {
       font-family: var(--font-body);
       font-size: var(--fs-body-sm);
-      color: #E74C3C;
+      color: var(--c-danger);
       text-align: center;
       margin-top: var(--space-3);
       min-height: 1.2em;

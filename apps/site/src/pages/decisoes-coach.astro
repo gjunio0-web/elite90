@@ -31,6 +31,10 @@
      projeto — /definir-senha e /acesso-equipe incluídas. -->
 <style is:global>
 :root {
+  /* Página autocontida — não importa tokens.css (ver comentário do
+     frontmatter). var(--c-lime) aqui dentro seria autorreferente e
+     inválido por especificação; os valores ficam literais, iguais aos
+     de tokens.css, e não var(--algo-que-não-existe-nesta-página). */
   --c-lime:     #A6C300;
   --c-black:    #0D0D0D;
   --c-darkbg:   #1A1A1A;
@@ -39,7 +43,7 @@
   --c-textsub:  #999999;
   --c-surface-2: #242424;
   --c-status-rejected: #C0392B;
-  --c-status-checkin:  #E67E22;
+  --c-status-checkin:  #E67E22; /* mesmo valor de --c-status-alert em tokens.css */
   --font-display: "Bebas Neue", sans-serif;
   --font-label:   "Raleway", sans-serif;
   --font-body:    "Montserrat", sans-serif;
@@ -71,8 +75,8 @@ p { margin: 0 0 var(--space-3); }
 .actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .btn { font-family: var(--font-label); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: var(--tracking-label); padding: 8px 14px; border-radius: var(--radius-pill); cursor: pointer; border: 1.5px solid rgba(255,255,255,0.2); background: transparent; color: var(--c-textsub); transition: all var(--dur-med) var(--ease-std); }
 .btn:hover { border-color: rgba(255,255,255,0.4); color: var(--c-light); }
-.btn.active-aprovado { background: var(--c-lime); border-color: var(--c-lime); color: #0D0D0D; }
-.btn.active-editado { background: var(--c-status-checkin); border-color: var(--c-status-checkin); color: #0D0D0D; }
+.btn.active-aprovado { background: var(--c-lime); border-color: var(--c-lime); color: var(--c-black); }
+.btn.active-editado { background: var(--c-status-checkin); border-color: var(--c-status-checkin); color: var(--c-black); }
 .btn.active-removido { background: var(--c-status-rejected); border-color: var(--c-status-rejected); color: var(--c-light); }
 .btn-preview { border-color: rgba(166,195,0,0.4); color: var(--c-lime); }
 .preview-box { display: none; margin-top: var(--space-3); padding: var(--space-3); background: var(--c-black); border-radius: var(--radius-card); border: 1px dashed rgba(255,255,255,0.14); }
@@ -80,7 +84,7 @@ p { margin: 0 0 var(--space-3); }
 .preview-row { display: flex; align-items: flex-start; gap: var(--space-2); margin-bottom: var(--space-2); }
 .preview-row:last-child { margin-bottom: 0; }
 .pill { font-family: var(--font-label); font-weight: 700; font-size: 0.65rem; text-transform: uppercase; letter-spacing: var(--tracking-label); padding: 3px 10px; border-radius: var(--radius-pill); flex-shrink: 0; }
-.pill-sim { background: var(--c-lime); color: #0D0D0D; }
+.pill-sim { background: var(--c-lime); color: var(--c-black); }
 .pill-nao { background: var(--c-status-rejected); color: var(--c-light); }
 .preview-text { font-size: 0.8rem; color: var(--c-textbody); font-style: italic; line-height: 1.4; }
 .edit-box { display: none; margin-top: var(--space-3); width: 100%; background: var(--c-black); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-card); color: var(--c-light); padding: var(--space-3); font-family: var(--font-body); font-size: 0.875rem; resize: vertical; min-height: 70px; }

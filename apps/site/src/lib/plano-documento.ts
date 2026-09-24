@@ -273,7 +273,7 @@ export const DOC_CSS = `
   }
   .doc-logo-p { font-family: var(--font-body); font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--c-textsub); margin-top: 3px; }
   .doc-badge { padding: 6px 14px; border-radius: var(--radius-pill); font-family: var(--font-label); font-size: 0.6rem; font-weight: var(--fw-label); letter-spacing: 0.12em; text-transform: uppercase; background: rgba(85,102,0,0.3); color: var(--c-lime); border: 1px solid rgba(166, 195, 0, 0.50); white-space: nowrap; }
-  .doc-card { position: relative; background: #121212; border-radius: 18px; padding: 32px; border: 1px solid rgba(255,255,255,0.05); }
+  .doc-card { position: relative; background: var(--c-darkbg); border-radius: 18px; padding: 32px; border: 1px solid rgba(255,255,255,0.05); }
   .doc-card::after { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: linear-gradient(to bottom right, rgba(166,195,0,0.35), rgba(85,102,0,0.05)); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
   .doc-title { font-family: var(--font-display); font-size: clamp(1.6rem, 4vw, 2.4rem); letter-spacing: 0.04em; color: var(--c-light); line-height: 1.1; margin-bottom: 24px; }
   .doc-summary { padding: 18px 20px; background: rgba(0,0,0,0.4); border-left: 3px solid var(--c-lime); border-radius: 0 10px 10px 0; font-family: var(--font-body); font-size: 0.8rem; color: var(--c-textbody); line-height: 1.8; margin-bottom: 36px; }
