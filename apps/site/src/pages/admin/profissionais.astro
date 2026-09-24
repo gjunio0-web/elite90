@@ -193,9 +193,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
                                           letter-spacing: .05em; }
     .prf-carteira__titulo { font-family: Montserrat, sans-serif; font-size: .78rem;
                             opacity: .7; margin: 0 0 8px; }
-    .prf-carteira__item { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-                          padding: 8px 0; border-top: 1px solid rgba(255,255,255,.06); }
-    .prf-carteira__nome { font-family: Raleway, sans-serif; font-size: .85rem; flex: 1; min-width: 140px; }
+    .prf-carteira__atleta { padding: 8px 0; border-top: 1px solid rgba(255,255,255,.06); }
+    .prf-carteira__nome { font-family: Raleway, sans-serif; font-weight: 700; font-size: .85rem;
+                          display: block; margin-bottom: 6px; }
+    .prf-carteira__vinculo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+                            padding: 4px 0 4px 14px; }
+    .prf-carteira__vinculo .prf-linha__meta { flex: 1; min-width: 100px; }
     .prf-carteira__origin { font-family: Montserrat, sans-serif; font-size: .7rem; opacity: .55; }
     .prf-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
                   gap: 10px; padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.08); }
@@ -819,14 +822,39 @@ import AdminHeader from '../../components/AdminHeader.astro';
         : "Nenhum vínculo ativo.";
       bloco.appendChild(titulo);
 
-      for (const v of vinculos) bloco.appendChild(montarVinculo(bloco, p, v));
+      // Agrupa por atleta — um mesmo atleta pode ter vínculo em mais de uma
+      // especialidade com este profissional (ex.: Treino e Nutrição), e antes
+      // aparecia como duas linhas soltas, potencialmente distantes uma da
+      // outra na lista. A ordem ENTRE atletas é alfabética; a ordem das
+      // especialidades DENTRO de cada atleta é a que a função já devolveu.
+      const porAtleta = new Map();
+      for (const v of vinculos) {
+        if (!porAtleta.has(v.athleteUid)) {
+          porAtleta.set(v.athleteUid, { nome: v.athleteName ?? v.athleteUid, vinculos: [] });
+        }
+        porAtleta.get(v.athleteUid).vinculos.push(v);
+      }
+      const atletas = [...porAtleta.values()]
+        .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }));
+
+      for (const atleta of atletas) bloco.appendChild(montarAtleta(bloco, p, atleta));
+    }
+
+    function montarAtleta(bloco, p, atleta) {
+      const wrap = document.createElement("div");
+      wrap.className = "prf-carteira__atleta";
+      const nome = document.createElement("div");
+      nome.className = "prf-carteira__nome";
+      nome.textContent = atleta.nome;
+      wrap.appendChild(nome);
+      for (const v of atleta.vinculos) wrap.appendChild(montarVinculo(bloco, p, v));
+      return wrap;
     }
 
     function montarVinculo(bloco, p, v) {
       const item = document.createElement("div");
-      item.className = "prf-carteira__item";
+      item.className = "prf-carteira__vinculo";
       item.innerHTML = `
-        <span class="prf-carteira__nome">${escapeHtml(v.athleteName ?? v.athleteUid)}</span>
         <span class="prf-linha__meta">${ROTULO_ESP[v.specialty] ?? escapeHtml(v.specialty)}</span>
         <span class="prf-carteira__origin">${v.origin === "default" ? "titularidade" : v.origin === "explicit" ? "manual" : "origem desconhecida"}</span>
         <button class="prf-btn prf-btn--secundario" data-trocar="1">Trocar</button>
