@@ -771,13 +771,24 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
       const bloco = document.createElement("div");
       bloco.className = "prf-form";
+      // Sem o Cancelar, este painel era um beco sem saída: diferente dos
+      // painéis de vínculo (abrirTroca/abrirEncerramento), que fecham ao
+      // clicar de novo no mesmo botão que abriu, aqui o guard em ligarAcoes()
+      // (`if (!card.querySelector(".prf-form"))`) IMPEDE reabrir clicando de
+      // novo em "Trocar titular" — só sobrava completar a troca/definição
+      // para sair. Mesmo botão e mesma ação de fechar do painel de edição
+      // (abrirEdicao, `data-cancelar` + `bloco.remove()`).
       bloco.innerHTML = elegiveis.length
         ? `${htmlDropdownTrigger()}
            <button class="prf-btn prf-btn--principal" data-confirmar="1">
              ${tipo === "trocar" ? "Confirmar troca" : "Confirmar titular"}
-           </button>`
-        : `<span class="prf-card__vazio">Nenhum profissional ativo com esta especialidade. Cadastre um antes.</span>`;
+           </button>
+           <button class="prf-btn prf-btn--secundario" data-cancelar="1">Cancelar</button>`
+        : `<span class="prf-card__vazio">Nenhum profissional ativo com esta especialidade. Cadastre um antes.</span>
+           <button class="prf-btn prf-btn--secundario" data-cancelar="1">Cancelar</button>`;
       acoes.appendChild(bloco);
+
+      bloco.querySelector("[data-cancelar]").addEventListener("click", () => bloco.remove());
 
       const gatilho = bloco.querySelector(".prf-dropdown-trigger");
       if (gatilho) criarDropdown(gatilho, elegiveis.map(p => ({ value: p.id, label: p.name })), elegiveis[0]?.id);
