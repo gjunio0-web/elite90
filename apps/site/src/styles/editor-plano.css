@@ -185,7 +185,11 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 .wke-search-result-tags .wke-ex-tag { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wke-search-hint { padding: var(--space-4); text-align: center; font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); }
 .nte-macro-delta { font-family: var(--font-body); font-size: 10px; color: var(--c-textsub); margin-top: 2px; }
-.nte-dayselector { display: flex; gap: var(--space-2); margin-bottom: var(--space-5); }
+.nte-dayselector { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-5); }
+.nte-daycopy { flex-basis: 100%; display: flex; justify-content: flex-end; }
+.nte-daycopy-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; background: transparent; border: 1px solid var(--c-border-strong); border-radius: 8px; color: var(--c-textsub); font-family: var(--font-label); font-size: 0.6rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.07em; cursor: pointer; transition: color 150ms ease, border-color 150ms ease; white-space: nowrap; }
+.nte-daycopy-btn:hover { border-color: var(--c-lime); color: var(--c-lime); }
+.nte-daycopy-btn [data-lucide] { width: 14px; height: 14px; }
 .nte-dayseg { flex: 1; padding: 9px 14px; border-radius: var(--radius-pill); border: 1px solid rgba(255, 255, 255, 0.14); background: transparent; color: var(--c-textsub); font-family: var(--font-label); font-size: var(--fs-label); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); cursor: pointer; transition: color 150ms ease, border-color 150ms ease, background 150ms ease; }
 .nte-dayseg:hover { border-color: rgba(166, 195, 0, 0.50); color: var(--c-light); }
 .nte-dayseg.active { background: var(--c-lime); border-color: var(--c-lime); color: var(--c-black); }
@@ -376,6 +380,7 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 @media (max-width: 768px) {
   .pi-modal-overlay { padding-top: var(--space-5); }
   .nte-previewbtn { margin-left: 0; width: 100%; justify-content: center; }
+  .nte-daycopy-btn { width: 100%; justify-content: center; }
   .wke-loadhist-full table { display: table; }
   .wke-loadhist-full thead { display: table-header-group; }
   .wke-loadhist-full tbody { display: table-row-group; }

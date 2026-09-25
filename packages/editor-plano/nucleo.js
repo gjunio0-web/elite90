@@ -952,7 +952,10 @@ function wkeDragOnEnd(e) {
   wkeAutoSave();
 }
 
-function wkeConfirm(message, onYes) {
+// opts.title / opts.okLabel override the default removal wording; callers
+// that omit opts keep the original "Confirmar remoção" / "Remover".
+function wkeConfirm(message, onYes, opts) {
+  const o = opts || {};
   let ov = document.getElementById('wke-confirm-overlay');
   if (!ov) {
     ov = document.createElement('div');
@@ -968,6 +971,8 @@ function wkeConfirm(message, onYes) {
       '</div></div>';
     document.body.appendChild(ov);
   }
+  ov.querySelector('.wke-confirm-title').textContent = o.title || 'Confirmar remoção';
+  ov.querySelector('.wke-confirm-ok').textContent = o.okLabel || 'Remover';
   ov.querySelector('.wke-confirm-msg').textContent = message;
   const close = function() { ov.hidden = true; };
   ov.querySelector('.wke-confirm-cancel').onclick = close;
@@ -1276,7 +1281,66 @@ function nteRenderDaySelector() {
   const dt = nteState.plan.dayType;
   el.innerHTML =
     '<button class="nte-dayseg' + (dt === 'treino' ? ' active' : '') + '" onclick="nteSelectDayType(\'treino\')">Dia de Treino</button>' +
-    '<button class="nte-dayseg' + (dt === 'descanso' ? ' active' : '') + '" onclick="nteSelectDayType(\'descanso\')">Dia de Descanso</button>';
+    '<button class="nte-dayseg' + (dt === 'descanso' ? ' active' : '') + '" onclick="nteSelectDayType(\'descanso\')">Dia de Descanso</button>' +
+    nteDayCopyButton(dt);
+}
+
+// ---------- Copy one day's meals into the other day ----------
+//
+// Works in both directions (treino -> descanso and descanso -> treino).
+// Only meals belong to a day: macro targets, phase, weight and coach notes are
+// plan-level and are left untouched. Replacing a day that already has meals
+// asks for confirmation first; there is no undo. The copy is saved as a draft
+// like any other edit, so the athlete only sees it after republishing.
+
+const NTE_DAY_LABEL = { treino: 'Dia de Treino', descanso: 'Dia de Descanso' };
+
+function nteOtherDayType(type) { return type === 'treino' ? 'descanso' : 'treino'; }
+
+function nteDayMeals(type) {
+  const day = nteState.plan.days && nteState.plan.days[type];
+  return (day && day.meals) || [];
+}
+
+function nteDayCopyButton(currentType) {
+  // Nothing to copy from an empty day, so the button is not offered.
+  if (!nteDayMeals(currentType).length) return '';
+  const dest = nteOtherDayType(currentType);
+  return '<div class="nte-daycopy">' +
+    '<button class="nte-daycopy-btn" onclick="nteCopyDayTo(\'' + dest + '\')"><span data-lucide="copy"></span> Copiar para ' + NTE_DAY_LABEL[dest] + '</button>' +
+  '</div>';
+}
+
+function nteDaySummary(meals) {
+  let kcal = 0;
+  meals.forEach(function(m) { kcal += nteMealKcal(m); });
+  return meals.length + (meals.length === 1 ? ' refeição' : ' refeições') +
+    ' (' + Math.round(kcal).toLocaleString('pt-BR') + ' kcal)';
+}
+
+function nteCopyDayTo(dest) {
+  const src = nteOtherDayType(dest);
+  const srcMeals = nteDayMeals(src);
+  if (!srcMeals.length) return;
+  const destMeals = nteDayMeals(dest);
+  const apply = function() {
+    // Deep copy, same approach as nteDuplicateMeal: the two days must not
+    // share meal or food objects, or editing one would change the other.
+    const copy = JSON.parse(JSON.stringify(srcMeals));
+    if (!nteState.plan.days[dest]) nteState.plan.days[dest] = {};
+    nteState.plan.days[dest].meals = copy;
+    nteSelectDayType(dest); // takes the Coach to the day that received the copy
+    wkeToast(NTE_DAY_LABEL[src] + ' copiado para o ' + NTE_DAY_LABEL[dest]);
+    nteAutoSave();
+  };
+  if (!destMeals.length) { apply(); return; }
+  wkeConfirm(
+    'O ' + NTE_DAY_LABEL[dest] + ' tem ' + nteDaySummary(destMeals) + '. ' +
+    (destMeals.length === 1 ? 'Ela será substituída' : 'Elas serão substituídas') +
+    (srcMeals.length === 1 ? ' pela ' : ' pelas ') + nteDaySummary(srcMeals) + ' do ' + NTE_DAY_LABEL[src] + '.',
+    apply,
+    { title: 'Substituir refeições', okLabel: 'Substituir' }
+  );
 }
 
 function nteRenderMacros() {
