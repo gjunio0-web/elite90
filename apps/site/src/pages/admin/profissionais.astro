@@ -100,7 +100,12 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-card__contagem button { background: none; border: none; padding: 0;
                                  color: var(--c-lime); cursor: pointer;
                                  font: inherit; text-decoration: underline; }
-    .prf-amostra { margin: 8px 0 0; padding: 0; list-style: none; font-family: Montserrat, sans-serif;
+    /* Mesma cor de .prf-selo--inativo — é o mesmo alerta ("profissional
+       desativado"), só que visto do lado do atleta, não do titular. */
+    .prf-card__contagem--alerta { opacity: 1; color: var(--c-status-alert); }
+    .prf-card__contagem--alerta button { color: var(--c-status-alert); }
+    .prf-amostra__item--alerta { color: var(--c-status-alert); font-size: .72rem; flex: 1 1 100%; }
+    .prf-amostra, .prf-amostra-inativo { margin: 8px 0 0; padding: 0; list-style: none; font-family: Montserrat, sans-serif;
                    font-size: .8rem; opacity: .95; }
     .prf-amostra__item { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
                          padding: 6px 0; border-top: 1px solid rgba(255,255,255,.06); }
@@ -410,6 +415,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
         <span class="prf-card__esp">${ROTULO_ESP[e.specialty] ?? escapeHtml(e.specialty)}</span>
         ${montarTitular(e.titular)}
         ${montarContagem(e)}
+        ${montarContagemInativo(e)}
       `;
 
       const acoes = document.createElement("div");
@@ -422,6 +428,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       card.append(topo, acoes);
       ligarAcoes(card, e, acoes);
       ligarAmostra(card, e);
+      ligarAmostraInativo(card, e);
       return card;
     }
 
@@ -448,6 +455,20 @@ import AdminHeader from '../../components/AdminHeader.astro';
       if (n === 0) return `<span class="prf-card__contagem">Nenhum atleta sem profissional nesta especialidade.</span>`;
       const rotulo = n === 1 ? "1 atleta sem profissional" : `${n} atletas sem profissional`;
       return `<span class="prf-card__contagem">${rotulo} — <button data-amostra="1">ver quem</button></span>`;
+    }
+
+    // O vínculo aqui tem endedAt:null — não é "sem profissional" (AT-08) —,
+    // mas o profissional responsável está desativado, e por isso ninguém de
+    // fato responde por aquele atleta. Sem contagem própria, esse caso ficava
+    // invisível: nem entrava na contagem acima (o atleta TEM vínculo), nem
+    // aparecia destacado em lugar nenhum da tela.
+    function montarContagemInativo(e) {
+      const n = e.atletasComProfissionalInativo.total;
+      if (n === 0) return "";
+      const rotulo = n === 1
+        ? "1 atleta com profissional desativado"
+        : `${n} atletas com profissional desativado`;
+      return `<span class="prf-card__contagem prf-card__contagem--alerta">${rotulo} — <button data-amostra-inativo="1">ver quem</button></span>`;
     }
 
     function ligarAmostra(card, e) {
@@ -502,6 +523,71 @@ import AdminHeader from '../../components/AdminHeader.astro';
               if (!ul.querySelector("[data-atleta]")) {
                 // Lista esvaziada: a contagem do card ficou desatualizada até
                 // recarregar — que também busca listar-titulares de novo.
+                await recarregar();
+              }
+            } catch (err) {
+              btn.disabled = false;
+              const aviso = document.createElement("p");
+              aviso.className = "prf-recado prf-recado--erro";
+              aviso.textContent = err?.message || "Não foi possível atribuir agora.";
+              li.appendChild(aviso);
+            }
+          });
+        }
+      });
+    }
+
+    function ligarAmostraInativo(card, e) {
+      const botao = card.querySelector("[data-amostra-inativo]");
+      if (!botao) return;
+      botao.addEventListener("click", () => {
+        if (card.querySelector(".prf-amostra-inativo")) {
+          card.querySelector(".prf-amostra-inativo").remove();
+          botao.textContent = "ver quem";
+          return;
+        }
+        const ul = document.createElement("ul");
+        // Classe PRÓPRIA, sem o token "prf-amostra": ligarAmostra() acima
+        // detecta a lista dela com card.querySelector(".prf-amostra"), e se
+        // esta lista carregasse o mesmo token os dois toggles se atropelariam
+        // — abrir um fecharia o outro por engano.
+        ul.className = "prf-amostra-inativo";
+        const a = e.atletasComProfissionalInativo;
+        // Mesmo filtro de ligarAmostra() — profissionais ATIVOS desta
+        // especialidade, para o seletor nunca oferecer uma opção que
+        // atribuir-carteira.ts recusaria.
+        const elegiveis = profissionais.filter(
+          p => p.active && (p.specialties ?? []).includes(e.specialty),
+        );
+        ul.innerHTML = a.amostra.map(x => `
+          <li class="prf-amostra__item" data-atleta="${x.athleteUid}">
+            <span>${escapeHtml(x.name ?? x.athleteUid)}</span>
+            <span class="prf-amostra__item--alerta">profissional desativado: ${escapeHtml(x.professionalName ?? x.professionalId)}</span>
+            ${elegiveis.length
+              ? `<select>${elegiveis.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("")}</select>
+                 <button class="prf-btn prf-btn--secundario" data-atribuir="1">Atribuir</button>`
+              : `<span class="prf-amostra__vazio">Nenhum profissional ativo com esta especialidade.</span>`}
+          </li>`).join("")
+          + (a.haMais ? `<li>e outros — a lista mostra os primeiros ${a.amostra.length}.</li>` : "");
+        botao.parentElement.appendChild(ul);
+        botao.textContent = "ocultar";
+
+        // atribuir-carteira.ts já detecta o vínculo ativo (com o profissional
+        // desativado) e faz a substituição sozinha (endedReason: "replaced")
+        // — mesma chamada de ligarAmostra(), nenhuma função nova.
+        for (const li of ul.querySelectorAll("[data-atleta]")) {
+          const btn = li.querySelector("[data-atribuir]");
+          if (!btn) continue;
+          btn.addEventListener("click", async () => {
+            const athleteUid = li.dataset.atleta;
+            const professionalId = li.querySelector("select").value;
+            btn.disabled = true;
+            li.querySelector(".prf-recado")?.remove();
+            try {
+              const resp = await chamar("atribuir-carteira", { athleteUid, professionalId, specialty: e.specialty });
+              if (!resp.ok) throw new Error(await erroDe(resp));
+              li.remove();
+              if (!ul.querySelector("[data-atleta]")) {
                 await recarregar();
               }
             } catch (err) {

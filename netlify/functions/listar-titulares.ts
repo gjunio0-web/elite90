@@ -103,6 +103,20 @@ type EstadoTitular = {
     amostra: { athleteUid: string; name: string | null }[];
     haMais: boolean;
   };
+  /**
+   * Atletas com vínculo ativo NESTA especialidade, mas cujo profissional
+   * responsável está desativado (ou o cadastro não existe mais). O vínculo em
+   * si continua com `endedAt: null` — não é "sem profissional" (AT-08) —, mas
+   * na prática ninguém responde por aquele atleta ali, e isso ficava invisível
+   * para o Coach: nem a contagem de "sem profissional" pega esse caso (o
+   * atleta TEM vínculo), nem a carteira do profissional desativado aparece em
+   * destaque na tela para alguém pensar em conferir.
+   */
+  atletasComProfissionalInativo: {
+    total: number;
+    amostra: { athleteUid: string; name: string | null; professionalId: string; professionalName: string | null }[];
+    haMais: boolean;
+  };
 };
 
 /** Carimbo do Firestore vira ISO; a tela só precisa exibir. */
@@ -123,7 +137,7 @@ export function montarEstado(
   titularBruto: { professionalId?: unknown; definedAt?: unknown } | undefined,
   cadastros: Map<string, { name?: unknown; active?: unknown }>,
   atletas: { athleteUid: string; name: string | null }[],
-  comVinculo: Set<string>,
+  vinculoAtivoPor: Map<string, string>,
 ): EstadoTitular {
   const professionalId = titularBruto?.professionalId
     ? String(titularBruto.professionalId)
@@ -143,7 +157,26 @@ export function montarEstado(
     };
   }
 
-  const sem = atletas.filter((a) => !comVinculo.has(a.athleteUid));
+  const sem = atletas.filter((a) => !vinculoAtivoPor.has(a.athleteUid));
+
+  // Mesmo cruzamento cadastro-vs-configuração do titular (AC-13, comentário
+  // acima): o vínculo registra QUEM foi atribuído, o cadastro do profissional
+  // é a verdade sobre se ele responde por alguém hoje.
+  const comInativo = atletas
+    .map((a) => ({ atleta: a, professionalId: vinculoAtivoPor.get(a.athleteUid) }))
+    .filter((x): x is { atleta: typeof x.atleta; professionalId: string } => {
+      if (!x.professionalId) return false;
+      const cadastro = cadastros.get(x.professionalId);
+      return !cadastro || cadastro.active !== true;
+    })
+    .map((x) => ({
+      athleteUid: x.atleta.athleteUid,
+      name: x.atleta.name,
+      professionalId: x.professionalId,
+      professionalName: cadastros.get(x.professionalId)?.name
+        ? String(cadastros.get(x.professionalId)!.name)
+        : null,
+    }));
 
   return {
     specialty,
@@ -152,6 +185,11 @@ export function montarEstado(
       total: sem.length,
       amostra: sem.slice(0, LIMITE_AMOSTRA),
       haMais: sem.length > LIMITE_AMOSTRA,
+    },
+    atletasComProfissionalInativo: {
+      total: comInativo.length,
+      amostra: comInativo.slice(0, LIMITE_AMOSTRA),
+      haMais: comInativo.length > LIMITE_AMOSTRA,
     },
   };
 }
@@ -176,44 +214,44 @@ export const handler = async (event: any) => {
   const db = getFirestore(app);
 
   try {
-    // -- A metade barata --
-    const configSnap = await db.collection(COLECAO_CONFIG).doc(DOC_DELEGACAO).get();
+    // -- A metade barata (config) e a metade cara (as duas coleções inteiras),
+    // em paralelo: nenhuma depende do resultado da outra até o cruzamento. --
+    const [configSnap, atletasSnap, ativosSnap] = await Promise.all([
+      db.collection(COLECAO_CONFIG).doc(DOC_DELEGACAO).get(),
+      db.collection(COLECAO_ATLETAS).get(),
+      db.collection(COLECAO_ASSIGNMENTS).where("endedAt", "==", null).get(),
+    ]);
     const config = configSnap.exists ? (configSnap.data() ?? {}) : {};
 
-    const idsTitulares = [
-      ...new Set(
-        SPECIALTIES.map((s) => (config as any)[s]?.professionalId)
-          .filter(Boolean)
-          .map(String),
-      ),
-    ];
+    const idsTitulares = SPECIALTIES.map((s) => (config as any)[s]?.professionalId).filter(Boolean).map(String);
+    // Além dos titulares, todo profissional com vínculo ativo agora — é
+    // contra ESTE cadastro que atletasComProfissionalInativo se decide, não só
+    // contra quem está configurado como titular.
+    const idsComVinculo = ativosSnap.docs.map((d) => String(d.get("professionalId"))).filter(Boolean);
+    const idsProfissionais = [...new Set([...idsTitulares, ...idsComVinculo])];
 
     const cadastros = new Map<string, { name?: unknown; active?: unknown }>();
-    if (idsTitulares.length) {
-      const refs = idsTitulares.map((id) => db.collection(COLECAO_PROFISSIONAIS).doc(id));
+    if (idsProfissionais.length) {
+      const refs = idsProfissionais.map((id) => db.collection(COLECAO_PROFISSIONAIS).doc(id));
       const snaps = await db.getAll(...refs);
       for (const s of snaps) {
         if (s.exists) cadastros.set(s.id, s.data() as any);
       }
     }
 
-    // -- A metade cara: as duas coleções inteiras, cruzadas em memória --
-    const [atletasSnap, ativosSnap] = await Promise.all([
-      db.collection(COLECAO_ATLETAS).get(),
-      db.collection(COLECAO_ASSIGNMENTS).where("endedAt", "==", null).get(),
-    ]);
-
     const atletas = atletasSnap.docs.map((d) => ({
       athleteUid: d.id,
       name: (d.data() ?? {}).name ? String((d.data() as any).name) : null,
     }));
 
-    // Um conjunto por especialidade, para não varrer os vínculos duas vezes.
-    const porEspecialidade = new Map<string, Set<string>>();
-    for (const s of SPECIALTIES) porEspecialidade.set(s, new Set<string>());
+    // Um mapa athleteUid → professionalId por especialidade (RN-10: no máximo
+    // um vínculo ativo por par atleta+especialidade, então não há ambiguidade
+    // em guardar só o último visto), para não varrer os vínculos duas vezes.
+    const porEspecialidade = new Map<string, Map<string, string>>();
+    for (const s of SPECIALTIES) porEspecialidade.set(s, new Map<string, string>());
     for (const d of ativosSnap.docs) {
-      const conjunto = porEspecialidade.get(String(d.get("specialty")));
-      if (conjunto) conjunto.add(String(d.get("athleteUid")));
+      const mapa = porEspecialidade.get(String(d.get("specialty")));
+      if (mapa) mapa.set(String(d.get("athleteUid")), String(d.get("professionalId")));
     }
 
     const estados = SPECIALTIES.map((s) =>
@@ -222,7 +260,7 @@ export const handler = async (event: any) => {
         (config as any)[s],
         cadastros,
         atletas,
-        porEspecialidade.get(s) ?? new Set<string>(),
+        porEspecialidade.get(s) ?? new Map<string, string>(),
       ),
     );
 
