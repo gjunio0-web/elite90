@@ -114,6 +114,31 @@ import AdminHeader from '../../components/AdminHeader.astro';
                                 color: var(--c-light); font-family: Montserrat, sans-serif; font-size: .78rem;
                                 padding: 4px; border-radius: 4px; }
     .prf-amostra__vazio { font-size: .75rem; opacity: .6; }
+    /* Dropdown customizado do Design System, em lugar de <select> nativo — o
+       CSS de página nunca alcança o estado ABERTO de um <select> (o menu de
+       opções é desenhado pelo sistema operacional, não pela página, em
+       qualquer navegador). O gatilho abaixo é um <button>, nunca um <select>
+       de verdade; o menu de opções (.status-dropdown-menu, mesma classe e
+       convenção de atletas.astro/fichas.astro) é desenhado à parte, em
+       position:fixed sobre document.body. */
+    .prf-dropdown-trigger { display: inline-flex; align-items: center; justify-content: space-between; gap: 8px;
+                            background: var(--c-black); border: 1px solid rgba(255,255,255,.15); color: var(--c-light);
+                            font-family: Montserrat, sans-serif; font-size: .82rem; padding: 7px 10px; border-radius: 4px;
+                            cursor: pointer; min-width: 180px; text-align: left; }
+    .prf-dropdown-trigger:hover { border-color: rgba(255,255,255,.3); }
+    .prf-dropdown-trigger svg { flex-shrink: 0; color: var(--c-textsub); }
+    .prf-dropdown-trigger__label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .prf-amostra__item .prf-dropdown-trigger { font-size: .78rem; padding: 4px 8px; min-width: 140px; }
+    .prf-form .prf-dropdown-trigger { min-width: 260px; font-size: .85rem; padding: 8px 10px; }
+    .prf-campo .prf-dropdown-trigger { width: 100%; font-size: .85rem; padding: 7px 10px; }
+    .status-dropdown-menu { position: fixed; z-index: 500; background: var(--c-darkbg);
+                            border: 1px solid rgba(255,255,255,.14); border-radius: 4px;
+                            list-style: none; margin: 0; padding: 4px 0; min-width: 200px;
+                            box-shadow: 0 8px 32px rgba(0,0,0,.85); overflow: hidden; }
+    .status-dropdown-menu li button { width: 100%; padding: 10px 14px; text-align: left; background: transparent;
+                                      border: none; font-family: Montserrat, sans-serif; font-size: .8rem;
+                                      color: var(--c-light); cursor: pointer; transition: background 150ms ease; }
+    .status-dropdown-menu li button:hover { background: rgba(255,255,255,.06); }
     .prf-card__acoes { display: flex; gap: 10px; padding: 14px 20px; flex-wrap: wrap;
                        border-top: 1px solid rgba(255,255,255,.08); }
     .prf-btn { font-family: Raleway, sans-serif; font-weight: 700; font-size: .75rem;
@@ -124,9 +149,6 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-btn--perigo { background: none; border: 1px solid var(--c-status-rejected); color: var(--c-status-rejected); }
     .prf-btn[disabled] { opacity: .35; cursor: not-allowed; }
     .prf-form { width: 100%; margin-top: 10px; }
-    .prf-form select { background: var(--c-black); border: 1px solid rgba(255,255,255,.15);
-                       color: var(--c-light); font-family: Montserrat, sans-serif;
-                       font-size: .85rem; padding: 8px; border-radius: 4px; min-width: 260px; }
     .prf-pend { border-top: 1px solid rgba(255,255,255,.08); padding: 14px 20px; }
     .prf-pend__aviso { font-family: Montserrat, sans-serif; font-size: .8rem;
                        opacity: .75; margin: 0 0 12px; }
@@ -210,7 +232,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-campo { display: flex; flex-direction: column; gap: 4px; }
     .prf-campo label { font-family: Raleway, sans-serif; font-size: .68rem;
                        text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
-    .prf-campo input, .prf-campo select {
+    .prf-campo input {
       background: var(--c-black); border: 1px solid rgba(255,255,255,.15); color: var(--c-light);
       font-family: Montserrat, sans-serif; font-size: .85rem; padding: 7px; border-radius: 4px;
       transition: border-color 120ms ease, box-shadow 120ms ease; }
@@ -219,7 +241,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
        campo, mensagem pequena embaixo, com o mesmo token de cor
        (--c-status-rejected). Nomeado prf-* para ficar dentro do vocabulário
        desta tela, não porque o padrão em si seja diferente. */
-    .prf-campo input.invalid, .prf-campo select.invalid {
+    .prf-campo input.invalid {
       border-color: var(--c-status-rejected);
       box-shadow: 0 0 0 2px rgba(231,76,60,0.15); }
     /* min-height reserva o espaço da mensagem SEMPRE, mesmo vazia — sem isto,
@@ -311,6 +333,111 @@ import AdminHeader from '../../components/AdminHeader.astro';
     const ROTULO_ESP = { training: "Treino", nutrition: "Nutrição" };
     let token = null;
     let profissionais = [];
+
+    // ── DROPDOWN CUSTOMIZADO, EM LUGAR DE <select> NATIVO ───────────────────
+    // Mesma razão de atletas.astro/fichas.astro: nenhum CSS de página alcança
+    // o estado ABERTO de um <select> — o menu é desenhado pelo sistema
+    // operacional. A diferença aqui é que ESTA tela não tem um número fixo de
+    // dropdowns conhecidos no carregamento (como o filtro de status daquelas
+    // duas) — cada linha dinâmica (item de amostra, vínculo de carteira,
+    // campo de cadastro) tem O SEU PRÓPRIO dropdown, criado e destruído com a
+    // linha, muitas vezes dezenas de vezes na mesma sessão (abrir/fechar
+    // "ver quem", abrir/fechar "Trocar" em cada vínculo). Por isso o menu
+    // flutuante de cada um (filho de document.body, fora da árvore da linha)
+    // é descartado sozinho quando o GATILHO some do documento — via
+    // MutationObserver, não via chamada manual espalhada por cada um dos
+    // pontos que fecham um painel (arriscado demais confiar em lembrar de
+    // todos eles).
+    let __dropdownSeq = 0;
+    const __dropdownMenus = new Map();
+
+    function __criarMenuDropdown(itens) {
+      const ul = document.createElement("ul");
+      ul.className = "status-dropdown-menu";
+      ul.hidden = true;
+      ul.setAttribute("role", "listbox");
+      ul.innerHTML = itens.map(({ value, label }) =>
+        `<li><button type="button" role="option" data-value="${escapeHtml(String(value))}">${escapeHtml(label)}</button></li>`,
+      ).join("");
+      document.body.appendChild(ul);
+      return ul;
+    }
+    function __posicionarMenuDropdown(menu, trigger) {
+      const r = trigger.getBoundingClientRect();
+      menu.style.left = `${r.left}px`;
+      menu.style.minWidth = `${r.width}px`;
+      menu.style.top = "-9999px";
+      menu.hidden = false;
+      const menuH = menu.offsetHeight;
+      menu.style.top = (window.innerHeight - r.bottom) > menuH
+        ? `${r.bottom + 4}px`
+        : `${r.top - menuH - 4}px`;
+    }
+    function __fecharDropdowns() {
+      for (const m of __dropdownMenus.values()) m.hidden = true;
+    }
+    document.addEventListener("click", () => __fecharDropdowns());
+    window.addEventListener("scroll", () => __fecharDropdowns(), { passive: true });
+
+    /**
+     * Substitui um <select> nativo por um botão + menu customizado.
+     * `trigger` já precisa existir no DOM (markup com
+     * `htmlDropdownTrigger()`), com um `<span class="prf-dropdown-trigger__label">`
+     * dentro. O valor escolhido fica tanto em `trigger.value` (propriedade
+     * real de <button>, refletindo o atributo `value` — funciona com
+     * lerCampos() sem mudança nenhuma nele) quanto em `trigger.dataset.value`.
+     */
+    function criarDropdown(trigger, itens, valorInicial) {
+      const id = String(++__dropdownSeq);
+      trigger.dataset.dropdownId = id;
+      const menu = __criarMenuDropdown(itens);
+      __dropdownMenus.set(id, menu);
+      const rotulo = (v) => itens.find((i) => String(i.value) === String(v))?.label ?? "";
+      const label = trigger.querySelector(".prf-dropdown-trigger__label");
+
+      function definir(v) {
+        trigger.value = v;
+        trigger.dataset.value = v;
+        label.textContent = rotulo(v);
+      }
+      definir(valorInicial);
+
+      trigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const abrir = menu.hidden;
+        __fecharDropdowns();
+        if (abrir) __posicionarMenuDropdown(menu, trigger);
+      });
+      menu.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const opt = e.target.closest("button[data-value]");
+        if (opt) definir(opt.dataset.value);
+        menu.hidden = true;
+      });
+    }
+
+    function htmlDropdownTrigger(atributosExtra = "") {
+      return `<button type="button" class="prf-dropdown-trigger"${atributosExtra}><span class="prf-dropdown-trigger__label"></span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+    }
+
+    // Descarta o menu flutuante de qualquer gatilho removido do documento —
+    // painel fechado, linha reconstruída, item de amostra removido após
+    // "Atribuir". Sem isto, cada abrir/fechar vazaria um <ul> órfão em
+    // document.body para sempre.
+    new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        for (const node of m.removedNodes) {
+          if (node.nodeType !== 1) continue;
+          const gatilhos = node.matches?.("[data-dropdown-id]")
+            ? [node]
+            : [...(node.querySelectorAll?.("[data-dropdown-id]") ?? [])];
+          for (const g of gatilhos) {
+            const menu = __dropdownMenus.get(g.dataset.dropdownId);
+            if (menu) { menu.remove(); __dropdownMenus.delete(g.dataset.dropdownId); }
+          }
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true });
 
     // ── JANELA DE CONFIRMAÇÃO (substitui window.confirm) ───────────────────
     const cfOverlay = document.getElementById("prf-confirm-overlay");
@@ -494,7 +621,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
           <li class="prf-amostra__item" data-atleta="${x.athleteUid}">
             <span>${escapeHtml(x.name ?? x.athleteUid)}</span>
             ${elegiveis.length
-              ? `<select>${elegiveis.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("")}</select>
+              ? `${htmlDropdownTrigger()}
                  <button class="prf-btn prf-btn--secundario" data-atribuir="1">Atribuir</button>`
               : `<span class="prf-amostra__vazio">Nenhum profissional ativo com esta especialidade.</span>`}
           </li>`).join("")
@@ -503,14 +630,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
         botao.textContent = "ocultar";
 
         // Um listener por item, não delegado no <ul> — cada linha precisa do
-        // PRÓPRIO <select>, e delegar exigiria navegar de volta ao ancestral
+        // PRÓPRIO dropdown, e delegar exigiria navegar de volta ao ancestral
         // a cada clique. O volume aqui é no máximo LIMITE_AMOSTRA (20).
         for (const li of ul.querySelectorAll("[data-atleta]")) {
+          const gatilho = li.querySelector(".prf-dropdown-trigger");
+          if (gatilho) criarDropdown(gatilho, elegiveis.map(p => ({ value: p.id, label: p.name })), elegiveis[0]?.id);
           const btn = li.querySelector("[data-atribuir]");
           if (!btn) continue;
           btn.addEventListener("click", async () => {
             const athleteUid = li.dataset.atleta;
-            const professionalId = li.querySelector("select").value;
+            const professionalId = li.querySelector(".prf-dropdown-trigger").value;
             btn.disabled = true;
             li.querySelector(".prf-recado")?.remove();
             try {
@@ -564,7 +693,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
             <span>${escapeHtml(x.name ?? x.athleteUid)}</span>
             <span class="prf-amostra__item--alerta">profissional desativado: ${escapeHtml(x.professionalName ?? x.professionalId)}</span>
             ${elegiveis.length
-              ? `<select>${elegiveis.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("")}</select>
+              ? `${htmlDropdownTrigger()}
                  <button class="prf-btn prf-btn--secundario" data-atribuir="1">Atribuir</button>`
               : `<span class="prf-amostra__vazio">Nenhum profissional ativo com esta especialidade.</span>`}
           </li>`).join("")
@@ -576,11 +705,13 @@ import AdminHeader from '../../components/AdminHeader.astro';
         // desativado) e faz a substituição sozinha (endedReason: "replaced")
         // — mesma chamada de ligarAmostra(), nenhuma função nova.
         for (const li of ul.querySelectorAll("[data-atleta]")) {
+          const gatilho = li.querySelector(".prf-dropdown-trigger");
+          if (gatilho) criarDropdown(gatilho, elegiveis.map(p => ({ value: p.id, label: p.name })), elegiveis[0]?.id);
           const btn = li.querySelector("[data-atribuir]");
           if (!btn) continue;
           btn.addEventListener("click", async () => {
             const athleteUid = li.dataset.atleta;
-            const professionalId = li.querySelector("select").value;
+            const professionalId = li.querySelector(".prf-dropdown-trigger").value;
             btn.disabled = true;
             li.querySelector(".prf-recado")?.remove();
             try {
@@ -622,27 +753,28 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     function abrirEscolha(card, acoes, e, tipo) {
       const atual = e.titular?.professionalId ?? null;
-      const opcoes = profissionais
+      const elegiveis = profissionais
         // Titular precisa estar ativo: a função recusaria um inativo, e oferecer
         // a opção seria convidar o Coach a um erro que só apareceria no envio.
-        .filter(p => p.active && (p.specialties ?? []).includes(e.specialty) && p.id !== atual)
-        .map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`)
-        .join("");
+        .filter(p => p.active && (p.specialties ?? []).includes(e.specialty) && p.id !== atual);
 
       const bloco = document.createElement("div");
       bloco.className = "prf-form";
-      bloco.innerHTML = opcoes
-        ? `<select>${opcoes}</select>
+      bloco.innerHTML = elegiveis.length
+        ? `${htmlDropdownTrigger()}
            <button class="prf-btn prf-btn--principal" data-confirmar="1" style="margin-left:8px">
              ${tipo === "trocar" ? "Confirmar troca" : "Confirmar titular"}
            </button>`
         : `<span class="prf-card__vazio">Nenhum profissional ativo com esta especialidade. Cadastre um antes.</span>`;
       acoes.appendChild(bloco);
 
+      const gatilho = bloco.querySelector(".prf-dropdown-trigger");
+      if (gatilho) criarDropdown(gatilho, elegiveis.map(p => ({ value: p.id, label: p.name })), elegiveis[0]?.id);
+
       const confirmar = bloco.querySelector("[data-confirmar]");
       if (!confirmar) return;
       confirmar.addEventListener("click", async () => {
-        const professionalId = bloco.querySelector("select").value;
+        const professionalId = bloco.querySelector(".prf-dropdown-trigger").value;
         const fn = tipo === "trocar" ? "trocar-titular" : "definir-titular";
         const mensagem = tipo === "trocar" ? "Titular trocado." : "Titular definido.";
         await executarAcao(acoes, fn, { professionalId, specialty: e.specialty }, mensagem, card);
@@ -963,15 +1095,18 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const form = document.createElement("div");
       form.className = "prf-form";
       form.innerHTML = elegiveis.length
-        ? `<select>${elegiveis.map(x => `<option value="${x.id}">${escapeHtml(x.name)}</option>`).join("")}</select>
+        ? `${htmlDropdownTrigger()}
            <button class="prf-btn prf-btn--principal" data-confirmar-troca="1" style="margin-left:8px">Confirmar troca</button>`
         : `<span class="prf-card__vazio">Nenhum outro profissional ativo com esta especialidade.</span>`;
       item.appendChild(form);
 
+      const gatilho = form.querySelector(".prf-dropdown-trigger");
+      if (gatilho) criarDropdown(gatilho, elegiveis.map(x => ({ value: x.id, label: x.name })), elegiveis[0]?.id);
+
       const confirmar = form.querySelector("[data-confirmar-troca]");
       if (!confirmar) return;
       confirmar.addEventListener("click", async () => {
-        const professionalId = form.querySelector("select").value;
+        const professionalId = form.querySelector(".prf-dropdown-trigger").value;
         confirmar.disabled = true;
         try {
           const resp = await chamar("atribuir-carteira", {
@@ -996,16 +1131,17 @@ import AdminHeader from '../../components/AdminHeader.astro';
       const form = document.createElement("div");
       form.className = "prf-form";
       form.innerHTML = `
-        <select>
-          <option value="professional_exit">Profissional saiu — sem substituto imediato</option>
-          <option value="cycle_closed">Ciclo do atleta encerrado</option>
-        </select>
+        ${htmlDropdownTrigger()}
         <button class="prf-btn prf-btn--perigo" data-confirmar-fim="1" style="margin-left:8px">Confirmar encerramento</button>
       `;
       item.appendChild(form);
+      criarDropdown(form.querySelector(".prf-dropdown-trigger"), [
+        { value: "professional_exit", label: "Profissional saiu — sem substituto imediato" },
+        { value: "cycle_closed", label: "Ciclo do atleta encerrado" },
+      ], "professional_exit");
 
       form.querySelector("[data-confirmar-fim]").addEventListener("click", async () => {
-        const endedReason = form.querySelector("select").value;
+        const endedReason = form.querySelector(".prf-dropdown-trigger").value;
         const ok = await confirmarAcao(
           "Encerrar carteira",
           `Encerrar o vínculo de ${escapeHtml(v.athleteName ?? v.athleteUid)}? O atleta fica sem profissional nesta especialidade até uma nova atribuição.`,
@@ -1163,19 +1299,29 @@ import AdminHeader from '../../components/AdminHeader.astro';
         <div class="prf-campo"><label>E-mail</label><input type="email" data-c="email" value="${v("email")}" />
           <span class="prf-campo-erro" data-erro="email"></span></div>
         <div class="prf-campo"><label>Telefone</label><input type="tel" data-c="phone" maxlength="15" value="${formatarTelefone(p?.phone ?? "")}" /></div>
-        <div class="prf-campo"><label>Conselho</label><select data-c="council">
-          ${CONSELHOS.map(c => `<option value="${c}"${p?.council === c ? " selected" : ""}>${c}</option>`).join("")}
-        </select></div>
+        <div class="prf-campo"><label>Conselho</label>${htmlDropdownTrigger(' data-c="council"')}</div>
         <div class="prf-campo"><label>Número</label><input data-c="councilNumber" value="${v("councilNumber")}" />
           <span class="prf-campo-erro" data-erro="councilNumber"></span></div>
         <div class="prf-campo"><label>UF</label><input data-c="councilState" maxlength="2" value="${v("councilState")}" /></div>
-        <div class="prf-campo"><label>Classificação</label><select data-c="classification">
-          ${Object.entries(CLASSIFICACOES).map(([k, r]) => `<option value="${k}"${p?.classification === k ? " selected" : ""}>${r}</option>`).join("")}
-        </select></div>
+        <div class="prf-campo"><label>Classificação</label>${htmlDropdownTrigger(' data-c="classification"')}</div>
         <div class="prf-campo"><label>Especialidades</label><span class="prf-campo--esp">
           ${Object.entries(ROTULO_ESP).map(([k, r]) => `<label style="text-transform:none;opacity:1"><input type="checkbox" data-esp="${k}"${(p?.specialties ?? []).includes(k) ? " checked" : ""} /> ${r}</label>`).join("")}
         </span></div>
       `;
+
+      // Mesma regra que o <select> nativo já seguia sem attribute `selected`
+      // algum: se o valor gravado não bate com nenhuma opção conhecida (ou
+      // não há cadastro ainda, no formulário de criação), assume a primeira.
+      criarDropdown(
+        campos.querySelector('[data-c="council"]'),
+        CONSELHOS.map(c => ({ value: c, label: c })),
+        CONSELHOS.includes(p?.council) ? p.council : CONSELHOS[0],
+      );
+      criarDropdown(
+        campos.querySelector('[data-c="classification"]'),
+        Object.entries(CLASSIFICACOES).map(([k, r]) => ({ value: k, label: r })),
+        (p?.classification in CLASSIFICACOES) ? p.classification : Object.keys(CLASSIFICACOES)[0],
+      );
 
       // Telefone: reformata a cada tecla — a máscara acima. Cursor sempre vai
       // para o fim; para um campo curto como telefone, isso não incomoda o
@@ -1230,8 +1376,9 @@ import AdminHeader from '../../components/AdminHeader.astro';
       //
       // SÓ NOME, E-MAIL E NÚMERO DO CONSELHO. Telefone e UF não têm formato a
       // violar além do que a própria máscara/normalização já impede ao
-      // digitar (a seção acima). Conselho e Classificação são <select>, sempre
-      // preenchidos com um valor válido por padrão do navegador. Especialidades
+      // digitar (a seção acima). Conselho e Classificação são o dropdown
+      // customizado, sempre preenchidos com um valor válido por criarDropdown()
+      // (nunca vazios, diferente de um <input> de texto). Especialidades
       // é grupo de checkbox, sem um único campo para o `blur` mirar — continua
       // verificado só no envio, no recado de resumo já existente.
       function validarCampo(chave, mensagemSeVazio) {
