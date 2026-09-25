@@ -1281,6 +1281,7 @@ function nteRenderDaySelector() {
   const dt = nteState.plan.dayType;
   el.innerHTML =
     '<button class="nte-dayseg' + (dt === 'treino' ? ' active' : '') + '" onclick="nteSelectDayType(\'treino\')">Dia de Treino</button>' +
+    nteDayCopyArrows() +
     '<button class="nte-dayseg' + (dt === 'descanso' ? ' active' : '') + '" onclick="nteSelectDayType(\'descanso\')">Dia de Descanso</button>' +
     nteDayCopyButton(dt);
 }
@@ -1309,6 +1310,29 @@ function nteDayCopyButton(currentType) {
   return '<div class="nte-daycopy">' +
     '<button class="nte-daycopy-btn" onclick="nteCopyDayTo(\'' + dest + '\')"><span data-lucide="copy"></span> Copiar para ' + NTE_DAY_LABEL[dest] + '</button>' +
   '</div>';
+}
+
+// Par de setas do desktop (nte-daycopy-arrows, ligado/desligado por
+// @media em editor-plano.css): ao contrário do botão único acima, que
+// copia a partir do dia EM TELA, aqui as duas direções ficam sempre
+// visíveis lado a lado — nenhuma depende de qual aba está ativa. Uma
+// seta falta quando o dia de ORIGEM dela está vazio (nada a copiar); o
+// par inteiro só some se os dois dias estiverem vazios.
+function nteDayCopyArrows() {
+  const partes = [];
+  if (nteDayMeals('treino').length) partes.push(nteDayCopyArrowBtn('descanso'));
+  if (nteDayMeals('descanso').length) partes.push(nteDayCopyArrowBtn('treino'));
+  if (!partes.length) return '';
+  return '<div class="nte-daycopy-arrows">' + partes.join('') + '</div>';
+}
+
+function nteDayCopyArrowBtn(dest) {
+  const src = nteOtherDayType(dest);
+  const icone = dest === 'descanso' ? 'arrow-right' : 'arrow-left';
+  return '<button class="nte-daycopy-arrow" onclick="nteCopyDayTo(\'' + dest + '\')">' +
+    '<span class="nte-daycopy-tooltip">Copiar <b>' + NTE_DAY_LABEL[src] + '</b> → <b>' + NTE_DAY_LABEL[dest] + '</b></span>' +
+    '<span data-lucide="' + icone + '"></span>' +
+  '</button>';
 }
 
 function nteDaySummary(meals) {
