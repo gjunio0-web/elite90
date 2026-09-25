@@ -148,7 +148,18 @@ import AdminHeader from '../../components/AdminHeader.astro';
     .prf-btn--secundario { background: none; border: 1px solid rgba(255,255,255,.3); color: var(--c-light); }
     .prf-btn--perigo { background: none; border: 1px solid var(--c-status-rejected); color: var(--c-status-rejected); }
     .prf-btn[disabled] { opacity: .35; cursor: not-allowed; }
-    .prf-form { width: 100%; margin-top: 10px; }
+    .prf-form { width: 100%; margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    /* Abaixo de 480px (mesmo corte de atletas.astro) o gatilho do dropdown já
+       ocupa quase toda a largura sozinho — lado a lado, o botão de confirmar
+       não cabe mais na mesma linha e quebra pela metade, ficando parcialmente
+       coberto pelo menu do dropdown quando ele abre (o menu nasce logo abaixo
+       do gatilho, sem saber que o botão quebrou linha ali). Empilhar em coluna
+       resolve na raiz: o botão vai para a PRÓPRIA linha, cheia, abaixo do
+       gatilho — não meia linha ao lado dele. */
+    @media (max-width: 480px) {
+      .prf-form { flex-direction: column; align-items: stretch; }
+      .prf-form .prf-dropdown-trigger { width: 100%; min-width: 0; }
+    }
     .prf-pend { border-top: 1px solid rgba(255,255,255,.08); padding: 14px 20px; }
     .prf-pend__aviso { font-family: Montserrat, sans-serif; font-size: .8rem;
                        opacity: .75; margin: 0 0 12px; }
@@ -762,7 +773,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       bloco.className = "prf-form";
       bloco.innerHTML = elegiveis.length
         ? `${htmlDropdownTrigger()}
-           <button class="prf-btn prf-btn--principal" data-confirmar="1" style="margin-left:8px">
+           <button class="prf-btn prf-btn--principal" data-confirmar="1">
              ${tipo === "trocar" ? "Confirmar troca" : "Confirmar titular"}
            </button>`
         : `<span class="prf-card__vazio">Nenhum profissional ativo com esta especialidade. Cadastre um antes.</span>`;
@@ -1096,7 +1107,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       form.className = "prf-form";
       form.innerHTML = elegiveis.length
         ? `${htmlDropdownTrigger()}
-           <button class="prf-btn prf-btn--principal" data-confirmar-troca="1" style="margin-left:8px">Confirmar troca</button>`
+           <button class="prf-btn prf-btn--principal" data-confirmar-troca="1">Confirmar troca</button>`
         : `<span class="prf-card__vazio">Nenhum outro profissional ativo com esta especialidade.</span>`;
       item.appendChild(form);
 
@@ -1132,7 +1143,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       form.className = "prf-form";
       form.innerHTML = `
         ${htmlDropdownTrigger()}
-        <button class="prf-btn prf-btn--perigo" data-confirmar-fim="1" style="margin-left:8px">Confirmar encerramento</button>
+        <button class="prf-btn prf-btn--perigo" data-confirmar-fim="1">Confirmar encerramento</button>
       `;
       item.appendChild(form);
       criarDropdown(form.querySelector(".prf-dropdown-trigger"), [
