@@ -29,6 +29,11 @@
 // metric-vtaper, metric-sim-braco, metric-sim-coxa, metric-evolucao e o crachá
 // de simetria derivavam todos das curvas inventadas — saem junto com elas.
 //
+// PHASE 3 (persistence plan): the weight block is no longer a skeleton here. It
+// comes from scripts/graficos/peso.js, reads the real series and shows its own
+// empty state when there is none; `athlete` is passed to IT only. The two
+// blocks below stay static until Phases 4 and 6.
+//
 // SEM OS BOTÕES DE PERÍODO (30d/60d/90d). Sem série temporal, não há período a
 // escolher; deixá-los seria oferecer um controle que não controla nada.
 // -----------------------------------------------------------------------------
@@ -52,18 +57,6 @@ function e90BlocoVazio(titulo, subtitulo, esqueleto) {
         '</p>' +
       '</div>' +
     '</div>'
-  );
-}
-
-// Linha temporal — o formato de "Evolução do Peso". Coordenadas fixas.
-function e90EsqueletoLinha() {
-  return (
-    '<svg viewBox="0 0 300 80" width="100%" height="80" preserveAspectRatio="none" aria-hidden="true">' +
-      '<line x1="0" y1="79" x2="300" y2="79" stroke="' + E90_PLACEHOLDER_EIXO + '" stroke-width="1"/>' +
-      '<line x1="0.5" y1="0" x2="0.5" y2="80" stroke="' + E90_PLACEHOLDER_EIXO + '" stroke-width="1"/>' +
-      '<line x1="0" y1="20" x2="300" y2="20" stroke="' + E90_PLACEHOLDER_EIXO + '" stroke-width="1" stroke-dasharray="3 6"/>' +
-      '<line x1="0" y1="45" x2="300" y2="45" stroke="' + E90_PLACEHOLDER_EIXO + '" stroke-width="1" stroke-dasharray="3 6"/>' +
-    '</svg>'
   );
 }
 
@@ -102,18 +95,23 @@ function e90EsqueletoBarrasAgrupadas() {
 }
 
 /**
- * Mesma assinatura de com-dados.js. `athlete` é ignorado de propósito (CA-108).
+ * Mesma assinatura de com-dados.js. `athlete` é ignorado de propósito (CA-108)
+ * pelos esqueletos; only the real weight block (peso.js) receives it.
  */
 function initCharts(athlete) {
   var container = document.getElementById(window.E90_CHARTS_CONTAINER || 'elite-m2-charts');
   if (!container) return;
 
   container.innerHTML =
-    e90BlocoVazio('Evolução do Peso', 'Tendência de 7 dias (MMA7)', e90EsqueletoLinha()) +
+    '<div id="e90-peso-bloco" style="margin-bottom:32px;min-width:0;"></div>' +
     '<div class="charts-grid" style="display:grid;gap:32px;">' +
       e90BlocoVazio('V-Taper Profile', 'Ombros vs Cintura', e90EsqueletoBarrasPareadas()) +
       e90BlocoVazio('Simetria e Densidade', 'Braços e Coxas (esq/dir)', e90EsqueletoBarrasAgrupadas()) +
     '</div>';
+
+  // Weight is real data in every environment (scripts/graficos/peso.js); its
+  // block receives the athlete. The two skeletons above still ignore it.
+  e90PesoIniciar(document.getElementById('e90-peso-bloco'), athlete);
 }
 
 /**

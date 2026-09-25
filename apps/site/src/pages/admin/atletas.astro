@@ -1357,6 +1357,9 @@ tbody { display: block; width: 100%; }
      scripts/filtrar-graficos.mjs (AC-33 · v1.27). Fora de produção vem a
      maquete com curvas simuladas; em produção, três esqueletos estáticos com
      aviso, e nenhum `generateMock` chega ao navegador (CA-103).
+     Phase 3: the weight block reads the real series in every environment
+     (scripts/graficos/peso.js, via window.E90_CARREGAR_SERIE_PESO); the
+     choice above now applies only to V-Taper and Symmetry.
      O contêiner é declarado antes de carregar o módulo, que o lê de
      window.E90_CHARTS_CONTAINER — é o que permite esta tela e /profissional
      compartilharem um arquivo só. -->
@@ -3735,6 +3738,14 @@ tbody { display: block; width: 100%; }
       }
       return resp.json();
     }
+
+    // Phase 3 (persistence plan): loader of the real weight series, handed to the
+    // Progressão Física module (scripts/graficos/peso.js) through window, the
+    // same way the chart container is. Goes through m2Ler, the single reader.
+    // /profissional does not define it, so there the block stays a skeleton.
+    window.E90_CARREGAR_SERIE_PESO = function (athleteUid) {
+      return m2Ler('ler-serie-peso', { athleteUid: athleteUid });
+    };
 
     // AC-28 · P-3/P-4. `true` persistido lido do servidor, por `uid:kind`.
     // Só guarda `true`; doPublish limpa a entrada ao publicar.

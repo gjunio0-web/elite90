@@ -71,7 +71,9 @@ const LIMITE_ALVOS = 50;
  * rastreabilidade precisa preservar.
  *
  * RESERVADO PARA O M2, a acrescentar quando as fases correspondentes forem
- * implementadas: 'checkin.registrado' (Fase 4) e 'peso.registrado' (Fase 3).
+ * implementadas: 'checkin.registrado' (Fase 4).
+ * ('peso.registrado' left this reservation in Phase 3 — persistence plan — together
+ * with 'peso.corrigido'; see the Phase 3 entry at the end of the list.)
  * 'atleta.status-alterado' segue reservada SEM destino, e assim permanece:
  * remover reserva de vocabulário custa mais do que mantê-la. Constam aqui em
  * comentário para que o M2 não precise reabrir o vocabulário.
@@ -184,6 +186,19 @@ export const ACOES = [
   // sobre ele.
   "titular.definido",
   "atleta.fase-alterada",
+  // M2 — Phase 3 (persistence plan, Phase 3 traceability contract).
+  // Emitted by `registrar-peso.ts`, after the write and outside the
+  // transaction (DR-06). The function decides which one AT WRITE TIME, from
+  // whether the day's document already existed — never from earlier events,
+  // which may have been lost (D-AH, same criterion as Addendum 04 §6.2).
+  //   'peso.registrado' — a day that did not exist;
+  //   'peso.corrigido'  — a day that already existed.
+  // Actor `{ tipo: "humano", uid, email: null, papel: "athlete" }` (D-AG; Addendum 04 §6.4).
+  // Target `{ colecao: "weights", id: "<AAAA-MM-DD>" }`. `detalhe`: NONE —
+  // weight is forbidden in `detalhe` (DR-04). A resend with the same
+  // idempotency key emits nothing: the operation did not happen again.
+  "peso.registrado",
+  "peso.corrigido",
 ] as const;
 
 export type Acao = (typeof ACOES)[number];
@@ -211,13 +226,28 @@ export type Acao = (typeof ACOES)[number];
  * três ações de sugestão. 'substitute', previsto no Adendo 02, NÃO entra:
  * nenhuma função implementada o usa, e o papel de Substituto está fora do
  * escopo desta fase.
+ *
+ * ATHLETE ACTOR: `email` IS ALWAYS NULL (D-AG; Addendum 04 §6.4). DR-09 records the
+ * e-mail to identify the OPERATOR of the system; the athlete is the data
+ * subject, not an operator. Events outlive the subject's exclusion by up to 24
+ * months (DR-08) on the premise that they hold no personal data (DR-04), and
+ * the athlete's e-mail would break that premise. The `uid` stays: it stops
+ * resolving to a person once the athlete is excluded. Enforced twice — by the
+ * type below (an athlete actor with an e-mail does not compile) and by
+ * `registrar`, which nulls it anyway at run time.
  */
 export type Ator =
   | {
       tipo: "humano";
       uid: string;
       email: string | null;
-      papel: "admin" | "athlete" | "professional";
+      papel: "admin" | "professional";
+    }
+  | {
+      tipo: "humano";
+      uid: string;
+      email: null;
+      papel: "athlete";
     }
   | { tipo: "sistema"; processo: string }
   | { tipo: "publico" };
@@ -259,9 +289,16 @@ export async function registrar(evento: Evento): Promise<void> {
   try {
     const ambiente = process.env.CONTEXT === "production" ? "producao" : "homologacao";
 
+    // D-AG, run-time half: the type already forbids an athlete actor with an
+    // e-mail; this covers a caller that bypassed the type (a cast, a `.js`).
+    const ator: Ator =
+      evento.ator.tipo === "humano" && evento.ator.papel === "athlete"
+        ? { ...evento.ator, email: null }
+        : evento.ator;
+
     const doc: Record<string, unknown> = {
       acao: evento.acao,
-      ator: evento.ator,
+      ator,
       origem: evento.origem,
       resultado: evento.resultado ?? "ok",
       ambiente,

@@ -80,6 +80,15 @@ service cloud.firestore {
       // plans; a lista deve ser conferida contra o esquema quando o M2 ganhar
       // back-end, para garantir que nenhuma precise de acesso direto.
       // Escrita e leitura exclusivamente por função de servidor.
+
+      // Daily weight series (M2 Phase 3, persistence plan). Written only by
+      // registrar-peso.ts and read only by ler-serie-peso.ts, both through the
+      // Admin SDK, which ignores these rules. Named block for clarity, same
+      // pattern as exercises/ and foods/: the wildcard below already denied it.
+      match /weights/{measuredOn} {
+        allow read, write: if false;
+      }
+
       match /{subcollection}/{docId} {
         allow read, write: if false;
       }

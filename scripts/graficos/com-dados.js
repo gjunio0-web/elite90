@@ -3,9 +3,10 @@
 // Módulo de "Progressão Física" — versão COM CURVAS, publicada SOMENTE FORA DE
 // PRODUÇÃO (Adendo 07, AC-33 · v1.27; filtro em scripts/filtrar-graficos.mjs).
 //
-// OS DADOS AQUI SÃO INVENTADOS. `generateMockWeightData`,
-// `generateMockVTaperData` e `generateMockSymmetryData` sintetizam curvas dia a
-// dia com `seededRand`, ancoradas em dois ou três valores reais do atleta. Nada
+// OS DADOS AQUI SÃO INVENTADOS. `generateMockVTaperData` e
+// `generateMockSymmetryData` sintetizam curvas com `seededRand`, ancoradas em
+// dois ou três valores reais do atleta (the weight generator was removed in
+// Phase 3 — see below). Nada
 // disso aconteceu: as subcoleções que trariam histórico de verdade —
 // weights/checkins/evaluations — estão declaradas e deliberadamente não lidas
 // nesta fase (ver SUBCOLECOES_NIVEL_1 em _projecao-atleta.ts).
@@ -23,6 +24,12 @@
 //
 // ARTEFATO DURÁVEL enquanto a maquete existir. Some junto com ela, no dia em
 // que a Progressão Física passar a ler dado real.
+//
+// PHASE 3 (persistence plan): the WEIGHT block left this file. It reads the real
+// series in every environment (scripts/graficos/peso.js, prepended by
+// filtrar-graficos.mjs), and `generateMockWeightData` no longer exists. What
+// remains simulated here is V-Taper and Symmetry, until Phases 4 and 6; the
+// 30/60/90 buttons below drive only those two.
 // -----------------------------------------------------------------------------
 
 // ── SEEDED PSEUDO-RANDOM (determinístico por atleta) ──
@@ -37,33 +44,6 @@ function idSeed(id) {
 function seededRand(seed, i) {
   var x = Math.sin(seed * 9301 + i * 49297 + 233) * 44208.63;
   return x - Math.floor(x);
-}
-
-// ── GERADOR PESO — usa dados reais do atleta ──
-function generateMockWeightData(days, athlete) {
-  var data = [];
-  var today = new Date();
-  var seed = athlete ? idSeed(athlete.id) : 1;
-  var pesoBase = athlete ? (athlete.weightInitialKg || 82) : 82;
-  var pesoFinal = athlete ? (athlete.weightCurrentKg || pesoBase) : pesoBase;
-  var totalDays = athlete ? (athlete.day || days) : days;
-  var dailyTrend = (pesoFinal - pesoBase) / Math.max(totalDays, 1);
-  for (var i = days - 1; i >= 0; i--) {
-    var date = new Date(today);
-    date.setDate(date.getDate() - i);
-    var dayOffset = Math.max(0, totalDays - i);
-    var trendW = pesoBase + dailyTrend * dayOffset;
-    var noise = (seededRand(seed, i) - 0.5) * 1.0 + Math.sin(i / 7) * 0.3;
-    data.push({ date: date.toLocaleDateString('pt-BR').substring(0, 5), peso_bruto: parseFloat((trendW + noise).toFixed(2)), mma7: 0 });
-  }
-  for (var j = 0; j < data.length; j++) {
-    if (j < 6) { data[j].mma7 = data[j].peso_bruto; }
-    else {
-      var sl7 = data.slice(j - 6, j + 1).map(function(d){ return d.peso_bruto; });
-      data[j].mma7 = parseFloat((sl7.reduce(function(a,b){ return a+b; }) / 7).toFixed(2));
-    }
-  }
-  return data;
 }
 
 // ── GERADOR V-TAPER — usa dados reais do atleta ──
@@ -109,7 +89,7 @@ function generateMockSymmetryData(days, athlete) {
 }
 
 // ── GLOBAIS ──
-var chart1, chart2, chart3;
+var chart2, chart3;
 var currentPeriod = 30;
 var currentAthlete = null;
 
@@ -117,7 +97,6 @@ function initCharts(athlete) {
   var container = document.getElementById(window.E90_CHARTS_CONTAINER || 'elite-m2-charts');
   if (!container) return;
   currentAthlete = athlete || null;
-  if (chart1) { try { chart1.destroy(); } catch(e){} chart1 = null; }
   if (chart2) { try { chart2.destroy(); } catch(e){} chart2 = null; }
   if (chart3) { try { chart3.destroy(); } catch(e){} chart3 = null; }
   container.innerHTML = '';
@@ -128,19 +107,6 @@ function initCharts(athlete) {
     '<button onclick="updateCharts(60)" id="btn-60" style="padding:6px 12px;background:#1a1a1a;color:#999;border:1px solid #333;border-radius:4px;cursor:pointer;font-weight:600;font-size:12px;">60d</button>' +
     '<button onclick="updateCharts(90)" id="btn-90" style="padding:6px 12px;background:#1a1a1a;color:#999;border:1px solid #333;border-radius:4px;cursor:pointer;font-weight:600;font-size:12px;">90d</button>' +
     '</div>';
-
-  var wHtml =
-    '<div style="margin-bottom:32px;min-width:0;">' +
-    '<h3 style="font-family:Bebas Neue;color:#A6C300;text-transform:uppercase;margin:0 0 4px 0;font-size:16px;letter-spacing:0.05em;">Evolução do Peso</h3>' +
-    '<p style="color:#999;font-size:11px;margin:0 0 16px 0;">Tendência de 7 dias (MMA7)</p>' +
-    '<canvas id="chart-weight" height="140" style="width:100% !important;max-width:100%;"></canvas>' +
-    '<div style="display:flex;column-gap:24px;row-gap:4px;margin-top:8px;flex-wrap:wrap;">' +
-    '<div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Peso Inicial</div><div id="metric-peso-inicial" style="font-size:15px;font-weight:600;color:#EDEDE0;">—</div></div>' +
-    '<div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Peso Atual</div><div id="metric-peso-atual" style="font-size:15px;font-weight:600;color:#EDEDE0;">—</div></div>' +
-    '<div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Variação</div><div id="metric-variacao" style="font-size:15px;font-weight:600;color:#EDEDE0;">—</div></div>' +
-    '<div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Menor</div><div id="metric-menor" style="font-size:15px;font-weight:600;color:#EDEDE0;">—</div></div>' +
-    '<div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Maior</div><div id="metric-maior" style="font-size:15px;font-weight:600;color:#EDEDE0;">—</div></div>' +
-    '</div></div>';
 
   var vtHtml =
     '<div style="min-width:0;">' +
@@ -168,10 +134,12 @@ function initCharts(athlete) {
     '</div></div>';
 
   container.innerHTML =
-    '<div style="margin-bottom:24px;">' + periodRow + wHtml +
+    '<div id="e90-peso-bloco" style="margin-bottom:32px;min-width:0;"></div>' +
+    '<div style="margin-bottom:24px;">' + periodRow +
     '<div class="charts-grid" style="display:grid;gap:32px;">' + vtHtml + symHtml + '</div>' +
     '</div>';
 
+  e90PesoIniciar(document.getElementById('e90-peso-bloco'), athlete);
   updateCharts(30);
 }
 
@@ -188,33 +156,11 @@ function updateCharts(days) {
     btn.style.border     = active ? 'none' : '1px solid #333';
   });
 
-  var wData = generateMockWeightData(days, athlete);
   var vData = generateMockVTaperData(days, athlete);
   var sData = generateMockSymmetryData(days, athlete);
 
-  if (chart1) { try{chart1.destroy();}catch(e){} }
   if (chart2) { try{chart2.destroy();}catch(e){} }
   if (chart3) { try{chart3.destroy();}catch(e){} }
-
-  var ctx1 = document.getElementById('chart-weight'); if (!ctx1) return;
-  chart1 = new Chart(ctx1, {
-    type: 'line',
-    data: {
-      labels: wData.map(function(d){return d.date;}),
-      datasets: [
-        {label:'Peso Bruto', data:wData.map(function(d){return d.peso_bruto;}), borderColor:'#A6C300', backgroundColor:'rgba(166,195,0,0.1)', pointRadius:3, pointBackgroundColor:'#A6C300', tension:0.3, fill:false},
-        {label:'MMA7',       data:wData.map(function(d){return d.mma7;}),       borderColor:'#CCCCCC', borderWidth:2, pointRadius:0, tension:0.3, fill:false}
-      ]
-    },
-    options: {
-      responsive:true, maintainAspectRatio:true,
-      plugins:{legend:{labels:{color:'#999',font:{size:11}},position:'bottom'}},
-      scales:{
-        x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#999',font:{size:10}}},
-        y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#999',font:{size:10},callback:function(v){return v.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});}}}
-      }
-    }
-  });
 
   var ctx2 = document.getElementById('chart-vtaper'); if (!ctx2) return;
   var vt1mn=Math.min.apply(null,vData.map(function(d){return d.perimetro_ombros;}))-8;
@@ -286,15 +232,6 @@ function updateCharts(days) {
   sm('metric-sim-braco',simB.toFixed(1).replace('.',',')+' %'); sc('metric-sim-braco',simB<97?'#FF3B30':'#EDEDE0');
   sm('metric-sim-coxa', simC.toFixed(1).replace('.',',')+' %'); sc('metric-sim-coxa', simC<97?'#FF3B30':'#EDEDE0');
   sm('metric-evolucao',(evM>=0?'+':'')+evM.toFixed(1).replace('.',',')+' cm');
-
-  // ── Métricas peso ──
-  var pi=wData[0].peso_bruto, pa=wData[wData.length-1].peso_bruto, va=pa-pi;
-  var ps=wData.map(function(d){return d.peso_bruto;});
-  sm('metric-peso-inicial',pi.toFixed(1).replace('.',',')+' kg');
-  sm('metric-peso-atual',  pa.toFixed(1).replace('.',',')+' kg');
-  sm('metric-variacao',(va>=0?'+':'')+va.toFixed(1).replace('.',',')+' kg'); sc('metric-variacao',va<=0?'#A6C300':'#FF3B30');
-  sm('metric-menor',Math.min.apply(null,ps).toFixed(1).replace('.',',')+' kg');
-  sm('metric-maior',Math.max.apply(null,ps).toFixed(1).replace('.',',')+' kg');
 
   // ── Métricas V-Taper ──
   var vtF=vData[0],vtL=vData[vData.length-1];

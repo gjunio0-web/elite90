@@ -16,6 +16,10 @@
 // relatório — entram aqui quando as fases correspondentes forem
 // implementadas.
 // Não antecipar: validar estrutura que ainda não é gravada envelhece sozinho.
+//
+// Phase 3 (persistence plan): the daily weight series is now written, so its shape
+// is validated here too — see the PHASE 3 section at the end. The rules
+// themselves live in _serie-peso.js and are only re-exported and applied here.
 
 // @ts-ignore — módulo CommonJS compartilhado com scripts/ (mesmo arranjo de
 // _athlete-from-lead.js em promote-lead.ts). A forma do rótulo é definida uma
@@ -434,4 +438,70 @@ export function validarOrigin(valor: unknown): ResultadoValidacao {
     };
   }
   return { ok: true };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PHASE 3 · DAILY WEIGHT SERIES
+// Persistence schema v3, section 7; persistence plan, Phase 3.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// @ts-ignore — CommonJS module shared with the test runner (same arrangement as
+// _external-label.js above). The rules are defined once there; here they are
+// only re-exported and applied.
+import seriePesoModule from "./_serie-peso.js";
+const seriePeso = seriePesoModule as {
+  WEIGHT_MIN_KG: number;
+  WEIGHT_MAX_KG: number;
+  WEIGHT_MAX_DECIMALS: number;
+  dataCivilDoInicio: (startDate: unknown) => string | null;
+  validarPesoKg: (v: unknown) => ResultadoValidacao;
+  validarMeasuredOn: (v: unknown, agora: Date) => ResultadoValidacao;
+  validarInicioCiclo: (v: string, inicioCiclo: string | null) => ResultadoValidacao;
+  calcularMediaMovel: (
+    pontos: { measuredOn: string; weightKg: number }[],
+  ) => { measuredOn: string; weightKg: number; mma7: number; n7: number }[];
+};
+export const { WEIGHT_MIN_KG, WEIGHT_MAX_KG, WEIGHT_MAX_DECIMALS } = seriePeso;
+export const dataCivilDoInicio = seriePeso.dataCivilDoInicio;
+export const calcularMediaMovel = seriePeso.calcularMediaMovel;
+
+/**
+ * Origin of a weight point. Closed (schema v3, section 7). `ocr` is reserved:
+ * the optical reading of the scale belongs to the Athlete Portal front (plan
+ * D-AI), so in Phase 3 every point is `manual`.
+ */
+export const WEIGHT_SOURCES = ["manual", "ocr"] as const;
+export type WeightSource = (typeof WEIGHT_SOURCES)[number];
+
+export function validarWeightKg(valor: unknown): ResultadoValidacao {
+  return seriePeso.validarPesoKg(valor);
+}
+
+/** Shape and upper bound of `measuredOn`. The lower bound needs the athlete. */
+export function validarMeasuredOn(valor: unknown, agora: Date): ResultadoValidacao {
+  return seriePeso.validarMeasuredOn(valor, agora);
+}
+
+/** Lower bound of `measuredOn`: not before the cycle start (civil date). */
+export function validarInicioCiclo(
+  measuredOn: string,
+  inicioCiclo: string | null,
+): ResultadoValidacao {
+  return seriePeso.validarInicioCiclo(measuredOn, inicioCiclo);
+}
+
+/**
+ * `source` sent by the caller. Absent or `manual` is accepted. `ocr` is
+ * REFUSED rather than stored as `manual`: a future client sending an optical
+ * reading must fail loudly here, not have its point silently mislabelled.
+ */
+export function validarWeightSource(valor: unknown): ResultadoValidacao {
+  if (valor === undefined || valor === null || valor === "manual") return { ok: true };
+  if (valor === "ocr") {
+    return {
+      ok: false,
+      erro: "source \"ocr\" ainda não é aceito: a leitura óptica da balança é da frente do Portal (D-AI).",
+    };
+  }
+  return { ok: false, erro: `source inválido. Esperado um de: ${WEIGHT_SOURCES.join(", ")}.` };
 }

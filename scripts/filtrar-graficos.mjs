@@ -4,7 +4,13 @@
 //
 //   ENTRADA  scripts/graficos/com-dados.js   (curvas simuladas — homologação)
 //            scripts/graficos/sem-dados.js   (esqueleto + aviso — produção)
+//            scripts/graficos/peso.js        (dado real — todos os ambientes)
 //   SAÍDA    apps/site/src/scripts/graficos.generated.js   (artefato de build)
+//
+//   The output is ALWAYS peso.js followed by the environment file (Phase 3,
+//   persistence plan): the weight block reads the real series everywhere, so it has
+//   no simulated twin to choose between. The choice below now decides only the
+//   V-Taper and Symmetry blocks.
 //
 //   CONTEXT === 'production'  → emite sem-dados.js
 //   qualquer outro contexto   → emite com-dados.js
@@ -47,6 +53,7 @@ const AQUI = dirname(fileURLToPath(import.meta.url));
 
 const ORIGEM_COM = resolve(AQUI, 'graficos/com-dados.js');
 const ORIGEM_SEM = resolve(AQUI, 'graficos/sem-dados.js');
+const ORIGEM_PESO = resolve(AQUI, 'graficos/peso.js');
 const SAIDA = resolve(AQUI, '../apps/site/src/scripts/graficos.generated.js');
 
 // Variável ausente é tratada como produção — o erro seguro é publicar de menos.
@@ -55,18 +62,29 @@ const emProducao = contexto === 'production';
 
 const origem = emProducao ? ORIGEM_SEM : ORIGEM_COM;
 
-if (!existsSync(origem)) {
-  console.error(`[filtrar-graficos] Origem ausente: ${origem}`);
-  process.exit(1);
+for (const arquivo of [ORIGEM_PESO, origem]) {
+  if (!existsSync(arquivo)) {
+    console.error(`[filtrar-graficos] Origem ausente: ${arquivo}`);
+    process.exit(1);
+  }
 }
 
-const conteudo = readFileSync(origem, 'utf8');
+const conteudo = readFileSync(ORIGEM_PESO, 'utf8') + '\n' + readFileSync(origem, 'utf8');
+
+// CA-103 as a build guard: in production no simulated generator may reach the
+// bundle. Before Phase 3 this held by construction (one file); with two files
+// concatenated it is checked explicitly, so a generator pasted into peso.js
+// fails the build instead of shipping.
+if (emProducao && /generateMock/.test(conteudo)) {
+  console.error('[filtrar-graficos] CA-103: `generateMock` encontrado no pacote de produção.');
+  process.exit(1);
+}
 
 // Cabeçalho de artefato: quem abrir o arquivo gerado precisa saber que editá-lo
 // não adianta — a próxima execução do build sobrescreve.
 const aviso =
   `// GERADO POR scripts/filtrar-graficos.mjs — NÃO EDITE.\n` +
-  `// Origem: scripts/graficos/${emProducao ? 'sem-dados' : 'com-dados'}.js\n` +
+  `// Origem: scripts/graficos/peso.js + scripts/graficos/${emProducao ? 'sem-dados' : 'com-dados'}.js\n` +
   `// CONTEXT=${contexto}${process.env.CONTEXT ? '' : ' (ausente — tratado como produção)'}\n\n`;
 
 mkdirSync(dirname(SAIDA), { recursive: true });
