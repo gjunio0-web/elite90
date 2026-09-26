@@ -41,6 +41,11 @@ button {
   font-family: inherit;
 }
 
+/* Lining figures everywhere (D-AQ, Design System §2): Raleway draws old-style
+   figures by default ("30d" read as "3od"). Form controls do not inherit the
+   page typography, so they are listed explicitly. */
+html, button, input, select, textarea { font-variant-numeric: lining-nums; }
+
 /* --- TIPOGRAFIA GLOBAL ------------------------------------------------------- */
 
 h1, h2, h3, h4 {

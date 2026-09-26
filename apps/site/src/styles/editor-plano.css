@@ -151,7 +151,8 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 .wke-loadhist-full td { color: var(--c-textbody); padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); }
 .wke-loadhist-full tr:last-child td { border-bottom: none; }
 .wke-loadhist-full tr.latest td { color: var(--c-lime); }
-.wke-loadhist-full td.num { font-variant-numeric: tabular-nums; }
+/* Numeric column: lining + tabular so values align vertically (D-AQ). */
+.wke-loadhist-full td.num { font-variant-numeric: lining-nums tabular-nums; }
 .wke-add-ex { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: var(--space-3); background: transparent; border: 1px dashed rgba(166, 195, 0, 0.50); border-radius: var(--radius-card); color: var(--c-lime); font-family: var(--font-label); font-size: var(--fs-label); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); cursor: pointer; transition: background 150ms ease, border-color 150ms ease; }
 .wke-add-ex:hover { background: rgba(166, 195, 0, 0.12); border-color: var(--c-lime); }
 .evo-overlay { position: fixed; inset: 0; background: var(--c-black); z-index: 400; overflow-y: auto; display: flex; flex-direction: column; }
@@ -309,6 +310,9 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 .nte-foods { width: 100%; border-collapse: collapse; }
 .nte-foods thead th { font-family: var(--font-label); font-size: 9.5px; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-textsub); text-align: left; padding: 6px var(--space-3); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
 .nte-foods thead th.num, .nte-foods tbody td.num { text-align: right; }
+/* Quantity and kcal columns align vertically (D-AQ). The quantity is an input,
+   which does not inherit from the cell, so it is listed on its own. */
+.nte-foods tbody td.num, .nte-qty-input { font-variant-numeric: lining-nums tabular-nums; }
 .nte-foods tbody td { padding: 5px var(--space-3); border-bottom: 1px solid rgba(255,255,255,0.04); font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textbody); vertical-align: middle; }
 .nte-foods tbody tr:last-child td { border-bottom: none; }
 .nte-food-name { color: var(--c-light); }

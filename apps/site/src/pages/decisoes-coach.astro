@@ -59,6 +59,8 @@
 * { box-sizing: border-box; }
 html { scroll-padding-top: env(safe-area-inset-top, 0px); }
 body { background: var(--c-black); color: var(--c-textbody); font-family: var(--font-body); font-size: var(--fs-body-md); line-height: 1.6; margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); -webkit-font-smoothing: antialiased; }
+/* This page does not import global.css, so it repeats the product-wide rule (D-AQ). */
+html, button, input, select, textarea { font-variant-numeric: lining-nums; }
 .wrap { max-width: 760px; margin: 0 auto; padding: var(--space-6) var(--space-4) var(--space-6); }
 .eyebrow { font-family: var(--font-label); font-weight: 700; font-size: var(--fs-label); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-lime); margin-bottom: var(--space-2); }
 h1 { font-family: var(--font-display); font-size: var(--fs-display-lg); line-height: 1.1; letter-spacing: var(--tracking-display); color: var(--c-light); text-transform: uppercase; margin: 0 0 var(--space-4); }
