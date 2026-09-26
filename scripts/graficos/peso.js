@@ -106,6 +106,9 @@ function e90PesoBotoes() {
     html +=
       '<button type="button" data-e90-peso-dias="' + d + '" aria-pressed="false" onclick="e90PesoPeriodo(' + d + ')" ' +
         'style="font-family:var(--font-label,Raleway),sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;' +
+        // Raleway draws old-style figures by default: "30d" read as "3od" in
+        // homologation (26/09/2026). Lining figures make the zero a zero.
+        'font-variant-numeric:lining-nums;' +
         'padding:6px 14px;border-radius:999px;border:1px solid var(--c-border-strong);' +
         'background:var(--c-darkbg);color:var(--c-textsub);cursor:pointer;transition:.15s;">' + d + 'd</button>';
   }
