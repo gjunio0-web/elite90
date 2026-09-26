@@ -10,7 +10,7 @@
 // do documento no Firestore.
 //
 // Three blocks: (1) AI in evaluations and reports, (2) Portal assistant and
-// content library, (3) program operation (non-AI questions p05–p07).
+// content library, (3) program operation (non-AI questions p05–p08).
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -132,7 +132,7 @@ p { margin: 0 0 var(--space-3); }
   <span class="progress-items">
     <span>IA <strong id="progIA">0</strong> / 32</span>
     <span>Assistente <strong id="progAS">0</strong> / 24</span>
-    <span>Programa <strong id="progPR">0</strong> / 3</span>
+    <span>Programa <strong id="progPR">0</strong> / 4</span>
   </span>
 </div>
 <div class="wrap">
@@ -191,7 +191,7 @@ p { margin: 0 0 var(--space-3); }
     <div class="eyebrow">Bloco 3 de 3</div>
     <div class="bloco-titulo">Funcionamento do programa</div>
     <div class="intro">
-      <p style="margin-bottom:0">Três perguntas sobre o funcionamento do programa, sem relação com inteligência artificial: quando o programa de um atleta pode começar, por quanto tempo os planos antigos ficam guardados, e se os números usados para calcular as metas de alimentação estão clinicamente corretos.</p>
+      <p style="margin-bottom:0">Quatro perguntas sobre o funcionamento do programa, sem relação com inteligência artificial: quando o programa de um atleta pode começar, por quanto tempo os planos antigos ficam guardados, se os números usados para calcular as metas de alimentação estão clinicamente corretos, e qual peso do atleta entra nesse cálculo.</p>
     </div>
   </div>
   <div id="pendencias-programa"></div>
@@ -315,6 +315,11 @@ const PENDENCIAS = [
     id: "p07",
     titulo: "Os números da fórmula nutricional estão clinicamente corretos?",
     descricao: "O sistema já tem uma estrutura pronta para calcular metas de proteína, carboidrato e gordura para cada atleta, com base no peso dele e na fase em que está (ganho de massa, definição, etc.). Essa estrutura funciona tecnicamente — o que falta confirmar é se os <strong>números usados no cálculo em si</strong> estão certos, do ponto de vista clínico.<br><br>Um exemplo concreto do tipo de problema que pode existir: em um teste, os coeficientes usados hoje, aplicados a um atleta de 100kg, resultaram numa meta de <strong>1.700 calorias por dia</strong> — um valor que pode estar abaixo do que seria seguro, dependendo do caso. Isso sugere que talvez falte um <strong>piso mínimo de calorias</strong>, abaixo do qual o sistema nunca deveria recomendar, independente do cálculo.<br><br><strong>A decisão:</strong> os coeficientes usados hoje para calcular a meta nutricional são clinicamente adequados? Se não, quais deveriam ser os valores corretos, e deve existir um piso mínimo de calorias que o sistema nunca ultrapassa para baixo?"
+  },
+  {
+    id: "p08",
+    titulo: "Qual peso do atleta deve entrar no cálculo das metas de alimentação?",
+    descricao: "A partir de agora, o atleta registra o peso todos os dias no sistema. Quando você publica um plano nutricional, o sistema calcula as metas de proteína, carboidrato e gordura a partir do peso do atleta.<br><br>Hoje, o peso usado é o do <strong>último dia registrado</strong>. O problema: o peso de um único dia oscila com hidratação, sal, horário e intestino, e pode variar um quilo ou mais de um dia para o outro sem que nada tenha mudado de verdade. Se o atleta se pesou num dia atípico, as metas do plano saem calculadas sobre um número atípico.<br><br>A alternativa é usar a <strong>média dos últimos 7 dias</strong>, que o sistema já calcula e mostra no gráfico de peso. Ela acompanha a tendência e ignora a oscilação do dia. Enquanto o atleta ainda não tiver pesagens suficientes na semana, o sistema usaria o último peso registrado.<br><br>Em qualquer caso, cada plano publicado guarda o peso que foi usado no cálculo, para consulta depois.<br><br><strong>A decisão:</strong> as metas devem ser calculadas com o peso do último dia, com a média dos últimos 7 dias, ou de outra forma? Se escolher a média, diga também a partir de quantas pesagens na semana ela passa a valer."
   }
 ];
 
@@ -348,8 +353,8 @@ const ASSISTENTE = {
   }
 };
 
-// Which block each pending question belongs to. p05–p07 are not AI-related.
-const BLOCO_PENDENCIA = { p01: "ia", p02: "ia", p03: "ia", p04: "ia", p05: "programa", p06: "programa", p07: "programa" };
+// Which block each pending question belongs to. p05–p08 are not AI-related.
+const BLOCO_PENDENCIA = { p01: "ia", p02: "ia", p03: "ia", p04: "ia", p05: "programa", p06: "programa", p07: "programa", p08: "programa" };
 
 function estadoVazio() {
   return { itens: {}, novas: [], fases: {}, pendencias: {}, assistente: {} };
@@ -578,7 +583,7 @@ function renderAssistente() {
   atualizarContadores();
 }
 
-// One counter per block, required items only. Totals: block 1 = 25 + 3 + 4; block 2 = 8 + 5 + 11; block 3 = 3.
+// One counter per block, required items only. Totals: block 1 = 25 + 3 + 4; block 2 = 8 + 5 + 11; block 3 = 4.
 // The three free-text fields of block 2 are optional: saved, but never counted.
 function atualizarContadores() {
   const preenchido = v => typeof v === "string" && v.trim() !== "";
