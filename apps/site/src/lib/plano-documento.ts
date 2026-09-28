@@ -214,11 +214,15 @@ function docNotesSection(notes: string | undefined, sectionNum: number): string 
 }
 
 function docMacrosBlock(t: { kcal: number; p: number; c: number; g: number }): string {
+  // Unidade num <span> à parte: var(--font-display) (Bebas Neue, usada no
+  // valor) só tem maiúsculas — "g" concatenado direto no número saía como
+  // "14G", do mesmo tamanho/peso do valor, ilegível como "14 gramas" num
+  // relance. .doc-macro-unit dá à unidade fonte e tamanho próprios (CSS).
   return (
     '<div class="doc-macros">' +
-      `<div class="doc-macro"><div class="doc-macro-v">${Math.round(t.p)}g</div><div class="doc-macro-l">Proteína</div></div>` +
-      `<div class="doc-macro"><div class="doc-macro-v">${Math.round(t.c)}g</div><div class="doc-macro-l">Carboidrato</div></div>` +
-      `<div class="doc-macro"><div class="doc-macro-v">${Math.round(t.g)}g</div><div class="doc-macro-l">Gordura</div></div>` +
+      `<div class="doc-macro"><div class="doc-macro-v">${Math.round(t.p)}<span class="doc-macro-unit">g</span></div><div class="doc-macro-l">Proteína</div></div>` +
+      `<div class="doc-macro"><div class="doc-macro-v">${Math.round(t.c)}<span class="doc-macro-unit">g</span></div><div class="doc-macro-l">Carboidrato</div></div>` +
+      `<div class="doc-macro"><div class="doc-macro-v">${Math.round(t.g)}<span class="doc-macro-unit">g</span></div><div class="doc-macro-l">Gordura</div></div>` +
       `<div class="doc-macro"><div class="doc-macro-v">${Math.round(t.kcal)}</div><div class="doc-macro-l">Calorias</div></div>` +
     '</div>'
   );
@@ -289,6 +293,7 @@ export const DOC_CSS = `
   .doc-macros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 4px 0 6px; }
   .doc-macro { background: var(--c-black); border-radius: var(--radius-card); padding: 10px; text-align: center; }
   .doc-macro-v { font-family: var(--font-display); font-size: 1.2rem; color: var(--c-lime); line-height: 1; }
+  .doc-macro-v .doc-macro-unit { font-family: var(--font-label); font-size: 0.65rem; font-weight: 700; color: var(--c-textsub); margin-left: 1px; }
   .doc-macro-l { font-family: var(--font-label); font-size: 0.5rem; color: var(--c-textsub); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
   .doc-meal { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 12px; }
   .doc-meal:first-of-type { border-top: none; margin-top: 8px; padding-top: 0; }

@@ -270,6 +270,12 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 .doc-macros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 4px 0 6px; }
 .doc-macro { background: var(--c-black); border-radius: var(--radius-card); padding: 10px; text-align: center; }
 .doc-macro-v { font-family: var(--font-display); font-size: 1.2rem; color: var(--c-lime); line-height: 1; }
+/* Unidade ("g") separada do valor: Bebas Neue (var(--font-display), usada no
+   valor) não tem minúsculas de verdade — "14g" saía como "14G", colado ao
+   número e do mesmo tamanho/peso, difícil de ler como "14 gramas" num
+   relance. Fonte e tamanho próprios (Raleway, a mesma de .doc-macro-l abaixo)
+   resolvem: a unidade fica muito menor e nunca de caixa alta forçada. */
+.doc-macro-v .doc-macro-unit { font-family: var(--font-label); font-size: 0.65rem; font-weight: 700; color: var(--c-textsub); margin-left: 1px; }
 .doc-macro-l { font-family: var(--font-label); font-size: 0.5rem; color: var(--c-textsub); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
 .doc-meal { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 12px; }
 .doc-meal:first-of-type { border-top: none; margin-top: 8px; padding-top: 0; }

@@ -2076,10 +2076,14 @@ function docDayTotals(meals) {
 }
 
 function docMacrosBlock(t) {
+  // Unidade num <span> à parte: var(--font-display) (Bebas Neue, usada no
+  // valor) só tem maiúsculas — "g" concatenado direto no número saía como
+  // "14G", do mesmo tamanho/peso do valor, ilegível como "14 gramas" num
+  // relance. .doc-macro-unit dá à unidade fonte e tamanho próprios (CSS).
   return '<div class="doc-macros">' +
-    '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.p) + 'g</div><div class="doc-macro-l">Proteína</div></div>' +
-    '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.c) + 'g</div><div class="doc-macro-l">Carboidrato</div></div>' +
-    '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.g) + 'g</div><div class="doc-macro-l">Gordura</div></div>' +
+    '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.p) + '<span class="doc-macro-unit">g</span></div><div class="doc-macro-l">Proteína</div></div>' +
+    '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.c) + '<span class="doc-macro-unit">g</span></div><div class="doc-macro-l">Carboidrato</div></div>' +
+    '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.g) + '<span class="doc-macro-unit">g</span></div><div class="doc-macro-l">Gordura</div></div>' +
     '<div class="doc-macro"><div class="doc-macro-v">' + Math.round(t.kcal) + '</div><div class="doc-macro-l">Calorias</div></div>' +
   '</div>';
 }
