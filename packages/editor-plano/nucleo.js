@@ -294,9 +294,16 @@ function nteMacroCard(label, current, target, unit) {
   const rounded = Math.round(current);
   const delta = target ? Math.round(current - target) : 0;
   const deltaStr = delta === 0 ? '' : (delta > 0 ? '+' + delta : '' + delta) + unit;
+  // Unidade num <span> à parte dentro do valor grande: var(--font-display)
+  // (Bebas Neue) só tem maiúsculas — "37g" concatenado direto saía como
+  // "37G", do mesmo tamanho/peso do número (mesmo defeito do bloco de
+  // macros do documento, .doc-macro-unit). .nte-macro-target não precisa
+  // do mesmo tratamento: já usa var(--font-body) (Montserrat), que tem
+  // minúsculas de verdade.
+  const valorUnidade = unit ? '<span class="nte-macro-unit">' + unit + '</span>' : '';
   return '<div class="nte-macro">' +
     '<div class="nte-macro-top">' +
-      '<span class="nte-macro-value">' + rounded + unit + '</span>' +
+      '<span class="nte-macro-value">' + rounded + valorUnidade + '</span>' +
       '<span class="nte-macro-target">/ ' + target + unit + '</span>' +
     '</div>' +
     (deltaStr ? '<div class="nte-macro-delta">' + deltaStr + '</div>' : '') +

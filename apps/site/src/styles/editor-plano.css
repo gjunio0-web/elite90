@@ -299,6 +299,7 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 .nte-macro { background: var(--c-darkbg); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-card); padding: var(--space-3); }
 .nte-macro-top { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; }
 .nte-macro-value { font-family: var(--font-display); font-size: 1.45rem; color: var(--c-light); line-height: 1; letter-spacing: 0.01em; }
+.nte-macro-value .nte-macro-unit { font-family: var(--font-label); font-size: 0.8rem; font-weight: 700; color: var(--c-textsub); letter-spacing: normal; margin-left: 1px; }
 .nte-macro-target { font-family: var(--font-body); font-size: 10px; color: var(--c-textsub); }
 .nte-macro-label { font-family: var(--font-label); font-size: 10px; color: var(--c-textsub); text-transform: uppercase; letter-spacing: var(--tracking-label); margin-top: 6px; margin-bottom: 7px; }
 .nte-macro-bar { height: 4px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; overflow: hidden; }
