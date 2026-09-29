@@ -167,11 +167,15 @@ export const handler = async (event: any) => {
   // desfazer uma escrita principal já bem-sucedida se a gravação do evento
   // falhar.
   const ator: Ator = { tipo: "humano", uid, email, papel: "admin" };
+  // Target id carries the athlete uid (D-AR; Addendum 04 §6.5, CE-10): the
+  // actor here is the Coach, so `ator.uid` does not identify the athlete, and a
+  // bare phase id would only resolve through a collection-group search. Events
+  // already recorded with the bare id are not rewritten (DR-06).
   await registrar({
     acao: "atleta.fase-alterada",
     ator,
     origem: "alterar-fase-atleta",
-    alvo: { colecao: SUBCOLECAO_FASES, id: novaFaseId } as Alvo,
+    alvo: { colecao: SUBCOLECAO_FASES, id: `${corpo.athleteUid}/${novaFaseId}` } as Alvo,
     detalhe: { de: faseAnterior, para: novaFase },
     _test: emHomologacao,
   });

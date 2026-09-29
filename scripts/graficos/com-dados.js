@@ -51,8 +51,11 @@ function generateMockVTaperData(days, athlete) {
   var semanas = Math.ceil(days / 7);
   var data = [];
   var seed = athlete ? idSeed(athlete.id) : 1;
-  var ombrosNow = (athlete && athlete.checkin && athlete.checkin.chest) ? (athlete.checkin.chest + 17) : 116;
-  var cinturaNow = (athlete && athlete.checkin) ? athlete.checkin.waist : 88;
+  // Fixed anchors since Phase 4 (persistence plan v5.23): the check-in left the
+  // athlete document (`athlete.checkin` is no longer written nor read by the
+  // panel), and this mock-up does not read `checkins/`.
+  var ombrosNow = 116;
+  var cinturaNow = 88;
   var phase = athlete ? (athlete.phase || 'Bulking') : 'Bulking';
   var og = phase === 'Bulking' ? 0.12 : (phase === 'Cutting' ? -0.06 : 0.02);
   var cg = phase === 'Cutting' ? -0.20 : (phase === 'Bulking' ? 0.09 : -0.02);
@@ -73,8 +76,9 @@ function generateMockSymmetryData(days, athlete) {
   var quinzenas = Math.max(2, Math.ceil(days / 15));
   var data = [];
   var seed = athlete ? idSeed(athlete.id) : 1;
-  var bracoNow = (athlete && athlete.checkin && athlete.checkin.arm) ? athlete.checkin.arm : 41;
-  var coxaNow  = (athlete && athlete.checkin && athlete.checkin.hip) ? (athlete.checkin.hip * 0.65) : 62;
+  // Fixed anchors since Phase 4 — see generateMockVTaperData.
+  var bracoNow = 41;
+  var coxaNow  = 62;
   for (var q = 1; q <= quinzenas; q++) {
     var qo = q - quinzenas;
     data.push({

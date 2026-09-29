@@ -70,10 +70,11 @@ const LIMITE_ALVOS = 50;
  * política de retenção —, e colapsá-las apagaria justamente a distinção que a
  * rastreabilidade precisa preservar.
  *
- * RESERVADO PARA O M2, a acrescentar quando as fases correspondentes forem
- * implementadas: 'checkin.registrado' (Fase 4).
+ * RESERVADO PARA O M2: nenhuma ação de fase pendente.
  * ('peso.registrado' left this reservation in Phase 3 — persistence plan — together
- * with 'peso.corrigido'; see the Phase 3 entry at the end of the list.)
+ * with 'peso.corrigido'; 'checkin.registrado' left it in Phase 4, together with
+ * 'checkin.corrigido', 'checkin.respondido' and 'checkin.resposta-corrigida';
+ * see the Phase 3 and Phase 4 entries at the end of the list.)
  * 'atleta.status-alterado' segue reservada SEM destino, e assim permanece:
  * remover reserva de vocabulário custa mais do que mantê-la. Constam aqui em
  * comentário para que o M2 não precise reabrir o vocabulário.
@@ -199,6 +200,30 @@ export const ACOES = [
   // idempotency key emits nothing: the operation did not happen again.
   "peso.registrado",
   "peso.corrigido",
+  // M2 — Phase 4 (persistence plan v5.23, Phase 4 traceability contract).
+  // All four after the write and outside the transaction (DR-06); `detalhe`:
+  // NONE in all four — measurements are forbidden in `detalhe` (DR-04), and
+  // `perception` and the Coach's text are free text (Addendum 04, R2).
+  //   'checkin.registrado'  — a week that did not exist. Emitted by
+  //                           `registrar-checkin.ts`.
+  //   'checkin.corrigido'   — a resend of the current week, before the Coach's
+  //                           response (F4-3). Emitted by `registrar-checkin.ts`.
+  //     Actor `{ tipo: "humano", uid, email: null, papel: "athlete" }` (D-AG;
+  //     Addendum 04 §6.4). Target `{ colecao: "checkins", id: "wNN" }` — the
+  //     athlete is identified by `ator.uid`.
+  //   'checkin.respondido'         — the Coach's first response to a week.
+  //   'checkin.resposta-corrigida' — an edit of that response (F4-10).
+  //     Emitted by `responder-checkin.ts`. Actor `{ tipo: "humano", uid, email,
+  //     papel: "admin" }` (DR-09). Target `{ colecao: "checkins",
+  //     id: "<athlete uid>/wNN" }` (D-AR; Addendum 04 §6.5): here `ator.uid` is
+  //     the Coach's, and "w05" alone would not say which athlete.
+  // Which one is emitted is decided AT WRITE TIME, from the document's state —
+  // never from earlier events, which may have been lost. A resend with the same
+  // idempotency key, or a response identical to the stored one, emits nothing.
+  "checkin.registrado",
+  "checkin.corrigido",
+  "checkin.respondido",
+  "checkin.resposta-corrigida",
 ] as const;
 
 export type Acao = (typeof ACOES)[number];

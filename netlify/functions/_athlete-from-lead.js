@@ -42,7 +42,11 @@
 //                         (CARDIO | SAUDE | LESAO | TRT_SEM_MEDICO)
 //
 //   OUTRAS ABAS
-//   - checkin (null até o 1º check-in), prev, avaliacao, baselinePhotos, planStatus
+//   - avaliacao, baselinePhotos, planStatus
+//   - NO `checkin` / `prev`: Phase 4 (persistence plan v5.23, F4-12) moved the
+//     check-in to `athletes/{uid}/checkins/{wNN}`; the athlete document only
+//     gets `lastCheckinSubmittedAt`, written by registrar-checkin.ts on the
+//     first check-in — never here, because a promotion is not a submission.
 //
 //   RÓTULO EXTERNO (Adendo 02 — Delegação, seção 5.1, AD-03/AD-04)
 //   - externalLabel -> "ATL-" + 4 símbolos, sorteado, imutável. Recebido por
@@ -224,8 +228,6 @@ function athleteFromLead(lead, avaliacao, opts = {}) {
     weightCurrentKg: peso,                                  // no dia 1, inicial == atual
 
     // -- Estados iniciais das demais abas --
-    checkin:        null,                                   // até o Portal (PRT-05/FN-07) gravar o primeiro
-    prev:           null,
     avaliacao:      null,                                   // subcoleção evaluations/ ainda ausente
     baselinePhotos: [],
     planStatus:     'none',                                 // nenhum plano publicado ainda

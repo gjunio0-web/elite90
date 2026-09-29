@@ -89,6 +89,16 @@ service cloud.firestore {
         allow read, write: if false;
       }
 
+      // Weekly check-in (M2 Phase 4, persistence plan v5.23). Written only by
+      // registrar-checkin.ts (athlete) and responder-checkin.ts (Coach), read
+      // only by ler-checkins.ts, all through the Admin SDK. Named block for
+      // clarity, same pattern as weights/: the wildcard below already denied
+      // it. The athlete reading their own check-in is a Portal decision (plan
+      // §7.3); until then, no direct access for anyone.
+      match /checkins/{week} {
+        allow read, write: if false;
+      }
+
       match /{subcollection}/{docId} {
         allow read, write: if false;
       }

@@ -20,6 +20,10 @@
 // Phase 3 (persistence plan): the daily weight series is now written, so its shape
 // is validated here too — see the PHASE 3 section at the end. The rules
 // themselves live in _serie-peso.js and are only re-exported and applied here.
+//
+// Phase 4 (persistence plan v5.23): the weekly check-in and the Coach's response
+// are now written — see the PHASE 4 section at the end. Same arrangement: the
+// rules live in _checkin.js and are re-exported here.
 
 // @ts-ignore — módulo CommonJS compartilhado com scripts/ (mesmo arranjo de
 // _athlete-from-lead.js em promote-lead.ts). A forma do rótulo é definida uma
@@ -453,6 +457,8 @@ const seriePeso = seriePesoModule as {
   WEIGHT_MIN_KG: number;
   WEIGHT_MAX_KG: number;
   WEIGHT_MAX_DECIMALS: number;
+  FUSO_REFERENCIA: string;
+  dataCivilNoFuso: (instante: Date, fuso: string) => string;
   dataCivilDoInicio: (startDate: unknown) => string | null;
   validarPesoKg: (v: unknown) => ResultadoValidacao;
   validarMeasuredOn: (v: unknown, agora: Date) => ResultadoValidacao;
@@ -463,6 +469,15 @@ const seriePeso = seriePesoModule as {
 };
 export const { WEIGHT_MIN_KG, WEIGHT_MAX_KG, WEIGHT_MAX_DECIMALS } = seriePeso;
 export const dataCivilDoInicio = seriePeso.dataCivilDoInicio;
+
+/**
+ * Civil date (AAAA-MM-DD) of an instant in the programme's reference time
+ * zone, America/Sao_Paulo — the same zone as the follow-up cut-off (Addendum
+ * 06, DA-08). Used by Phase 4 to find the cycle week of arrival.
+ */
+export function dataCivilReferencia(instante: Date): string {
+  return seriePeso.dataCivilNoFuso(instante, seriePeso.FUSO_REFERENCIA);
+}
 export const calcularMediaMovel = seriePeso.calcularMediaMovel;
 
 /**
@@ -504,4 +519,78 @@ export function validarWeightSource(valor: unknown): ResultadoValidacao {
     };
   }
   return { ok: false, erro: `source inválido. Esperado um de: ${WEIGHT_SOURCES.join(", ")}.` };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PHASE 4 · WEEKLY CHECK-IN AND COACH RESPONSE
+// Persistence schema v3, section 6 (and its update note of 28/09/2026);
+// persistence plan v5.23, Phase 4, decisions F4-2 to F4-6.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// @ts-ignore — CommonJS module shared with the test runner (same arrangement as
+// _serie-peso.js above). The rules are defined once there.
+import checkinModule from "./_checkin.js";
+
+export type MedidasCheckin = {
+  waistCm: number;
+  hipCm: number;
+  armCm: number | null;
+  chestCm: number | null;
+};
+
+type ComValor<T> = { ok: true; valor: T } | { ok: false; erro: string };
+
+const checkin = checkinModule as {
+  CICLO_TOTAL_SEMANAS: number;
+  TEXTO_MAX_CHARS: number;
+  FOTOS_MAX: number;
+  idDaSemana: (n: number) => string;
+  numeroDaSemana: (id: unknown) => number | null;
+  semanaDoCiclo: (inicioCivil: string, hojeCivil: string) => number;
+  decidirSemana: (
+    A: number,
+    U: number,
+  ) =>
+    | { ok: true; semana: number; correcao: boolean }
+    | { ok: false; motivo: "antes-do-inicio" | "ciclo-encerrado" | "historico-inconsistente" };
+  validarMedidas: (m: unknown) => ComValor<MedidasCheckin>;
+  validarTexto: (v: unknown, campo: string, obrigatorio: boolean) => ComValor<string | null>;
+  prefixoFotos: (athleteUid: string) => string;
+  validarFotos: (fotos: unknown, athleteUid: string) => ComValor<string[]>;
+  validarDeclaradoEm: (v: unknown) => ComValor<Date | null>;
+  validarSemanaId: (v: unknown) => ResultadoValidacao;
+};
+
+export const CHECKIN_TEXTO_MAX_CHARS = checkin.TEXTO_MAX_CHARS;
+export const CHECKIN_FOTOS_MAX = checkin.FOTOS_MAX;
+export const {
+  idDaSemana,
+  numeroDaSemana,
+  semanaDoCiclo,
+  decidirSemana,
+  validarMedidas,
+  validarTexto,
+  prefixoFotos,
+  validarFotos,
+  validarDeclaradoEm,
+  validarSemanaId,
+} = checkin;
+
+/**
+ * F4-4. The check-in never carries weight: weight is recorded only by the
+ * daily series (registrar-peso.ts). A body with a weight field is REFUSED,
+ * never silently ignored — a client sending it would believe it was recorded.
+ */
+export const CAMPOS_DE_PESO_RECUSADOS = ["weightKg", "weight", "peso"] as const;
+
+export function validarSemPeso(corpo: Record<string, unknown>): ResultadoValidacao {
+  for (const campo of CAMPOS_DE_PESO_RECUSADOS) {
+    if (campo in corpo) {
+      return {
+        ok: false,
+        erro: "O check-in não aceita peso. O peso é registrado pela série diária (registrar-peso).",
+      };
+    }
+  }
+  return { ok: true };
 }

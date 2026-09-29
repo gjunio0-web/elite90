@@ -190,9 +190,19 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .cycle-week-num { font-family: var(--font-display); font-size: var(--fs-display-md); color: var(--c-lime); letter-spacing: var(--tracking-display); line-height: 1; margin-top: var(--space-2); }
 .cycle-week-total { font-family: var(--font-label); font-size: var(--fs-label); color: var(--c-textsub); }
 .metric-delta { display: flex; align-items: center; gap: 6px; font-family: var(--font-label); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
-.metric-delta.positive { color: var(--c-lime); }
-.metric-delta.negative { color: var(--c-status-checkin); }
+/* Variations are always neutral: a change is neither good nor bad by itself
+   (D-AM, extended to the Check-in tab by F4-8). */
 .metric-delta.neutral  { color: var(--c-textsub); }
+.metric-note { font-family: var(--font-body); font-size: 0.6875rem; color: var(--c-textsub); min-height: 1em; }
+.ci-meta { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: var(--lh-body); margin: 0 0 var(--space-5); }
+.ci-resposta { width: 100%; }
+.ci-resposta-meta { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: var(--lh-body); margin: 0 0 var(--space-3); }
+.ci-resposta-textarea { width: 100%; min-height: 140px; background: var(--c-black); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card); color: var(--c-light); font-family: var(--font-body); font-size: var(--fs-body-md); line-height: var(--lh-body); padding: var(--space-4); resize: vertical; transition: border-color var(--dur-fast) var(--ease-std); }
+.ci-resposta-textarea:focus { outline: none; border-color: var(--c-lime); }
+.ci-resposta-textarea:disabled { opacity: 0.5; cursor: not-allowed; }
+.ci-resposta-rodape { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); margin-top: var(--space-3); }
+.ci-resposta-contador { font-family: var(--font-label); font-size: 0.6875rem; font-weight: var(--fw-label); letter-spacing: var(--tracking-label); color: var(--c-textsub); font-variant-numeric: lining-nums tabular-nums; }
+#ci-resposta-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
 .checkin-container { display: flex; flex-direction: column; gap: var(--space-6); padding: 0; width: 100%; min-width: 0; }
 .m1-section { margin-bottom: var(--space-8); }
 .m1-section-title { font-family: var(--font-label); font-size: var(--fs-body-sm); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-lime); margin-bottom: var(--space-3); }
@@ -883,21 +893,35 @@ tbody { display: block; width: 100%; }
                 </div>
               </div>
 
+              <!-- Which check-in is shown (Phase 4: read from checkins/ by ler-checkins) -->
+              <p class="ci-meta" id="ci-meta">Nenhum check-in enviado ainda.</p>
+
               <div class="metric-grid">
                 <div class="metric-input">
                   <label class="metric-label">Peso (kg)</label>
                   <div class="metric-value-wrap"><span class="metric-value" id="checkin-weight">—</span></div>
-                  <div class="metric-delta" id="delta-weight"></div>
+                  <div class="metric-note" id="checkin-weight-date"></div>
+                  <div class="metric-delta neutral" id="delta-weight"></div>
                 </div>
                 <div class="metric-input">
                   <label class="metric-label">Cintura (cm)</label>
                   <div class="metric-value-wrap"><span class="metric-value" id="checkin-waist">—</span></div>
-                  <div class="metric-delta" id="delta-waist"></div>
+                  <div class="metric-delta neutral" id="delta-waist"></div>
                 </div>
                 <div class="metric-input">
                   <label class="metric-label">Quadril (cm)</label>
                   <div class="metric-value-wrap"><span class="metric-value" id="checkin-hip">—</span></div>
-                  <div class="metric-delta" id="delta-hip"></div>
+                  <div class="metric-delta neutral" id="delta-hip"></div>
+                </div>
+                <div class="metric-input">
+                  <label class="metric-label">Braço (cm)</label>
+                  <div class="metric-value-wrap"><span class="metric-value" id="checkin-arm">—</span></div>
+                  <div class="metric-delta neutral" id="delta-arm"></div>
+                </div>
+                <div class="metric-input">
+                  <label class="metric-label">Peito (cm)</label>
+                  <div class="metric-value-wrap"><span class="metric-value" id="checkin-chest">—</span></div>
+                  <div class="metric-delta neutral" id="delta-chest"></div>
                 </div>
               </div>
             </div>
@@ -918,15 +942,21 @@ tbody { display: block; width: 100%; }
 
           </div>
 
-          <!-- PAINEL DIREITO: Captura Passiva Coach -->
+          <!-- PAINEL DIREITO: resposta do Coach (Phase 4, F4-9 — replaces the two
+               simulated buttons "Copiar Link do Check-in" and "Reenviar Lembrete",
+               which did not do what they announced) -->
           <div class="capture-panel">
 
-            <!-- AÇÕES DO COACH -->
-            <div class="m1-section" style="width:100%">
-              <div class="m1-section-title">Ações</div>
+            <div class="m1-section ci-resposta">
+              <div class="m1-section-title">Resposta ao Atleta</div>
               <div class="m1-section-line"></div>
-              <button class="m1-btn-outline" onclick="copyCheckinLink(this)">Copiar Link do Check-in</button>
-              <button class="m1-btn-outline" onclick="resendReminder(this)">Reenviar Lembrete ao Atleta</button>
+              <p class="ci-resposta-meta" id="ci-resposta-meta">Sem check-in para responder.</p>
+              <textarea class="ci-resposta-textarea" id="ci-resposta-text" maxlength="4000" disabled
+                        placeholder="Escreva a resposta a este check-in…" oninput="m2AtualizarContadorResposta()"></textarea>
+              <div class="ci-resposta-rodape">
+                <span class="ci-resposta-contador" id="ci-resposta-contador">0 / 4.000</span>
+                <button class="btn-primary" id="ci-resposta-btn" type="button" disabled onclick="m2EnviarRespostaCheckin()">Enviar resposta</button>
+              </div>
             </div>
 
           </div>
@@ -1465,17 +1495,23 @@ tbody { display: block; width: 100%; }
     //    portado; renderIcons() varre [data-lucide] e injeta o SVG. ──
 
     // ── FOTOS DO CHECK-IN (get-foto-urls.ts real, sem persistência mock) ──
-    // Convenção de paths no Storage (a popular pelo time/app do atleta):
-    //   athlete.checkin.photos   — fotos do check-in da semana atual
-    //   athlete.baselinePhotos   — fotos do Dia 1 (mesma ordem/ângulo)
-    async function renderAthletePhotos(athlete) {
+    // Paths in Storage (Phase 4, F4-5):
+    //   checkinPaths            — photos of the check-in shown in the tab,
+    //                             from checkins/{wNN}.photos (ler-checkins)
+    //   athlete.baselinePhotos  — the triage form photos (same angles, same
+    //                             order), filled at promotion
+    // Gap 3.2: the guard used to return early when the check-in had no photo,
+    // throwing the baseline away. Now, with no check-in photo, the baseline is
+    // what the grid shows; with both, the grid shows the check-in and the modal
+    // compares each photo with the baseline photo IN THE SAME POSITION.
+    async function renderAthletePhotos(athlete, checkinPaths) {
       const grid = document.getElementById('photos-grid');
       if (!grid) return;
       photoFiles = [];
       photoBeforeFiles = [];
-      const currentPaths = athlete.checkin?.photos || [];
+      const currentPaths = Array.isArray(checkinPaths) ? checkinPaths : [];
       const baselinePaths = athlete.baselinePhotos || [];
-      if (!currentPaths.length) {
+      if (!currentPaths.length && !baselinePaths.length) {
         grid.innerHTML = '<p class="photos-empty">Nenhuma foto enviada ainda.</p>';
         return;
       }
@@ -1490,10 +1526,21 @@ tbody { display: block; width: 100%; }
         });
         if (!res.ok) throw new Error('Falha ao gerar links de fotos');
         const { urls } = await res.json();
+        // The drawer may have switched athlete while the URLs were signed.
+        if (!wke04CurrentAthlete || wke04CurrentAthlete.id !== athlete.id) return;
         const urlByPath = Object.fromEntries(allPaths.map((p, i) => [p, urls[i]]));
-        photoFiles = currentPaths.map(p => urlByPath[p]).filter(Boolean);
-        photoBeforeFiles = baselinePaths.map(p => urlByPath[p]).filter(Boolean);
-        grid.innerHTML = photoFiles.map((url, i) =>
+        if (currentPaths.length) {
+          photoFiles = currentPaths.map(p => urlByPath[p]).filter(Boolean);
+          // No .filter here: comparison is by position (F4-5), and a missing
+          // baseline photo must leave a hole, not shift the others.
+          photoBeforeFiles = baselinePaths.map(p => urlByPath[p]);
+        } else {
+          photoFiles = baselinePaths.map(p => urlByPath[p]).filter(Boolean);
+          photoBeforeFiles = [];
+        }
+        const aviso = currentPaths.length ? ''
+          : '<p class="photos-empty">Este check-in não tem fotos. Abaixo, as fotos de início (ficha).</p>';
+        grid.innerHTML = aviso + photoFiles.map((url, i) =>
           `<div class="photo-thumb" onclick="openPhotoModal(${i})" style="background-image: url('${url}');"></div>`
         ).join('');
       } catch (e) {
@@ -1604,15 +1651,17 @@ tbody { display: block; width: 100%; }
     // resolvido de vez.
 
     // Situação de acompanhamento (Adendo 06). Ponto único de chamada a
-    // derivarSituacao (packages/situacao, injetado acima) — antes da Fase 4,
-    // não existe subcoleção de check-ins, então o segundo argumento é sempre
-    // null (DA-06: derivação parcial aceita, contando a partir da promoção).
-    // Quando a Fase 4 existir, só este função muda — nenhum dos nove pontos
-    // de exibição que a chamam.
+    // derivarSituacao (packages/situacao, injetado acima) — nenhum dos nove
+    // pontos de exibição que a chamam muda.
+    // Phase 4 (Addendum 06 v1.5, §5; F4-1): the date of the last check-in sent
+    // comes from `lastCheckinSubmittedAt` on the athlete document, which this
+    // list already reads — the browser has no read access to `checkins/`. The
+    // field is written by registrar-checkin.ts only for a NEW week, with the
+    // server clock. Absent (never sent) → null, the DA-06 behaviour.
     function situacaoDoAtleta(athlete) {
       const createdAt = athlete && parseDate(athlete.createdAt);
       if (!createdAt) return null;
-      return derivarSituacao(createdAt, null);
+      return derivarSituacao(createdAt, parseDate(athlete.lastCheckinSubmittedAt));
     }
 
     // Os quatro indicadores do topo são atualizados em dois pontos do painel
@@ -2013,51 +2062,9 @@ tbody { display: block; width: 100%; }
       }
       if (profileGoal)   profileGoal.textContent   = athlete.goal    || '—';
 
-      // Check-in
-      const ci = athlete.checkin;
-      const pr = athlete.prev;
-      const ciWeight = document.getElementById('checkin-weight');
-      const ciWaist  = document.getElementById('checkin-waist');
-      const ciHip    = document.getElementById('checkin-hip');
-      const ciPerc   = document.getElementById('checkin-perception');
-      if (ciWeight) ciWeight.textContent = ci ? ci.weight : '—';
-      if (ciWaist)  ciWaist.textContent  = ci ? ci.waist  : '—';
-      if (ciHip)    ciHip.textContent    = ci ? ci.hip    : '—';
-      if (ciPerc)   ciPerc.textContent   = ci ? ci.perception : '';
-      if (ciPerc)   ciPerc.placeholder = ci ? '' : 'Nenhum relato enviado ainda…'; // placeholder não se aplica a span, mas mantido para compatibilidade
-      renderAthletePhotos(athlete);
-
-      // Delta das métricas (cor por fase)
-      function renderDelta(elId, current, previous, phase, metricType) {
-        const el = document.getElementById(elId);
-        if (!el || !current || !previous) { if(el) el.innerHTML = ''; return; }
-        const diff = (current - previous).toFixed(1);
-        const absDiff = Math.abs(diff);
-        if (absDiff < 0.05) { el.className = 'metric-delta neutral'; el.textContent = '— sem alteração'; return; }
-        const sign = diff > 0 ? '+' : '';
-        const pct = previous ? Math.abs(((current - previous) / previous) * 100).toFixed(1) : null;
-        // Positivo por fase:
-        // Peso: Bulking = subir é bom; Cutting = descer é bom; Diet Break = neutro
-        // Cintura: sempre descer é bom
-        // Quadril: Bulking = neutro/leve; Cutting = descer é bom
-        let positive;
-        if (metricType === 'weight') {
-          positive = phase === 'Bulking' ? diff > 0 : phase === 'Cutting' ? diff < 0 : null;
-        } else if (metricType === 'waist' || metricType === 'hip') {
-          positive = diff < 0;
-        }
-        const cls = positive === null ? 'neutral' : positive ? 'positive' : 'negative';
-        const arrow = diff > 0 ? '↑' : '↓';
-        el.className = `metric-delta ${cls}`;
-        el.textContent = `${sign}${diff} ${arrow}${pct !== null ? ` (${pct}%)` : ''}`;
-      }
-      if (ci && pr) {
-        renderDelta('delta-weight', ci.weight, pr.weight, athlete.phase, 'weight');
-        renderDelta('delta-waist',  ci.waist,  pr.waist,  athlete.phase, 'waist');
-        renderDelta('delta-hip',    ci.hip,    pr.hip,    athlete.phase, 'hip');
-      } else {
-        ['delta-weight','delta-waist','delta-hip'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=''; });
-      }
+      // Check-in (Phase 4): read from checkins/ through ler-checkins — no
+      // longer from `athlete.checkin` / `athlete.prev` (gap 3.1).
+      m2CarregarCheckins(athlete);
 
       // Indicador de semana do ciclo
       const weekNum  = document.getElementById('cycle-week-num');
@@ -2280,22 +2287,6 @@ tbody { display: block; width: 100%; }
       t.textContent = msg;
       document.body.appendChild(t);
       setTimeout(() => t.remove(), duration);
-    }
-
-    function copyCheckinLink(btn) {
-      navigator.clipboard?.writeText('https://elite90.app/checkin/LINK-TEMP').catch(() => {});
-      showToast('✓ Link copiado!');
-    }
-
-    function resendReminder(btn) {
-      const orig = btn.textContent;
-      btn.textContent = 'Enviando…';
-      btn.disabled = true;
-      setTimeout(() => {
-        btn.textContent = orig;
-        btn.disabled = false;
-        showToast('✓ Lembrete enviado!');
-      }, 1200);
     }
 
     // ── FLAGS DO ATLETA (padrão M1) ──
@@ -3746,6 +3737,181 @@ tbody { display: block; width: 100%; }
     window.E90_CARREGAR_SERIE_PESO = function (athleteUid) {
       return m2Ler('ler-serie-peso', { athleteUid: athleteUid });
     };
+
+    // ── CHECK-IN (Phase 4, persistence plan v5.23) ──
+    // The tab reads the two most recent check-ins through ler-checkins (gap
+    // 3.1) and answers the most recent one through responder-checkin (F4-9,
+    // F4-10). State of the check-in on screen, for the response section:
+    let m2CheckinNaTela = null; // { athleteId, week, cycleWeek, textoSalvo }
+
+    function m2NumeroBr(v) {
+      return (typeof v === 'number' && isFinite(v)) ? String(v).replace('.', ',') : '—';
+    }
+
+    // Variation between the two check-ins, always in neutral colour (F4-8,
+    // extending D-AM): a change is neither good nor bad by itself.
+    function m2RenderVariacao(elId, atual, anterior) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.className = 'metric-delta neutral';
+      if (typeof atual !== 'number' || typeof anterior !== 'number') { el.textContent = ''; return; }
+      const diff = Math.round((atual - anterior) * 10) / 10;
+      if (Math.abs(diff) < 0.05) { el.textContent = '— sem alteração'; return; }
+      const pct = anterior ? Math.abs((atual - anterior) / anterior * 100).toFixed(1).replace('.', ',') : null;
+      el.textContent = (diff > 0 ? '+' : '') + m2NumeroBr(diff) + (diff > 0 ? ' ↑' : ' ↓')
+        + (pct !== null ? ' (' + pct + '%)' : '');
+    }
+
+    function m2RenderCheckin(athlete, atual, anterior) {
+      const meta = document.getElementById('ci-meta');
+      if (meta) {
+        if (!atual) {
+          meta.textContent = 'Nenhum check-in enviado ainda.';
+        } else {
+          const enviado = m2FormatarDataHora(atual.submittedAt);
+          meta.textContent = 'Check-in da semana ' + (atual.cycleWeek || atual.week)
+            + (enviado ? ', enviado em ' + enviado : '')
+            + (anterior ? '. Variações em relação à semana ' + (anterior.cycleWeek || anterior.week) + '.' : '.');
+        }
+      }
+
+      const m = atual ? atual.measurements : {};
+      const p = anterior ? anterior.measurements : {};
+      const campos = [
+        ['checkin-waist', 'delta-waist', 'waistCm'],
+        ['checkin-hip', 'delta-hip', 'hipCm'],
+        ['checkin-arm', 'delta-arm', 'armCm'],
+        ['checkin-chest', 'delta-chest', 'chestCm'],
+      ];
+      campos.forEach(function (c) {
+        const el = document.getElementById(c[0]);
+        if (el) el.textContent = atual ? m2NumeroBr(m[c[2]]) : '—';
+        m2RenderVariacao(c[1], atual ? m[c[2]] : null, anterior ? p[c[2]] : null);
+      });
+
+      // F4-7: weight of the daily series on the submission date, or the last
+      // one before it — never a value stored in the check-in (F4-4).
+      const pesoAtual = atual && atual.peso ? atual.peso : null;
+      const pesoAnterior = anterior && anterior.peso ? anterior.peso : null;
+      const elPeso = document.getElementById('checkin-weight');
+      if (elPeso) elPeso.textContent = pesoAtual ? m2NumeroBr(pesoAtual.weightKg) : '—';
+      const elPesoData = document.getElementById('checkin-weight-date');
+      if (elPesoData) {
+        elPesoData.textContent = pesoAtual
+          ? 'Pesagem de ' + pesoAtual.measuredOn.split('-').reverse().join('/')
+          : (atual ? 'Sem pesagem até o envio' : '');
+      }
+      m2RenderVariacao('delta-weight', pesoAtual && pesoAtual.weightKg, pesoAnterior && pesoAnterior.weightKg);
+
+      const perc = document.getElementById('checkin-perception');
+      if (perc) {
+        perc.value = atual && atual.perception ? atual.perception : '';
+        perc.placeholder = atual ? 'O atleta não escreveu relato nesta semana.' : 'Nenhum relato enviado ainda…';
+      }
+
+      renderAthletePhotos(athlete, atual ? atual.photos : []);
+      m2RenderResposta(athlete, atual);
+    }
+
+    function m2RenderResposta(athlete, atual) {
+      const meta = document.getElementById('ci-resposta-meta');
+      const txt = document.getElementById('ci-resposta-text');
+      const btn = document.getElementById('ci-resposta-btn');
+      if (!meta || !txt || !btn) return;
+      if (!atual) {
+        m2CheckinNaTela = null;
+        meta.textContent = 'Sem check-in para responder.';
+        txt.value = '';
+        txt.disabled = true;
+        btn.textContent = 'Enviar resposta';
+        m2AtualizarContadorResposta();
+        return;
+      }
+      const r = atual.coachResponse;
+      m2CheckinNaTela = {
+        athleteId: athlete.id,
+        week: atual.week,
+        cycleWeek: atual.cycleWeek,
+        textoSalvo: r ? r.text : null,
+      };
+      const quando = r ? m2FormatarDataHora(r.respondedAt) : '';
+      meta.textContent = r
+        ? 'Semana ' + (atual.cycleWeek || atual.week) + ' respondida' + (quando ? ' em ' + quando : '')
+          + '. A resposta pode ser editada.'
+        : 'Semana ' + (atual.cycleWeek || atual.week) + ' ainda sem resposta.';
+      txt.value = r ? r.text : '';
+      txt.disabled = false;
+      btn.textContent = r ? 'Salvar edição' : 'Enviar resposta';
+      m2AtualizarContadorResposta();
+    }
+
+    function m2AtualizarContadorResposta() {
+      const txt = document.getElementById('ci-resposta-text');
+      const cont = document.getElementById('ci-resposta-contador');
+      const btn = document.getElementById('ci-resposta-btn');
+      if (!txt) return;
+      if (cont) cont.textContent = txt.value.length.toLocaleString('pt-BR') + ' / 4.000';
+      if (btn) {
+        const t = txt.value.trim();
+        btn.disabled = !m2CheckinNaTela || !t || t === m2CheckinNaTela.textoSalvo;
+      }
+    }
+
+    async function m2CarregarCheckins(athlete) {
+      // Honest intermediate state: nothing from the previous athlete stays on
+      // screen while the new one loads.
+      m2RenderCheckin(athlete, null, null);
+      const meta = document.getElementById('ci-meta');
+      if (meta) meta.textContent = 'Carregando check-in…';
+      try {
+        const r = await m2Ler('ler-checkins', { athleteUid: athlete.id });
+        if (!wke04CurrentAthlete || wke04CurrentAthlete.id !== athlete.id) return;
+        const lista = (r && r.checkins) || [];
+        m2RenderCheckin(athlete, lista[0] || null, lista[1] || null);
+      } catch (e) {
+        console.error('[m2CarregarCheckins]', e);
+        if (!wke04CurrentAthlete || wke04CurrentAthlete.id !== athlete.id) return;
+        if (meta) meta.textContent = 'Não foi possível carregar o check-in agora.';
+      }
+    }
+
+    async function m2EnviarRespostaCheckin() {
+      const alvo = m2CheckinNaTela;
+      const txt = document.getElementById('ci-resposta-text');
+      const btn = document.getElementById('ci-resposta-btn');
+      if (!alvo || !txt || !btn) return;
+      const texto = txt.value.trim();
+      if (!texto) return;
+      const rotulo = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
+      try {
+        const r = await m2Escrever('responder-checkin', {
+          athleteUid: alvo.athleteId,
+          week: alvo.week,
+          text: texto,
+        });
+        alvo.textoSalvo = texto;
+        showToast(r && r.editou ? '✓ Resposta atualizada' : '✓ Resposta enviada');
+        if (wke04CurrentAthlete && wke04CurrentAthlete.id === alvo.athleteId && m2CheckinNaTela === alvo) {
+          const meta = document.getElementById('ci-resposta-meta');
+          const quando = m2FormatarDataHora(r && r.respondedAt);
+          if (meta) {
+            meta.textContent = 'Semana ' + (alvo.cycleWeek || alvo.week) + ' respondida'
+              + (quando ? ' em ' + quando : '') + '. A resposta pode ser editada.';
+          }
+          btn.textContent = 'Salvar edição';
+        } else {
+          btn.textContent = rotulo;
+        }
+      } catch (e) {
+        console.error('[m2EnviarRespostaCheckin]', e);
+        showToast('Não foi possível enviar a resposta. ' + (e && e.message ? e.message : ''), 5000);
+        btn.textContent = rotulo;
+      } finally {
+        m2AtualizarContadorResposta();
+      }
+    }
 
     // AC-28 · P-3/P-4. `true` persistido lido do servidor, por `uid:kind`.
     // Só guarda `true`; doPublish limpa a entrada ao publicar.
