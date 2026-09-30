@@ -211,7 +211,12 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .m1-field-label { font-family: var(--font-label); font-size: 0.6875rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-textsub); margin-bottom: var(--space-2); }
 .m1-field-value { font-family: var(--font-body); font-size: var(--fs-body-md); color: var(--c-light); line-height: var(--lh-body); }
 .m1-btn-outline { display: block; width: 100%; padding: 10px 20px; background: transparent; border: 1px solid rgba(166, 195, 0, 0.3); border-radius: var(--radius-card); color: var(--c-lime); font-family: var(--font-label); font-size: 0.7rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; text-align: center; transition: background var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std); margin-bottom: var(--space-3); }
-.m1-btn-outline:hover { background: rgba(166, 195, 0, 0.05); border-color: var(--c-lime); }
+.m1-btn-outline:hover:not(:disabled) { background: rgba(166, 195, 0, 0.05); border-color: var(--c-lime); }
+/* Disabled outline button: an action shown but not yet available (Phase 4 review
+   of F4-9). Faint text and default border, no hover, and a note below it saying
+   when the action becomes available. */
+.m1-btn-outline:disabled { color: var(--c-textfaint); border-color: var(--c-border); cursor: not-allowed; }
+.ci-acoes-aviso { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: var(--lh-body); margin: 0; }
 .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5) var(--space-5); margin-bottom: var(--space-6); }
 .metric-input { display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-1); }
 .metric-label { font-family: var(--font-label); font-size: 0.6875rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-textsub); min-height: 2em; }
@@ -942,9 +947,12 @@ tbody { display: block; width: 100%; }
 
           </div>
 
-          <!-- PAINEL DIREITO: resposta do Coach (Phase 4, F4-9 — replaces the two
-               simulated buttons "Copiar Link do Check-in" and "Reenviar Lembrete",
-               which did not do what they announced) -->
+          <!-- PAINEL DIREITO: resposta do Coach (Phase 4, F4-9) e ações ao atleta.
+               The two actions were simulated before Phase 4 (a fake link and a
+               fake "sent" toast). They are back, disabled, until the athlete
+               Portal exists: the link needs the athlete's check-in page, and the
+               reminder needs somewhere to send the athlete. Their real
+               implementation belongs to the Portal front. -->
           <div class="capture-panel">
 
             <div class="m1-section ci-resposta">
@@ -957,6 +965,14 @@ tbody { display: block; width: 100%; }
                 <span class="ci-resposta-contador" id="ci-resposta-contador">0 / 4.000</span>
                 <button class="btn-primary" id="ci-resposta-btn" type="button" disabled onclick="m2EnviarRespostaCheckin()">Enviar resposta</button>
               </div>
+            </div>
+
+            <div class="m1-section" style="width:100%">
+              <div class="m1-section-title">Ações</div>
+              <div class="m1-section-line"></div>
+              <button class="m1-btn-outline" type="button" disabled aria-describedby="ci-acoes-aviso">Copiar Link do Check-in</button>
+              <button class="m1-btn-outline" type="button" disabled aria-describedby="ci-acoes-aviso">Reenviar Lembrete ao Atleta</button>
+              <p class="ci-acoes-aviso" id="ci-acoes-aviso">Disponível quando o Portal do Atleta estiver no ar.</p>
             </div>
 
           </div>
