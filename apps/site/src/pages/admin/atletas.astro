@@ -212,10 +212,10 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .m1-field-value { font-family: var(--font-body); font-size: var(--fs-body-md); color: var(--c-light); line-height: var(--lh-body); }
 .m1-btn-outline { display: block; width: 100%; padding: 10px 20px; background: transparent; border: 1px solid rgba(166, 195, 0, 0.3); border-radius: var(--radius-card); color: var(--c-lime); font-family: var(--font-label); font-size: 0.7rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; text-align: center; transition: background var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std); margin-bottom: var(--space-3); }
 .m1-btn-outline:hover:not(:disabled) { background: rgba(166, 195, 0, 0.05); border-color: var(--c-lime); }
-/* Disabled outline button: an action shown but not yet available (Phase 4 review
-   of F4-9). Faint text and default border, no hover, and a note below it saying
-   when the action becomes available. */
-.m1-btn-outline:disabled { color: var(--c-textfaint); border-color: var(--c-border); cursor: not-allowed; }
+/* Disabled state of every button category (Design System §5.9, amendment of
+   30/09/2026): half opacity, not-allowed cursor, no hover. A button that will
+   become available later says why in a note right below it (.ci-acoes-aviso). */
+.m1-btn-outline:disabled { opacity: .5; cursor: not-allowed; }
 .ci-acoes-aviso { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: var(--lh-body); margin: 0; }
 .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5) var(--space-5); margin-bottom: var(--space-6); }
 .metric-input { display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-1); }
