@@ -337,8 +337,12 @@ body.wke-dragging .wke-ex-drag { cursor: grabbing !important; }
 .nte-meal-addfood { display: flex; align-items: center; gap: 6px; width: 100%; padding: 9px var(--space-3); background: transparent; border: none; border-top: 1px solid rgba(255, 255, 255, 0.08); color: var(--c-lime); font-family: var(--font-label); font-size: 11px; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-cta); cursor: pointer; transition: background 150ms ease; }
 .nte-meal-addfood:hover { background: rgba(166, 195, 0, 0.12); }
 .nte-meal-addfood [data-lucide] { width: 13px; height: 13px; }
+/* Busca de alimento: nome e macros são <span>s dentro de um bloco. Sem display:block
+   ficavam na mesma linha (macros coladas ao nome, margin-top sem efeito). Cada um
+   ocupa a sua linha, e o corpo do texto sobe de 12/10px para 14/12px. */
 .nte-food-result { display: block; }
-.nte-food-result-macros { font-family: var(--font-body); font-size: 10px; color: var(--c-textsub); margin-top: 2px; }
+.nte-food-result .wke-search-result-name { display: block; font-size: var(--fs-body-md); }
+.nte-food-result-macros { display: block; font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); margin-top: 4px; }
 .nte-qty-overlay { position: fixed; inset: 0; z-index: 330; background: rgba(0,0,0,0.7); display: flex; align-items: flex-start; justify-content: center; padding-top: 12vh; }
 .nte-qty-overlay[hidden] { display: none !important; }
 .nte-qty-box { width: 100%; max-width: 380px; background: var(--c-darkbg); border: 1px solid rgba(166, 195, 0, 0.50); border-radius: var(--radius-card); box-shadow: var(--shadow-lg); padding: var(--space-5); }
