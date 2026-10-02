@@ -24,6 +24,10 @@
 // Phase 4 (persistence plan v5.23): the weekly check-in and the Coach's response
 // are now written — see the PHASE 4 section at the end. Same arrangement: the
 // rules live in _checkin.js and are re-exported here.
+//
+// Phase 6 (persistence plan v5.26): the physical evaluation and the weekly
+// evolution report are now written — see the PHASE 6 section at the end. Same
+// arrangement: the rules live in _avaliacao-fisica.js and _relatorio.js.
 
 // @ts-ignore — módulo CommonJS compartilhado com scripts/ (mesmo arranjo de
 // _athlete-from-lead.js em promote-lead.ts). A forma do rótulo é definida uma
@@ -592,5 +596,89 @@ export function validarSemPeso(corpo: Record<string, unknown>): ResultadoValidac
       };
     }
   }
+  return { ok: true };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PHASE 6 · PHYSICAL EVALUATION AND WEEKLY EVOLUTION REPORT
+// Persistence schema v3, sections 9 and 10 (and the update note); persistence
+// plan v5.26, Phase 6, decisions O1 to O13; Addendum 10 v1.4, RP-1.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// @ts-ignore — CommonJS module shared with the test runner (same arrangement as
+// _checkin.js above). The rules are defined once there.
+import avaliacaoModule from "./_avaliacao-fisica.js";
+// @ts-ignore — idem.
+import relatorioModule from "./_relatorio.js";
+
+export type PerimetrosAvaliacao = Record<string, number>;
+export type DobrasAvaliacao = Record<string, number>;
+export type MedidoPor = { type: "professional" | "self"; sameAsPrevious: boolean | null };
+export type TextosRelatorio = {
+  diagnosis: string | null;
+  trainingAdjustments: string | null;
+  nutritionAdjustments: string | null;
+  causalLinks: string | null;
+};
+
+const avaliacao = avaliacaoModule as {
+  SEMANAS_DE_AVALIACAO: number[];
+  decidirVagaAvaliacao: (
+    A: number,
+    U: number,
+  ) =>
+    | { ok: true; semana: number; correcao: boolean }
+    | { ok: false; motivo: "antes-do-inicio" | "ciclo-encerrado" | "historico-inconsistente" };
+  validarPerimetros: (m: unknown) => ComValor<PerimetrosAvaliacao>;
+  validarDobras: (m: unknown) => ComValor<DobrasAvaliacao | null>;
+  validarMedidoPor: (v: unknown, haAnterior: boolean) => ComValor<MedidoPor>;
+  validarMedidoEm: (v: unknown) => ComValor<Date>;
+  validarSemPesoAvaliacao: (corpo: Record<string, unknown>) => ResultadoValidacao;
+};
+
+export const {
+  SEMANAS_DE_AVALIACAO,
+  decidirVagaAvaliacao,
+  validarPerimetros,
+  validarDobras,
+  validarMedidoPor,
+  validarMedidoEm,
+  validarSemPesoAvaliacao,
+} = avaliacao;
+
+const relatorio = relatorioModule as {
+  TEXTOS_RELATORIO: (keyof TextosRelatorio)[];
+  semanaDoRelatorioPermitida: (w: number, A: number) => boolean;
+  validarTextosRelatorio: (corpo: unknown) => ComValor<TextosRelatorio>;
+  temAlgumTexto: (textos: TextosRelatorio) => boolean;
+  textosIguais: (armazenado: Record<string, unknown> | null | undefined, textos: TextosRelatorio) => boolean;
+  camposIniciaisRelatorio: () => Record<string, unknown>;
+};
+
+export const {
+  TEXTOS_RELATORIO,
+  semanaDoRelatorioPermitida,
+  validarTextosRelatorio,
+  temAlgumTexto,
+  textosIguais,
+  camposIniciaisRelatorio,
+} = relatorio;
+
+/**
+ * O2 with D-AJ. Bounds of `measuredAt`, applied to its civil date in the
+ * programme's reference time zone: not after today in UTC+14 (the weight
+ * series' upper bound) and not before the cycle start. The instant itself is
+ * stored as the athlete declared it; it never decides the slot.
+ */
+export function validarLimitesMedidoEm(
+  medidoEm: Date,
+  agora: Date,
+  inicioCiclo: string | null,
+): ResultadoValidacao {
+  const civil = dataCivilReferencia(medidoEm);
+  const superior = seriePeso.validarMeasuredOn(civil, agora);
+  if (!superior.ok) return { ok: false, erro: "measuredAt não pode ser uma data futura." };
+  const inferior = seriePeso.validarInicioCiclo(civil, inicioCiclo);
+  if (!inferior.ok) return { ok: false, erro: `measuredAt anterior ao início do ciclo (${inicioCiclo}).` };
   return { ok: true };
 }

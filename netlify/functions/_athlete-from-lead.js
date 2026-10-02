@@ -42,7 +42,11 @@
 //                         (CARDIO | SAUDE | LESAO | TRT_SEM_MEDICO)
 //
 //   OUTRAS ABAS
-//   - avaliacao, baselinePhotos, planStatus
+//   - baselinePhotos, planStatus
+//   - NO `avaliacao`: Phase 6 (persistence plan v5.26, O12) — the physical
+//     evaluation lives in `athletes/{uid}/evaluations/{wNN}`, written by the
+//     athlete through registrar-avaliacao-fisica.ts. Athletes promoted before
+//     keep their `avaliacao: null`; nothing reads it any more.
 //   - NO `checkin` / `prev`: Phase 4 (persistence plan v5.23, F4-12) moved the
 //     check-in to `athletes/{uid}/checkins/{wNN}`; the athlete document only
 //     gets `lastCheckinSubmittedAt`, written by registrar-checkin.ts on the
@@ -228,7 +232,6 @@ function athleteFromLead(lead, avaliacao, opts = {}) {
     weightCurrentKg: peso,                                  // no dia 1, inicial == atual
 
     // -- Estados iniciais das demais abas --
-    avaliacao:      null,                                   // subcoleção evaluations/ ainda ausente
     baselinePhotos: [],
     planStatus:     'none',                                 // nenhum plano publicado ainda
 

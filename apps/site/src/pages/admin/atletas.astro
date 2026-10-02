@@ -327,9 +327,9 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .evo-srctag { margin-left: auto; font-family: var(--font-label); font-size: 0.52rem; font-weight: var(--fw-label); color: var(--c-textsub); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(255,255,255,0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 3px; padding: 2px 7px; }
 .evo-btn { display: block; width: 100%; padding: 13px 18px; border-radius: var(--radius-card); font-family: var(--font-label); font-size: 0.7rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border: none; transition: opacity 140ms ease, box-shadow 140ms ease; margin-bottom: 7px; text-align: center; }
 .evo-btn.lime { background: var(--grad-cta); color: var(--c-black); }
-.evo-btn.lime:hover { box-shadow: var(--glow-lime); }
+.evo-btn.lime:hover:not(:disabled) { box-shadow: var(--glow-lime); }
 .evo-btn.ghost { background: transparent; border: 1px solid rgba(255, 255, 255, 0.14); color: var(--c-textsub); }
-.evo-btn.ghost:hover { color: var(--c-textbody); }
+.evo-btn.ghost:hover:not(:disabled) { color: var(--c-textbody); }
 .evo-hint { font-family: var(--font-body); font-size: 0.67rem; color: var(--c-textsub); text-align: center; margin-top: -2px; margin-bottom: 13px; }
 .evo-gencard { background: var(--c-darkbg); border: 1px solid rgba(74,144,217,0.20); border-radius: var(--radius-card); padding: 20px; text-align: center; }
 .evo-spin { width: 25px; height: 25px; border: 2px solid rgba(255, 255, 255, 0.14); border-top-color: var(--c-lime); border-radius: 50%; animation: evo-spin 0.75s linear infinite; margin: 0 auto 11px; }
@@ -393,7 +393,7 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .evo-ed-sub { background: var(--c-darkbg); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-card); padding: 9px 12px; margin-top: 9px; }
 .ia-tag { display: inline-block; padding: 1px 6px; background: rgba(166,195,0,0.08); color: rgba(166,195,0,0.5); border: 1px solid rgba(166,195,0,0.18); border-radius: 2px; font-size: 0.47rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.1em; }
 .evo-origtoggle { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; font-family: var(--font-label); font-size: 0.55rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-textsub); background: none; border: none; cursor: pointer; padding: 0; }
-.evo-origtoggle:hover { color: rgba(166,195,0,0.6); }
+.evo-origtoggle:hover:not(:disabled) { color: rgba(166,195,0,0.6); }
 .evo-origbox { display: none; margin-top: 8px; background: rgba(166,195,0,0.04); border: 1px solid rgba(166,195,0,0.1); border-radius: var(--radius-card); padding: 10px 12px; font-family: var(--font-body); font-size: 0.76rem; color: var(--c-textsub); line-height: 1.65; }
 .evo-origbox.show { display: block; }
 .evo-origlbl { font-family: var(--font-label); font-size: 0.5rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.1em; color: rgba(166,195,0,0.38); margin-bottom: 5px; }
@@ -424,6 +424,22 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .evo-evnote { font-family: var(--font-body); font-size: 0.67rem; color: var(--c-textsub); margin-bottom: 9px; line-height: 1.5; padding: 7px 10px; background: var(--c-darkbg); border-left: 2px solid rgba(255, 255, 255, 0.14); border-radius: 0 var(--radius-card) var(--radius-card) 0; }
 .evo-linkbtn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 9px; border: 1px solid rgba(166, 195, 0, 0.50); border-radius: var(--radius-card); background: transparent; color: var(--c-lime); font-family: var(--font-label); font-size: 0.61rem; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: background 120ms ease; }
 .evo-linkbtn:hover { background: rgba(166, 195, 0, 0.12); }
+/* Phase 6 (persistence plan v5.26): honest states of the Avaliação and Evolução
+   tabs, and the disabled state of their controls (Design System §5.9). */
+.av-meta { font-family: var(--font-label); font-size: 0.65rem; color: var(--c-textsub); text-transform: uppercase; letter-spacing: var(--tracking-label); margin: 0 0 var(--space-5) 0; }
+.evo-estado { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: var(--lh-body); margin: 0 0 var(--space-4); }
+.evo-vazio { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: var(--lh-body); margin: 0; }
+.evo-aviso { font-family: var(--font-body); font-size: var(--fs-body-sm); color: var(--c-textsub); line-height: var(--lh-body); margin: 0 0 var(--space-3); }
+.evo-btn:disabled, .evo-origtoggle:disabled { opacity: .5; cursor: not-allowed; }
+.evo-blockbd, .evo-ajuste p { white-space: pre-wrap; }
+.evo-wkpill.draft { border-color: rgba(230,126,34,0.30); color: var(--c-status-new); }
+.evo-cadmark.reg, .evo-cadmark.vaga, .evo-wkpill .evo-cadmark.reg, .evo-wkpill .evo-cadmark.vaga { display: inline-block; width: 6px; height: 6px; border-radius: 50%; opacity: 1; }
+.evo-cadmark.reg, .evo-wkpill .evo-cadmark.reg { background: var(--c-lime); border: 1px solid var(--c-lime); }
+.evo-cadmark.vaga, .evo-wkpill .evo-cadmark.vaga { background: transparent; border: 1px solid var(--c-line-muted); }
+.evo-wkpill.cur .evo-cadmark.reg { background: var(--c-black); border-color: var(--c-black); }
+.evo-wkpill.cur .evo-cadmark.vaga { border-color: rgba(13, 13, 13, 0.6); }
+.evo-legenda { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-family: var(--font-body); font-size: 0.6875rem; color: var(--c-textsub); margin: 10px 0 0; }
+.evo-evtable td.evo-dneu { color: var(--c-textsub); font-family: var(--font-label); font-size: 0.58rem; font-weight: var(--fw-label); }
 .shr-overlay { position: fixed; inset: 0; z-index: 340; background: rgba(0,0,0,0.7); display: flex; align-items: flex-start; justify-content: center; padding: 12vh var(--space-4) var(--space-4); }
 .shr-overlay[hidden] { display: none !important; }
 .shr-box { width: 100%; max-width: 440px; background: var(--c-darkbg); border: 1px solid rgba(166, 195, 0, 0.50); border-radius: var(--radius-card); box-shadow: var(--shadow-lg); padding: var(--space-5); }
@@ -979,14 +995,19 @@ tbody { display: block; width: 100%; }
         </div>
       </div>
 
-      <!-- TAB AVALIAÇÃO: Avaliação Periódica (Coach) -->
+      <!-- TAB AVALIAÇÃO: Avaliação física (somente leitura).
+           Phase 6 (persistence plan v5.26): the athlete sends the numbers measured
+           by a professional through registrar-avaliacao-fisica; this tab reads the
+           latest evaluation through ler-avaliacoes-fisicas (gap 3.13). The cadence
+           is biweekly (schema §10); whether skinfolds are biweekly or monthly is a
+           question to the Coach (p10), so a missing skinfold block is shown as such. -->
       <div class="tab-content" id="tab-avaliacao">
 
-        <!-- SEÇÃO QUINZENAL: Perímetros -->
+        <!-- Perímetros -->
         <div class="m1-section">
           <div class="m1-section-title">Avaliação Física: Perímetros</div>
           <div class="m1-section-line"></div>
-          <p style="font-family: var(--font-label); font-size: 0.65rem; color: var(--c-textsub); text-transform: uppercase; letter-spacing: var(--tracking-label); margin: 0 0 var(--space-5) 0;">Última avaliação: 15/06/2026</p>
+          <p class="av-meta" id="av-meta-perimetros">Carregando avaliação…</p>
 
           <div class="m1-section-title" style="font-size: 0.6rem; color: var(--c-textsub); margin-bottom: var(--space-3); margin-top: var(--space-2);">Bloco A — Tronco</div>
           <div class="metric-grid">
@@ -1015,11 +1036,11 @@ tbody { display: block; width: 100%; }
           </div>
         </div>
 
-        <!-- SEÇÃO MENSAL: Dobras Cutâneas -->
+        <!-- Dobras cutâneas -->
         <div class="m1-section" style="margin-top: var(--space-6);">
           <div class="m1-section-title">Avaliação Física: Dobras Cutâneas</div>
           <div class="m1-section-line"></div>
-          <p style="font-family: var(--font-label); font-size: 0.65rem; color: var(--c-textsub); text-transform: uppercase; letter-spacing: var(--tracking-label); margin: 0 0 var(--space-5) 0;">Última avaliação: 08/06/2026</p>
+          <p class="av-meta" id="av-meta-dobras"></p>
 
           <div class="m1-section-title" style="font-size: 0.6rem; color: var(--c-textsub); margin-bottom: var(--space-3); margin-top: var(--space-2);">Bloco A — Unilaterais Clínicas (Lado Direito)</div>
           <div class="metric-grid">
@@ -1043,11 +1064,18 @@ tbody { display: block; width: 100%; }
         </div>
 
         <div style="margin-top: var(--space-5); padding: var(--space-4); background: var(--c-black); border-left: 3px solid rgba(255, 255, 255, 0.14); border-radius: var(--radius-card);">
-          <p style="font-family: var(--font-label); font-size: var(--fs-label); color: var(--c-textsub); text-transform: uppercase; letter-spacing: var(--tracking-label);">Dados fornecidos pelo atleta com profissional avaliador. Somente leitura.</p>
+          <p style="font-family: var(--font-label); font-size: var(--fs-label); color: var(--c-textsub); text-transform: uppercase; letter-spacing: var(--tracking-label);">Medidas tomadas por profissional avaliador e enviadas pelo atleta. Somente leitura.</p>
         </div>
       </div>
 
-      <!-- TAB 3: EVOLUTION (UC2b · Motor de Evolução) -->
+      <!-- TAB 3: EVOLUTION (UC2b · relatório de evolução).
+           Phase 6 (persistence plan v5.26): the Coach writes, saves and publishes
+           the weekly report through salvar-relatorio-rascunho and
+           publicar-relatorio; the tab reads it through ler-relatorios and the
+           evaluation history through ler-avaliacoes-fisicas. Nothing invented
+           remains (gaps 3.14, 3.15). Controls whose function does not exist yet
+           stay on screen, disabled, with the reason below them (O13; Design
+           System §5.9). -->
       <div class="tab-content" id="tab-evolution">
         <div class="drawer-section evo-rulersec">
           <div class="drawer-section-title">Evolução do Atleta: Semana</div>
@@ -1056,69 +1084,53 @@ tbody { display: block; width: 100%; }
             <div class="evo-rulertrack" id="evo-rulertrack"></div>
             <button class="evo-navarr" onclick="evoScrollRuler(1)">›</button>
           </div>
+          <p class="evo-legenda"><span class="evo-cadmark reg"></span> avaliação física enviada · <span class="evo-cadmark vaga"></span> semana de avaliação sem envio</p>
         </div>
 
         <div class="drawer-section">
           <div class="evo-wsrow">
-            <span class="evo-wk" id="evo-wkbadge">Semana 5 — S5</span>
-            <span class="evo-pill none" id="evo-pill"><span class="evo-dot" id="evo-pilldot" style="display:none"></span><span id="evo-pilltxt">Sem relatório</span></span>
+            <span class="evo-wk" id="evo-wkbadge">Semana</span>
+            <span class="evo-pill none" id="evo-pill"><span id="evo-pilltxt">Sem relatório</span></span>
             <!-- Adendo 05 · §8.3 — mesma modal do menu de ações, com a semana
                  em revisão pré-preenchida. -->
             <button class="tf-evo-fase-btn" onclick="tfAbrirModal(evoViewWeek)">Ajustar fase do ciclo</button>
           </div>
+          <p class="evo-estado" id="evo-estado"></p>
 
           <div id="evo-capsec">
             <div class="drawer-section-title">Entradas desta semana</div>
             <div class="evo-capbar">
               <div class="evo-capttl">Captura do coach</div>
-              <div class="evo-caprow"><div class="evo-dots" id="evo-daudio"></div><span class="evo-caplbl">Áudios gravados</span><span class="evo-capcnt" id="evo-caudio">3 · ok</span></div>
-              <div class="evo-caprow"><span class="evo-caplbl">Notas de texto</span><span class="evo-capcnt free" id="evo-cnotes">2 notas</span></div>
+              <p class="evo-vazio">Nenhum áudio ou nota registrado. A captação pelo WhatsApp ainda não existe.</p>
             </div>
-            <div class="evo-capbar" style="margin-top:9px">
-              <div class="evo-capttl">Fontes automáticas do sistema</div>
-              <div class="evo-srcrow"><span class="evo-srcico">✓</span><span class="evo-caplbl">Check-in S5</span><span class="evo-srctag">PRT-05</span></div>
-              <div class="evo-srcrow"><span class="evo-srcico">✓</span><span class="evo-caplbl">Histórico de cargas (4 sem.)</span><span class="evo-srctag">workout_logs/</span></div>
-              <div class="evo-srcrow"><span class="evo-srcico">✓</span><span class="evo-caplbl">Perfil + avaliação inicial</span><span class="evo-srctag">triagem</span></div>
+            <div style="margin-top: var(--space-4);">
+              <button class="evo-btn lime" type="button" disabled aria-describedby="evo-gerar-aviso">Gerar relatório com IA</button>
+              <p class="evo-aviso" id="evo-gerar-aviso">Disponível quando a geração por IA do relatório existir.</p>
             </div>
           </div>
 
-          <div class="drawer-section" id="evo-ctaarea" style="margin-top:var(--space-5);margin-bottom:0"></div>
-
-          <div id="evo-aiarea" style="display:none">
-            <div class="drawer-section" style="margin-bottom:0">
-              <div class="drawer-section-title" id="evo-reporttitle">Relatório semanal · IA</div>
+          <div class="drawer-section" id="evo-reportarea" style="margin-top: var(--space-5); margin-bottom: 0;">
+            <div class="drawer-section-title" id="evo-reporttitle">Relatório semanal</div>
+            <p class="evo-vazio" id="evo-vazio-rel">Nenhum relatório escrito para esta semana.</p>
+            <div id="evo-blocos" style="display:none">
               <div class="evo-block diag">
                 <div class="evo-blockhd">Diagnóstico da semana</div>
-                <div class="evo-blockbd" id="evo-bddiag">Progresso consistente em bulking. Aderência nutricional em 92%. Sono melhorou em relação à S4 — energia acima da média. Volume perceptível em ombros e peitoral.</div>
-                <div class="evo-ajuste"><div class="evo-ajustelbl tr">Treino</div><p id="evo-bdtreino">Adicionar série de agachamento (4×5). Progressão de supino para 102,5kg.</p><div class="evo-loadref" id="evo-loadref"><span class="evo-loadchip">Supino · última carga executada: 100kg × 5 · S4</span><span class="evo-loadsrc">workout_logs/</span></div></div>
-                <div class="evo-ajuste"><div class="evo-ajustelbl nu">Nutrição</div><p id="evo-bdnutri">+200kcal via carbo pós-treino. Manter proteína em 2,2g/kg.</p></div>
+                <div class="evo-blockbd" id="evo-bddiag"></div>
+                <div class="evo-ajuste"><div class="evo-ajustelbl tr">Treino</div><p id="evo-bdtreino"></p></div>
+                <div class="evo-ajuste"><div class="evo-ajustelbl nu">Nutrição</div><p id="evo-bdnutri"></p></div>
               </div>
               <div class="evo-block conn">
                 <div class="evo-blockhd">⬡ Conexões causais</div>
-                <div class="evo-blockbd" id="evo-bdconn">A queda de pump na S3 coincide com a redução de carboidratos na S2. A normalização após reintrodução valida a hipótese de sensibilidade glicogênica.</div>
-              </div>
-              <div class="evo-block alrt" id="evo-alrtblock">
-                <div class="evo-blockhd">⚠ Alertas de inconsistência</div>
-                <div class="evo-blockbd" id="evo-bdalrt">
-                  <div class="evo-alrtitem"><span class="evo-alrtico">⚠</span><span><strong style="color:var(--c-light)">Áudio 1 × Áudio 4:</strong> "Aumentar carboidrato" conflita com "reduzir carbo em dias off".</span></div>
-                  <div class="evo-alrtitem"><span class="evo-alrtico">ℹ</span><span>Atleta reportou desconforto no joelho. Nenhuma adaptação de treino foi mencionada nos áudios.</span></div>
-                </div>
+                <div class="evo-blockbd" id="evo-bdconn"></div>
               </div>
             </div>
-
-            <div class="drawer-section" id="evo-approvearea" style="display:none;margin-bottom:0;margin-top:var(--space-5)">
-              <div class="evo-approvets"><span>Rascunho gerado</span> em 28/06/2026 às 10:22</div>
-              <button class="btn-report" style="width:100%;justify-content:center;margin-bottom:7px" onclick="evoPublish()"><span data-lucide="check"></span> Aprovar e Publicar</button>
-              <button class="evo-btn ghost" onclick="evoOpenEdit()">Editar rascunho</button>
-            </div>
-            <div class="drawer-section" id="evo-pubinfo" style="display:none;margin-bottom:0;margin-top:var(--space-5)">
-              <div class="evo-approvets" id="evo-pubtslabel"><span>Publicado</span></div>
-              <button class="evo-btn ghost" onclick="evoOpenPreview()"><span data-lucide="eye"></span> Ver como o atleta recebeu</button>
-            </div>
+            <div class="evo-approvets" id="evo-statusline"></div>
+            <div id="evo-acoes"></div>
           </div>
         </div>
 
-        <!-- Overlay: preview da Análise Evolutiva como o atleta a vê (PRT-07) -->
+        <!-- Overlay: preview do relatório como o atleta o receberá (PRT-07).
+             The athlete's reading belongs to the Portal front (plan §7.3). -->
         <div class="evo-overlay" id="evo-preview" style="display:none">
           <div class="drawer-header evo-ovl-head">
             <span class="drawer-title">Visão do <span>atleta</span></span>
@@ -1127,46 +1139,44 @@ tbody { display: block; width: 100%; }
           <div class="evo-ovl-body" id="evo-preview-body"></div>
         </div>
 
-        <!-- Overlay: Editor de Rascunho -->
+        <!-- Overlay: editor do relatório -->
         <div class="evo-overlay" id="evo-editor" style="display:none">
           <div class="drawer-header evo-ovl-head">
-            <span class="drawer-title">Editar <span>rascunho</span></span>
+            <span class="drawer-title" id="evo-ed-titulo">Editar <span>rascunho</span></span>
             <div style="display:flex;align-items:center;gap:10px">
-              <button class="evo-ovl-save" onclick="evoSaveEdit()">Salvar</button>
               <button class="drawer-close" onclick="evoCloseEdit()" aria-label="Fechar">✕</button>
             </div>
           </div>
           <div class="evo-ovl-meta">
             <span class="evo-draftpill" id="evo-ed-pill">Rascunho</span>
-            <span class="evo-ed-ts">Gerado em 28/06 às 10:22</span>
-            <span class="evo-ed-autosave" id="evo-ed-autosave">✓ Autosalvo</span>
+            <span class="evo-ed-ts" id="evo-ed-ts"></span>
+            <span class="evo-ed-autosave" id="evo-ed-autosave"></span>
           </div>
           <div class="evo-ovl-body">
             <div class="evo-block diag" style="margin-bottom:10px">
-              <div class="evo-blockhd" style="margin-bottom:10px">Diagnóstico da semana <span class="ia-tag">IA</span></div>
-              <textarea class="evo-edit" id="evo-ed-diag" rows="4" oninput="evoGrow(this);evoTriggerAutosave()"></textarea>
-              <div class="evo-ed-sub"><div class="evo-ajustelbl tr" style="margin-bottom:7px">Treino <span class="ia-tag">IA</span></div><textarea class="evo-edit" id="evo-ed-treino" rows="3" oninput="evoGrow(this);evoTriggerAutosave()"></textarea></div>
-              <div class="evo-ed-sub"><div class="evo-ajustelbl nu" style="margin-bottom:7px">Nutrição <span class="ia-tag">IA</span></div><textarea class="evo-edit" id="evo-ed-nutri" rows="3" oninput="evoGrow(this);evoTriggerAutosave()"></textarea></div>
+              <div class="evo-blockhd" style="margin-bottom:10px">Diagnóstico da semana</div>
+              <textarea class="evo-edit" id="evo-ed-diag" rows="4" maxlength="4000" oninput="evoGrow(this);evoTriggerAutosave()"></textarea>
+              <div class="evo-ed-sub"><div class="evo-ajustelbl tr" style="margin-bottom:7px">Treino</div><textarea class="evo-edit" id="evo-ed-treino" rows="3" maxlength="4000" oninput="evoGrow(this);evoTriggerAutosave()"></textarea></div>
+              <div class="evo-ed-sub"><div class="evo-ajustelbl nu" style="margin-bottom:7px">Nutrição</div><textarea class="evo-edit" id="evo-ed-nutri" rows="3" maxlength="4000" oninput="evoGrow(this);evoTriggerAutosave()"></textarea></div>
             </div>
             <div class="evo-block conn" style="margin-bottom:10px">
-              <div class="evo-blockhd" style="margin-bottom:10px">⬡ Conexões causais <span class="ia-tag">IA</span></div>
-              <textarea class="evo-edit" id="evo-ed-conn" rows="4" oninput="evoGrow(this);evoTriggerAutosave()"></textarea>
-              <button class="evo-origtoggle" id="evo-ed-origbtn" onclick="evoToggleOrig()">Ver geração original <span id="evo-ed-origarr">↓</span></button>
-              <div class="evo-origbox" id="evo-ed-origbox"><div class="evo-origlbl">Geração original · IA · somente leitura</div><span id="evo-ed-origtext"></span></div>
+              <div class="evo-blockhd" style="margin-bottom:10px">⬡ Conexões causais</div>
+              <textarea class="evo-edit" id="evo-ed-conn" rows="4" maxlength="4000" oninput="evoGrow(this);evoTriggerAutosave()"></textarea>
+              <button class="evo-origtoggle" id="evo-ed-origbtn" type="button" disabled aria-describedby="evo-ed-origaviso">Ver geração original</button>
+              <p class="evo-aviso" id="evo-ed-origaviso">Sem geração por IA nesta semana.</p>
             </div>
             <div class="evo-block alrt" style="margin-bottom:14px">
-              <div class="evo-blockhd" style="margin-bottom:10px">⚠ Alertas de inconsistência</div>
-              <p class="evo-ed-alrtnote">Resolva cada alerta antes de publicar. Itens resolvidos não aparecem no relatório do atleta.</p>
-              <div id="evo-ed-alerts"></div>
+              <div class="evo-blockhd" style="margin-bottom:6px">⚠ Alertas de inconsistência</div>
+              <p class="evo-ed-alrtnote" style="margin-bottom:0">Nenhum alerta. A detecção automática de inconsistências ainda não existe.</p>
             </div>
-            <button class="btn-report" style="width:100%;justify-content:center;margin-bottom:7px" onclick="evoSaveEdit()">Salvar rascunho</button>
-            <button class="evo-btn ghost" onclick="evoCloseEdit()">Cancelar</button>
+            <div id="evo-ed-acoes"></div>
+            <button class="evo-btn ghost" type="button" onclick="evoCloseEdit()">Fechar</button>
           </div>
         </div>
 
         <div class="drawer-section">
-          <div class="drawer-section-title">Histórico de avaliações <span class="evo-featbadge">Nova funcionalidade</span></div>
-          <div class="evo-evnote">Avaliação completa (Blocos A·B·C) registrada a cada 2 semanas (S1, S3, S5…), até a semana corrente. Requer subcoleção <code style="color:var(--c-lime);font-size:0.63rem">athletes/[id]/evaluations/</code> no Firestore — os valores abaixo são ilustrativos.</div>
+          <div class="drawer-section-title">Histórico de avaliações</div>
+          <div class="evo-evnote">Avaliações físicas enviadas pelo atleta, a cada duas semanas (S1, S3, S5…). O peso é a pesagem da série diária na data da medição, ou a anterior mais próxima.</div>
           <div id="evo-evtable-wrap"></div>
           <button class="evo-linkbtn" onclick="selectSidenavTab(event,'avaliacao')">Ver avaliação completa → Aba Avaliação</button>
         </div>
@@ -2093,25 +2103,10 @@ tbody { display: block; width: 100%; }
 
       renderAthleteFlags(athlete);
 
-      // Avaliação (read-only)
-      const av = athlete.avaliacao;
-      const avalMap = {
-        'av-ombros': av?.ombros, 'av-peito': av?.peito, 'av-cintura-abd': av?.cintura, 'av-quadril': av?.quadril,
-        'av-braco-esq-relax': av?.bracoEsqRelax, 'av-braco-dir-relax': av?.bracoDirRelax,
-        'av-braco-esq-cont': av?.bracoEsqCont, 'av-braco-dir-cont': av?.bracoDirCont,
-        'av-coxa-prox-esq': av?.coxaProxEsq, 'av-coxa-prox-dir': av?.coxaProxDir,
-        'av-coxa-med-esq': av?.coxaMedEsq, 'av-coxa-med-dir': av?.coxaMedDir,
-        'av-pant-esq': av?.pantEsq, 'av-pant-dir': av?.pantDir,
-        'av-subesc': av?.subesc, 'av-peit': av?.peit, 'av-suprail': av?.suprail, 'av-abd-dobra': av?.abd,
-        'av-tric-esq': av?.tricEsq, 'av-tric-dir': av?.tricDir,
-        'av-bic-esq': av?.bicEsq, 'av-bic-dir': av?.bicDir,
-        'av-coxa-dobra-esq': av?.coxaDobEsq, 'av-coxa-dobra-dir': av?.coxaDobDir,
-        'av-pant-dobra-esq': av?.pantDobEsq, 'av-pant-dobra-dir': av?.pantDobDir,
-      };
-      Object.entries(avalMap).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = val != null ? val : '—';
-      });
+      // Avaliação física (read-only). Phase 6: read from evaluations/ through
+      // ler-avaliacoes-fisicas — no longer from `athlete.avaliacao` (gap 3.13).
+      // The same read feeds the Evolução tab's history table and ruler.
+      m2CarregarAvaliacoes(athlete);
 
       const drawer = document.getElementById('athlete-drawer');
       // Cancelar qualquer fechamento pendente antes de abrir
@@ -3256,120 +3251,187 @@ tbody { display: block; width: 100%; }
     }
 
     // ════════════════════════════════════════════════════════
-    //  UC2b — Aba Evolução (Motor de Evolução)
+    //  UC2b — Aba Evolução (relatório de evolução) e aba Avaliação
     // ════════════════════════════════════════════════════════
-    // Áudios: faixa recomendada de 3 (mínimo) a 5 (ideal). Acomoda excesso sem parecer erro.
-    var EVO_AUDIO_MIN = 3, EVO_AUDIO_IDEAL = 5;
-    function evoRenderAudio(count) {
-      var c = document.getElementById('evo-daudio');
-      var lbl = document.getElementById('evo-caudio');
-      if (c) {
-        c.innerHTML = '';
-        // pontos da faixa (1..ideal)
-        for (var i = 1; i <= EVO_AUDIO_IDEAL; i++) {
-          var d = document.createElement('div');
-          d.className = 'evo-d ' + (i <= count ? 'on' : 'off');
-          c.appendChild(d);
-        }
-        // pontos extras (acima do ideal), com separador e anel
-        if (count > EVO_AUDIO_IDEAL) {
-          var sep = document.createElement('div');
-          sep.className = 'evo-dsep';
-          c.appendChild(sep);
-          for (var j = EVO_AUDIO_IDEAL + 1; j <= count; j++) {
-            var e = document.createElement('div');
-            e.className = 'evo-d over';
-            c.appendChild(e);
-          }
-        }
-      }
-      if (lbl) {
-        if (count < EVO_AUDIO_MIN) {
-          lbl.className = 'evo-capcnt low';
-          lbl.textContent = count + ' · abaixo do mínimo';
-        } else if (count > EVO_AUDIO_IDEAL) {
-          lbl.className = 'evo-capcnt over';
-          lbl.textContent = EVO_AUDIO_IDEAL + ' + ' + (count - EVO_AUDIO_IDEAL);
-        } else {
-          lbl.className = 'evo-capcnt ok';
-          lbl.textContent = count + ' · ok';
-        }
-      }
-    }
-    // Notas: contagem livre, sem meta nem pontos.
-    function evoRenderNotes(count) {
-      var lbl = document.getElementById('evo-cnotes');
-      if (lbl) { lbl.className = 'evo-capcnt free'; lbl.textContent = count + (count === 1 ? ' nota' : ' notas'); }
-    }
-    var EVO_CFG = {
-      none:  { cls:'none',  txt:'Sem relatório', pulse:false, cta:'<button class="evo-btn lime">Gerar relatório</button><p class="evo-hint">Utilizará 3 áudios · 2 notas · check-in S5 · histórico de cargas (4 sem.)</p>', ai:false, ap:false },
-      gen:   { cls:'gen',   txt:'Gerando…',      pulse:true,  cta:'<div class="evo-gencard"><div class="evo-spin"></div><div class="evo-genttl">Processando com IA</div><div class="evo-gensub">Transcrevendo áudios · montando contexto (check-in + cargas) · sintetizando</div></div>', ai:false, ap:false },
-      draft: { cls:'draft', txt:'Rascunho',       pulse:false, cta:null, ai:true,  ap:true  },
-      pub:   { cls:'pub',   txt:'✓ Publicado',    pulse:false, cta:null, ai:true,  ap:false }
-    };
-    function evoSetState(key) {
-      var c = EVO_CFG[key];
-      if (!c) return;
-      var pill = document.getElementById('evo-pill');
-      pill.className = 'evo-pill ' + c.cls;
-      document.getElementById('evo-pilldot').style.display = c.pulse ? 'block' : 'none';
-      document.getElementById('evo-pilldot').className = 'evo-dot' + (c.pulse ? ' live' : '');
-      document.getElementById('evo-pilltxt').textContent = c.txt;
-      document.getElementById('evo-ctaarea').innerHTML = c.cta || '';
-      document.getElementById('evo-aiarea').style.display = c.ai ? 'block' : 'none';
-      document.getElementById('evo-approvearea').style.display = c.ap ? 'block' : 'none';
-      renderIcons();
-    }
+    // Phase 6 (persistence plan v5.26). Everything on these two tabs now comes
+    // from the server: the reports through ler-relatorios, the evaluations
+    // through ler-avaliacoes-fisicas. The invented reports, the generated
+    // measurement table, the fixed audio and note counts and the reference to a
+    // `workout_logs/` collection that does not exist are gone (gaps 3.14, 3.15).
+    // Controls whose function does not exist yet — AI generation, the AI
+    // original — stay on screen, disabled, with the reason below (O13).
     var EVO_TOTAL_WEEKS = 13;
-    var evoCycleWeek = 5;   // semana atual do ciclo (derivada do atleta) — fixa por atleta
-    var evoViewWeek = 5;    // semana em visualização (navegável)
-    var EVO_REPORTS = {
-      1: { diag:'Início de ciclo. Peso base estabelecido em 82,0kg. Aderência nutricional em 88%. Atleta adaptando-se ao protocolo de treinamento e às primeiras diretrizes nutricionais.', treino:'Volume inicial conservador: 3×8 em todos os compostos. Foco em técnica e recrutamento muscular correto.', nutri:'Proteína estabelecida em 2,0g/kg. Calorias em manutenção. Carboidratos peri-treino introduzidos.', conn:'Primeira semana de referência — dados insuficientes para conexão causal. Baseline estabelecido para comparações futuras.', alrt:null, load:null, pub:'em 01/06/2026 às 09:14' },
-      2: { diag:'Adaptação inicial concluída. Peso subiu 1,1kg — majoritariamente glicogênico. Energia alta, sono regular. Primeiros sinais de progressão de carga.', treino:'Progressão de 2,5kg em supino e agachamento. Adicionado trabalho de isolamento para ombros posteriores.', nutri:'Calorias aumentadas em +150kcal. Proteína mantida em 2,0g/kg. Carboidrato pré-treino dobrado.', conn:'O aumento de energia reportado coincide com a elevação calórica da S1. Correlação esperada confirmada — manter progressão.', alrt:null, load:'Supino · última carga executada: 92,5kg × 8 · S1', pub:'em 08/06/2026 às 10:01' },
-      3: { diag:'Queda de pump e energia relatada. Peso estável em 83,8kg. Aderência nutricional caiu para 84%. Possível impacto da redução de carboidratos.', treino:'Volume mantido. Progressão suspensa até normalização energética. Foco em execução e tempo sob tensão.', nutri:'Carboidratos reduzidos em tentativa de melhora de composição. Estratégia a ser reavaliada na S4.', conn:'A queda de pump relatada pode ser consequência direta da redução de carboidratos aplicada nesta semana. Reverter na S4 para validar hipótese.', alrt:'Aderência nutricional abaixo de 85% — risco de comprometimento de recuperação. Verificar adesão ao plano com o atleta.', load:'Supino · última carga executada: 95kg × 6 · S2', pub:'em 15/06/2026 às 11:32' },
-      4: { diag:'Normalização após reintrodução de carboidratos. Energia restaurada ao nível da S2. Pump de volta. Atleta motivado com a progressão visual.', treino:'Retomada de progressão. Agachamento avançou para 4×8. Supino: nova PR de 100kg registrada.', nutri:'Carboidratos pós-treino aumentados (+100kcal sobre S3). Resultado positivo confirmado. Manter estratégia para S5.', conn:'A hipótese de sensibilidade glicogênica levantada na S3 se confirma: reintrodução do carbo normalizou pump e energia em menos de 5 dias.', alrt:null, load:'Supino · última carga executada: 97,5kg × 5 · S3', pub:'em 22/06/2026 às 09:48' }
-    };
-    // Semana do ciclo: usa o campo week do atleta (mesma fonte do cabeçalho do drawer).
-    // Fallback para derivação a partir do dia (DIA DO CICLO = hoje − DATA) se week ausente.
-    function evoDeriveCycleWeek() {
-      var a = wke04CurrentAthlete;
-      var w;
-      var diaDerivado = cicloDia(a && a.startDate);
-      if (diaDerivado !== null) {
-        w = cicloSemana(diaDerivado);
-      } else if (a && typeof a.week === 'number') {
-        w = a.week;
-      } else {
-        var day = (a && typeof a.day === 'number') ? a.day : 35;
-        w = Math.ceil(day / 7);
-      }
-      if (w < 1) w = 1;
-      if (w > EVO_TOTAL_WEEKS) w = EVO_TOTAL_WEEKS;
-      return w;
+    var evoAtletaId = null;       // athlete whose data is on screen
+    var evoSemanaCorrente = null; // cycle week now, from the server (not clamped)
+    var evoCycleWeek = null;      // last week the Coach may write (1…13), or null
+    var evoViewWeek = null;       // week on view
+    var evoRelatorios = {};       // 'wNN' → report, as ler-relatorios returns it
+    var evoAvaliacoes = [];       // evaluations, oldest first
+    var evoEditor = null;         // { week, status, textoSalvo } while the editor is open
+    var evoAsTimer = null;
+    var evoSalvando = null;       // pending draft save, so a publish waits for it
+
+    function evoIdSemana(n) { return 'w' + String(n).padStart(2, '0'); }
+
+    // Number in Brazilian notation, one decimal unless told otherwise.
+    function evoNum(v, casas) {
+      if (typeof v !== 'number' || !isFinite(v)) return '—';
+      var c = (typeof casas === 'number') ? casas : 1;
+      var s = (Math.round(v * Math.pow(10, c)) / Math.pow(10, c)).toFixed(c);
+      if (c === 1 && s.slice(-2) === '.0') s = s.slice(0, -2);
+      return s.replace('.', ',');
     }
-    // Gera as 13 pílulas da régua. Marcador de cadência fica reservado (inerte) até a subcoleção evaluations/ existir.
+
+    function evoMostrarEstado(texto) {
+      var el = document.getElementById('evo-estado');
+      if (!el) return;
+      el.textContent = texto || '';
+      el.style.display = texto ? '' : 'none';
+    }
+
+    // ── Carga (chamada por openAthleteDrawer) ──
+    async function evoInit() {
+      var athlete = wke04CurrentAthlete;
+      if (!athlete) return;
+      evoAtletaId = athlete.id;
+      evoSemanaCorrente = null;
+      evoCycleWeek = null;
+      evoViewWeek = null;
+      evoRelatorios = {};
+      evoEditor = null;
+      var pv = document.getElementById('evo-preview'); if (pv) pv.style.display = 'none';
+      var ed = document.getElementById('evo-editor'); if (ed) ed.style.display = 'none';
+      evoRenderRuler();
+      evoMostrarEstado('Carregando relatórios…');
+      evoRenderSemanaVazia();
+      evoEnableDrag();
+      try {
+        var r = await m2Ler('ler-relatorios', { athleteUid: athlete.id });
+        if (evoAtletaId !== athlete.id) return;
+        evoSemanaCorrente = (r && typeof r.semanaCorrente === 'number') ? r.semanaCorrente : null;
+        ((r && r.relatorios) || []).forEach(function (rel) { evoRelatorios[rel.week] = rel; });
+        if (evoSemanaCorrente === null) {
+          evoMostrarEstado('O atleta não tem data de início do ciclo; não há semana para escrever relatório.');
+        } else if (evoSemanaCorrente < 1) {
+          evoMostrarEstado('O ciclo do atleta ainda não começou.');
+        } else {
+          evoMostrarEstado('');
+          evoCycleWeek = Math.min(evoSemanaCorrente, EVO_TOTAL_WEEKS);
+          evoViewWeek = evoCycleWeek;
+        }
+        evoRenderRuler();
+        if (evoViewWeek) evoLoadWeek(evoViewWeek, true); else evoRenderSemanaVazia();
+        evoOnReveal();
+      } catch (e) {
+        console.error('[evoInit]', e);
+        if (evoAtletaId !== athlete.id) return;
+        evoMostrarEstado('Não foi possível carregar os relatórios agora.');
+      }
+    }
+
+    // Evaluations feed both tabs: the Avaliação tab shows the latest one, the
+    // Evolução tab the history table and the ruler markers.
+    async function m2CarregarAvaliacoes(athlete) {
+      evoAvaliacoes = [];
+      m2RenderAvaliacao(null, 'Carregando avaliação…');
+      evoRenderEvalTable('Carregando avaliações…');
+      try {
+        var r = await m2Ler('ler-avaliacoes-fisicas', { athleteUid: athlete.id });
+        if (!wke04CurrentAthlete || wke04CurrentAthlete.id !== athlete.id) return;
+        evoAvaliacoes = (r && r.avaliacoes) || [];
+        m2RenderAvaliacao(evoAvaliacoes.length ? evoAvaliacoes[evoAvaliacoes.length - 1] : null);
+        evoRenderEvalTable();
+        evoRenderRuler();
+      } catch (e) {
+        console.error('[m2CarregarAvaliacoes]', e);
+        if (!wke04CurrentAthlete || wke04CurrentAthlete.id !== athlete.id) return;
+        m2RenderAvaliacao(null, 'Não foi possível carregar a avaliação agora.');
+        evoRenderEvalTable('Não foi possível carregar as avaliações agora.');
+      }
+    }
+
+    // ── Aba Avaliação (somente leitura) ──
+    var AV_CAMPOS_PERIMETROS = {
+      'av-ombros': 'shouldersCm', 'av-peito': 'chestCm', 'av-cintura-abd': 'waistAbdomenCm', 'av-quadril': 'hipCm',
+      'av-braco-esq-relax': 'armLeftRelaxedCm', 'av-braco-dir-relax': 'armRightRelaxedCm',
+      'av-braco-esq-cont': 'armLeftFlexedCm', 'av-braco-dir-cont': 'armRightFlexedCm',
+      'av-coxa-prox-esq': 'thighLeftProximalCm', 'av-coxa-prox-dir': 'thighRightProximalCm',
+      'av-coxa-med-esq': 'thighLeftMedialCm', 'av-coxa-med-dir': 'thighRightMedialCm',
+      'av-pant-esq': 'calfLeftCm', 'av-pant-dir': 'calfRightCm'
+    };
+    var AV_CAMPOS_DOBRAS = {
+      'av-subesc': 'subscapularMm', 'av-peit': 'pectoralMm', 'av-suprail': 'suprailiacMm', 'av-abd-dobra': 'abdominalMm',
+      'av-tric-esq': 'tricepsLeftMm', 'av-tric-dir': 'tricepsRightMm',
+      'av-bic-esq': 'bicepsLeftMm', 'av-bic-dir': 'bicepsRightMm',
+      'av-coxa-dobra-esq': 'thighLeftMm', 'av-coxa-dobra-dir': 'thighRightMm',
+      'av-pant-dobra-esq': 'calfLeftMm', 'av-pant-dobra-dir': 'calfRightMm'
+    };
+
+    function m2DescreverAvaliador(mb) {
+      if (!mb) return '';
+      var quem = mb.type === 'self' ? 'medida pelo próprio atleta' : 'medida por profissional';
+      if (mb.sameAsPrevious === true) return quem + ', mesmo avaliador da anterior';
+      if (mb.sameAsPrevious === false) return quem + ', avaliador diferente da anterior';
+      return quem;
+    }
+
+    function m2RenderAvaliacao(av, mensagem) {
+      var metaP = document.getElementById('av-meta-perimetros');
+      var metaD = document.getElementById('av-meta-dobras');
+      var p = av && av.perimeters ? av.perimeters : {};
+      var d = av && av.skinfolds ? av.skinfolds : null;
+      Object.keys(AV_CAMPOS_PERIMETROS).forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = evoNum(p[AV_CAMPOS_PERIMETROS[id]]);
+      });
+      Object.keys(AV_CAMPOS_DOBRAS).forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = d ? evoNum(d[AV_CAMPOS_DOBRAS[id]]) : '—';
+      });
+      if (!av) {
+        if (metaP) metaP.textContent = mensagem || 'Nenhuma avaliação física enviada ainda.';
+        if (metaD) metaD.textContent = '';
+        return;
+      }
+      var quando = formatarDataBr(av.measuredAt ? new Date(av.measuredAt) : null);
+      var linha = 'Avaliação da semana ' + (av.cycleWeek || av.week)
+        + (quando ? ' · medida em ' + quando : '')
+        + (av.measuredBy ? ' · ' + m2DescreverAvaliador(av.measuredBy) : '');
+      if (metaP) metaP.textContent = linha;
+      if (metaD) metaD.textContent = d ? linha : 'Dobras cutâneas não enviadas nesta avaliação.';
+    }
+
+    // ── Régua de semanas ──
     function evoRenderRuler() {
       var track = document.getElementById('evo-rulertrack');
       if (!track) return;
+      var semAval = {};
+      evoAvaliacoes.forEach(function (a) { if (typeof a.cycleWeek === 'number') semAval[a.cycleWeek] = true; });
       var html = '';
       for (var w = 1; w <= EVO_TOTAL_WEEKS; w++) {
         var cls = 'evo-wkpill';
-        var clickable = true;
+        var clicavel = evoCycleWeek !== null && w <= evoCycleWeek;
+        var rel = evoRelatorios[evoIdSemana(w)];
         if (w === evoCycleWeek) cls += ' current';
-        if (w > evoCycleWeek) { cls += ' future'; clickable = false; }
-        else if (w < evoCycleWeek) cls += ' done';
-        // marca a semana em visualização: 'cur' se for a corrente, 'viewing' se for passada
+        if (!clicavel) cls += ' future';
+        else if (rel && rel.status === 'published') cls += ' done';
+        else if (rel) cls += ' draft';
         if (w === evoViewWeek) cls += (w === evoCycleWeek) ? ' cur' : ' viewing';
-        var onclick = clickable ? ' onclick="evoLoadWeek(' + w + ')"' : '';
-        // slot de cadência reservado (3 marcadores inertes: A semanal · B/C quinzenal · dobras mensal)
-        var cad = '<div class="evo-wkcad"><span class="evo-cadmark"></span><span class="evo-cadmark"></span><span class="evo-cadmark"></span></div>';
-        html += '<button class="' + cls + '"' + onclick + '><span class="evo-wknum">S' + w + '</span>' + cad + '</button>';
+        var onclick = clicavel ? ' onclick="evoLoadWeek(' + w + ')"' : '';
+        // Cadence marker: odd weeks are evaluation slots (O1).
+        var marca = '';
+        if (w % 2 === 1) {
+          marca = semAval[w]
+            ? '<span class="evo-cadmark reg" title="Avaliação física enviada"></span>'
+            : '<span class="evo-cadmark vaga" title="Semana de avaliação sem envio"></span>';
+        }
+        html += '<button class="' + cls + '"' + onclick + ' type="button"><span class="evo-wknum">S' + w + '</span>'
+          + '<div class="evo-wkcad">' + marca + '</div></button>';
       }
       track.innerHTML = html;
     }
-    // Centraliza a régua na semana corrente do ciclo (chamada quando a aba fica visível).
     function evoCenterRuler() {
-      evoScrollToWeek(evoCycleWeek);
+      if (evoViewWeek) evoScrollToWeek(evoViewWeek);
     }
     // Rola a régua para deixar a semana w visível e centrada quando possível.
     function evoScrollToWeek(w) {
@@ -3396,71 +3458,8 @@ tbody { display: block; width: 100%; }
       // converte scroll vertical de trackpad/roda em horizontal sobre a régua
       track.addEventListener('wheel', function(e){ if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { track.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
     }
-    function evoLoadWeek(n) {
-      if (n === evoViewWeek) return;
-      if (n > evoCycleWeek) return; // futuro é inerte
-      if (n < 1 || n > EVO_TOTAL_WEEKS) return;
-      evoViewWeek = n;
-      evoRenderRuler();
-      evoScrollToWeek(n);
-      var pv = document.getElementById('evo-preview'); if (pv) pv.style.display = 'none';
-      var ed = document.getElementById('evo-editor'); if (ed) ed.style.display = 'none';
-      evoSetBadge(n);
-      if (n === evoCycleWeek) {
-        // Semana corrente do ciclo: captura + rascunho da IA
-        document.getElementById('evo-capsec').style.display = '';
-        document.getElementById('evo-ctaarea').style.display = '';
-        document.getElementById('evo-pubinfo').style.display = 'none';
-        evoSetState('draft');
-        document.getElementById('evo-reporttitle').textContent = 'Relatório semanal · IA';
-        document.getElementById('evo-bddiag').textContent = 'Progresso consistente em bulking. Aderência nutricional em 92%. Sono melhorou em relação à semana anterior — energia acima da média. Volume perceptível em ombros e peitoral.';
-        document.getElementById('evo-bdtreino').textContent = 'Adicionar série de agachamento (4×5). Progressão de supino para 102,5kg.';
-        document.getElementById('evo-loadref').style.display = 'flex';
-        document.getElementById('evo-loadref').innerHTML = '<span class="evo-loadchip">Supino · última carga executada: 100kg × 5 · S' + (evoCycleWeek - 1) + '</span><span class="evo-loadsrc">workout_logs/</span>';
-        document.getElementById('evo-bdnutri').textContent = '+200kcal via carbo pós-treino. Manter proteína em 2,2g/kg.';
-        document.getElementById('evo-bdconn').textContent = 'A queda de pump na S3 coincide com a redução de carboidratos na S2. A normalização após reintrodução valida a hipótese de sensibilidade glicogênica.';
-        document.getElementById('evo-alrtblock').style.display = '';
-        document.getElementById('evo-bdalrt').innerHTML = '<div class="evo-alrtitem"><span class="evo-alrtico">⚠</span><span><strong style="color:var(--c-light)">Áudio 1 × Áudio 4:</strong> "Aumentar carboidrato" conflita com "reduzir carbo em dias off".</span></div><div class="evo-alrtitem"><span class="evo-alrtico">ℹ</span><span>Atleta reportou desconforto no joelho. Nenhuma adaptação de treino foi mencionada nos áudios.</span></div>';
-      } else {
-        // Semana passada: relatório publicado em leitura. Usa mock se disponível, senão placeholder honesto.
-        var r = EVO_REPORTS[n];
-        document.getElementById('evo-capsec').style.display = 'none';
-        document.getElementById('evo-ctaarea').style.display = 'none';
-        document.getElementById('evo-approvearea').style.display = 'none';
-        document.getElementById('evo-pubinfo').style.display = 'block';
-        document.getElementById('evo-aiarea').style.display = 'block';
-        document.getElementById('evo-pill').className = 'evo-pill pub';
-        document.getElementById('evo-pilldot').style.display = 'none';
-        document.getElementById('evo-pilltxt').textContent = '✓ Publicado';
-        document.getElementById('evo-reporttitle').textContent = 'Relatório publicado · S' + n + ' · IA';
-        if (r) {
-          document.getElementById('evo-pubtslabel').innerHTML = '<span>Publicado</span> ' + r.pub;
-          document.getElementById('evo-bddiag').textContent = r.diag;
-          document.getElementById('evo-bdtreino').textContent = r.treino;
-          if (r.load) {
-            document.getElementById('evo-loadref').style.display = 'flex';
-            document.getElementById('evo-loadref').innerHTML = '<span class="evo-loadchip">' + r.load + '</span><span class="evo-loadsrc">workout_logs/</span>';
-          } else { document.getElementById('evo-loadref').style.display = 'none'; }
-          document.getElementById('evo-bdnutri').textContent = r.nutri;
-          document.getElementById('evo-bdconn').textContent = r.conn;
-          if (r.alrt) {
-            document.getElementById('evo-alrtblock').style.display = '';
-            document.getElementById('evo-bdalrt').innerHTML = '<div class="evo-alrtitem"><span class="evo-alrtico">⚠</span><span>' + r.alrt + '</span></div>';
-          } else { document.getElementById('evo-alrtblock').style.display = 'none'; }
-        } else {
-          // Sem mock para esta semana — não inventa dado clínico.
-          document.getElementById('evo-pubtslabel').innerHTML = '<span>Publicado</span>';
-          document.getElementById('evo-bddiag').textContent = 'Relatório da semana S' + n + ' publicado. Conteúdo detalhado disponível no registro do atleta.';
-          document.getElementById('evo-bdtreino').textContent = '—';
-          document.getElementById('evo-loadref').style.display = 'none';
-          document.getElementById('evo-bdnutri').textContent = '—';
-          document.getElementById('evo-bdconn').textContent = '—';
-          document.getElementById('evo-alrtblock').style.display = 'none';
-        }
-      }
-      renderIcons();
-    }
     function evoNavWeek(dir) {
+      if (!evoViewWeek || !evoCycleWeek) return;
       var t = evoViewWeek + dir;
       if (t < 1 || t > evoCycleWeek) return; // não navega para o futuro
       evoLoadWeek(t);
@@ -3471,21 +3470,13 @@ tbody { display: block; width: 100%; }
       if (!track) return;
       track.scrollLeft += dir * Math.max(120, track.clientWidth * 0.6);
     }
-    function evoPublish() {
-      document.getElementById('evo-approvearea').style.display = 'none';
-      document.getElementById('evo-pubinfo').style.display = 'block';
-      document.getElementById('evo-pubtslabel').innerHTML = '<span>Publicado</span> agora';
-      document.getElementById('evo-pill').className = 'evo-pill pub';
-      document.getElementById('evo-pilldot').style.display = 'none';
-      document.getElementById('evo-pilltxt').textContent = '✓ Publicado';
-      if (typeof wkeToast === 'function') wkeToast('Relatório semanal publicado para o atleta.', { type: 'success' });
+    function evoOnReveal() {
+      evoEnableDrag();
+      requestAnimationFrame(function(){ requestAnimationFrame(evoCenterRuler); });
     }
-    function evoOpenEdit() {
-      if (typeof wkeToast === 'function') wkeToast('Editor de rascunho (a implementar no portal).', { type: 'info' });
-    }
+
     // Intervalo de datas de uma semana de ciclo, a partir de startDate.
-    // Devolve null quando o atleta não tem data de início utilizável — nesse
-    // caso o selo e os cabeçalhos ficam como estavam, só com "S1", "S3"…
+    // Devolve null quando o atleta não tem data de início utilizável.
     function evoWeekRange(n) {
       var a = wke04CurrentAthlete;
       if (!a || !a.startDate) return null;
@@ -3502,98 +3493,174 @@ tbody { display: block; width: 100%; }
       return { curto: fmt(d0, false), intervalo: fmt(d0, false) + ' a ' + fmt(d1, true) };
     }
 
-    // Selo de semana: numero da semana de ciclo + ancoragem em calendario.
+    // Selo de semana: número da semana de ciclo + ancoragem em calendário.
     function evoSetBadge(n) {
       var el = document.getElementById('evo-wkbadge');
       if (!el) return;
-      var r = evoWeekRange(n);
       var a = wke04CurrentAthlete;
-      el.textContent = 'Semana ' + n + ' \u2014 S' + n;
+      el.textContent = n ? 'Semana ' + n : 'Semana';
+      var r = n ? evoWeekRange(n) : null;
       if (!r) return;
       var sub = document.createElement('span');
       sub.className = 'evo-wk-dates';
-      sub.textContent = r.intervalo + ' \u00b7 ciclo iniciado em ' + (formatarDataBr(a.startDate) || '—');
+      sub.textContent = r.intervalo + ' · ciclo iniciado em ' + (formatarDataBr(a.startDate) || '—');
       el.appendChild(sub);
     }
 
-    function evoInit() {
-      evoCycleWeek = evoDeriveCycleWeek();
-      evoViewWeek = -1; // força o evoLoadWeek a renderizar o conteúdo da semana corrente
-      evoRenderAudio(3);
-      evoRenderNotes(2);
-      evoRenderRuler();
-      evoEnableDrag();
-      evoRenderEvalTable();
-      evoLoadWeek(evoCycleWeek);
-    }
-    // Centraliza a régua quando a aba Evolução fica visível (medidas só são válidas com a aba exibida).
-    function evoOnReveal() {
-      evoEnableDrag();
-      requestAnimationFrame(function(){ requestAnimationFrame(evoCenterRuler); });
+    function evoSetPill(status) {
+      var pill = document.getElementById('evo-pill');
+      var txt = document.getElementById('evo-pilltxt');
+      if (!pill || !txt) return;
+      var cfg = status === 'published' ? ['pub', '✓ Publicado'] : status === 'draft' ? ['draft', 'Rascunho'] : ['none', 'Sem relatório'];
+      pill.className = 'evo-pill ' + cfg[0];
+      txt.textContent = cfg[1];
     }
 
-    // ── Histórico de avaliações: dinâmico por semana corrente e cadência quinzenal ──
-    var EVO_EVAL_SERIES = {
-      'Peso (kg)':    { base: 82.0, step: 0.6,  dir: 'up',   dec: 1 },
-      'Cintura (cm)': { base: 82.5, step: -0.25, dir: 'down', dec: 1 },
-      'Ombros (cm)':  { base: 120.0, step: 0.4,  dir: 'up',   dec: 1 },
-      'Braço D (cm)': { base: 39.0, step: 0.4,   dir: 'up',   dec: 1 },
-      'V-Taper':      { base: 1.45, step: 0.01,  dir: 'up',   dec: 2 }
-    };
-    function evoFmt(v, dec) { return v.toFixed(dec).replace('.', ','); }
-    function evoRenderEvalTable() {
+    // No week to show (loading, no start date, cycle not started).
+    function evoRenderSemanaVazia() {
+      evoSetBadge(null);
+      evoSetPill(null);
+      var blocos = document.getElementById('evo-blocos'); if (blocos) blocos.style.display = 'none';
+      var vazio = document.getElementById('evo-vazio-rel'); if (vazio) vazio.style.display = 'none';
+      var linha = document.getElementById('evo-statusline'); if (linha) linha.textContent = '';
+      var acoes = document.getElementById('evo-acoes'); if (acoes) acoes.innerHTML = '';
+    }
+
+    function evoLoadWeek(n, forcar) {
+      if (!evoCycleWeek || n < 1 || n > evoCycleWeek) return; // futuro é inerte
+      if (n === evoViewWeek && !forcar) return;
+      evoViewWeek = n;
+      evoRenderRuler();
+      evoScrollToWeek(n);
+      var pv = document.getElementById('evo-preview'); if (pv) pv.style.display = 'none';
+      evoSetBadge(n);
+      evoRenderRelatorio(evoRelatorios[evoIdSemana(n)] || null);
+      renderIcons();
+    }
+
+    function evoPreencher(id, texto) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = texto || '—';
+    }
+
+    function evoRenderRelatorio(rel) {
+      evoSetPill(rel ? rel.status : null);
+      var blocos = document.getElementById('evo-blocos');
+      var vazio = document.getElementById('evo-vazio-rel');
+      var linha = document.getElementById('evo-statusline');
+      var acoes = document.getElementById('evo-acoes');
+      if (blocos) blocos.style.display = rel ? '' : 'none';
+      if (vazio) vazio.style.display = rel ? 'none' : '';
+      if (rel) {
+        evoPreencher('evo-bddiag', rel.diagnosis);
+        evoPreencher('evo-bdtreino', rel.trainingAdjustments);
+        evoPreencher('evo-bdnutri', rel.nutritionAdjustments);
+        evoPreencher('evo-bdconn', rel.causalLinks);
+      }
+      if (linha) {
+        if (!rel) {
+          linha.textContent = '';
+        } else if (rel.status === 'published') {
+          var pub = m2FormatarDataHora(rel.publishedAt);
+          var upd = m2FormatarDataHora(rel.updatedAt);
+          var corrigido = rel.updatedAt && rel.publishedAt
+            && (new Date(rel.updatedAt).getTime() - new Date(rel.publishedAt).getTime() > 1000);
+          linha.textContent = 'Publicado' + (pub ? ' em ' + pub : '') + (corrigido && upd ? ' · corrigido em ' + upd : '');
+        } else {
+          var salvo = m2FormatarDataHora(rel.updatedAt);
+          linha.textContent = 'Rascunho' + (salvo ? ' salvo em ' + salvo : '') + ' · ainda não publicado';
+        }
+      }
+      if (acoes) {
+        var html = '';
+        if (!rel) {
+          html += '<button class="btn-report" type="button" style="width:100%;justify-content:center;margin-bottom:7px" onclick="evoOpenEdit()"><span data-lucide="pencil"></span> Escrever relatório</button>';
+        } else if (rel.status === 'draft') {
+          html += '<button class="btn-report" type="button" style="width:100%;justify-content:center;margin-bottom:7px" onclick="evoPublicar()"><span data-lucide="check"></span> Publicar relatório</button>';
+          html += '<button class="evo-btn ghost" type="button" onclick="evoOpenEdit()">Editar rascunho</button>';
+          html += '<button class="evo-btn ghost" type="button" onclick="evoOpenPreview()"><span data-lucide="eye"></span> Ver como o atleta vai receber</button>';
+        } else {
+          html += '<button class="evo-btn ghost" type="button" onclick="evoOpenEdit()">Corrigir relatório publicado</button>';
+          html += '<button class="evo-btn ghost" type="button" onclick="evoOpenPreview()"><span data-lucide="eye"></span> Ver como o atleta vai receber</button>';
+        }
+        acoes.innerHTML = html;
+      }
+    }
+
+    // ── Histórico de avaliações (a partir de evaluations/) ──
+    // Rows chosen for the evolution view. The arm reference (relaxed or flexed)
+    // is a question to the Coach (p13), so both stay until the answer.
+    var EVO_EVAL_LINHAS = [
+      { rotulo: 'Peso (kg)', valor: function (a) { return a.peso ? a.peso.weightKg : null; }, casas: 1 },
+      { rotulo: 'Cintura abd. (cm)', valor: function (a) { return a.perimeters ? a.perimeters.waistAbdomenCm : null; }, casas: 1 },
+      { rotulo: 'Ombros (cm)', valor: function (a) { return a.perimeters ? a.perimeters.shouldersCm : null; }, casas: 1 },
+      { rotulo: 'Braço D relax. (cm)', valor: function (a) { return a.perimeters ? a.perimeters.armRightRelaxedCm : null; }, casas: 1 },
+      { rotulo: 'Braço D contr. (cm)', valor: function (a) { return a.perimeters ? a.perimeters.armRightFlexedCm : null; }, casas: 1 },
+      // Derived on read, never stored (schema P3): shoulders over waist.
+      { rotulo: 'V-Taper', valor: function (a) {
+          var p = a.perimeters;
+          return p && p.shouldersCm && p.waistAbdomenCm ? p.shouldersCm / p.waistAbdomenCm : null;
+        }, casas: 2 }
+    ];
+
+    function evoRenderEvalTable(mensagem) {
       var wrap = document.getElementById('evo-evtable-wrap');
       if (!wrap) return;
-      // semanas de avaliação completa: cadência quinzenal (1,3,5,...) até a semana corrente
-      var weeks = [];
-      for (var w = 1; w <= evoCycleWeek; w += 2) weeks.push(w);
-      if (weeks.length === 0) weeks = [1];
-      var cur = weeks[weeks.length - 1];
+      if (mensagem || !evoAvaliacoes.length) {
+        wrap.innerHTML = '<p class="evo-vazio">' + wkeEsc(mensagem || 'Nenhuma avaliação física enviada ainda.') + '</p>';
+        return;
+      }
       var head = '<thead><tr><th style="min-width:78px">Métrica</th>';
-      weeks.forEach(function(w){
-        var r = evoWeekRange(w);
-        head += '<th' + (w === cur ? ' class="evo-evcur"' : '') + '>S' + w +
-                (r ? '<span class="evo-evdate">' + r.curto + '</span>' : '') + '</th>';
+      evoAvaliacoes.forEach(function (a) {
+        var data = a.measuredAt ? formatarDataBr(new Date(a.measuredAt)) : null;
+        head += '<th>S' + wkeEsc(a.cycleWeek) + (data ? '<span class="evo-evdate">' + wkeEsc(data.slice(0, 5)) + '</span>' : '') + '</th>';
       });
       head += '<th>Δ ciclo</th></tr></thead>';
       var body = '<tbody>';
-      Object.keys(EVO_EVAL_SERIES).forEach(function(metric){
-        var s = EVO_EVAL_SERIES[metric];
-        body += '<tr><td>' + metric + '</td>';
-        var first = s.base, last = s.base;
-        weeks.forEach(function(w, i){
-          var val = s.base + s.step * (w - 1);
-          if (i === 0) first = val;
-          last = val;
-          body += '<td' + (w === cur ? ' class="evo-evcur"' : '') + '>' + evoFmt(val, s.dec) + '</td>';
-        });
-        var delta = last - first;
-        var arrow = (s.dir === 'up') ? (delta >= 0 ? '↑' : '↓') : (delta <= 0 ? '↓' : '↑');
-        var sign = delta >= 0 ? '+' : '−';
-        body += '<td class="evo-dpos">' + sign + evoFmt(Math.abs(delta), s.dec) + ' ' + arrow + '</td></tr>';
+      EVO_EVAL_LINHAS.forEach(function (linha) {
+        body += '<tr><td>' + linha.rotulo + '</td>';
+        var valores = evoAvaliacoes.map(linha.valor);
+        valores.forEach(function (v) { body += '<td>' + evoNum(v, linha.casas) + '</td>'; });
+        // Neutral colour: a change is neither good nor bad by itself (D-AM, F4-8).
+        var definidos = valores.filter(function (v) { return typeof v === 'number' && isFinite(v); });
+        var delta = '—';
+        if (definidos.length >= 2) {
+          var d = definidos[definidos.length - 1] - definidos[0];
+          delta = (d > 0 ? '+' : d < 0 ? '−' : '') + evoNum(Math.abs(d), linha.casas);
+        }
+        body += '<td class="evo-dneu">' + delta + '</td></tr>';
       });
       body += '</tbody>';
       wrap.innerHTML = '<table class="evo-evtable">' + head + body + '</table>';
     }
 
-    // ── Preview: Análise Evolutiva como o atleta a recebe (PRT-07) ──
-    function evoCollectReport() {
+    // ── Pré-visualização: o relatório como o atleta o receberá (PRT-07) ──
+    function evoTextosAtuais() {
+      if (evoEditor) {
+        return {
+          diagnosis: document.getElementById('evo-ed-diag').value,
+          trainingAdjustments: document.getElementById('evo-ed-treino').value,
+          nutritionAdjustments: document.getElementById('evo-ed-nutri').value,
+          causalLinks: document.getElementById('evo-ed-conn').value
+        };
+      }
+      var rel = evoRelatorios[evoIdSemana(evoViewWeek)] || {};
       return {
-        week: evoViewWeek,
-        diag: document.getElementById('evo-bddiag').textContent,
-        treino: document.getElementById('evo-bdtreino').textContent,
-        nutri: document.getElementById('evo-bdnutri').textContent,
-        conn: document.getElementById('evo-bdconn').textContent
+        diagnosis: rel.diagnosis || '',
+        trainingAdjustments: rel.trainingAdjustments || '',
+        nutritionAdjustments: rel.nutritionAdjustments || '',
+        causalLinks: rel.causalLinks || ''
       };
     }
     function evoOpenPreview() {
-      var r = evoCollectReport();
-      var a = (typeof wke04CurrentAthlete !== 'undefined' && wke04CurrentAthlete) ? wke04CurrentAthlete : null;
+      var t = evoTextosAtuais();
+      var a = wke04CurrentAthlete;
+      var corpoTexto = function (s) { return s && s.trim() ? wkeEsc(s.trim()).replace(/\n/g, '<br>') : ''; };
       var sections = [
-        { num: '01', title: 'Diagnóstico da semana', body: r.diag },
-        { num: '02', title: 'Ajuste de treino',     body: r.treino },
-        { num: '03', title: 'Ajuste nutricional',   body: r.nutri },
-        { num: '04', title: 'Análise de progressão', body: r.conn }
+        { num: '01', title: 'Diagnóstico da semana', body: corpoTexto(t.diagnosis) },
+        { num: '02', title: 'Ajuste de treino',     body: corpoTexto(t.trainingAdjustments) },
+        { num: '03', title: 'Ajuste nutricional',   body: corpoTexto(t.nutritionAdjustments) },
+        { num: '04', title: 'Conexões causais',     body: corpoTexto(t.causalLinks) }
       ];
       var inner = sections.map(function(s, i){
         var sec = '<div class="doc-section">' +
@@ -3603,86 +3670,159 @@ tbody { display: block; width: 100%; }
         return sec + (i < sections.length - 1 ? '<div class="doc-divider"></div>' : '');
       }).join('');
       document.getElementById('evo-preview-body').innerHTML =
-        docEnvelope('Relatório Semanal · S' + r.week, 'Relatório Semanal', a && a.name, ' com base no seu check-in da Semana ' + r.week + ' do ciclo', inner);
+        docEnvelope('Relatório Semanal · S' + evoViewWeek, 'Relatório Semanal', a && wkeEsc(a.name), ' referente à Semana ' + evoViewWeek + ' do ciclo', inner);
       document.getElementById('evo-preview').style.display = 'flex';
       renderIcons();
     }
     function evoClosePreview() { document.getElementById('evo-preview').style.display = 'none'; }
 
-    // ── Editor de Rascunho ──
-    var EVO_ED_ALERTS = [];
+    // ── Editor do relatório ──
+    // A draft (or a week without report) is saved automatically, throttled, by
+    // salvar-relatorio-rascunho — no event (plan, Phase 6). A published report
+    // is corrected only by an explicit "Salvar correção", which goes through
+    // publicar-relatorio and emits 'relatorio.corrigido' (O7).
     function evoOpenEdit() {
-      // popula os campos com o conteúdo atual do rascunho
-      document.getElementById('evo-ed-diag').value = document.getElementById('evo-bddiag').textContent;
-      document.getElementById('evo-ed-treino').value = document.getElementById('evo-bdtreino').textContent;
-      document.getElementById('evo-ed-nutri').value = document.getElementById('evo-bdnutri').textContent;
-      var connTxt = document.getElementById('evo-bdconn').textContent;
-      document.getElementById('evo-ed-conn').value = connTxt;
-      document.getElementById('evo-ed-origtext').textContent = connTxt;
-      // alertas: extrai os itens atuais do bloco de alertas
-      EVO_ED_ALERTS = [];
-      var items = document.querySelectorAll('#evo-bdalrt .evo-alrtitem');
-      items.forEach(function(it, i){
-        var span = it.querySelector('span:last-child');
-        EVO_ED_ALERTS.push({ html: span ? span.innerHTML : '', resolved: false, editing: false });
-      });
-      evoRenderEditAlerts();
+      if (!evoViewWeek) return;
+      var week = evoIdSemana(evoViewWeek);
+      var rel = evoRelatorios[week] || null;
+      var status = rel ? rel.status : 'none';
+      evoEditor = {
+        week: week,
+        status: status,
+        textoSalvo: JSON.stringify(evoNormalizar({
+          diagnosis: rel && rel.diagnosis, trainingAdjustments: rel && rel.trainingAdjustments,
+          nutritionAdjustments: rel && rel.nutritionAdjustments, causalLinks: rel && rel.causalLinks
+        }))
+      };
+      document.getElementById('evo-ed-diag').value = (rel && rel.diagnosis) || '';
+      document.getElementById('evo-ed-treino').value = (rel && rel.trainingAdjustments) || '';
+      document.getElementById('evo-ed-nutri').value = (rel && rel.nutritionAdjustments) || '';
+      document.getElementById('evo-ed-conn').value = (rel && rel.causalLinks) || '';
+      var publicado = status === 'published';
+      document.getElementById('evo-ed-titulo').innerHTML = publicado ? 'Corrigir <span>relatório</span>' : 'Editar <span>rascunho</span>';
+      var pill = document.getElementById('evo-ed-pill');
+      pill.textContent = publicado ? 'Publicado' : 'Rascunho';
+      document.getElementById('evo-ed-ts').textContent = 'Semana ' + evoViewWeek;
+      evoMarcarAutosave('');
+      // AI original (O13): disabled while no AI generation exists for the week.
+      var orig = document.getElementById('evo-ed-origbtn');
+      if (orig) orig.disabled = !(rel && rel.temGeracaoOriginal);
+      var acoes = document.getElementById('evo-ed-acoes');
+      acoes.innerHTML = publicado
+        ? '<button class="btn-report" type="button" style="width:100%;justify-content:center;margin-bottom:7px" onclick="evoPublicar()">Salvar correção</button>'
+          + '<p class="evo-aviso" style="margin-bottom:12px">A correção substitui o texto publicado e fica registrada.</p>'
+        : '<button class="btn-report" type="button" style="width:100%;justify-content:center;margin-bottom:7px" onclick="evoPublicar()"><span data-lucide="check"></span> Publicar relatório</button>';
       document.getElementById('evo-editor').style.display = 'block';
-      // auto-grow inicial
       ['evo-ed-diag','evo-ed-treino','evo-ed-nutri','evo-ed-conn'].forEach(function(id){ evoGrow(document.getElementById(id)); });
       renderIcons();
     }
-    function evoCloseEdit() { document.getElementById('evo-editor').style.display = 'none'; }
-    function evoSaveEdit() {
-      // grava de volta no rascunho visível
-      document.getElementById('evo-bddiag').textContent = document.getElementById('evo-ed-diag').value;
-      document.getElementById('evo-bdtreino').textContent = document.getElementById('evo-ed-treino').value;
-      document.getElementById('evo-bdnutri').textContent = document.getElementById('evo-ed-nutri').value;
-      document.getElementById('evo-bdconn').textContent = document.getElementById('evo-ed-conn').value;
-      // reconstrói o bloco de alertas com os não resolvidos
-      var live = EVO_ED_ALERTS.filter(function(a){ return !a.resolved; });
-      if (live.length) {
-        document.getElementById('evo-bdalrt').innerHTML = live.map(function(a){
-          return '<div class="evo-alrtitem"><span class="evo-alrtico">⚠</span><span>' + a.html + '</span></div>';
-        }).join('');
-        document.getElementById('evo-alrtblock').style.display = '';
-      } else {
-        document.getElementById('evo-alrtblock').style.display = 'none';
-      }
-      evoCloseEdit();
-      if (typeof wkeToast === 'function') wkeToast('Rascunho salvo.', { type: 'success' });
+
+    function evoNormalizar(t) {
+      var n = function (s) { return (typeof s === 'string' && s.trim()) ? s.trim() : null; };
+      return {
+        diagnosis: n(t.diagnosis), trainingAdjustments: n(t.trainingAdjustments),
+        nutritionAdjustments: n(t.nutritionAdjustments), causalLinks: n(t.causalLinks)
+      };
     }
+
+    function evoMarcarAutosave(texto) {
+      var l = document.getElementById('evo-ed-autosave');
+      if (!l) return;
+      l.textContent = texto;
+      l.classList.toggle('show', !!texto);
+    }
+
     function evoGrow(el) { if (!el) return; el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
-    var evoAsTimer = null;
+
     function evoTriggerAutosave() {
+      if (!evoEditor || evoEditor.status === 'published') return;
       clearTimeout(evoAsTimer);
-      evoAsTimer = setTimeout(function(){
-        var l = document.getElementById('evo-ed-autosave');
-        l.classList.add('show');
-        setTimeout(function(){ l.classList.remove('show'); }, 2000);
-      }, 1200);
+      evoMarcarAutosave('');
+      evoAsTimer = setTimeout(function () { evoSalvarRascunho(); }, 1500);
     }
-    function evoToggleOrig() {
-      var box = document.getElementById('evo-ed-origbox');
-      var open = box.classList.toggle('show');
-      document.getElementById('evo-ed-origarr').textContent = open ? '↑' : '↓';
-    }
-    function evoRenderEditAlerts() {
-      var c = document.getElementById('evo-ed-alerts');
-      c.innerHTML = EVO_ED_ALERTS.map(function(a, i){
-        var inner;
-        if (a.resolved) {
-          inner = '<div class="evo-ed-alert-row"><span class="evo-alrtico">⚠</span><span class="evo-ed-alert-txt struck">' + a.html + '</span></div>' +
-                  '<div class="evo-ed-alert-acts"><span class="evo-resbadge">✓ Resolvido</span><button class="evo-resundo" onclick="evoUnresolveAlert(' + i + ')">Desfazer</button></div>';
-        } else {
-          inner = '<div class="evo-ed-alert-row"><span class="evo-alrtico">⚠</span><span class="evo-ed-alert-txt">' + a.html + '</span></div>' +
-                  '<div class="evo-ed-alert-acts"><button class="evo-aact amber" onclick="evoResolveAlert(' + i + ')">Marcar resolvido</button></div>';
+
+    async function evoSalvarRascunho() {
+      clearTimeout(evoAsTimer);
+      var ed = evoEditor;
+      var athlete = wke04CurrentAthlete;
+      if (!ed || ed.status === 'published' || !athlete) return;
+      var textos = evoNormalizar(evoTextosAtuais());
+      var serial = JSON.stringify(textos);
+      if (serial === ed.textoSalvo) return;
+      // A week without report is not created empty.
+      if (ed.status === 'none' && !textos.diagnosis && !textos.trainingAdjustments
+          && !textos.nutritionAdjustments && !textos.causalLinks) return;
+      evoMarcarAutosave('Salvando…');
+      var tarefa = (async function () {
+        try {
+          var r = await m2Escrever('salvar-relatorio-rascunho', Object.assign({ athleteUid: athlete.id, week: ed.week }, textos));
+          ed.textoSalvo = serial;
+          if (ed.status === 'none') ed.status = 'draft';
+          if (evoAtletaId === athlete.id) {
+            var rel = evoRelatorios[ed.week] || { week: ed.week, cycleWeek: Number(ed.week.slice(1)), status: 'draft', temGeracaoOriginal: false };
+            Object.assign(rel, textos, { updatedAt: (r && r.updatedAt) || rel.updatedAt || null });
+            evoRelatorios[ed.week] = rel;
+            if (evoEditor === ed) evoMarcarAutosave('✓ Rascunho salvo');
+            evoRenderRuler();
+            if (evoIdSemana(evoViewWeek) === ed.week) evoRenderRelatorio(rel);
+          }
+        } catch (e) {
+          console.error('[evoSalvarRascunho]', e);
+          if (evoEditor === ed) evoMarcarAutosave('Falha ao salvar');
+          showToast('Não foi possível salvar o rascunho. ' + (e && e.message ? e.message : ''), 5000);
         }
-        return '<div class="evo-ed-alert' + (a.resolved ? ' resolved' : '') + '">' + inner + '</div>';
-      }).join('');
+      })();
+      evoSalvando = tarefa;
+      await tarefa;
+      if (evoSalvando === tarefa) evoSalvando = null;
     }
-    function evoResolveAlert(i) { EVO_ED_ALERTS[i].resolved = true; evoRenderEditAlerts(); evoTriggerAutosave(); }
-    function evoUnresolveAlert(i) { EVO_ED_ALERTS[i].resolved = false; evoRenderEditAlerts(); evoTriggerAutosave(); }
+
+    function evoCloseEdit() {
+      if (evoEditor && evoEditor.status !== 'published') evoSalvarRascunho();
+      evoEditor = null;
+      clearTimeout(evoAsTimer);
+      document.getElementById('evo-editor').style.display = 'none';
+    }
+
+    // Publishes the week on view: the texts of the editor when it is open, the
+    // stored draft otherwise. First publication or correction is decided by the
+    // server from the document's state (O7).
+    async function evoPublicar() {
+      var athlete = wke04CurrentAthlete;
+      if (!athlete || !evoViewWeek) return;
+      var week = evoIdSemana(evoViewWeek);
+      var textos = evoNormalizar(evoTextosAtuais());
+      if (!textos.diagnosis && !textos.trainingAdjustments && !textos.nutritionAdjustments && !textos.causalLinks) {
+        showToast('Escreva ao menos um dos textos antes de publicar.', 4000);
+        return;
+      }
+      clearTimeout(evoAsTimer);
+      if (evoSalvando) { try { await evoSalvando; } catch (_) {} }
+      try {
+        var r = await m2Escrever('publicar-relatorio', Object.assign({ athleteUid: athlete.id, week: week }, textos));
+        if (evoAtletaId !== athlete.id) return;
+        var rel = evoRelatorios[week] || { week: week, cycleWeek: evoViewWeek, temGeracaoOriginal: false };
+        Object.assign(rel, textos, {
+          status: 'published',
+          publishedAt: (r && r.publishedAt) || rel.publishedAt || null,
+          updatedAt: (r && r.updatedAt) || rel.updatedAt || null
+        });
+        evoRelatorios[week] = rel;
+        if (evoEditor && evoEditor.week === week) {
+          evoEditor = null;
+          document.getElementById('evo-editor').style.display = 'none';
+        }
+        evoRenderRuler();
+        evoRenderRelatorio(rel);
+        renderIcons();
+        // Publishing does not reach the athlete yet: reading and notification
+        // belong to the Portal front (plan §7.3).
+        showToast(r && r.corrigiu ? '✓ Correção publicada' : r && r.semAlteracao ? 'Nada mudou no relatório' : '✓ Relatório publicado');
+      } catch (e) {
+        console.error('[evoPublicar]', e);
+        showToast('Não foi possível publicar. ' + (e && e.message ? e.message : ''), 5000);
+      }
+    }
 
     // ════════════════════════════════════════════════════════
     //  M2-01 — CLIENTE ÚNICO DE ESCRITA (Fase 1 da persistência)

@@ -74,7 +74,8 @@ const LIMITE_ALVOS = 50;
  * ('peso.registrado' left this reservation in Phase 3 — persistence plan — together
  * with 'peso.corrigido'; 'checkin.registrado' left it in Phase 4, together with
  * 'checkin.corrigido', 'checkin.respondido' and 'checkin.resposta-corrigida';
- * see the Phase 3 and Phase 4 entries at the end of the list.)
+ * the physical-evaluation and report actions entered in Phase 6; see the
+ * Phase 3, 4 and 6 entries at the end of the list.)
  * 'atleta.status-alterado' segue reservada SEM destino, e assim permanece:
  * remover reserva de vocabulário custa mais do que mantê-la. Constam aqui em
  * comentário para que o M2 não precise reabrir o vocabulário.
@@ -224,6 +225,28 @@ export const ACOES = [
   "checkin.corrigido",
   "checkin.respondido",
   "checkin.resposta-corrigida",
+  // M2 — Phase 6 (persistence plan v5.26; Addendum 04 v1.12, §6.2 and §6.3).
+  // All four after the write and outside the transaction (DR-06); `detalhe`:
+  // NONE in all four — perimeters and skinfolds are body measurements,
+  // forbidden in `detalhe` (DR-04), and so is the name of a corrected field;
+  // the report texts are free text about the athlete (R2).
+  //   'avaliacao-fisica.registrada' — a slot that did not exist.
+  //   'avaliacao-fisica.corrigida'  — a resend inside the slot's window (O3).
+  //     Emitted by `registrar-avaliacao-fisica.ts`. Actor `{ tipo: "humano",
+  //     uid, email: null, papel: "athlete" }` (D-AG). Target
+  //     `{ colecao: "evaluations", id: "wNN" }` — the athlete is `ator.uid`.
+  //   'relatorio.publicado' — the first publication of a week's report.
+  //   'relatorio.corrigido' — a later publication with different text (O7).
+  //     Emitted by `publicar-relatorio.ts`. Actor `{ tipo: "humano", uid, email,
+  //     papel: "admin" }` (DR-09). Target `{ colecao: "weeklyReports",
+  //     id: "<athlete uid>/wNN" }` (D-AR; Addendum 04 §6.5, CE-10).
+  // Saving a draft emits nothing, like the plan draft. A resend with the same
+  // idempotency key, or a publication identical to the stored text, emits
+  // nothing either.
+  "avaliacao-fisica.registrada",
+  "avaliacao-fisica.corrigida",
+  "relatorio.publicado",
+  "relatorio.corrigido",
 ] as const;
 
 export type Acao = (typeof ACOES)[number];

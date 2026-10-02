@@ -10,7 +10,8 @@
 // do documento no Firestore.
 //
 // Three blocks: (1) AI in evaluations and reports, (2) Portal assistant and
-// content library, (3) program operation (non-AI questions p05–p08).
+// content library, (3) program operation (non-AI questions p05–p13; p09–p13,
+// the physical evaluation, entered with Phase 6 of the persistence plan).
 ---
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -134,7 +135,7 @@ p { margin: 0 0 var(--space-3); }
   <span class="progress-items">
     <span>IA <strong id="progIA">0</strong> / 32</span>
     <span>Assistente <strong id="progAS">0</strong> / 24</span>
-    <span>Programa <strong id="progPR">0</strong> / 4</span>
+    <span>Programa <strong id="progPR">0</strong> / 9</span>
   </span>
 </div>
 <div class="wrap">
@@ -193,7 +194,7 @@ p { margin: 0 0 var(--space-3); }
     <div class="eyebrow">Bloco 3 de 3</div>
     <div class="bloco-titulo">Funcionamento do programa</div>
     <div class="intro">
-      <p style="margin-bottom:0">Quatro perguntas sobre o funcionamento do programa, sem relação com inteligência artificial: quando o programa de um atleta pode começar, por quanto tempo os planos antigos ficam guardados, se os números usados para calcular as metas de alimentação estão clinicamente corretos, e qual peso do atleta entra nesse cálculo.</p>
+      <p style="margin-bottom:0">Nove perguntas sobre o funcionamento do programa, sem relação com inteligência artificial: quando o programa de um atleta pode começar, por quanto tempo os planos antigos ficam guardados, se os números usados para calcular as metas de alimentação estão clinicamente corretos, qual peso do atleta entra nesse cálculo, e cinco perguntas sobre a avaliação física — quais medidas são obrigatórias, a frequência das dobras cutâneas, os valores aceitáveis, quem pode medir e qual medida de braço acompanha a evolução.</p>
     </div>
   </div>
   <div id="pendencias-programa"></div>
@@ -322,6 +323,31 @@ const PENDENCIAS = [
     id: "p08",
     titulo: "Qual peso do atleta deve entrar no cálculo das metas de alimentação?",
     descricao: "A partir de agora, o atleta registra o peso todos os dias no sistema. Quando você publica um plano nutricional, o sistema calcula as metas de proteína, carboidrato e gordura a partir do peso do atleta.<br><br>Hoje, o peso usado é o do <strong>último dia registrado</strong>. O problema: o peso de um único dia oscila com hidratação, sal, horário e intestino, e pode variar um quilo ou mais de um dia para o outro sem que nada tenha mudado de verdade. Se o atleta se pesou num dia atípico, as metas do plano saem calculadas sobre um número atípico.<br><br>A alternativa é usar a <strong>média dos últimos 7 dias</strong>, que o sistema já calcula e mostra no gráfico de peso. Ela acompanha a tendência e ignora a oscilação do dia. Enquanto o atleta ainda não tiver pesagens suficientes na semana, o sistema usaria o último peso registrado.<br><br>Em qualquer caso, cada plano publicado guarda o peso que foi usado no cálculo, para consulta depois.<br><br><strong>A decisão:</strong> as metas devem ser calculadas com o peso do último dia, com a média dos últimos 7 dias, ou de outra forma? Se escolher a média, diga também a partir de quantas pesagens na semana ela passa a valer."
+  },
+  {
+    id: "p09",
+    titulo: "Quais medidas da avaliação física são obrigatórias?",
+    descricao: "A cada duas semanas, o atleta envia ao sistema a avaliação física feita por um profissional: <strong>14 perímetros</strong> (ombros, peito, cintura abdominal, quadril, braços relaxados e contraídos dos dois lados, coxas proximal e medial dos dois lados, panturrilhas) e <strong>12 dobras cutâneas</strong> (tricipital e bicipital dos dois lados, subescapular, suprailíaca, abdominal, peitoral, coxa e panturrilha dos dois lados).<br><br>Enquanto você não decide, o sistema aplica uma regra provisória: os <strong>14 perímetros são obrigatórios</strong>, e as <strong>dobras vêm todas juntas ou nenhuma</strong> — uma avaliação com só parte das dobras é recusada, porque as fórmulas de gordura corporal precisam do conjunto.<br><br>Exigir tudo dá uma série completa para comparar, mas recusa a avaliação inteira se faltar um único ponto. Deixar alguns pontos opcionais aceita a avaliação incompleta, mas a série passa a ter buracos.<br><br><strong>A decisão:</strong> quais medidas são indispensáveis em toda avaliação, e quais podem faltar sem que a avaliação seja recusada?"
+  },
+  {
+    id: "p10",
+    titulo: "As dobras cutâneas são medidas a cada duas semanas ou uma vez por mês?",
+    descricao: "Os perímetros são medidos <strong>a cada duas semanas</strong> (semanas 1, 3, 5 e assim por diante, até a 13). Para as dobras cutâneas, há duas indicações diferentes no projeto: a especificação diz <strong>a cada duas semanas</strong>, junto com os perímetros; a tela antiga do painel as marcava como <strong>mensais</strong>.<br><br>Hoje o sistema aceita as duas formas: a avaliação pode vir com ou sem o bloco de dobras.<br><br><strong>A decisão:</strong> as dobras cutâneas devem ser medidas em toda avaliação (a cada duas semanas) ou uma vez por mês (avaliação sim, avaliação não)?"
+  },
+  {
+    id: "p11",
+    titulo: "Quais valores são aceitáveis para cada medida?",
+    descricao: "Para evitar erro de digitação, o sistema hoje recusa valores fora de limites largos, escolhidos só por critério técnico, sem juízo clínico: ombros de 60 a 200 cm; peito e quadril de 50 a 200 cm; cintura abdominal de 40 a 200 cm; braços e panturrilhas de 15 a 70 cm; coxas de 25 a 120 cm; e todas as dobras de 1 a 80 mm, sempre com no máximo uma casa decimal.<br><br>Esses limites pegam um erro grosseiro (83,5 digitado como 835), mas deixam passar um valor improvável para o perfil dos seus atletas.<br><br><strong>A decisão:</strong> quais faixas de valor você considera plausíveis para cada medida? Pode responder só para as medidas em que as faixas atuais lhe parecem largas demais."
+  },
+  {
+    id: "p12",
+    titulo: "O atleta pode tirar as próprias medidas, ou só um profissional?",
+    descricao: "A avaliação física foi pensada para ser feita por um profissional, e enviada ao sistema pelo atleta. Ao enviar, o atleta informa se quem mediu foi um profissional ou ele mesmo, e se foi o mesmo profissional da avaliação anterior — a troca de avaliador costuma mudar o resultado das dobras, e o sistema registra isso para não confundir troca de avaliador com mudança no corpo.<br><br>Medir perímetros com fita métrica é relativamente simples; medir dobras cutâneas com adipômetro, com a mesma confiabilidade, é bem mais difícil sem treino.<br><br>Hoje o sistema aceita as duas situações e registra qual foi.<br><br><strong>A decisão:</strong> a avaliação feita pelo próprio atleta deve ser aceita? Se sim, vale para tudo, ou só para os perímetros, exigindo profissional para as dobras?"
+  },
+  {
+    id: "p13",
+    titulo: "Qual medida de braço acompanha a evolução: relaxado ou contraído?",
+    descricao: "A avaliação física tem quatro medidas de braço: esquerdo e direito, cada um relaxado e contraído. Na tabela de evolução do painel, que mostra as principais medidas semana a semana, cabe uma linha de braço como referência.<br><br>Enquanto você não decide, a tabela mostra o braço direito relaxado e o braço direito contraído, em duas linhas.<br><br><strong>A decisão:</strong> qual medida de braço representa melhor a evolução do atleta — relaxado ou contraído? E de qual lado, ou a média dos dois?"
   }
 ];
 
@@ -355,8 +381,12 @@ const ASSISTENTE = {
   }
 };
 
-// Which block each pending question belongs to. p05–p08 are not AI-related.
-const BLOCO_PENDENCIA = { p01: "ia", p02: "ia", p03: "ia", p04: "ia", p05: "programa", p06: "programa", p07: "programa", p08: "programa" };
+// Which block each pending question belongs to. p05–p13 are not AI-related.
+const BLOCO_PENDENCIA = {
+  p01: "ia", p02: "ia", p03: "ia", p04: "ia",
+  p05: "programa", p06: "programa", p07: "programa", p08: "programa",
+  p09: "programa", p10: "programa", p11: "programa", p12: "programa", p13: "programa"
+};
 
 function estadoVazio() {
   return { itens: {}, novas: [], fases: {}, pendencias: {}, assistente: {} };
@@ -585,7 +615,7 @@ function renderAssistente() {
   atualizarContadores();
 }
 
-// One counter per block, required items only. Totals: block 1 = 25 + 3 + 4; block 2 = 8 + 5 + 11; block 3 = 4.
+// One counter per block, required items only. Totals: block 1 = 25 + 3 + 4; block 2 = 8 + 5 + 11; block 3 = 9.
 // The three free-text fields of block 2 are optional: saved, but never counted.
 function atualizarContadores() {
   const preenchido = v => typeof v === "string" && v.trim() !== "";

@@ -99,6 +99,22 @@ service cloud.firestore {
         allow read, write: if false;
       }
 
+      // Physical evaluation (M2 Phase 6, persistence plan v5.26). Written only
+      // by registrar-avaliacao-fisica.ts (athlete) and read only by
+      // ler-avaliacoes-fisicas.ts (Coach), both through the Admin SDK. Named
+      // block for clarity; the wildcard below already denied it.
+      match /evaluations/{week} {
+        allow read, write: if false;
+      }
+
+      // Weekly evolution report (M2 Phase 6). Written only by
+      // salvar-relatorio-rascunho.ts and publicar-relatorio.ts (Coach), read
+      // only by ler-relatorios.ts (Coach), all through the Admin SDK. The
+      // athlete reading the published report is a Portal decision (plan §7.3).
+      match /weeklyReports/{week} {
+        allow read, write: if false;
+      }
+
       match /{subcollection}/{docId} {
         allow read, write: if false;
       }
