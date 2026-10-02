@@ -291,8 +291,16 @@ conferir(`A–C · eventos em ${wS}: um avaliacao-fisica.registrada e um avaliac
 conferir('A–C · CE-09 · ator atleta com email null, sem detalhe, alvo só "wNN"',
   evA.every((e) => e.ator?.papel === 'athlete' && e.ator?.email === null && !('detalhe' in e) && e.alvo?.id === wS));
 
-// D–O · refusals. After A, an earlier evaluation exists, so sameAsPrevious is boolean.
-const mb = { type: 'professional', sameAsPrevious: true };
+// D–O · refusals. Every call below lands on the slot wS, which A created, so the
+// function treats it as a correction of wS and asks whether an evaluation exists
+// BEFORE wS — the same `haAnterior` computed above, not "after A". The valid
+// measuredBy follows it, so each refusal fails only for the reason its case
+// tests; case H sends the opposite sameAsPrevious and must be refused by O4.
+const mb = medidoPor;
+const mbInvertido = { type: 'professional', sameAsPrevious: haAnterior ? null : true };
+const rotuloH = haAnterior
+  ? 'H · sameAsPrevious nulo havendo avaliação anterior → 400 (O4)'
+  : 'H · sameAsPrevious preenchido sem avaliação anterior → 400 (O4)';
 const parcial = { ...dobras }; delete parcial.pectoralMm;
 const semPanturrilha = { ...perimetros }; delete semPanturrilha.calfRightCm;
 const futura = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
@@ -305,7 +313,7 @@ const casos = [
   ['E · dobras parciais → 400', corpoValido({ measuredBy: mb, skinfolds: parcial })],
   ['F · measuredBy com nome do avaliador → 400 (CE-12)', corpoValido({ measuredBy: { ...mb, name: 'Fulano' } })],
   ['G · measuredBy com registro profissional → 400 (CE-12)', corpoValido({ measuredBy: { ...mb, councilNumber: '123' } })],
-  ['H · sameAsPrevious nulo havendo avaliação anterior → 400 (O4)', corpoValido({ measuredBy: { type: 'professional', sameAsPrevious: null } })],
+  [rotuloH, corpoValido({ measuredBy: mbInvertido })],
   ['I · perímetro com duas casas decimais → 400', corpoValido({ measuredBy: mb, perimeters: { ...perimetros, chestCm: 104.25 } })],
   ['J · perímetro desconhecido → 400', corpoValido({ measuredBy: mb, perimeters: { ...perimetros, neckCm: 40 } })],
   ['K · perímetro ausente → 400', corpoValido({ measuredBy: mb, perimeters: semPanturrilha })],
