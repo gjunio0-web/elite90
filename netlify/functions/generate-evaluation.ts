@@ -6,6 +6,7 @@ import { getAuth } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
 import { getApp, getDb, storageBucketName } from "./_firebase";
 import { calcularIdade } from "./_scoring";
+import { chamarModelo, TEMPO_LIMITE_MS } from "./_llm";
 
 
 async function downloadPhotosAsBase64(
@@ -60,7 +61,15 @@ Evitar motivacional genérico. Usar terminologia específica (BF, AEJ, TRT, bulk
 O coach fala como estrategista biológico, não como personal trainer.
 `;
 
-function buildPrompt(lead: Record<string, any>, previousDocs: string[], hasPhotos: boolean = false): string {
+/**
+ * Version of the prompt built below, REFERENCE_STRUCTURE included (T-17,
+ * "<task>/v<n>"). Change the text and this version together:
+ * tests/llm-comandos.test.js compares the rendered prompt with the snapshot of
+ * this version.
+ */
+export const VERSAO_COMANDO_AVALIACAO_RASCUNHO = "avaliacao-rascunho/v1";
+
+export function buildPrompt(lead: Record<string, any>, previousDocs: string[], hasPhotos: boolean = false): string {
   // O documento é redigido no idioma declarado na ficha. Sem isto, um lead
   // captado pela versão em inglês do site receberia um e-mail em inglês com
   // uma prévia em português — pior que o e-mail inteiro em português.
@@ -205,17 +214,6 @@ export const handler = async (event: any) => {
 
     // Download athlete photos for visual diagnosis (S1)
     const fotos = await downloadPhotosAsBase64(lead.fotos_paths ?? []);
-    const parts: any[] = [
-      { text: buildPrompt(lead, previousDocs, fotos.length > 0) },
-      ...fotos.map(f => ({ inlineData: f })),
-    ];
-
-    // Call Gemini 2.5 Flash
-    const geminiKey = process.env.GOOGLE_GEMINI_KEY;
-    if (!geminiKey) {
-      return { statusCode: 500, body: "GOOGLE_GEMINI_KEY não configurada" };
-    }
-
     const schemaRigido = {
       type: "OBJECT",
       properties: {
@@ -228,37 +226,51 @@ export const handler = async (event: any) => {
       required: ["s1", "s2", "s3", "s4", "s5"]
     };
 
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: {
-            temperature: 0.4,
-            maxOutputTokens: 4096,
-            responseMimeType: "application/json",
-            responseSchema: schemaRigido
-          },
-        }),
-      }
-    );
+    // Shared model-access module (T-17). The key check, the request and the
+    // reading of the answer live there; what each outcome becomes stays here,
+    // unchanged from before the migration.
+    const r = await chamarModelo({
+      tarefa: "avaliacao-rascunho",
+      promptVersion: VERSAO_COMANDO_AVALIACAO_RASCUNHO,
+      partes: [
+        { texto: buildPrompt(lead, previousDocs, fotos.length > 0) },
+        ...fotos.map(f => ({ imagem: { mimeType: f.mimeType, base64: f.data } })),
+      ],
+      esquema: schemaRigido,
+      temperatura: 0.4,
+      maxTokensSaida: 4096,
+      tempoLimiteMs: TEMPO_LIMITE_MS["avaliacao-rascunho"],
+    });
 
-    if (!geminiRes.ok) {
-      const err = await geminiRes.text();
-      throw new Error(`Gemini error: ${err}`);
+    let rawText: string;
+    if (r.ok) {
+      rawText = r.texto;
+    } else if (r.erro === "fora-do-formato") {
+      rawText = r.textoBruto ?? "";
+    } else if (r.erro === "vazio" || r.erro === "bloqueado") {
+      // An answer without text was read as "{}" before the migration.
+      rawText = "{}";
+    } else if (r.erro === "sem-chave") {
+      return { statusCode: 500, body: "GOOGLE_GEMINI_KEY não configurada" };
+    } else if (r.erro === "http") {
+      throw new Error(r.etapa === "status" ? `Gemini error: ${r.detalhe ?? ""}` : (r.detalhe ?? "Erro interno"));
+    } else if (r.erro === "tempo-esgotado") {
+      throw new Error("Tempo limite da chamada ao modelo esgotado.");
+    } else {
+      throw new Error(`Chamada ao modelo recusada: ${r.detalhe ?? r.erro}`);
     }
-
-    const geminiData = await geminiRes.json();
-    const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
 
     // Executa a estratégia de parsing tolerante a truncamento de tokens
     const sections = tentarRepararJsonTruncado(rawText);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true, sections, leadName: lead.nome }),
+      // promptVersion and modelVersion travel to the panel, which sends them
+      // back with the evaluation; send-evaluation records them (DP-12).
+      body: JSON.stringify({
+        success: true, sections, leadName: lead.nome,
+        promptVersion: r.promptVersion, modelVersion: r.modelVersion,
+      }),
     };
   } catch (err: any) {
     console.error("generate-evaluation error:", err);

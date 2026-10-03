@@ -52,7 +52,7 @@ export const handler = async (event: any) => {
     const lead = leadDoc.data() as Record<string, any>;
 
     const { base, flags }           = calcularScoreBase(lead);
-    const { ajuste, justificativa } = await ajusteIA(lead);
+    const { ajuste, justificativa, promptVersion, modelVersion } = await ajusteIA(lead);
     const scoreFinal = Math.max(0, Math.min(100, base + ajuste));
     const prioridade = classificarPrioridade(scoreFinal);
 
@@ -64,6 +64,10 @@ export const handler = async (event: any) => {
       score_flags:         flags,
       score_justificativa: justificativa,
       score_gerado_em:     FieldValue.serverTimestamp(),
+      // Provenance of the model output above (T-17, DP-12): null when the
+      // adjustment is a fixed fallback and not the model's answer.
+      score_prompt_version: promptVersion,
+      score_model_version:  modelVersion,
     });
 
     // A nota e a prioridade entram; a justificativa gerada pelo modelo NÃO —

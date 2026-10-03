@@ -402,7 +402,7 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     let alertasClinicos = 0;
     try {
       const { base, flags }           = calcularScoreBase(leadParaScore);
-      const { ajuste, justificativa } = await ajusteIA(leadParaScore);
+      const { ajuste, justificativa, promptVersion, modelVersion } = await ajusteIA(leadParaScore);
       const scoreFinal  = Math.max(0, Math.min(100, base + ajuste));
       const prioridade  = classificarPrioridade(scoreFinal);
       scoreParaAviso      = scoreFinal;
@@ -418,6 +418,10 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
         score_flags:         flags,
         score_justificativa: justificativa,
         score_gerado_em:     FieldValue.serverTimestamp(),
+        // Provenance of the model output above (T-17, DP-12): null when the
+        // adjustment is a fixed fallback and not the model's answer.
+        score_prompt_version: promptVersion,
+        score_model_version:  modelVersion,
       });
       // Mesma ação que generate-triage-score grava, com ator diferente: aqui o
       // cálculo é automático, disparado pela chegada da ficha, sem nenhuma

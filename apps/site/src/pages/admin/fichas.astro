@@ -1365,6 +1365,11 @@ import AdminHeader from '../../components/AdminHeader.astro';
     const db=getFirestore(app);
 
     let leads=[], currentLeadId=null, currentDetailLeadId=null;
+    // Provenance of the model draft loaded in the evaluation drawer (T-17,
+    // DP-12): { promptVersion, modelVersion } returned by generate-evaluation,
+    // or null when no draft was generated since the drawer opened. Sent back
+    // with the evaluation; send-evaluation records it.
+    let evalAiDraft=null;
     let currentViewEval = null; // { id, token, nome, email }
     let sortField = "data", sortDir = "desc";
 
@@ -2228,6 +2233,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
 
     window.__openEval=function(id){
       currentLeadId=id;
+      evalAiDraft=null;
       const guideLink=document.getElementById("guide-link-avaliacao");
       if(guideLink)guideLink.href=`/admin/guia?from=%2Fadmin%2Ffichas&lead=${id}&drawer=eval#avaliacao`;
       const lead=leads.find(l=>l.id===id);
@@ -2279,12 +2285,16 @@ import AdminHeader from '../../components/AdminHeader.astro';
         
         // Preenche os campos textareas com o mapa aninhado correto
         taIds.forEach(k=>{document.getElementById(`eval-${k}`).value=secoesRecebidas[k]??"";});
+        evalAiDraft = typeof dados.promptVersion === "string"
+          ? { promptVersion: dados.promptVersion, modelVersion: dados.modelVersion ?? null }
+          : null;
         updateSendBtnState();
         
-        // Validação Full Stack: Verifica flag do backend ou ausência de qualquer bloco essencial
+        // Incomplete draft: any of the five sections empty. generate-evaluation never
+        // returned a `truncated` flag; the dead read of it was removed (plan gap 3.20).
         const possuiSecaoIncompleta = taIds.some(k => !secoesRecebidas[k] || secoesRecebidas[k].trim() === "");
         
-        if (dados.truncated || possuiSecaoIncompleta) {
+        if (possuiSecaoIncompleta) {
           statusEl.style.color = "var(--c-status-new)";
           statusEl.textContent = "Rascunho integrado com ressalvas estruturais.";
           
@@ -2336,7 +2346,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       statusEl.textContent="Salvando histórico corporativo e enviando e-mail...";
       
       try{
-        const res=await fetch("/.netlify/functions/send-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId,sections,coachNotes})});
+        const res=await fetch("/.netlify/functions/send-evaluation",{method:"POST",headers:{"content-type":"application/json","Authorization":`Bearer ${await getFreshToken()}`},body:JSON.stringify({leadId:currentLeadId,sections,coachNotes,aiDraft:evalAiDraft})});
         if(!res.ok){
           let msg="";
           try{ msg=(JSON.parse(await res.text())||{}).error||""; }catch{}

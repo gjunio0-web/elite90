@@ -3,6 +3,8 @@
 // Importado por generate-triage-score.ts e submit-lead.ts.
 // O prefixo _ impede o Netlify de tratar este arquivo como endpoint.
 
+import { chamarModelo, modeloConfigurado, TEMPO_LIMITE_MS } from "./_llm";
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 export function calcularIdade(dataNascimento: string): number | null {
@@ -129,12 +131,17 @@ export function calcularScoreBase(lead: Record<string, any>): { base: number; fl
   return { base, flags };
 }
 
-// ── Ajuste qualitativo via Gemini (-10 a +10) ─────────────────────────────────
+// ── Ajuste qualitativo via modelo (-10 a +10) ───────────────────────────────
 
-export async function ajusteIA(lead: Record<string, any>): Promise<{ ajuste: number; justificativa: string }> {
-  const geminiKey = process.env.GOOGLE_GEMINI_KEY;
-  if (!geminiKey) return { ajuste: 0, justificativa: "GOOGLE_GEMINI_KEY não configurada." };
+/**
+ * Version of the prompt below (T-17, "<task>/v<n>"). Change the text of
+ * `comandoAjusteIA` and this version together: tests/llm-comandos.test.js
+ * compares the rendered prompt with the snapshot of this version.
+ */
+export const VERSAO_COMANDO_TRIAGEM_AJUSTE = "triagem-ajuste/v1";
 
+/** Free-text fields sent to the model, or null when the lead has none. */
+export function comandoAjusteIA(lead: Record<string, any>): string | null {
   const camposTexto = [
     lead.objetivo_outro      ? `Objetivo (texto livre): ${lead.objetivo_outro}` : null,
     lead.trt_detalhe         ? `Detalhe TRT: ${lead.trt_detalhe}` : null,
@@ -143,11 +150,9 @@ export async function ajusteIA(lead: Record<string, any>): Promise<{ ajuste: num
     lead.suplementos_detalhe ? `Detalhe suplementação: ${lead.suplementos_detalhe}` : null,
   ].filter(Boolean) as string[];
 
-  if (camposTexto.length === 0) {
-    return { ajuste: 0, justificativa: "Sem campos de texto livre para análise qualitativa." };
-  }
+  if (camposTexto.length === 0) return null;
 
-  const prompt = `Você é um assistente de triagem do Coach Ruiz, especialista em fisiculturismo de alto nível.
+  return `Você é um assistente de triagem do Coach Ruiz, especialista em fisiculturismo de alto nível.
 
 Analise os campos abaixo de um candidato ao Programa ELITE90 PRO e retorne um ajuste de pontuação entre -10 e +10, acompanhado de uma justificativa objetiva de até 2 linhas.
 
@@ -159,41 +164,78 @@ CAMPOS PARA ANÁLISE:
 ${camposTexto.join("\n")}
 
 Retorne JSON estrito: {"ajuste": número_inteiro_entre_-10_e_10, "justificativa": "texto de até 2 linhas"}`;
+}
 
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 256,
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: "OBJECT",
-              properties: {
-                ajuste:        { type: "INTEGER" },
-                justificativa: { type: "STRING"  },
-              },
-              required: ["ajuste", "justificativa"],
-            },
-          },
-        }),
-      }
-    );
-    if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
-    const data = await res.json() as any;
-    const raw  = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-    const parsed = JSON.parse(raw);
-    const ajuste = Math.max(-10, Math.min(10, Number(parsed.ajuste ?? 0)));
-    return { ajuste, justificativa: String(parsed.justificativa ?? "") };
-  } catch (e: any) {
-    console.warn("[scoring] Ajuste IA falhou (não-fatal):", e.message);
-    return { ajuste: 0, justificativa: "Ajuste qualitativo indisponível." };
+const ESQUEMA_AJUSTE = {
+  type: "OBJECT",
+  properties: {
+    ajuste:        { type: "INTEGER" },
+    justificativa: { type: "STRING"  },
+  },
+  required: ["ajuste", "justificativa"],
+};
+
+export type AjusteIA = {
+  ajuste: number;
+  justificativa: string;
+  /**
+   * Provenance (DP-12): set only when `ajuste` and `justificativa` come from
+   * the model's answer; null when they are this module's fixed fallbacks.
+   */
+  promptVersion: string | null;
+  modelVersion: string | null;
+};
+
+const INDISPONIVEL = "Ajuste qualitativo indisponível.";
+
+export async function ajusteIA(lead: Record<string, any>): Promise<AjusteIA> {
+  const semVersao = { promptVersion: null, modelVersion: null };
+  // Same order of checks as before T-17: a missing key is reported even when
+  // the lead has no free text.
+  if (!modeloConfigurado()) return { ajuste: 0, justificativa: "GOOGLE_GEMINI_KEY não configurada.", ...semVersao };
+
+  const prompt = comandoAjusteIA(lead);
+  if (prompt === null) {
+    return { ajuste: 0, justificativa: "Sem campos de texto livre para análise qualitativa.", ...semVersao };
   }
+
+  const r = await chamarModelo({
+    tarefa: "triagem-ajuste",
+    promptVersion: VERSAO_COMANDO_TRIAGEM_AJUSTE,
+    partes: [{ texto: prompt }],
+    esquema: ESQUEMA_AJUSTE,
+    temperatura: 0.2,
+    maxTokensSaida: 256,
+    tempoLimiteMs: TEMPO_LIMITE_MS["triagem-ajuste"],
+  });
+
+  // Before T-17 an answer without text was parsed as "{}": ajuste 0 and an
+  // empty justification, not the "unavailable" fallback. Kept as it was.
+  let parsed: any;
+  if (r.ok) {
+    parsed = r.valor;
+  } else if (r.erro === "vazio" || r.erro === "bloqueado") {
+    parsed = {};
+  } else {
+    if (r.erro === "sem-chave") return { ajuste: 0, justificativa: "GOOGLE_GEMINI_KEY não configurada.", ...semVersao };
+    console.warn("[scoring] Ajuste IA falhou (não-fatal):", r.erro, r.detalhe ?? "");
+    return { ajuste: 0, justificativa: INDISPONIVEL, ...semVersao };
+  }
+
+  // A JSON `null` answer used to throw on property access and fall back.
+  if (parsed === null || parsed === undefined) {
+    console.warn("[scoring] Ajuste IA falhou (não-fatal): resposta nula");
+    return { ajuste: 0, justificativa: INDISPONIVEL, ...semVersao };
+  }
+  // Non-numeric `ajuste` still yields NaN, as before T-17 (registered gap; the
+  // response schema asks the model for an integer).
+  const ajuste = Math.max(-10, Math.min(10, Number(parsed.ajuste ?? 0)));
+  return {
+    ajuste,
+    justificativa: String(parsed.justificativa ?? ""),
+    promptVersion: r.promptVersion,
+    modelVersion: r.modelVersion,
+  };
 }
 
 // ── Prioridade ────────────────────────────────────────────────────────────────

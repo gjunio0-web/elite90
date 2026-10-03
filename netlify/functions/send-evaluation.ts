@@ -9,6 +9,7 @@ import { randomBytes } from "crypto";
 import { sendMail } from "./_mailer";
 import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
+import { lerProcedencia } from "./_llm";
 
 
 function buildEvaluationEmail(
@@ -132,9 +133,16 @@ export const handler = async (event: any) => {
   }
 
   try {
-    const { leadId, sections, coachNotes } = JSON.parse(event.body);
+    const { leadId, sections, coachNotes, aiDraft } = JSON.parse(event.body);
     if (!leadId || !sections) {
       return { statusCode: 400, body: "leadId e sections obrigatórios" };
+    }
+    // Provenance of the text (T-17, DP-12): the versions generate-evaluation
+    // returned, when the Coach started from a model draft. Checked before the
+    // e-mail leaves, so a malformed value never reaches the candidate.
+    const procedencia = lerProcedencia(aiDraft, "avaliacao-rascunho");
+    if (!procedencia.ok) {
+      return { statusCode: 400, body: JSON.stringify({ error: procedencia.erro }) };
     }
 
     // db já inicializado acima
@@ -188,6 +196,11 @@ export const handler = async (event: any) => {
       emailId: evaluationEmailId,
       // Gravado aqui para que o reenvio não precise reler a ficha do lead.
       idioma,
+      // Whether the Coach started from a model draft, and from which prompt and
+      // model (DP-12). The text in `sections` is the one the Coach approved.
+      aiDrafted: procedencia.valor.aiDrafted,
+      promptVersion: procedencia.valor.promptVersion,
+      modelVersion: procedencia.valor.modelVersion,
     });
 
     // Update lead status
