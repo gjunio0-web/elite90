@@ -754,7 +754,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
     $('exc-proc-corpo').innerHTML =
       `Nome de origem · <b>${esc(e.nome_en ?? '—')}</b><br>` +
       `Fonte · <b>${esc(e.origem?.fonte ?? '—')}</b><br>` +
-      `Criado por · <b>${esc(e.criadoPor ?? '—')}</b><br>` +
+      `Criado por · <b title="${esc(e.criadoPor ?? '')}">${esc(e.criadoPorNome ?? e.criadoPor ?? '—')}</b><br>` +
       `Última alteração · <b>${e.atualizadoEm ? esc(new Date(e.atualizadoEm).toLocaleString('pt-BR')) : '—'}</b>`;
     $('exc-recado').innerHTML = '';
     // Recolhe a procedência de novo a cada abertura no celular: deixá-la aberta

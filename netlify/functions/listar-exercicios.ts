@@ -36,6 +36,7 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getApp } from "./_firebase";
+import { resolverAutores } from "./_autoria";
 import { GRUPOS, EQUIPAMENTOS, dobraBusca } from "./_vocabulario-exercicios";
 
 const COLECAO = "exercises";
@@ -203,6 +204,11 @@ export const handler = async (event: any) => {
     };
 
     const recorte = filtrarEPaginar(todos, { estado, grupo: corpo.grupo, equipamento: corpo.equipamento, busca, pagina, porPagina });
+
+    // Nome de quem criou, só para os itens da página (uids distintos são poucos).
+    // O documento guarda o uid; o nome é resolvido aqui, na leitura (_autoria.ts).
+    const autores = await resolverAutores(app, recorte.itens.map((i: any) => i.criadoPor));
+    recorte.itens = recorte.itens.map((i: any) => ({ ...i, criadoPorNome: autores.get(i.criadoPor) ?? null }));
 
     return json(200, { ok: true, ...recorte, contadores });
   } catch (e: any) {

@@ -33,7 +33,7 @@ const RAIZ = path.resolve(__dirname, '..');
 const STUBS = {
   'firebase-admin/auth': ['getAuth'],
   'firebase-admin/storage': ['getStorage'],
-  'firebase-admin/firestore': ['FieldValue', 'Timestamp', 'FieldPath'],
+  'firebase-admin/firestore': ['FieldValue', 'Timestamp', 'FieldPath', 'getFirestore'],
   './_firebase': ['getApp', 'getDb', 'storageBucketName'],
   './_rastreabilidade': ['registrar'],
 };

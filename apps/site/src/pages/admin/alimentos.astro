@@ -771,7 +771,7 @@ import AdminHeader from '../../components/AdminHeader.astro';
       `<label class="alm-rotulo" style="margin-top:0">Procedência · somente leitura</label>` +
       `Nome de origem · <b>${esc(a.nome ?? '—')}</b><br>` +
       `Fonte · <b>${esc(a.fonte ?? '—')}</b><br>` +
-      `Criado por · <b>${esc(a.criadoPor ?? '—')}</b><br>` +
+      `Criado por · <b title="${esc(a.criadoPor ?? '')}">${esc(a.criadoPorNome ?? a.criadoPor ?? '—')}</b><br>` +
       `Última alteração · <b>${a.atualizadoEm ? esc(new Date(a.atualizadoEm).toLocaleString('pt-BR')) : '—'}</b>`;
     $('alm-recado').innerHTML = '';
     // Passo 8: item sem macros completos nunca é revisável — nem o botão
