@@ -1692,7 +1692,7 @@ var PI_CATEGORIAS = [
   'Alimentos preparados', 'Bebidas (alcoólicas e não alcoólicas)', 'Carnes e derivados',
   'Cereais e derivados', 'Frutas e derivados', 'Gorduras e óleos', 'Leguminosas e derivados',
   'Leite e derivados', 'Miscelâneas', 'Nozes e sementes', 'Outros alimentos industrializados',
-  'Ovos e derivados', 'Pescados e frutos do mar', 'Produtos açucarados',
+  'Ovos e derivados', 'Pescados e frutos do mar', 'Produtos açucarados', 'Suplementos',
   'Verduras, hortaliças e derivados',
 ];
 function piItens(opcoes, rotulos) {

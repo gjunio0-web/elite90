@@ -29,9 +29,12 @@
 // TAMBÉM EM scripts/carregar-alimentos.mjs.
 //
 // CATEGORIAS: as 15 categorias da TACO, conferidas contra o arquivo-fonte real
-// (scripts/dados-alimentos/alimentos-fonte.json, carga de 26/08/2026). Não são
-// vocabulário livre — vêm da carga, e um valor fora daqui não corresponde a
-// nenhum alimento real.
+// (scripts/dados-alimentos/alimentos-fonte.json, carga de 26/08/2026), mais
+// 'Suplementos' (05/10/2026), a única que não vem da TACO: a tabela não traz
+// suplementos, então só itens de curadoria ou propostos por profissional a usam.
+// Não são vocabulário livre — um valor fora daqui não é aceito. A lista é
+// repetida em alimentos.astro e em packages/editor-plano/nucleo.js (formulário
+// de proposta); tests/categorias-alimentos.test.js falha se as três divergirem.
 //
 // PASSOS 4 A 10 (26/08/2026) — o que este módulo ganhou:
 //   • macrosFaltando lê o bloco bruto `nutrientes` (gravado por
@@ -64,6 +67,7 @@ export const CATEGORIAS = [
   'Ovos e derivados',
   'Pescados e frutos do mar',
   'Produtos açucarados',
+  'Suplementos',
   'Verduras, hortaliças e derivados',
 ] as const;
 
