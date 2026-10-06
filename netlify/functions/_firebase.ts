@@ -20,6 +20,8 @@
 // DEPOIS da leitura e apenas sobre a chave criptográfica — fazê-la antes
 // transformaria um JSON válido em inválido.
 
+// Primeiro, de propósito: instala o filtro do aviso DEP0040 antes de qualquer chamada de rede.
+import "./_avisos";
 import { initializeApp, getApps, cert, type App } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 
