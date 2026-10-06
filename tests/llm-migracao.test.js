@@ -173,3 +173,24 @@ test('avaliação · tempo limite de 45 s: 500 com mensagem própria', async (t)
   const r = await p;
   assert.deepEqual(r, { statusCode: 500, body: JSON.stringify({ error: 'Tempo limite da chamada ao modelo esgotado.' }) });
 });
+
+test('triagem · resposta cercada de prosa ("Here is the JSON…") aplica o ajuste em vez de cair no fallback', async (t) => {
+  definirChave(t, CHAVE);
+  t.mock.method(console, 'info', () => {});
+  instalarFetch(t, () => resposta(envelope('Here is the JSON requested:\n```json\n{"ajuste": 4, "justificativa": "TRT detalhado."}\n```')));
+  const { ajusteIA } = await carregarTs('netlify/functions/_scoring.ts');
+  assert.deepEqual(await ajusteIA(LEAD_TRIAGEM), {
+    ajuste: 4, justificativa: 'TRT detalhado.', promptVersion: 'triagem-ajuste/v1', modelVersion: 'gemini-2.5-flash-001',
+  });
+});
+
+test('triagem · prosa sem nenhum JSON continua no fallback "indisponível"', async (t) => {
+  definirChave(t, CHAVE);
+  silenciarConsole(t);
+  instalarFetch(t, () => resposta(envelope('Desculpe, não consigo ajudar com isso.')));
+  const { ajusteIA } = await carregarTs('netlify/functions/_scoring.ts');
+  const r = await ajusteIA(LEAD_TRIAGEM);
+  assert.equal(r.ajuste, 0);
+  assert.equal(r.justificativa, 'Ajuste qualitativo indisponível.');
+  assert.equal(r.promptVersion, null);
+});

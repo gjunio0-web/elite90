@@ -122,7 +122,7 @@ test('sucesso: valor, texto, versões, motivo de término; o sinal de aborto vai
     fetch: async (url, init) => { recebido = init; return resposta(envelope('{"a":1}')); },
   });
   assert.deepEqual(r, {
-    ok: true, valor: { a: 1 }, texto: '{"a":1}', promptVersion: 'triagem-ajuste/v1',
+    ok: true, valor: { a: 1 }, texto: '{"a":1}', recuperado: false, promptVersion: 'triagem-ajuste/v1',
     modelVersion: 'gemini-2.5-flash-001', finishReason: 'STOP', truncado: false,
   });
   assert.ok(recebido.signal instanceof AbortSignal);
@@ -244,4 +244,73 @@ test('procedência do rascunho (DP-12): ausente, válida e malformada', () => {
   ]) {
     assert.equal(lerProcedencia(ruim, T).ok, false, JSON.stringify(ruim));
   }
+});
+
+// ── leitura tolerante: JSON cercado de prosa (produção, 05/10/2026) ──────────
+
+test('extrairJson: prosa antes e depois, cercas de código e chaves dentro de strings', async () => {
+  const { extrairJson } = require('../netlify/functions/_llm-nucleo.js');
+  assert.deepEqual(extrairJson('Here is the JSON requested:\n{"ajuste": 3, "justificativa": "ok"}\nHope it helps!').valor, { ajuste: 3, justificativa: 'ok' });
+  assert.deepEqual(extrairJson('Aqui está:\n```json\n{"a": 1}\n```').valor, { a: 1 });
+  assert.deepEqual(extrairJson('x {"t": "tem } e { dentro", "n": {"k": 2}} y').valor, { t: 'tem } e { dentro', n: { k: 2 } });
+  assert.deepEqual(extrairJson('{"t": "aspas \\" e \\\\ barra"}').valor, { t: 'aspas " e \\ barra' });
+});
+
+test('extrairJson: ignora chaves que não formam JSON antes do objeto real', async () => {
+  const { extrairJson } = require('../netlify/functions/_llm-nucleo.js');
+  const r = extrairJson('Nota {rascunho} e {outro: 1}. Resultado: {"ajuste": 2, "justificativa": "b"}');
+  assert.deepEqual(r.valor, { ajuste: 2, justificativa: 'b' });
+  assert.equal(r.json, '{"ajuste": 2, "justificativa": "b"}');
+});
+
+test('extrairJson: objeto truncado, texto sem JSON, array, vazio e não-texto → null', async () => {
+  const { extrairJson } = require('../netlify/functions/_llm-nucleo.js');
+  assert.equal(extrairJson('prefixo {"a": "cor'), null);
+  assert.equal(extrairJson('sem nenhum json aqui'), null);
+  assert.equal(extrairJson('lista [1, 2, 3]'), null);
+  assert.equal(extrairJson(''), null);
+  assert.equal(extrairJson(null), null);
+  assert.equal(extrairJson(42), null);
+});
+
+test('extrairJson: primeiro objeto válido vence quando há dois', async () => {
+  const { extrairJson } = require('../netlify/functions/_llm-nucleo.js');
+  assert.deepEqual(extrairJson('{"a":1} depois {"b":2}').valor, { a: 1 });
+});
+
+test('chamarModelo: resposta cercada de prosa vira sucesso com recuperado=true e texto = só o JSON', async () => {
+  const r = await chamarModelo(pedido(), {
+    chave: CHAVE,
+    fetch: async () => resposta(envelope('Here is the JSON requested:\n```json\n{"codigo":"X"}\n```')),
+  });
+  assert.equal(r.ok, true);
+  assert.deepEqual(r.valor, { codigo: 'X' });
+  assert.equal(r.texto, '{"codigo":"X"}');
+  assert.equal(r.recuperado, true);
+});
+
+test('chamarModelo: JSON puro continua intacto, com recuperado=false', async () => {
+  const r = await chamarModelo(pedido(), { chave: CHAVE, fetch: async () => resposta(envelope('{"codigo":"X"}')) });
+  assert.equal(r.ok, true);
+  assert.equal(r.texto, '{"codigo":"X"}');
+  assert.equal(r.recuperado, false);
+});
+
+test('chamarModelo: o objeto recuperado também passa pela validação', async () => {
+  const fetch = async () => resposta(envelope('Claro! {"codigo":"Y"} Pronto.'));
+  assert.equal((await chamarModelo(pedido(), { chave: CHAVE, fetch, validar: (v) => v.codigo === 'Y' })).ok, true);
+  const recusa = await chamarModelo(pedido(), { chave: CHAVE, fetch, validar: (v) => v.codigo === 'X' });
+  assert.equal(recusa.erro, 'fora-do-formato');
+  assert.equal(recusa.textoBruto, 'Claro! {"codigo":"Y"} Pronto.');
+});
+
+test('chamarModelo: texto truncado dentro de prosa continua fora-do-formato, com o texto bruto', async () => {
+  const bruto = 'Aqui: {"a": "cor';
+  const r = await chamarModelo(pedido(), {
+    chave: CHAVE,
+    fetch: async () => resposta({ candidates: [{ content: { parts: [{ text: bruto }] }, finishReason: 'MAX_TOKENS' }] }),
+  });
+  assert.equal(r.erro, 'fora-do-formato');
+  assert.equal(r.textoBruto, bruto);
+  assert.equal(r.truncado, true);
 });

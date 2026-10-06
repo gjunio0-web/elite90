@@ -214,6 +214,7 @@ export async function ajusteIA(lead: Record<string, any>, opcoes: { tempoLimiteM
   // empty justification, not the "unavailable" fallback. Kept as it was.
   let parsed: any;
   if (r.ok) {
+    if (r.recuperado) console.info("[scoring] Resposta do modelo veio cercada de texto; JSON extraído.");
     parsed = r.valor;
   } else if (r.erro === "vazio" || r.erro === "bloqueado") {
     parsed = {};

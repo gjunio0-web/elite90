@@ -182,6 +182,58 @@ function mensagemDe(e) {
  *                      nothing was sent.
  * `modelVersion` is null whenever no response envelope was read.
  */
+/**
+ * Lê UM objeto JSON dentro de um texto que o modelo cercou de prosa ou de cercas
+ * de código ("Here is the JSON requested: ```json {…} ```"). O modo de saída
+ * estruturada não garante, na prática, que a resposta seja só o JSON: em produção
+ * (05/10/2026) o modelo devolveu "Here is th…" e o ajuste da triagem se perdeu.
+ *
+ * Só chamada quando JSON.parse do texto inteiro já falhou, então o texto que já
+ * era JSON válido não passa por aqui. Procura o primeiro objeto bem formado e
+ * balanceado; chaves dentro de strings não contam; um objeto truncado (sem fecho)
+ * não é recuperado — esse caso segue como 'fora-do-formato' e, no rascunho de
+ * avaliação, para o reparo próprio de truncamento.
+ *
+ * Devolve { valor, json } (json = só o trecho extraído) ou null.
+ */
+const LIMITE_EXTRACAO = 200000;
+
+function fimDoObjeto(texto, inicio) {
+  let profundidade = 0;
+  let emTexto = false;
+  let escape = false;
+  for (let i = inicio; i < texto.length; i++) {
+    const c = texto[i];
+    if (emTexto) {
+      if (escape) escape = false;
+      else if (c === '\\') escape = true;
+      else if (c === '"') emTexto = false;
+      continue;
+    }
+    if (c === '"') emTexto = true;
+    else if (c === '{') profundidade++;
+    else if (c === '}') {
+      profundidade--;
+      if (profundidade === 0) return i;
+    }
+  }
+  return -1;
+}
+
+function extrairJson(texto) {
+  if (typeof texto !== 'string' || texto.length === 0 || texto.length > LIMITE_EXTRACAO) return null;
+  for (let inicio = texto.indexOf('{'); inicio !== -1; inicio = texto.indexOf('{', inicio + 1)) {
+    const fim = fimDoObjeto(texto, inicio);
+    if (fim === -1) continue;
+    const trecho = texto.slice(inicio, fim + 1);
+    try {
+      const valor = JSON.parse(trecho);
+      if (valor !== null && typeof valor === 'object' && !Array.isArray(valor)) return { valor, json: trecho };
+    } catch { /* não era JSON: tenta o próximo '{' */ }
+  }
+  return null;
+}
+
 async function chamarModelo(pedido, ambiente) {
   const promptVersion = pedido && typeof pedido.promptVersion === 'string' ? pedido.promptVersion : null;
   const defeito = defeitoDoPedido(pedido);
@@ -267,10 +319,18 @@ async function chamarModelo(pedido, ambiente) {
     const texto = String(bruto);
     const truncado = finishReason === 'MAX_TOKENS';
     let valor;
+    let textoJson = texto;
+    let recuperado = false;
     try {
       valor = JSON.parse(texto);
     } catch {
-      return { ok: false, erro: 'fora-do-formato', textoBruto: texto, finishReason, truncado, promptVersion, modelVersion };
+      const achado = extrairJson(texto);
+      if (!achado) {
+        return { ok: false, erro: 'fora-do-formato', textoBruto: texto, finishReason, truncado, promptVersion, modelVersion };
+      }
+      valor = achado.valor;
+      textoJson = achado.json;
+      recuperado = true;
     }
     if (typeof validar === 'function') {
       let aceito = false;
@@ -279,7 +339,8 @@ async function chamarModelo(pedido, ambiente) {
         return { ok: false, erro: 'fora-do-formato', textoBruto: texto, finishReason, truncado, promptVersion, modelVersion };
       }
     }
-    return { ok: true, valor, texto, promptVersion, modelVersion, finishReason, truncado };
+    // `texto` é o JSON em si (o trecho extraído, quando a resposta vinha cercada de prosa).
+    return { ok: true, valor, texto: textoJson, recuperado, promptVersion, modelVersion, finishReason, truncado };
   } finally {
     clearTimeout(relogio);
   }
@@ -320,5 +381,6 @@ module.exports = {
   defeitoDoPedido,
   montarRequisicao,
   chamarModelo,
+  extrairJson,
   lerProcedencia,
 };

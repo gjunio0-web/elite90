@@ -53,6 +53,8 @@ export type SucessoLlm<T> = {
   modelVersion: string;
   finishReason: string | null;
   truncado: boolean;
+  /** true quando o JSON foi lido de dentro de prosa ou de cercas de código (a resposta inteira não era JSON). */
+  recuperado: boolean;
 };
 
 export type FalhaLlm = {
