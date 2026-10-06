@@ -1264,33 +1264,85 @@ document.querySelectorAll('input[name="atividade_fisica"]').forEach(cb => {
 const fileInput   = document.getElementById("f-photos") as HTMLInputElement;
 const filePreview = document.getElementById("file-preview") as HTMLElement;
 
-async function compressImage(file: File): Promise<File> {
-  return new Promise(resolve => {
-    const img = new Image();
+// ----------------------------------------------------------------------------
+// Compressão das fotos no navegador.
+//
+// O envio é um JSON com as fotos em base64 (+33%), e a plataforma recusa corpo
+// acima de 6 MB. Por isso cada foto tem um teto (LIMITE_FOTO_BYTES) e o conjunto
+// outro (LIMITE_ENVIO_B64_CHARS), conferidos aqui antes de enviar.
+//
+// Três defeitos que esta versão corrige (06/10/2026):
+//  • pedir WebP ao canvas não garante WebP: o navegador que não o gera devolve
+//    PNG — muito maior — e o arquivo era rotulado "image/webp" mesmo assim. Agora
+//    o tipo devolvido é conferido, e a falha cai para JPEG;
+//  • nada limitava o tamanho: cinco PNGs passavam de 12 MB e o envio nunca
+//    terminava. Agora a qualidade e a dimensão descem em degraus até caber;
+//  • imagem que o navegador não decodifica (HEIC fora do Safari, arquivo
+//    corrompido) não tinha `onerror`, e a promessa nunca resolvia. Agora há
+//    tratamento de erro e um prazo.
+// ----------------------------------------------------------------------------
+const LIMITE_FOTO_BYTES = 600 * 1024;          // 5 fotos = 3 MB ≈ 4 MB em base64
+const LIMITE_ENVIO_B64_CHARS = 4.5 * 1024 * 1024; // folga sob os 6 MB do corpo da requisição
+const PRAZO_DECODIFICAR_MS = 15000;
+const DEGRAUS_COMPRESSAO = [
+  { max: 1200, qualidade: 0.82 },
+  { max: 1200, qualidade: 0.7 },
+  { max: 1000, qualidade: 0.65 },
+  { max: 800, qualidade: 0.6 },
+];
+const TIPOS_ACEITOS_SEM_RECODIFICAR = /^image\/(webp|jpeg)$/;
+
+function codificar(canvas: HTMLCanvasElement, tipo: string, qualidade: number): Promise<Blob | null> {
+  return new Promise(resolve => canvas.toBlob(b => resolve(b), tipo, qualidade));
+}
+
+/** Devolve a foto comprimida (WebP, ou JPEG se o navegador não gera WebP), ou null se não der para usá-la. */
+async function compressImage(file: File): Promise<File | null> {
+  const img = await new Promise<HTMLImageElement | null>(resolve => {
+    const el = new Image();
     const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const MAX = 1200;
+    const fim = (v: HTMLImageElement | null) => { clearTimeout(prazo); URL.revokeObjectURL(url); resolve(v); };
+    const prazo = setTimeout(() => fim(null), PRAZO_DECODIFICAR_MS);
+    el.onload = () => fim(el);
+    el.onerror = () => fim(null);
+    el.src = url;
+  });
+  if (!img) return null;
+
+  try {
+    let melhor: Blob | null = null;
+    for (const degrau of DEGRAUS_COMPRESSAO) {
       let { width, height } = img;
-      if (width > MAX || height > MAX) {
-        if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
-        else { width = Math.round(width * MAX / height); height = MAX; }
+      if (width > degrau.max || height > degrau.max) {
+        if (width > height) { height = Math.round(height * degrau.max / width); width = degrau.max; }
+        else { width = Math.round(width * degrau.max / height); height = degrau.max; }
       }
       const canvas = document.createElement("canvas");
       canvas.width = width; canvas.height = height;
       canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(blob => {
-        if (!blob) { resolve(file); return; }
-        const out = new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), { type: "image/webp" });
-        const pct = Math.round((1 - blob.size / file.size) * 100);
-        showSuccessToast(
-          `${file.name}: ${(file.size/1024).toFixed(0)} KB -> ${(blob.size/1024).toFixed(0)} KB (${pct}% menor)`
-        );
-        resolve(out);
-      }, "image/webp", 0.82);
-    };
-    img.src = url;
-  });
+
+      let blob = await codificar(canvas, "image/webp", degrau.qualidade);
+      // Sem suporte a WebP o navegador devolve PNG; JPEG é o formato compacto que sobra.
+      if (!blob || !TIPOS_ACEITOS_SEM_RECODIFICAR.test(blob.type)) {
+        blob = await codificar(canvas, "image/jpeg", degrau.qualidade);
+      }
+      if (!blob || !TIPOS_ACEITOS_SEM_RECODIFICAR.test(blob.type)) continue;
+      if (!melhor || blob.size < melhor.size) melhor = blob;
+      if (blob.size <= LIMITE_FOTO_BYTES) break;
+    }
+    if (!melhor || melhor.size > LIMITE_FOTO_BYTES) return null; // não coube nem no último degrau
+
+    const ext = melhor.type === "image/jpeg" ? ".jpg" : ".webp";
+    const out = new File([melhor], file.name.replace(/\.[^.]+$/, "") + ext, { type: melhor.type });
+    if (out.size < file.size) {
+      showSuccessToast(
+        `${file.name}: ${(file.size/1024).toFixed(0)} KB -> ${(out.size/1024).toFixed(0)} KB (${Math.round((1 - out.size / file.size) * 100)}% menor)`
+      );
+    }
+    return out;
+  } catch {
+    return null;
+  }
 }
 
 fileInput?.addEventListener("change", async () => {
@@ -1310,8 +1362,10 @@ fileInput?.addEventListener("change", async () => {
   compressedFiles = [];
   filePreview.innerHTML = "";
 
+  let descartadas = 0;
   for (const file of files.slice(0, 5)) {
     const compressed = await compressImage(file);
+    if (!compressed) { descartadas++; continue; }
     compressedFiles.push(compressed);
     const url = URL.createObjectURL(compressed);
     const img = document.createElement("img");
@@ -1319,6 +1373,14 @@ fileInput?.addEventListener("change", async () => {
     img.className = "file-preview__img";
     img.alt = compressed.name;
     filePreview.appendChild(img);
+  }
+
+  if (descartadas > 0) {
+    showValidationToast(
+      isEnPage
+        ? `${descartadas} photo(s) could not be read or are too large and were skipped. Try another photo.`
+        : `${descartadas} foto(s) não puderam ser lidas ou são grandes demais e foram ignoradas. Tente outra foto.`
+    );
   }
 
   // Restaurar scroll após todas as inserções
@@ -1346,6 +1408,8 @@ const TEMPO_LIMITE_ENVIO_MS = 25000;
 // Uma chave por preenchimento, repetida nas novas tentativas: se a primeira
 // chegou ao servidor mas a resposta se perdeu, o reenvio devolve a mesma ficha
 // em vez de criar outra. Gerada uma vez, na primeira tentativa.
+class FotosGrandesDemais extends Error {}
+
 let chaveEnvio: string | null = null;
 function obterChaveEnvio(): string {
   if (chaveEnvio) return chaveEnvio;
@@ -1403,6 +1467,12 @@ formEl?.addEventListener("submit", async e => {
         });
         fotosB64.push(b64);
       }
+      // Última barreira: acima do teto o corpo passaria de 6 MB, e a plataforma o
+      // recusa antes de chamar a função — sem aviso algum ao usuário.
+      const totalB64 = fotosB64.reduce((n, f) => n + f.length, 0);
+      if (totalB64 > LIMITE_ENVIO_B64_CHARS) {
+        throw new FotosGrandesDemais();
+      }
       fields.fotos_b64 = fotosB64;
     }
 
@@ -1441,8 +1511,13 @@ formEl?.addEventListener("submit", async e => {
     }
   } catch (err) {
     const expirou = err instanceof DOMException && err.name === "AbortError";
+    const fotosGrandes = err instanceof FotosGrandesDemais;
     if (errorEl) {
-      errorEl.textContent = expirou
+      errorEl.textContent = fotosGrandes
+        ? (isEnPage
+            ? "The photos are too large to send. Remove one or choose smaller photos."
+            : "As fotos são grandes demais para o envio. Remova uma ou escolha fotos menores.")
+        : expirou
         ? (isEnPage
             ? "The submission is taking longer than expected. Please try again; your form will not be duplicated."
             : "O envio está demorando mais que o esperado. Tente novamente: sua ficha não será duplicada.")

@@ -10,6 +10,7 @@ import { sendMail } from "./_mailer";
 import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 import { comPrazo, criarOrcamento, PrazoEsgotado } from "./_prazo";
+import { detectarImagem } from "./_imagem";
 
 
 // Upload de fotos base64 para Firebase Storage via Admin SDK (sem CORS, sem restrições de bucket)
@@ -26,11 +27,19 @@ async function uploadFotos(fotosB64: string[], uploadId: string): Promise<string
   // orçamento de tempo da função.
   await Promise.all(fotosB64.map(async (b64, i) => {
     const buffer = Buffer.from(b64, "base64");
-    const filePath = `leads/${uploadId}/foto-${i + 1}.webp`;
+    // O formato vem do conteúdo: o formulário entrega WebP, ou JPEG quando o
+    // navegador não gera WebP (_imagem.ts). Arquivo que não é imagem conhecida
+    // não é gravado — antes ia para o Storage como "foto-N.webp" mesmo assim.
+    const formato = detectarImagem(buffer);
+    if (!formato) {
+      console.warn(`[submit-lead] Foto ${i + 1} descartada: formato não reconhecido (${buffer.length} bytes).`);
+      return;
+    }
+    const filePath = `leads/${uploadId}/foto-${i + 1}.${formato.ext}`;
     const file = bucket.file(filePath);
 
     await file.save(buffer, {
-      metadata: { contentType: "image/webp" },
+      metadata: { contentType: formato.mime },
       // Sem predefinedAcl: arquivo permanece privado.
       // Acesso controlado via Signed URL gerada pelo painel admin sob demanda.
     });
@@ -40,7 +49,7 @@ async function uploadFotos(fotosB64: string[], uploadId: string): Promise<string
     paths[i] = filePath;
   }));
 
-  return paths;
+  return paths.filter(Boolean); // sem buracos onde uma foto foi descartada
 }
 
 // Textos por idioma. A estrutura visual é única — só o conteúdo muda, para que

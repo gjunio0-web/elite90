@@ -7,6 +7,7 @@ import { getStorage } from "firebase-admin/storage";
 import { getApp, getDb, storageBucketName } from "./_firebase";
 import { calcularIdade } from "./_scoring";
 import { chamarModelo, TEMPO_LIMITE_MS } from "./_llm";
+import { detectarImagem } from "./_imagem";
 
 
 async function downloadPhotosAsBase64(
@@ -22,7 +23,10 @@ async function downloadPhotosAsBase64(
   for (const path of paths) {
     try {
       const [buffer] = await bucket.file(path).download();
-      results.push({ mimeType: "image/webp", data: buffer.toString("base64") });
+      // O tipo vem dos bytes, não do nome: a foto pode ser WebP, JPEG ou PNG, e
+      // rotular tudo como WebP faz o modelo ler errado ou recusar a imagem.
+      const formato = detectarImagem(buffer);
+      results.push({ mimeType: formato?.mime ?? "image/webp", data: buffer.toString("base64") });
     } catch (e) {
       console.warn(`[generate-evaluation] Falha ao baixar foto ${path}:`, e);
     }
