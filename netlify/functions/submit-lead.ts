@@ -9,6 +9,7 @@ import { calcularScoreBase, ajusteIA, classificarPrioridade } from "./_scoring";
 import { sendMail } from "./_mailer";
 import { EMAIL_BASE_CSS, emailHeader, emblemaAttachment } from "./_email-header";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
+import { comPrazo, criarOrcamento, PrazoEsgotado } from "./_prazo";
 
 
 // Upload de fotos base64 para Firebase Storage via Admin SDK (sem CORS, sem restrições de bucket)
@@ -21,8 +22,9 @@ async function uploadFotos(fotosB64: string[], uploadId: string): Promise<string
   const bucket = getStorage().bucket(bucketName);
   const paths: string[] = [];
 
-  for (let i = 0; i < fotosB64.length; i++) {
-    const b64 = fotosB64[i];
+  // Em paralelo: em série, cinco fotos somavam cinco idas ao Storage dentro do
+  // orçamento de tempo da função.
+  await Promise.all(fotosB64.map(async (b64, i) => {
     const buffer = Buffer.from(b64, "base64");
     const filePath = `leads/${uploadId}/foto-${i + 1}.webp`;
     const file = bucket.file(filePath);
@@ -30,13 +32,13 @@ async function uploadFotos(fotosB64: string[], uploadId: string): Promise<string
     await file.save(buffer, {
       metadata: { contentType: "image/webp" },
       // Sem predefinedAcl: arquivo permanece privado.
-      // Acesso controlado via Signed URL gerada pelo painel admin.
+      // Acesso controlado via Signed URL gerada pelo painel admin sob demanda.
     });
 
     // Salva o path do Storage, não uma URL pública.
     // A URL de acesso é gerada sob demanda em fichas.astro com expiração.
-    paths.push(filePath);
-  }
+    paths[i] = filePath;
+  }));
 
   return paths;
 }
@@ -206,7 +208,23 @@ ${emailHeader("ELITE90 PRO &middot; Aviso interno")}
 </html>`;
 }
 
+// Orçamento de tempo da função. A plataforma encerra a função no limite dela (10 s
+// no padrão do Netlify) e devolve erro ao navegador; o orçamento é menor que isso
+// para que quem chega ao fim sempre responda. A ficha gravada é o essencial: o
+// que não couber (e-mails, nota do modelo) é pulado e registrado no log.
+const ORCAMENTO_TOTAL_MS = Number(process.env.SUBMIT_LEAD_ORCAMENTO_MS) || 8500;
+const PRAZO_GRAVACAO_MS = 4000;
+const PRAZO_UPLOAD_FOTOS_MS = 5000;
+const RESERVA_AVISO_COACH_MS = 1200;
+
+// Chave que o formulário gera uma vez por envio e repete nas novas tentativas:
+// o servidor a usa como identificador do documento, e o reenvio de uma ficha já
+// gravada devolve a mesma ficha em vez de criar outra.
+const CHAVE_ENVIO_VALIDA = /^[A-Za-z0-9_-]{16,64}$/;
+const jaExiste = (e: any) => e?.code === 6 || /ALREADY_EXISTS/.test(String(e?.message ?? ""));
+
 export const handler = async (event: any): Promise<{ statusCode: number; body: string }> => {
+  const orcamento = criarOrcamento(ORCAMENTO_TOTAL_MS);
   // Recusa imediatamente requisições que violem o verbo do protocolo HTTP
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
@@ -252,7 +270,8 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       fotos_urls = [],
       fotos_upload_id = "",
       fotos_b64 = [],
-    } = fields;
+      idempotencyKey = undefined,
+    } = fields as Record<string, any>;
 
     // Barreira síncrona primária contra dados vazios ou corrompidos
     if (!nome?.trim() || !email?.trim()) {
@@ -267,15 +286,40 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       ? objetivo_outro
       : objetivo;
 
+    if (idempotencyKey !== undefined && !(typeof idempotencyKey === "string" && CHAVE_ENVIO_VALIDA.test(idempotencyKey))) {
+      return { statusCode: 400, body: JSON.stringify({ error: "idempotencyKey inválida" }) };
+    }
+
     // Upload de fotos para Firebase Storage via Admin SDK (server-side, sem CORS)
     // getDb() deve ser chamado ANTES de uploadFotos para garantir que initializeApp()
     // rode antes de getStorage() ser acessado.
     const db = getDb();
-    const uploadId = fotos_upload_id || `${Date.now()}-srv`;
+    const chaveEnvio: string | null = typeof idempotencyKey === "string" ? idempotencyKey : null;
+    const refEnvio = chaveEnvio ? db.collection("leads").doc(`envio-${chaveEnvio}`) : null;
+    const respostaDuplicado = (id: string) => ({
+      statusCode: 200,
+      body: JSON.stringify({ success: true, id, duplicado: true }),
+    });
+
+    // Reenvio de uma ficha já gravada (o navegador não viu a resposta e tentou de
+    // novo): devolve a mesma ficha, antes de subir fotos ou enviar qualquer e-mail.
+    if (refEnvio) {
+      const existente = await comPrazo(refEnvio.get(), 3000, "leitura da ficha anterior");
+      if (existente.exists) {
+        console.info("[submit-lead] Reenvio de ficha já gravada; nada refeito:", refEnvio.id);
+        return respostaDuplicado(refEnvio.id);
+      }
+    }
+
+    const uploadId = fotos_upload_id || (chaveEnvio ?? `${Date.now()}-srv`);
     let fotosUrlsFinal: string[] = Array.isArray(fotos_urls) ? fotos_urls : [];
     if (Array.isArray(fotos_b64) && fotos_b64.length > 0) {
       try {
-        fotosUrlsFinal = await uploadFotos(fotos_b64, uploadId);
+        fotosUrlsFinal = await comPrazo(
+          uploadFotos(fotos_b64, uploadId),
+          orcamento.fatia(PRAZO_UPLOAD_FOTOS_MS),
+          "upload das fotos",
+        );
       } catch (uploadErr: any) {
         console.error("[submit-lead] Erro no upload de fotos:", uploadErr?.message ?? uploadErr);
         // Não bloqueia o envio da ficha — fotos ficam vazias
@@ -284,7 +328,7 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     }
 
     // Escrita atômica e definitiva na coleção de destino do Firebase Firestore
-    const docRef = await db.collection("leads").add({
+    const dadosLead = {
       nome:                nome.trim(),
       email:               email.trim().toLowerCase(),
       // Documento: CPF na versão pt-BR, documento estrangeiro livre na versão em inglês.
@@ -328,7 +372,22 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
       consentimento_saude_timestamp: FieldValue.serverTimestamp(),
       fotos_paths:         fotosUrlsFinal,  // paths no Storage, acesso via Signed URL
       fotos_upload_id:     uploadId,
-    });
+    };
+
+    let docRef: { id: string };
+    if (refEnvio) {
+      // create(), não set(): duas tentativas simultâneas com a mesma chave não se sobrescrevem.
+      try {
+        await comPrazo(refEnvio.create(dadosLead), PRAZO_GRAVACAO_MS, "gravação da ficha");
+      } catch (e: any) {
+        if (jaExiste(e)) return respostaDuplicado(refEnvio.id);
+        throw e;
+      }
+      docRef = refEnvio;
+    } else {
+      // Cliente antigo, sem chave: comportamento anterior.
+      docRef = await comPrazo(db.collection("leads").add(dadosLead), PRAZO_GRAVACAO_MS, "gravação da ficha");
+    }
 
     // Confirmação ao candidato — envio AGUARDADO, falha não-fatal.
     // O envio precisa ser aguardado porque o ambiente de execução da função é
@@ -340,7 +399,9 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     // recebe sucesso de qualquer forma.
     let confirmationEmailId: string | null = null;
     try {
+      if (orcamento.restante() < 2500) throw new Error("orçamento de tempo esgotado antes do envio");
       const { id } = await sendMail({
+        tempoLimiteMs: orcamento.fatia(4000, RESERVA_AVISO_COACH_MS),
         to: email.trim(),
         subject: idioma === "en"
           ? `${nome.split(" ")[0]}, we received your application - ELITE90 PRO`
@@ -360,9 +421,9 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     // tem investigação possível no painel do provedor.
     if (confirmationEmailId) {
       try {
-        await db.collection("leads").doc(docRef.id).update({
+        await comPrazo(db.collection("leads").doc(docRef.id).update({
           confirmation_email_id: confirmationEmailId,
-        });
+        }), 2000, "registro do id do e-mail");
       } catch (idErr: any) {
         console.warn("[submit-lead] Falha ao registrar o id do e-mail (não-fatal):",
           idErr?.message ?? idErr);
@@ -375,13 +436,17 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     // consentiu apenas com o tratamento declarado no formulário.
     // O evento guarda o identificador da ficha e o idioma; nome, e-mail,
     // documento, celular e a anamnese inteira ficam de fora por DR-04.
-    await registrar({
-      acao: "lead.recebido",
-      ator: { tipo: "publico" },
-      origem: "submit-lead",
-      alvo: { colecao: "leads", id: docRef.id },
-      detalhe: { idioma },
-    });
+    try {
+      await comPrazo(registrar({
+        acao: "lead.recebido",
+        ator: { tipo: "publico" },
+        origem: "submit-lead",
+        alvo: { colecao: "leads", id: docRef.id },
+        detalhe: { idioma },
+      }), 2000, "evento lead.recebido");
+    } catch (evErr: any) {
+      console.error("[submit-lead] EVENTO PERDIDO lead.recebido:", docRef.id, evErr?.message ?? evErr);
+    }
 
     // Calcula o score de triagem inline — evita o HTTP hop entre funções Lambda,
     // que é cancelado pelo runtime antes de concluir quando o handler retorna.
@@ -402,7 +467,12 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     let alertasClinicos = 0;
     try {
       const { base, flags }           = calcularScoreBase(leadParaScore);
-      const { ajuste, justificativa, promptVersion, modelVersion } = await ajusteIA(leadParaScore);
+      // A nota do modelo é acessória: só roda se sobrar tempo para ela E para o
+      // aviso ao Coach. Sem a nota, o lead fica sem pontuação e o painel a gera
+      // sob demanda (generate-triage-score).
+      const prazoModelo = orcamento.fatia(15000, RESERVA_AVISO_COACH_MS + 1000);
+      if (prazoModelo < 1500) throw new Error("orçamento de tempo esgotado antes da nota do modelo");
+      const { ajuste, justificativa, promptVersion, modelVersion } = await ajusteIA(leadParaScore, { tempoLimiteMs: prazoModelo });
       const scoreFinal  = Math.max(0, Math.min(100, base + ajuste));
       const prioridade  = classificarPrioridade(scoreFinal);
       scoreParaAviso      = scoreFinal;
@@ -453,8 +523,10 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     const coachEmail = process.env.COACH_NOTIFICATION_EMAIL?.trim();
     if (coachEmail) {
       try {
+        if (orcamento.restante() < 1000) throw new Error("orçamento de tempo esgotado antes do aviso");
         const siteUrl = `${event.headers["x-forwarded-proto"] ?? "https"}://${event.headers["host"]}`;
         await sendMail({
+          tempoLimiteMs: orcamento.fatia(4000),
           to: coachEmail,
           subject: `Ficha nova - ${nome.trim()} - ELITE90 PRO`,
           html: buildCoachNotification(
@@ -480,6 +552,15 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
     };
 
   } catch (err: any) {
+    if (err instanceof PrazoEsgotado) {
+      // Antes da ficha gravada: nada foi salvo, ou foi sem confirmação. O
+      // formulário reenvia com a mesma chave, e o reenvio não duplica.
+      console.error("Tempo limite no processamento do lead:", err.message);
+      return {
+        statusCode: 504,
+        body: JSON.stringify({ error: "Tempo limite esgotado. Tente novamente em instantes." }),
+      };
+    }
     console.error("Erro interno no processamento do lead:", err?.message ?? err);
     return {
       statusCode: 500,

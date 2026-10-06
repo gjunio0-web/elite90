@@ -72,6 +72,8 @@ export interface MailInput {
   html: string;
   /** Anexos opcionais. Lista vazia equivale a não passar nada. */
   attachments?: MailAttachment[];
+  /** Tempo máximo da chamada ao Resend, em ms. Padrão 8000: sem limite, um provedor lento segurava quem chamou. */
+  tempoLimiteMs?: number;
 }
 
 export interface MailResult {
@@ -89,7 +91,7 @@ export function isMailerConfigured(): boolean {
  * Lança MailerNotConfiguredError se faltar configuração e Error se a API
  * recusar a mensagem. Só retorna quando o provedor aceitou o envio.
  */
-export async function sendMail({ to, subject, html, attachments }: MailInput): Promise<MailResult> {
+export async function sendMail({ to, subject, html, attachments, tempoLimiteMs = 8000 }: MailInput): Promise<MailResult> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) throw new MailerNotConfiguredError("RESEND_API_KEY");
 
@@ -117,33 +119,45 @@ export async function sendMail({ to, subject, html, attachments }: MailInput): P
     });
   }
 
-  const res = await fetch(RESEND_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    let detalhe = `status ${res.status}`;
-    try {
-      const erro = (await res.json()) as any;
-      detalhe = erro?.message ?? detalhe;
-    } catch {
-      detalhe = (await res.text()) || detalhe;
-    }
-    throw new Error(`Falha no envio de e-mail (${res.status}): ${detalhe}`);
-  }
-
-  let id: string | null = null;
+  // O mesmo prazo vale para a leitura do corpo da resposta: o sinal só é
+  // liberado no `finally`.
+  const controle = new AbortController();
+  const relogio = setTimeout(() => controle.abort(), tempoLimiteMs);
   try {
-    const dados = (await res.json()) as any;
-    id = typeof dados?.id === "string" ? dados.id : null;
-  } catch {
-    // Resposta aceita porém sem corpo legível: o envio vale, o rastro se perde.
-  }
+    const res = await fetch(RESEND_ENDPOINT, {
+      signal: controle.signal,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-  return { id };
+    if (!res.ok) {
+      let detalhe = `status ${res.status}`;
+      try {
+        const erro = (await res.json()) as any;
+        detalhe = erro?.message ?? detalhe;
+      } catch {
+        detalhe = (await res.text()) || detalhe;
+      }
+      throw new Error(`Falha no envio de e-mail (${res.status}): ${detalhe}`);
+    }
+
+    let id: string | null = null;
+    try {
+      const dados = (await res.json()) as any;
+      id = typeof dados?.id === "string" ? dados.id : null;
+    } catch {
+      // Resposta aceita porém sem corpo legível: o envio vale, o rastro se perde.
+    }
+
+    return { id };
+  } catch (e: any) {
+    if (controle.signal.aborted) throw new Error(`Falha no envio de e-mail: tempo limite de ${tempoLimiteMs} ms esgotado`);
+    throw e;
+  } finally {
+    clearTimeout(relogio);
+  }
 }

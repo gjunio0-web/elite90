@@ -1194,6 +1194,14 @@ function openModal() {
   // Resetar estado
   formEl?.style && (formEl.style.display = "");
   formEl?.reset();
+  chaveEnvio = null; // formulário novo = envio novo
+  // O botão ficava desabilitado em "Enviando..." depois de um envio bem-sucedido
+  // (só o caminho de erro o liberava). Na mesma página — o Coach cadastra várias
+  // fichas seguidas —, o segundo formulário abria com o botão morto.
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = isEnPage ? "Request evaluation" : "Solicitar avaliação";
+  }
   if (successEl) successEl.hidden = true;
   if (errorEl) errorEl.hidden = true;
   compressedFiles = [];
@@ -1330,6 +1338,24 @@ fileInput?.addEventListener("change", async () => {
 // ============================================================
 const submitBtn = document.getElementById("form-submit-btn") as HTMLButtonElement;
 
+// Tempo máximo de espera pela resposta do servidor. Sem ele, uma chamada que
+// nunca termina deixava o botão em "Enviando..." para sempre (06/10/2026).
+// O servidor responde em até ~8 s; 25 s cobre rede lenta e partida a frio.
+const TEMPO_LIMITE_ENVIO_MS = 25000;
+
+// Uma chave por preenchimento, repetida nas novas tentativas: se a primeira
+// chegou ao servidor mas a resposta se perdeu, o reenvio devolve a mesma ficha
+// em vez de criar outra. Gerada uma vez, na primeira tentativa.
+let chaveEnvio: string | null = null;
+function obterChaveEnvio(): string {
+  if (chaveEnvio) return chaveEnvio;
+  const c = (globalThis.crypto as Crypto | undefined);
+  chaveEnvio = c && typeof c.randomUUID === "function"
+    ? c.randomUUID()
+    : Date.now().toString(36) + "-" + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  return chaveEnvio;
+}
+
 formEl?.addEventListener("submit", async e => {
   e.preventDefault();
 
@@ -1381,15 +1407,28 @@ formEl?.addEventListener("submit", async e => {
     }
 
     submitBtn.textContent = isEnPage ? "Sending..." : "Enviando...";
+    fields.idempotencyKey = obterChaveEnvio();
 
     // Transmissão assíncrona blindada direcionada à Netlify Function em formato JSON de alta performance
-    const res = await fetch("/.netlify/functions/submit-lead", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fields),
-    });
+    const controle = new AbortController();
+    const relogio = setTimeout(() => controle.abort(), TEMPO_LIMITE_ENVIO_MS);
+    let res: Response;
+    try {
+      res = await fetch("/.netlify/functions/submit-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fields),
+        signal: controle.signal,
+      });
+    } finally {
+      clearTimeout(relogio);
+    }
 
     if (!res.ok) throw new Error(await res.text());
+
+    // Ficha entregue: a próxima (a mesma página pode ser usada para vários
+    // candidatos) precisa de uma chave nova, senão seria tomada por reenvio.
+    chaveEnvio = null;
 
     formEl.style.display = "none";
     if (successEl) {
@@ -1400,11 +1439,16 @@ formEl?.addEventListener("submit", async e => {
     if ((window as any).fbq) {
       (window as any).fbq("track", "Lead");
     }
-  } catch {
+  } catch (err) {
+    const expirou = err instanceof DOMException && err.name === "AbortError";
     if (errorEl) {
-      errorEl.textContent = isEnPage
-        ? "Submission failed. Please try again."
-        : "Erro ao enviar. Tente novamente.";
+      errorEl.textContent = expirou
+        ? (isEnPage
+            ? "The submission is taking longer than expected. Please try again; your form will not be duplicated."
+            : "O envio está demorando mais que o esperado. Tente novamente: sua ficha não será duplicada.")
+        : (isEnPage
+            ? "Submission failed. Please try again."
+            : "Erro ao enviar. Tente novamente.");
       errorEl.hidden = false;
     }
     submitBtn.disabled = false;

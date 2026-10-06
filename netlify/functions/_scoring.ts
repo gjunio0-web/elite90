@@ -188,7 +188,7 @@ export type AjusteIA = {
 
 const INDISPONIVEL = "Ajuste qualitativo indisponível.";
 
-export async function ajusteIA(lead: Record<string, any>): Promise<AjusteIA> {
+export async function ajusteIA(lead: Record<string, any>, opcoes: { tempoLimiteMs?: number } = {}): Promise<AjusteIA> {
   const semVersao = { promptVersion: null, modelVersion: null };
   // Same order of checks as before T-17: a missing key is reported even when
   // the lead has no free text.
@@ -206,7 +206,8 @@ export async function ajusteIA(lead: Record<string, any>): Promise<AjusteIA> {
     esquema: ESQUEMA_AJUSTE,
     temperatura: 0.2,
     maxTokensSaida: 256,
-    tempoLimiteMs: TEMPO_LIMITE_MS["triagem-ajuste"],
+    // O chamador pode apertar o prazo (submit-lead divide um orçamento de tempo); nunca o alarga.
+    tempoLimiteMs: Math.max(1, Math.min(TEMPO_LIMITE_MS["triagem-ajuste"], opcoes.tempoLimiteMs ?? Infinity)),
   });
 
   // Before T-17 an answer without text was parsed as "{}": ajuste 0 and an
