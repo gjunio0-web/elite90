@@ -91,6 +91,18 @@ var NTE_FORMULA_DEFAULTS = {
   'Maintenance': { p: 2.0, c: 4.0, g: 1.0 }
 };
 
+// Plausibility bounds per coefficient (g/kg), used by the formula panel's
+// stepper arrows and by the check before saving. They catch typing errors
+// such as a misplaced decimal separator; they are not clinical limits and are
+// wide on purpose (a strict ketogenic diet, ~0.3 g/kg of carbohydrate, must
+// pass). Mirror of FORMULA_LIMITS in netlify/functions/_formula-nutricional.ts,
+// which is the authority — change both together.
+var NTE_FORMULA_LIMITS = {
+  p: { min: 0.8, max: 5.0 },
+  c: { min: 0.2, max: 12.0 },
+  g: { min: 0.3, max: 3.5 }
+};
+
 var nteFormulaConfig;
 
 var nteState = { athlete: null, plan: null };

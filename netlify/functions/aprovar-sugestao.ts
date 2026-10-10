@@ -47,7 +47,7 @@ import { emblemaAttachment } from "./_email-emblema";
 import { buildDecisaoSugestaoEmail, ROTULO_PLANO } from "./_email-decisao-sugestao";
 import { garantirLinkPlano, siteUrlDoEvento, type KindPlano } from "./_link-plano";
 import { assuntoPlanoRepublicado, buildPlanoRepublicadoEmail } from "./_email-plano-republicado";
-import { calcularFormulaSnapshot, FaseInvalidaError } from "./_formula-nutricional";
+import { calcularFormulaSnapshot, FaseInvalidaError, FormulaForaDaFaixaError } from "./_formula-nutricional";
 import { congelarPlanoNutricional } from "./_congelamento-nutricional";
 
 const COLECAO_PROFISSIONAIS = "professionals";
@@ -209,6 +209,12 @@ export const handler = async (event: any) => {
         return json(400, {
           erro: "A fase do atleta não está no vocabulário de fórmula (" + String(e.fase) + "). Corrija o cadastro antes de aprovar.",
           reason: "fase-invalida",
+        });
+      }
+      if (e instanceof FormulaForaDaFaixaError) {
+        return json(400, {
+          erro: "A fórmula de macros tem valor fora da faixa aceita (" + e.message + "). Corrija em Fórmula de macros antes de aprovar.",
+          reason: "formula-fora-da-faixa",
         });
       }
       const msg = e instanceof Error ? e.message : String(e);

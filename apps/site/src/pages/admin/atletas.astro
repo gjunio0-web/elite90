@@ -487,6 +487,9 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .nte-formula-phase { font-family: var(--font-label); font-size: 10px; font-weight: var(--fw-label); color: var(--c-textbody); text-transform: uppercase; letter-spacing: 0.04em; }
 .nte-formula-input { width: 100%; background: var(--c-black); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 3px; color: var(--c-lime); font-family: var(--font-body); font-size: var(--fs-body-sm); font-weight: var(--fw-body-bold); padding: 4px 6px; text-align: center; }
 .nte-formula-input:focus { outline: none; border-color: var(--c-lime); box-shadow: 0 0 0 2px rgba(166,195,0,0.2); }
+.nte-formula-input[aria-invalid="true"] { border-color: var(--c-danger); }
+/* Persistent out-of-range notice — Design System micro text, form-error colour (--c-danger). */
+.nte-formula-msg { margin: var(--space-2) 0 0; font-family: var(--font-body); font-size: var(--fs-body-sm); line-height: 1.5; color: var(--c-danger); }
 .nte-formula-input::-webkit-outer-spin-button,
     .nte-formula-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .nte-formula-input { -moz-appearance: textfield; appearance: textfield; }
@@ -1246,6 +1249,7 @@ tbody { display: block; width: 100%; }
                 <thead><tr><th>Fase</th><th>Ptn</th><th>Carb</th><th>Gord</th></tr></thead>
                 <tbody id="nte-formula-rows"></tbody>
               </table>
+              <p class="nte-formula-msg" id="nte-formula-msg" role="alert" hidden></p>
               <div class="nte-formula-actions">
                 <button class="nte-formula-btn primary" onclick="nteApplyFormula()">Recalcular metas</button>
                 <button class="nte-formula-btn" onclick="nteResetFormula()">Restaurar padrão</button>
@@ -4261,6 +4265,38 @@ tbody { display: block; width: 100%; }
       }
     }
 
+    // Checks one formula input against NTE_FORMULA_LIMITS and marks it.
+    // Returns null when valid, or a readable label of the problem.
+    var NTE_NOME_MACRO = { p: 'Proteína', c: 'Carboidrato', g: 'Gordura' };
+    function nteValidarCampoFormula(inp) {
+      var macro = inp.dataset.macro, lim = NTE_FORMULA_LIMITS[macro];
+      var val = Math.round(parseFloat(inp.value) * 10) / 10;
+      var ok = !isNaN(val) && !!lim && val >= lim.min && val <= lim.max;
+      inp.setAttribute('aria-invalid', ok ? 'false' : 'true');
+      if (ok) return null;
+      var fmt = function(n) { return String(n).replace('.', ','); };
+      return rotuloFase(inp.dataset.phase) + ' · ' + (NTE_NOME_MACRO[macro] || macro) +
+        (lim ? ' (aceita de ' + fmt(lim.min) + ' a ' + fmt(lim.max) + ' g/kg)' : '');
+    }
+
+    // Re-checks every input and shows or hides the persistent notice below
+    // the table. Returns the list of problems (empty when all valid).
+    function nteAtualizarAvisoFormula() {
+      var invalidos = [];
+      document.querySelectorAll('.nte-formula-input').forEach(function(inp) {
+        var erro = nteValidarCampoFormula(inp);
+        if (erro) invalidos.push(erro);
+      });
+      var msg = document.getElementById('nte-formula-msg');
+      if (msg) {
+        msg.textContent = invalidos.length
+          ? 'Fora da faixa aceita: ' + invalidos.join('; ') + '. Corrija para salvar.'
+          : '';
+        msg.hidden = !invalidos.length;
+      }
+      return invalidos;
+    }
+
     function nteRenderFormulaPanel() {
       const tbody = document.getElementById('nte-formula-rows');
       if (!tbody) return;
@@ -4270,24 +4306,36 @@ tbody { display: block; width: 100%; }
           '<button type="button" class="nte-stepper-btn" data-dir="up" tabindex="-1" aria-label="Aumentar"><svg width="7" height="5" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
           '<button type="button" class="nte-stepper-btn" data-dir="down" tabindex="-1" aria-label="Diminuir"><svg width="7" height="5" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
           '</span>';
-        const cell = (macro, min, max) =>
-          '<td><span class="nte-stepper"><input class="nte-formula-input" data-phase="' + phase + '" data-macro="' + macro + '" type="number" step="0.1" min="' + min + '" max="' + max + '" value="' + vals[macro] + '" />' + ARROWS + '</span></td>';
+        // Bounds come from NTE_FORMULA_LIMITS (editor-plano/nucleo.js), the
+        // same values the save check and the server enforce.
+        const cell = (macro) =>
+          '<td><span class="nte-stepper"><input class="nte-formula-input" data-phase="' + phase + '" data-macro="' + macro + '" type="number" step="0.1" min="' + NTE_FORMULA_LIMITS[macro].min + '" max="' + NTE_FORMULA_LIMITS[macro].max + '" value="' + vals[macro] + '" />' + ARROWS + '</span></td>';
         return '<tr>' +
           '<td class="nte-formula-phase">' + rotuloFase(phase) + '</td>' +
-          cell('p', '0.5', '5') +
-          cell('c', '0.5', '10') +
-          cell('g', '0.1', '3') +
+          cell('p') +
+          cell('c') +
+          cell('g') +
         '</tr>';
       }).join('');
+      // Values saved before the bounds existed may be out of range: flag them
+      // as soon as the panel opens, not only when the Coach tries to save.
+      nteAtualizarAvisoFormula();
     }
 
     async function nteApplyFormula() {
       var candidato = JSON.parse(JSON.stringify(nteFormulaConfig));
       var inputs = document.querySelectorAll('.nte-formula-input');
+      // A value that is empty, not a number or outside NTE_FORMULA_LIMITS
+      // blocks the save. The persistent notice below the table lists what to
+      // fix; the toast only confirms that nothing was saved. Previously such
+      // values were dropped silently and the old coefficient kept.
+      if (nteAtualizarAvisoFormula().length) {
+        wkeToast('Nada foi salvo: há valor fora da faixa aceita.', { type: 'error' });
+        return;
+      }
       inputs.forEach(function(inp) {
         var phase = inp.dataset.phase, macro = inp.dataset.macro;
-        var val = parseFloat(inp.value);
-        if (!isNaN(val) && val > 0 && candidato[phase]) candidato[phase][macro] = Math.round(val * 10) / 10;
+        if (candidato[phase]) candidato[phase][macro] = Math.round(parseFloat(inp.value) * 10) / 10;
       });
 
       // Adendo 03, AF-05/AF-07: a configuração é da casa, e a escrita passa
@@ -4333,6 +4381,16 @@ tbody { display: block; width: 100%; }
       wkeToast('Metas recalculadas para ' + (nteState.athlete ? nteState.athlete.name.split(' ')[0] : 'atleta'));
     }
 
+    // Re-checks the panel when a field loses focus — not on every keystroke,
+    // so clearing a field to retype it does not flash the notice. 'focusout'
+    // is used instead of 'blur' because it bubbles to the document. Saving
+    // re-checks anyway (nteApplyFormula), and the stepper arrows re-check
+    // after each click (below), since they change the value without focus.
+    document.addEventListener('focusout', function(e) {
+      var inp = e.target;
+      if (inp && inp.classList && inp.classList.contains('nte-formula-input')) nteAtualizarAvisoFormula();
+    });
+
     // Setas customizadas da tabela de fórmula (delegado; sobrevive a re-renders).
     // A digitação direta no input continua válida — os dois métodos coexistem.
     document.addEventListener('click', function(e) {
@@ -4353,6 +4411,7 @@ tbody { display: block; width: 100%; }
       if (!isNaN(mx)) num = Math.min(mx, num);
       inp.value = num;
       inp.dispatchEvent(new Event('input', { bubbles: true }));
+      nteAtualizarAvisoFormula();
     });
 
     // Só preenche os campos com os valores de origem — não salva. É
@@ -4366,6 +4425,8 @@ tbody { display: block; width: 100%; }
           var origem = NTE_FORMULA_DEFAULTS[inp.dataset.phase];
           if (origem) inp.value = origem[inp.dataset.macro];
         });
+        // Programmatic changes fire no 'input' event: refresh marks and notice.
+        nteAtualizarAvisoFormula();
       }
       wkeToast('Campos preenchidos com os valores de origem — clique em Recalcular metas para salvar.', { type: 'info' });
     }

@@ -51,6 +51,25 @@ export const FORMULA_DEFAULTS: Record<PlanPhase, CoeficientesFase> = {
 };
 
 /**
+ * Plausibility bounds per coefficient, in g/kg of body weight. They exist to
+ * catch typing errors — chiefly a misplaced decimal separator ("22" for
+ * "2,2") — before a bad value is saved as the house-wide formula. They are
+ * NOT clinical limits: they are deliberately wide so that no legitimate
+ * prescription is blocked (e.g. a strict ketogenic diet, ~0.3 g/kg of
+ * carbohydrate). Clinical guidance ranges, if adopted, belong in a separate
+ * non-blocking warning.
+ *
+ * Approved by the product owner on 09/10/2026. Mirrored on the client as
+ * `NTE_FORMULA_LIMITS` in packages/editor-plano/nucleo.js — change both
+ * together. The server is the authority: this check runs whatever the caller.
+ */
+export const FORMULA_LIMITS: Record<keyof CoeficientesFase, { min: number; max: number }> = {
+  proteinPerKg: { min: 0.8, max: 5.0 },
+  carbPerKg: { min: 0.2, max: 12.0 },
+  fatPerKg: { min: 0.3, max: 3.5 },
+};
+
+/**
  * Devolve `config/nutritionFormula`, criando-o com os valores de origem na
  * primeira leitura (CF-07: "o documento nasce com os coeficientes de
  * origem"). Sem isto, o documento só existiria depois que alguém abrisse o
@@ -101,6 +120,13 @@ export function validarCoeficientesFormula(payload: unknown):
       if (typeof n !== "number" || !Number.isFinite(n) || n <= 0) {
         return { ok: false, erro: `phases.${fase}.${campo} precisa ser um número maior que zero.` };
       }
+      const { min, max } = FORMULA_LIMITS[campo];
+      if (n < min || n > max) {
+        return {
+          ok: false,
+          erro: `phases.${fase}.${campo} fora da faixa aceita (${min} a ${max} g/kg): recebido ${n}.`,
+        };
+      }
     }
     saida[fase] = {
       proteinPerKg: c.proteinPerKg as number,
@@ -109,6 +135,24 @@ export function validarCoeficientesFormula(payload: unknown):
     };
   }
   return { ok: true, phases: saida };
+}
+
+/**
+ * Thrown by `calcularFormulaSnapshot` when the stored coefficient for the
+ * athlete's phase is outside FORMULA_LIMITS. Writes are already bounded by
+ * `validarCoeficientesFormula`; this guards values saved before the bounds
+ * existed, so they are never silently frozen into a published plan.
+ */
+export class FormulaForaDaFaixaError extends Error {
+  constructor(
+    public fase: PlanPhase,
+    public campo: keyof CoeficientesFase,
+    public valor: number,
+    public min: number,
+    public max: number,
+  ) {
+    super(`Coeficiente ${fase}.${campo} = ${valor} fora da faixa aceita (${min} a ${max} g/kg).`);
+  }
 }
 
 export class FaseInvalidaError extends Error {
@@ -139,6 +183,13 @@ export async function calcularFormulaSnapshot(
 
   const config = await garantirFormulaConfig(db);
   const coef = config.phases[fase] ?? FORMULA_DEFAULTS[fase];
+  for (const campo of ["proteinPerKg", "carbPerKg", "fatPerKg"] as const) {
+    const { min, max } = FORMULA_LIMITS[campo];
+    const valor = coef[campo];
+    if (typeof valor !== "number" || !Number.isFinite(valor) || valor < min || valor > max) {
+      throw new FormulaForaDaFaixaError(fase, campo, valor, min, max);
+    }
+  }
 
   const proteinG = Math.round(weightKgUsed * coef.proteinPerKg);
   const carbG = Math.round(weightKgUsed * coef.carbPerKg);
