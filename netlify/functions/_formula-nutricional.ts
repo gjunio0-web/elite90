@@ -155,6 +155,17 @@ export class FormulaForaDaFaixaError extends Error {
   }
 }
 
+/**
+ * Thrown by `calcularFormulaSnapshot` when the athlete has no usable weight:
+ * missing, not a number, zero or negative (Adendo 03 v1.6, AF-16). Without it
+ * every target would be frozen as zero (or negative) in the published plan.
+ */
+export class PesoAusenteError extends Error {
+  constructor(public valor: unknown) {
+    super(`Peso do atleta ausente ou inválido para o cálculo da fórmula: ${JSON.stringify(valor ?? null)}.`);
+  }
+}
+
 export class FaseInvalidaError extends Error {
   constructor(public fase: unknown) {
     super(`Fase inválida para cálculo de fórmula: ${JSON.stringify(fase)}.`);
@@ -176,10 +187,18 @@ export class FaseInvalidaError extends Error {
 export async function calcularFormulaSnapshot(
   db: Firestore,
   phase: unknown,
-  weightKgUsed: number,
+  weightKg: unknown,
 ): Promise<Record<string, unknown>> {
   if (!PLAN_PHASES.includes(phase as PlanPhase)) throw new FaseInvalidaError(phase);
   const fase = phase as PlanPhase;
+
+  // AF-16: the weight is taken as stored, never coerced. Callers used to pass
+  // `Number(weightCurrentKg) || 0`, which turned a missing weight into zero
+  // targets. Checked before any database read.
+  if (typeof weightKg !== "number" || !Number.isFinite(weightKg) || weightKg <= 0) {
+    throw new PesoAusenteError(weightKg);
+  }
+  const weightKgUsed = weightKg;
 
   const config = await garantirFormulaConfig(db);
   const coef = config.phases[fase] ?? FORMULA_DEFAULTS[fase];

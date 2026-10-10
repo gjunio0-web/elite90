@@ -57,7 +57,7 @@ import { sendMail, isMailerConfigured } from "./_mailer";
 import { garantirLinkPlano, siteUrlDoEvento, type KindPlano } from "./_link-plano";
 import { assuntoPlanoRepublicado, buildPlanoRepublicadoEmail } from "./_email-plano-republicado";
 import { emblemaAttachment } from "./_email-emblema";
-import { calcularFormulaSnapshot, FaseInvalidaError, FormulaForaDaFaixaError } from "./_formula-nutricional";
+import { calcularFormulaSnapshot, FaseInvalidaError, FormulaForaDaFaixaError, PesoAusenteError } from "./_formula-nutricional";
 import { congelarPlanoNutricional } from "./_congelamento-nutricional";
 import { registrar, type Ator, type Alvo } from "./_rastreabilidade";
 import { validarUid, validarPlanType } from "./_m2-validacao";
@@ -198,13 +198,19 @@ export const handler = async (event: any) => {
   if (planType === "nutrition") {
     try {
       formulaSnapshot = await calcularFormulaSnapshot(
-        db, dadosAtleta?.phase, Number(dadosAtleta?.weightCurrentKg) || 0,
+        db, dadosAtleta?.phase, dadosAtleta?.weightCurrentKg,
       );
     } catch (e) {
       if (e instanceof FaseInvalidaError) {
         return json(400, {
           erro: "A fase do atleta não está no vocabulário de fórmula (" + String(e.fase) + "). Corrija o cadastro antes de publicar.",
           reason: "fase-invalida",
+        });
+      }
+      if (e instanceof PesoAusenteError) {
+        return json(400, {
+          erro: "O atleta não tem peso registrado. Registre o peso do atleta antes de publicar o plano nutricional.",
+          reason: "sem-peso",
         });
       }
       if (e instanceof FormulaForaDaFaixaError) {
