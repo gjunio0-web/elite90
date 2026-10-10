@@ -478,7 +478,12 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 #nte-formula-panel { background: var(--c-darkbg); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-card); padding: var(--space-4); margin-bottom: var(--space-4); }
 #nu-pubheader { flex-wrap: wrap; row-gap: 6px; }
 #nu-pubheader #nte-formula-panel { order: 99; flex-basis: 100%; width: 100%; margin-top: 6px; margin-bottom: 0; }
-.nte-formula-header { font-family: var(--font-label); font-size: 10px; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-textsub); margin-bottom: var(--space-3); }
+/* Section label (Design System §2): Raleway 700, 12px, .14em, uppercase. The
+   unit sits in its own span without the uppercase, so "g/kg" stays "g/kg".
+   .14em is written literally: tokens.css has no tracking token with that value
+   (--tracking-label is 0.15em). */
+.nte-formula-header { font-family: var(--font-label); font-size: var(--fs-label); font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: .14em; color: var(--c-textsub); margin-bottom: var(--space-3); }
+.nte-formula-header-unit { text-transform: none; }
 .nte-formula-table { width: 100%; border-collapse: collapse; }
 .nte-formula-table thead th { font-family: var(--font-label); font-size: 9.5px; font-weight: var(--fw-label); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-textsub); text-align: left; padding: 0 6px 6px; }
 .nte-formula-table thead th:first-child { width: 30%; }
@@ -1244,7 +1249,7 @@ tbody { display: block; width: 100%; }
               <button class="btn-protocol" id="nu-pubbtn" onclick="ntePublish()"></button>
             </div>
             <div id="nte-formula-panel" hidden>
-              <div class="nte-formula-header">Fórmula de macros (g/kg de peso corporal)</div>
+              <div class="nte-formula-header">Fórmula de macros <span class="nte-formula-header-unit">(g/kg de peso corporal)</span></div>
               <table class="nte-formula-table">
                 <thead><tr><th>Fase</th><th>Ptn</th><th>Carb</th><th>Gord</th></tr></thead>
                 <tbody id="nte-formula-rows"></tbody>
