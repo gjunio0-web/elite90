@@ -28,8 +28,18 @@ const COLECAO_CONFIG = "config";
 const DOC_FORMULA = "nutritionFormula";
 
 export type CoeficientesFase = { proteinPerKg: number; carbPerKg: number; fatPerKg: number };
+/** Which table a coefficient comes from: `phases` is the training day. */
+export type DiaFormula = "treino" | "descanso";
+
 export type FormulaConfig = {
+  /** Training-day coefficients. */
   phases: Record<PlanPhase, CoeficientesFase>;
+  /**
+   * Rest-day coefficients, same shape as `phases`. Optional: documents written
+   * before the rest-day table existed lack it, and then the rest day uses
+   * `phases` (no new default values — AF-06).
+   */
+  restDayPhases?: Record<PlanPhase, CoeficientesFase>;
   updatedAt: Timestamp | null;
   updatedBy: { uid: string; email: string | null } | null;
   _test: boolean;
@@ -100,11 +110,16 @@ export async function garantirFormulaConfig(db: Firestore): Promise<FormulaConfi
   return origem;
 }
 
-export function validarCoeficientesFormula(payload: unknown):
+/**
+ * Validates one coefficient table. `rotulo` is the field name used in the
+ * error messages (`phases` for the training day, `restDayPhases` for the rest
+ * day); the bounds are the same for both tables.
+ */
+export function validarCoeficientesFormula(payload: unknown, rotulo = "phases"):
   | { ok: true; phases: Record<PlanPhase, CoeficientesFase> }
   | { ok: false; erro: string } {
   if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
-    return { ok: false, erro: "phases precisa ser um mapa." };
+    return { ok: false, erro: `${rotulo} precisa ser um mapa.` };
   }
   const entrada = payload as Record<string, unknown>;
   const saida = {} as Record<PlanPhase, CoeficientesFase>;
@@ -112,19 +127,19 @@ export function validarCoeficientesFormula(payload: unknown):
   for (const fase of PLAN_PHASES) {
     const v = entrada[fase];
     if (v === null || typeof v !== "object" || Array.isArray(v)) {
-      return { ok: false, erro: `phases.${fase} ausente ou não é um mapa.` };
+      return { ok: false, erro: `${rotulo}.${fase} ausente ou não é um mapa.` };
     }
     const c = v as Record<string, unknown>;
     for (const campo of ["proteinPerKg", "carbPerKg", "fatPerKg"] as const) {
       const n = c[campo];
       if (typeof n !== "number" || !Number.isFinite(n) || n <= 0) {
-        return { ok: false, erro: `phases.${fase}.${campo} precisa ser um número maior que zero.` };
+        return { ok: false, erro: `${rotulo}.${fase}.${campo} precisa ser um número maior que zero.` };
       }
       const { min, max } = FORMULA_LIMITS[campo];
       if (n < min || n > max) {
         return {
           ok: false,
-          erro: `phases.${fase}.${campo} fora da faixa aceita (${min} a ${max} g/kg): recebido ${n}.`,
+          erro: `${rotulo}.${fase}.${campo} fora da faixa aceita (${min} a ${max} g/kg): recebido ${n}.`,
         };
       }
     }
@@ -150,8 +165,10 @@ export class FormulaForaDaFaixaError extends Error {
     public valor: number,
     public min: number,
     public max: number,
+    public dia: DiaFormula = "treino",
   ) {
-    super(`Coeficiente ${fase}.${campo} = ${valor} fora da faixa aceita (${min} a ${max} g/kg).`);
+    const tabela = dia === "descanso" ? "dia de descanso, " : "";
+    super(`Coeficiente ${tabela}${fase}.${campo} = ${valor} fora da faixa aceita (${min} a ${max} g/kg).`);
   }
 }
 
@@ -202,29 +219,48 @@ export async function calcularFormulaSnapshot(
 
   const config = await garantirFormulaConfig(db);
   const coef = config.phases[fase] ?? FORMULA_DEFAULTS[fase];
-  for (const campo of ["proteinPerKg", "carbPerKg", "fatPerKg"] as const) {
-    const { min, max } = FORMULA_LIMITS[campo];
-    const valor = coef[campo];
-    if (typeof valor !== "number" || !Number.isFinite(valor) || valor < min || valor > max) {
-      throw new FormulaForaDaFaixaError(fase, campo, valor, min, max);
-    }
-  }
+  // Rest day: its own table when present, otherwise the training table.
+  const coefDescanso = config.restDayPhases?.[fase] ?? coef;
+  conferirFaixa(fase, coef, "treino");
+  conferirFaixa(fase, coefDescanso, "descanso");
 
-  const proteinG = Math.round(weightKgUsed * coef.proteinPerKg);
-  const carbG = Math.round(weightKgUsed * coef.carbPerKg);
-  const fatG = Math.round(weightKgUsed * coef.fatPerKg);
-  // 4 kcal/g proteína e carboidrato, 9 kcal/g gordura — mesma conta de
-  // `nteBuildBasePlan` (nucleo.js), preservada aqui.
-  const kcal = Math.round(proteinG * 4 + carbG * 4 + fatG * 9);
-
+  // The existing fields stay the training day, so snapshots written before the
+  // rest day existed keep their meaning; the rest day goes in `restDay`.
   return {
     phase: fase,
     proteinPerKg: coef.proteinPerKg,
     carbPerKg: coef.carbPerKg,
     fatPerKg: coef.fatPerKg,
     weightKgUsed,
-    targets: { proteinG, carbG, fatG, kcal },
+    targets: calcularMetas(weightKgUsed, coef),
+    restDay: {
+      proteinPerKg: coefDescanso.proteinPerKg,
+      carbPerKg: coefDescanso.carbPerKg,
+      fatPerKg: coefDescanso.fatPerKg,
+      targets: calcularMetas(weightKgUsed, coefDescanso),
+    },
   };
+}
+
+/** AF-14: refuses a stored coefficient outside FORMULA_LIMITS, for either table. */
+function conferirFaixa(fase: PlanPhase, coef: CoeficientesFase, dia: DiaFormula): void {
+  for (const campo of ["proteinPerKg", "carbPerKg", "fatPerKg"] as const) {
+    const { min, max } = FORMULA_LIMITS[campo];
+    const valor = coef[campo];
+    if (typeof valor !== "number" || !Number.isFinite(valor) || valor < min || valor > max) {
+      throw new FormulaForaDaFaixaError(fase, campo, valor, min, max, dia);
+    }
+  }
+}
+
+function calcularMetas(pesoKg: number, coef: CoeficientesFase) {
+  const proteinG = Math.round(pesoKg * coef.proteinPerKg);
+  const carbG = Math.round(pesoKg * coef.carbPerKg);
+  const fatG = Math.round(pesoKg * coef.fatPerKg);
+  // 4 kcal/g proteína e carboidrato, 9 kcal/g gordura — mesma conta de
+  // `nteCalcularMetas` (nucleo.js), preservada aqui.
+  const kcal = Math.round(proteinG * 4 + carbG * 4 + fatG * 9);
+  return { proteinG, carbG, fatG, kcal };
 }
 
 export { COLECAO_CONFIG, DOC_FORMULA };

@@ -39,6 +39,8 @@ export const handler = async (event: any) => {
     const config = await garantirFormulaConfig(getDb());
     return json(200, {
       phases: config.phases,
+      // null when the rest-day table was never saved: the client then uses `phases`.
+      restDayPhases: config.restDayPhases ?? null,
       updatedAt: (config.updatedAt as any)?.toDate ? (config.updatedAt as any).toDate().toISOString() : null,
       updatedBy: config.updatedBy ?? null,
     });

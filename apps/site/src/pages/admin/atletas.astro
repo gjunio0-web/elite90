@@ -487,6 +487,9 @@ th { font-family: var(--font-label); font-size: var(--fs-label); font-weight: va
 .nte-formula-table thead th:first-child { width: 30%; }
 .nte-formula-table tbody td { padding: 4px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); }
 .nte-formula-table tbody tr:last-child td { border-bottom: none; }
+/* The training and rest-day tables share the panel; only one is shown. The
+   mobile rule `tbody { display: block }` would otherwise override `hidden`. */
+#nte-formula-panel tbody[hidden] { display: none; }
 .nte-formula-phase { font-family: var(--font-label); font-size: 10px; font-weight: var(--fw-label); color: var(--c-textbody); text-transform: uppercase; letter-spacing: 0.04em; }
 .nte-formula-input { width: 100%; background: var(--c-black); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 3px; color: var(--c-lime); font-family: var(--font-body); font-size: var(--fs-body-sm); font-weight: var(--fw-body-bold); padding: 4px 6px; text-align: center; }
 .nte-formula-input:focus { outline: none; border-color: var(--c-lime); box-shadow: 0 0 0 2px rgba(166,195,0,0.2); }
@@ -1248,9 +1251,15 @@ tbody { display: block; width: 100%; }
             </div>
             <div id="nte-formula-panel" hidden>
               <div class="nte-formula-header">Fórmula de macros <span class="nte-formula-header-unit">(g/kg de peso corporal)</span></div>
+              <!-- Day selector: same .nte-dayseg view-toggle as the editor (Design System §5.9). -->
+              <div class="nte-dayselector" id="nte-formula-daysel">
+                <button type="button" class="nte-dayseg active" data-formula-dia="treino" aria-pressed="true" onclick="nteSelecionarDiaFormula('treino')">Dia de Treino</button>
+                <button type="button" class="nte-dayseg" data-formula-dia="descanso" aria-pressed="false" onclick="nteSelecionarDiaFormula('descanso')">Dia de Descanso</button>
+              </div>
               <table class="nte-formula-table">
                 <thead><tr><th>Fase</th><th>Ptn</th><th>Carb</th><th>Gord</th></tr></thead>
-                <tbody id="nte-formula-rows"></tbody>
+                <tbody id="nte-formula-rows" data-formula-dia="treino"></tbody>
+                <tbody id="nte-formula-rows-descanso" data-formula-dia="descanso" hidden></tbody>
               </table>
               <p class="nte-formula-msg" id="nte-formula-msg" role="alert" hidden></p>
               <div class="nte-formula-actions">
@@ -4216,6 +4225,7 @@ tbody { display: block; width: 100%; }
     // os dois só rodam depois de o Coach já estar autenticado e interagindo
     // com a página, quando `window.__getFreshToken` já existe há muito tempo.
     nteFormulaConfig = JSON.parse(JSON.stringify(NTE_FORMULA_DEFAULTS));
+    nteFormulaConfigRest = null;
 
     // Memoizada: uma busca só para a sessão inteira, reusada por quem quer que
     // precise, sem refazer a chamada a cada athlete aberto nem a cada clique
@@ -4235,14 +4245,18 @@ tbody { display: block; width: 100%; }
             // c, g } —, lida por nteGetFormulaForPhase/nteBuildBasePlan/a
             // tabela do painel. Atribuir r.phases direto deixaria .p/.c/.g
             // undefined assim que uma config customizada fosse salva.
-            if (r && r.phases) {
+            const traduzir = function (mapa) {
               const traduzido = {};
-              Object.keys(r.phases).forEach(function (fase) {
-                const c = r.phases[fase];
+              Object.keys(mapa).forEach(function (fase) {
+                const c = mapa[fase];
                 traduzido[fase] = { p: c.proteinPerKg, c: c.carbPerKg, g: c.fatPerKg };
               });
-              nteFormulaConfig = traduzido;
-            }
+              return traduzido;
+            };
+            if (r && r.phases) nteFormulaConfig = traduzir(r.phases);
+            // restDayPhases is null until a rest-day table is saved; the rest
+            // day then uses the training table (nteGetFormulaForPhase).
+            if (r && r.restDayPhases) nteFormulaConfigRest = traduzir(r.restDayPhases);
           } catch (e) {
             console.error('[nteGarantirFormulaConfig]', e);
           }
@@ -4277,8 +4291,10 @@ tbody { display: block; width: 100%; }
       var ok = !isNaN(val) && !!lim && val >= lim.min && val <= lim.max;
       inp.setAttribute('aria-invalid', ok ? 'false' : 'true');
       if (ok) return null;
-      var fmt = function(n) { return String(n).replace('.', ','); };
-      return rotuloFase(inp.dataset.phase) + ' · ' + (NTE_NOME_MACRO[macro] || macro) +
+      // One decimal place, as in the Design System §5.16 example ("0,8 a 5,0 g/kg").
+      var fmt = function(n) { return n.toFixed(1).replace('.', ','); };
+      var tabela = inp.dataset.dia === 'descanso' ? 'Descanso' : 'Treino';
+      return tabela + ' · ' + rotuloFase(inp.dataset.phase) + ' · ' + (NTE_NOME_MACRO[macro] || macro) +
         (lim ? ' (aceita de ' + fmt(lim.min) + ' a ' + fmt(lim.max) + ' g/kg)' : '');
     }
 
@@ -4300,11 +4316,38 @@ tbody { display: block; width: 100%; }
       return invalidos;
     }
 
+    // Which table the panel shows. Both tables stay in the page (one hidden),
+    // so the range check, the notice and "Recalcular metas" always see both.
+    var nteFormulaDiaVisivel = 'treino';
+    function nteSelecionarDiaFormula(dia) {
+      nteFormulaDiaVisivel = dia;
+      document.querySelectorAll('#nte-formula-daysel .nte-dayseg').forEach(function(b) {
+        var ativo = b.dataset.formulaDia === dia;
+        b.classList.toggle('active', ativo);
+        b.setAttribute('aria-pressed', ativo ? 'true' : 'false');
+      });
+      document.querySelectorAll('#nte-formula-panel tbody[data-formula-dia]').forEach(function(tb) {
+        tb.hidden = tb.dataset.formulaDia !== dia;
+      });
+    }
+
     function nteRenderFormulaPanel() {
-      const tbody = document.getElementById('nte-formula-rows');
+      nteRenderTabelaFormula('treino', document.getElementById('nte-formula-rows'), nteFormulaConfig);
+      // No rest-day table saved yet: the rest day starts as a copy of the
+      // training table (AF-06, no new default values).
+      nteRenderTabelaFormula('descanso', document.getElementById('nte-formula-rows-descanso'), nteFormulaConfigRest || nteFormulaConfig);
+      nteSelecionarDiaFormula(nteFormulaDiaVisivel);
+      // Values saved before the bounds existed may be out of range: flag them
+      // as soon as the panel opens, not only when the Coach tries to save.
+      nteAtualizarAvisoFormula();
+    }
+
+    function nteRenderTabelaFormula(dia, tbody, config) {
       if (!tbody) return;
-      tbody.innerHTML = Object.entries(nteFormulaConfig).map(function(entry) {
-        const phase = entry[0], vals = entry[1];
+      // Phases follow the training table's keys, so both tables list the same
+      // rows even if the rest-day table lacks one (it then shows the training value).
+      tbody.innerHTML = Object.keys(nteFormulaConfig).map(function(phase) {
+        const vals = (config && config[phase]) || nteFormulaConfig[phase];
         const ARROWS = '<span class="nte-stepper-arrows">' +
           '<button type="button" class="nte-stepper-btn" data-dir="up" tabindex="-1" aria-label="Aumentar"><svg width="7" height="5" viewBox="0 0 10 6" fill="none"><path d="M1 5L5 1L9 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
           '<button type="button" class="nte-stepper-btn" data-dir="down" tabindex="-1" aria-label="Diminuir"><svg width="7" height="5" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
@@ -4312,7 +4355,7 @@ tbody { display: block; width: 100%; }
         // Bounds come from NTE_FORMULA_LIMITS (editor-plano/nucleo.js), the
         // same values the save check and the server enforce.
         const cell = (macro) =>
-          '<td><span class="nte-stepper"><input class="nte-formula-input" data-phase="' + phase + '" data-macro="' + macro + '" type="number" step="0.1" min="' + NTE_FORMULA_LIMITS[macro].min + '" max="' + NTE_FORMULA_LIMITS[macro].max + '" value="' + vals[macro] + '" />' + ARROWS + '</span></td>';
+          '<td><span class="nte-stepper"><input class="nte-formula-input" data-dia="' + dia + '" data-phase="' + phase + '" data-macro="' + macro + '" type="number" step="0.1" min="' + NTE_FORMULA_LIMITS[macro].min + '" max="' + NTE_FORMULA_LIMITS[macro].max + '" value="' + vals[macro] + '" />' + ARROWS + '</span></td>';
         return '<tr>' +
           '<td class="nte-formula-phase">' + rotuloFase(phase) + '</td>' +
           cell('p') +
@@ -4320,13 +4363,14 @@ tbody { display: block; width: 100%; }
           cell('g') +
         '</tr>';
       }).join('');
-      // Values saved before the bounds existed may be out of range: flag them
-      // as soon as the panel opens, not only when the Coach tries to save.
-      nteAtualizarAvisoFormula();
     }
 
     async function nteApplyFormula() {
+      // Saves both tables: the training day (`phases`) and the rest day
+      // (`restDayPhases`). The rest day starts from its own saved table, or
+      // from the training table when none was saved yet.
       var candidato = JSON.parse(JSON.stringify(nteFormulaConfig));
+      var candidatoDescanso = JSON.parse(JSON.stringify(nteFormulaConfigRest || nteFormulaConfig));
       var inputs = document.querySelectorAll('.nte-formula-input');
       // A value that is empty, not a number or outside NTE_FORMULA_LIMITS
       // blocks the save. The persistent notice below the table lists what to
@@ -4338,7 +4382,9 @@ tbody { display: block; width: 100%; }
       }
       inputs.forEach(function(inp) {
         var phase = inp.dataset.phase, macro = inp.dataset.macro;
-        if (candidato[phase]) candidato[phase][macro] = Math.round(parseFloat(inp.value) * 10) / 10;
+        var alvo = inp.dataset.dia === 'descanso' ? candidatoDescanso : candidato;
+        if (!alvo[phase]) alvo[phase] = JSON.parse(JSON.stringify(candidato[phase] || {}));
+        alvo[phase][macro] = Math.round(parseFloat(inp.value) * 10) / 10;
       });
 
       // Adendo 03, AF-05/AF-07: a configuração é da casa, e a escrita passa
@@ -4349,12 +4395,19 @@ tbody { display: block; width: 100%; }
       if (btn) btn.disabled = true;
       try {
         // Forma do servidor: { proteinPerKg, carbPerKg, fatPerKg } por fase.
-        var phasesParaEnviar = {};
-        Object.keys(candidato).forEach(function(fase) {
-          phasesParaEnviar[fase] = { proteinPerKg: candidato[fase].p, carbPerKg: candidato[fase].c, fatPerKg: candidato[fase].g };
+        var paraServidor = function(config) {
+          var mapa = {};
+          Object.keys(config).forEach(function(fase) {
+            mapa[fase] = { proteinPerKg: config[fase].p, carbPerKg: config[fase].c, fatPerKg: config[fase].g };
+          });
+          return mapa;
+        };
+        await m2Escrever('salvar-config-formula', {
+          phases: paraServidor(candidato),
+          restDayPhases: paraServidor(candidatoDescanso)
         });
-        await m2Escrever('salvar-config-formula', { phases: phasesParaEnviar });
         nteFormulaConfig = candidato;
+        nteFormulaConfigRest = candidatoDescanso;
       } catch (e) {
         console.error('[nteApplyFormula]', e);
         wkeToast('Não foi possível salvar a fórmula agora. ' + (e && e.message ? e.message : ''), { type: 'error' });
@@ -4365,9 +4418,13 @@ tbody { display: block; width: 100%; }
 
       // Recalcula meta para o atleta atual
       if (nteState.athlete && nteState.plan && !nteState.plan.isNew) {
-        var full = nteBuildBasePlan(nteState.athlete);
-        nteState.plan.target = full.target;
-        if (ntePlanCache[nteState.athlete.id]) ntePlanCache[nteState.athlete.id].target = full.target;
+        var metas = nteCalcularMetas(nteState.athlete);
+        nteState.plan.target = metas.target;
+        nteState.plan.targetRest = metas.targetRest;
+        if (ntePlanCache[nteState.athlete.id]) {
+          ntePlanCache[nteState.athlete.id].target = metas.target;
+          ntePlanCache[nteState.athlete.id].targetRest = metas.targetRest;
+        }
         // Achado em teste manual (B4, 19/09/2026): esta função mudava
         // `plan.target` só em memória e nunca chamava `nteAutoSave()` — a
         // única das dez chamadas que editam o plano nutricional a pular esse
@@ -4421,8 +4478,10 @@ tbody { display: block; width: 100%; }
     // "Recalcular metas" quem persiste (mesmo botão, mesma chamada ao
     // servidor de qualquer edição): dois botões que gravam seria dois
     // caminhos para o mesmo dado, exatamente o que este adendo veio evitar.
+    // Restores the table on screen only (training or rest day). The rest day
+    // has no defaults of its own (AF-06): it restores to the training defaults.
     function nteResetFormula() {
-      var tbody = document.getElementById('nte-formula-rows');
+      var tbody = document.querySelector('#nte-formula-panel tbody[data-formula-dia="' + nteFormulaDiaVisivel + '"]');
       if (tbody) {
         tbody.querySelectorAll('.nte-formula-input').forEach(function(inp) {
           var origem = NTE_FORMULA_DEFAULTS[inp.dataset.phase];

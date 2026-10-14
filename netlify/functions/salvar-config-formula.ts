@@ -46,11 +46,24 @@ export const handler = async (event: any) => {
 
   const validado = validarCoeficientesFormula(corpo.phases);
   if (!validado.ok) return json(400, { erro: validado.erro });
+  // Rest-day table: optional in the body (a client from before it existed
+  // sends only `phases`), validated with the same bounds when present.
+  let restDayPhases: Record<string, unknown> | undefined;
+  if (corpo.restDayPhases !== undefined) {
+    const validadoDescanso = validarCoeficientesFormula(corpo.restDayPhases, "restDayPhases");
+    if (!validadoDescanso.ok) return json(400, { erro: validadoDescanso.erro });
+    restDayPhases = validadoDescanso.phases;
+  }
 
   try {
     const db = getDb();
     await db.collection(COLECAO_CONFIG).doc(DOC_FORMULA).set(
-      { phases: validado.phases, ...camposAtualizacao(uid, email), _test: process.env.CONTEXT !== "production" },
+      {
+        phases: validado.phases,
+        ...(restDayPhases ? { restDayPhases } : {}),
+        ...camposAtualizacao(uid, email),
+        _test: process.env.CONTEXT !== "production",
+      },
       { merge: true },
     );
     return json(200, { ok: true });

@@ -105,6 +105,11 @@ var NTE_FORMULA_LIMITS = {
 
 var nteFormulaConfig;
 
+// Rest-day coefficients, same client shape as nteFormulaConfig ({ p, c, g } by
+// phase). null means "no rest-day table saved yet": the rest day then uses the
+// training table (nteFormulaConfig), as the server does (restDayPhases absent).
+var nteFormulaConfigRest = null;
+
 var nteState = { athlete: null, plan: null };
 
 var ntePlanCache = {};
@@ -225,22 +230,51 @@ function nteCongelarPlano(plan) {
 // fora do vocabulário cai em Bulking com aviso no console — a UI nunca trava
 // a edição por isso, mas o cálculo autoritativo, no servidor, no instante da
 // publicação (calcularFormulaSnapshot), recusa em vez de cair em silêncio.
-function nteGetFormulaForPhase(phase) {
-  if (Object.prototype.hasOwnProperty.call(NTE_FORMULA_DEFAULTS, phase)) {
-    return nteFormulaConfig[phase] || NTE_FORMULA_DEFAULTS[phase];
+//
+// `dia` is 'treino' (default) or 'descanso'. The rest day reads its own table
+// when one exists, and falls back to the training table phase by phase.
+function nteGetFormulaForPhase(phase, dia) {
+  var chave = Object.prototype.hasOwnProperty.call(NTE_FORMULA_DEFAULTS, phase) ? phase : null;
+  if (!chave) {
+    console.warn('[NTE] fase fora do vocabulário: ' + phase + ' — usando Bulking para a prévia.');
+    chave = 'Bulking';
   }
-  console.warn('[NTE] fase fora do vocabulário: ' + phase + ' — usando Bulking para a prévia.');
-  return nteFormulaConfig['Bulking'] || NTE_FORMULA_DEFAULTS['Bulking'];
+  var treino = nteFormulaConfig[chave] || NTE_FORMULA_DEFAULTS[chave];
+  if (dia === 'descanso' && nteFormulaConfigRest && nteFormulaConfigRest[chave]) {
+    return nteFormulaConfigRest[chave];
+  }
+  return treino;
+}
+
+// Daily targets for both day types, from the athlete's weight and phase.
+// `target` is the training day; `targetRest` the rest day.
+function nteCalcularMetas(athlete) {
+  const w = athlete.weightCurrentKg || 80;
+  const meta = function(f) {
+    const t = { p: Math.round(w * f.p), c: Math.round(w * f.c), g: Math.round(w * f.g) };
+    t.kcal = Math.round(t.p * 4 + t.c * 4 + t.g * 9);
+    return t;
+  };
+  return {
+    target: meta(nteGetFormulaForPhase(athlete.phase, 'treino')),
+    targetRest: meta(nteGetFormulaForPhase(athlete.phase, 'descanso'))
+  };
+}
+
+// Target shown for the selected day. A draft saved before the rest day had
+// its own target lacks `targetRest`: it is computed here, in memory only, so
+// opening an old draft does not by itself mark the plan as changed.
+function nteMetaDoDia() {
+  const plan = nteState.plan;
+  if (plan.dayType !== 'descanso') return plan.target;
+  if (!plan.targetRest && nteState.athlete) plan.targetRest = nteCalcularMetas(nteState.athlete).targetRest;
+  return plan.targetRest || plan.target;
 }
 
 function nteBuildBasePlan(athlete) {
-  // Metas de macro via fórmula parametrizável (nteFormulaConfig)
-  const w = athlete.weightCurrentKg || 80;
-  const f = nteGetFormulaForPhase(athlete.phase);
-  const target = {
-    p: Math.round(w * f.p), c: Math.round(w * f.c), g: Math.round(w * f.g)
-  };
-  target.kcal = Math.round(target.p * 4 + target.c * 4 + target.g * 9);
+  // Metas de macro via fórmula parametrizável (nteFormulaConfig / nteFormulaConfigRest)
+  const metas = nteCalcularMetas(athlete);
+  const target = metas.target;
   // MOCK AGUARDANDO REFAÇÃO — resolve por NOME num catálogo que já não é
   // fixo. Com o vetor literal removido, esta busca não encontra nada até o
   // carregamento assíncrono terminar, e os itens saem sem `base`. As guardas
@@ -257,6 +291,7 @@ function nteBuildBasePlan(athlete) {
   };
   return {
     target: target,
+    targetRest: metas.targetRest,
     dayType: 'treino',
     days: {
       treino: { meals: [
@@ -1286,6 +1321,7 @@ function nteClosePreview() { document.getElementById('nte-preview').style.displa
 function nteCreateFirstPlan() {
   const full = nteBuildBasePlan(nteState.athlete); // metas calculadas pelo peso/fase
   nteState.plan.target = full.target;
+  nteState.plan.targetRest = full.targetRest;
   nteState.plan.dayType = 'treino';
   nteState.plan.days = { treino: { meals: [ { name: 'Café da manhã', foods: [] } ] }, descanso: { meals: [] } };
   nteState.plan.isNew = false;
@@ -1390,7 +1426,7 @@ function nteRenderMacros() {
   const el = document.getElementById('nte-macros');
   if (!el) return;
   const t = nteDayTotals();
-  const tg = nteState.plan.target;
+  const tg = nteMetaDoDia();
   el.innerHTML =
     nteMacroCard('Proteína', t.p, tg.p, 'g') +
     nteMacroCard('Carboidrato', t.c, tg.c, 'g') +

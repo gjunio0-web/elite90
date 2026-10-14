@@ -28,9 +28,19 @@ if (!snap.exists) {
 const d = snap.data();
 console.log(`  updatedAt: ${d.updatedAt?.toDate ? d.updatedAt.toDate().toISOString() : '(nunca atualizado — só valores de origem)'}`);
 console.log(`  updatedBy: ${d.updatedBy ? d.updatedBy.email ?? d.updatedBy.uid : '(nenhum)'}\n`);
+console.log('  Dia de treino (phases):');
 for (const fase of Object.keys(d.phases ?? {})) {
   const c = d.phases[fase];
-  console.log(`  ${fase}: proteína=${c.proteinPerKg} · carbo=${c.carbPerKg} · gordura=${c.fatPerKg}`);
+  console.log(`    ${fase}: proteína=${c.proteinPerKg} · carbo=${c.carbPerKg} · gordura=${c.fatPerKg}`);
+}
+console.log('  Dia de descanso (restDayPhases):');
+if (!d.restDayPhases) {
+  console.log('    (nunca salvo — o dia de descanso usa a tabela do dia de treino)');
+} else {
+  for (const fase of Object.keys(d.restDayPhases)) {
+    const c = d.restDayPhases[fase];
+    console.log(`    ${fase}: proteína=${c.proteinPerKg} · carbo=${c.carbPerKg} · gordura=${c.fatPerKg}`);
+  }
 }
 console.log('');
 process.exit(0);

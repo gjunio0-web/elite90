@@ -14,6 +14,7 @@
 // -----------------------------------------------------------------------------
 
 import { conectar } from './_firestore-cli.mjs';
+import { linhasFormulaSnapshot } from './_linhas-retrato-nutricional.mjs';
 
 const alvo = process.argv[2] || null;
 const db = conectar();
@@ -53,7 +54,7 @@ for (const atleta of atletas) {
   const { total, comSnapshot } = contarAlimentos(content);
 
   console.log(`  ${atleta.id} · ${atleta.get('name') ?? '(sem nome)'} · última versão nutricional: ${v.id}`);
-  console.log(`      formulaSnapshot: ${fs ? 'presente' : 'AUSENTE'}` + (fs ? ` · fase=${fs.phase} · peso=${fs.weightKgUsed}kg · metas=${JSON.stringify(fs.targets)}` : ''));
+  for (const linha of linhasFormulaSnapshot(fs)) console.log(linha);
   console.log(`      alimentos com retrato (.snapshot): ${comSnapshot} de ${total}` + (total > 0 && comSnapshot < total ? '  ← ALGUM SEM RETRATO' : ''));
   console.log('');
 }
